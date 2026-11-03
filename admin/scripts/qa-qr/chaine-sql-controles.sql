@@ -24,7 +24,7 @@ with c(nom, ok) as (values
   ('NDS : anon peut toujours ecrire joueurs (inscription des parcours)', has_table_privilege('anon', 'public.joueurs', 'insert') and has_table_privilege('anon', 'public.joueurs', 'update')),
   ('11 : Nice Jazz Festival place a Nice, sans date inventee', exists (select 1 from public.super_events where id='se-nice-jazz-festival-demo' and lat between 43.6 and 43.8 and lng between 7.2 and 7.3 and date_d is null and date_f is null)),
   ('11 : colonnes lat/lng/lieu de super_events', exists (select 1 from information_schema.columns where table_name='super_events' and column_name='lieu')),
-  ('12 : colonne pack_souhaite des demandes', exists (select 1 from information_schema.columns where table_name='demandes_rattachement_super_event' and column_name='pack_souhaite')),
+  ('13 : colonne pack_souhaite des demandes', exists (select 1 from information_schema.columns where table_name='demandes_rattachement_super_event' and column_name='pack_souhaite')),
   ('anon ne lit pas flowin_super_admins',            not has_table_privilege('anon', 'public.flowin_super_admins', 'select')),
   ('anon ne lit pas pros_rib',                       not has_table_privilege('anon', 'public.pros_rib', 'select')),
   ('anon ne lit pas tirage_resultats',               not has_table_privilege('anon', 'public.tirage_resultats', 'select'))

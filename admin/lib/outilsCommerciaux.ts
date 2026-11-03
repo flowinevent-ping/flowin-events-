@@ -98,7 +98,11 @@ export const OUTILS: Outil[] = [
     description: 'Accès aux démos des jeux.',
     chemin: '/demos.html',
     message: 'Bonjour, voici les démos Flowin :' },
-  { statut: 'brouillon', id: 'storyboard-commerce', titre: 'Scénario vidéo commerçants (v14, à valider)', public: ['commerce'], type: 'scenario', suivi: false,
+  { statut: 'brouillon', id: 'storyboard-commerce-v15', titre: 'Scénario vidéo commerçants (v15, à valider)', public: ['commerce'], type: 'scenario', suivi: false,
+    description: 'Storyboard v15 de la vidéo Flowin Animation pour les commerçants (version à jour). Pas de MP4 : scénario à valider.',
+    chemin: '/storyboards-video/v15-animation-commercants.html',
+    message: 'Scénario vidéo à valider (ne pas diffuser) :' },
+  { statut: 'brouillon', id: 'storyboard-commerce', titre: 'Scénario vidéo commerçants (v14, remplacé par v15)', public: ['commerce'], type: 'scenario', suivi: false,
     description: 'Storyboard v14 de la vidéo Flowin Animation pour les commerçants. Pas de MP4 : scénario à valider.',
     chemin: '/storyboards-video/v14-animation-commercants.html',
     message: 'Scénario vidéo à valider (ne pas diffuser) :' },
@@ -154,3 +158,19 @@ export const OUTILS_MANQUANTS: { titre: string; public: Public; note: string }[]
   { titre: 'Vidéo organisateurs et partenaires : version finale', public: 'organisateur', note: 'Les 3 scénarios v14 sont à valider ; les MP4 ne seront produits qu’après.' },
   { titre: 'Email de présentation prêt à l’emploi', public: 'commerce', note: 'Modèle d’email avec pièce jointe : à rédiger avec Florine.' },
 ]
+
+/* ── Validation par le Super Admin (depuis l'aperçu) ─────────────────────────
+   Aucune table existante ne porte ce statut : stockage LOCAL au navigateur du Super Admin
+   (localStorage), sans SQL. Limite connue : la validation n'est pas partagee entre appareils ;
+   le statut de reference reste celui du catalogue ci-dessus. */
+export const CLE_VALIDES = 'flowin_outils_valides'
+
+export function lireValides(): string[] {
+  try {
+    const v = JSON.parse(window.localStorage.getItem(CLE_VALIDES) ?? '[]')
+    return Array.isArray(v) ? v.filter((x: unknown) => typeof x === 'string') : []
+  } catch { return [] }
+}
+export function ecrireValides(ids: string[]): void {
+  try { window.localStorage.setItem(CLE_VALIDES, JSON.stringify(ids)) } catch { /* ignore */ }
+}

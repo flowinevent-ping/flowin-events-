@@ -1,5 +1,5 @@
 -- ============================================================================
--- 12 — DEMANDES DE RATTACHEMENT : pack et tarif souhaites  [03/11/2026]
+-- 13 — DEMANDES DE RATTACHEMENT : pack et tarif souhaites  [03/11/2026]
 -- ============================================================================
 -- NON APPLIQUE EN BASE. Facultatif, sans dependance. Idempotent.
 -- La grille de tarifs a cocher du parcours « rejoindre un super event » presélectionne la demande. Tant que ce fichier n'est pas applique,

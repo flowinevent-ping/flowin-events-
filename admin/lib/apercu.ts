@@ -10,6 +10,7 @@
 import { supabase } from './supabase'
 import type { FlowinLot } from './types'
 import type { ParcoursPageData } from './parcours'
+import { preparerBanquesJoueur } from './banquesModeles/resoudre'
 
 export interface SaisieApercu {
   nom?: string
@@ -73,7 +74,7 @@ export async function appliquerApercu<T extends Pick<ParcoursPageData, 'ev' | 'l
       .filter((id, i, a) => a.indexOf(id) === i)
     if (ids.length) {
       const { data: b } = await supabase.from('banques').select('*').in('id', ids)
-      banques = (b ?? []) as ParcoursPageData['banques']
+      banques = preparerBanquesJoueur((b ?? []) as ParcoursPageData['banques'])
     }
   }
   return { ...data, ev, lots, ...(banques !== undefined ? { banques } : {}) }

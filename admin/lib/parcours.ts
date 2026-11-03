@@ -1,5 +1,6 @@
 import { supabase, supabaseVivant } from './supabase'
 import { generateTicket } from './ticket'
+import { preparerBanquesJoueur } from './banquesModeles/resoudre'
 import type { TicketPrefix } from './types'
 import type { FlowinEvent, FlowinLot, FlowinPartenaire } from './types'
 
@@ -104,7 +105,9 @@ export async function fetchParcoursData(evId: string): Promise<ParcoursPageData>
   let banques: ParcoursBanque[] = []
   if (banqueIds.length) {
     const { data } = await supabaseVivant.from('banques').select('*').in('id', banqueIds)
-    banques = (data ?? []) as ParcoursBanque[]
+    /* Questions personnalisees : une {variable} non renseignee n est JAMAIS posee au joueur
+       (lib/banquesModeles/resoudre.ts). Sans modele, la liste est inchangee. */
+    banques = preparerBanquesJoueur((data ?? []) as ParcoursBanque[])
   }
 
   return { ev, lots, partenaires, banques }

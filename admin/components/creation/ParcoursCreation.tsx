@@ -529,7 +529,7 @@ export default function ParcoursCreation({ mode = 'pro', pro, banques, supers, p
     setEnvoi('envoi'); setErreur('')
     if (rejoindre) {
       /* Demande a Flowin : le pack coche presélectionne la demande (texte dans `offre`, colonne existante, + colonnes
-         pack_souhaite / tarif_souhaite_ht si sql/12 est applique). Tarif a confirmer par Flowin : rien n'est facture. */
+         pack_souhaite / tarif_souhaite_ht si sql/13 est applique). Tarif a confirmer par Flowin : rien n'est facture. */
       let proIdEnvoi = p.id
       if (visiteur && !p.id) {
         /* 2e chemin d'inscription : le compte pro se cree ici avec les coordonnees saisies (meme mecanisme que « Ma premiere fois »). */
@@ -562,7 +562,7 @@ export default function ParcoursCreation({ mode = 'pro', pro, banques, supers, p
       /* Sans compte, l'envoi est impossible (le bouton est bloque) ; garde-fou si l'appel arrive quand meme. */
       if (!sa) {
         let { error } = await supabase.from('demandes_rattachement_super_event').insert({ ...ligne, ...extras })
-        /* sql/12 pas encore applique : colonnes inconnues -> meme demande sans elles (le pack reste dans `offre`). */
+        /* sql/13 pas encore applique : colonnes inconnues -> meme demande sans elles (le pack reste dans `offre`). */
         if (error && Object.keys(extras).length && (error.code === 'PGRST204' || error.code === '42703' || /column/i.test(error.message))) {
           ;({ error } = await supabase.from('demandes_rattachement_super_event').insert(ligne))
         }

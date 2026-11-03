@@ -22,7 +22,10 @@
  * nouvelle n'est inventée, sinon le jeu ne saurait pas les lire.
  */
 
-import type { Banque } from '@/lib/banques'
+import { useState } from 'react'
+import type { Banque, QuestionBanque } from '@/lib/banques'
+import { METIERS } from '@/lib/banquesModeles/outils'
+import { compterJouables } from '@/lib/banquesModeles/resoudre'
 /* Les classes sa-* utilisees ici n existent que dans le CSS du dashboard :
    le composant emporte les siennes pour s afficher aussi dans l espace pro. */
 import './configjeu.css'
@@ -72,6 +75,7 @@ function ListeBanques({
   }
   const ligne = (b: Banque) => {
     const n = compter ? compter(b) : (b.questions ?? []).length
+    const aCompleter = compterJouables(b.questions as QuestionBanque[]).aCompleter
     const coche = choisies.includes(b.id)
     return (
       <label key={b.id} className="sa-list-item" style={{ alignItems: 'flex-start', cursor: 'pointer' }}>
@@ -80,9 +84,10 @@ function ListeBanques({
           onChange={e => onChange(e.target.checked ? choisies.concat(b.id) : choisies.filter(x => x !== b.id))}
         />
         <div style={{ flex: 1 }}>
-          <div style={{ fontWeight: 700 }}>{b.nom}</div>
+          <div style={{ fontWeight: 700 }}>{b.nom}{b.pro_id === 'flowin' && <span style={{ marginLeft: 6, fontSize: 10, fontWeight: 800, color: '#5B34C2', background: 'rgba(122,79,224,.1)', borderRadius: 6, padding: '1px 6px' }}>COMMUNE FLOWIN</span>}</div>
           <div style={{ fontSize: 11, color: 'var(--sa-muted)' }}>
             {n} question{n !== 1 ? 's' : ''}{unite} · {b.statut === 'valide' ? 'Validée' : 'Brouillon'}
+            {aCompleter > 0 && <span style={{ color: '#B45309', fontWeight: 700 }}> · {aCompleter} à compléter (non posée{aCompleter > 1 ? 's' : ''} tant que vide)</span>}
           </div>
         </div>
       </label>
@@ -115,6 +120,8 @@ function ConfigJeuContenu({
   banquesStation?: string[]
 }) {
   const set = (champs: CfgJeu) => onChange({ ...cfg, ...champs })
+  /* Filtre par metier (tags des banques : restaurateur, pizzeria, boulanger, boucher, libraire). */
+  const [metier, setMetier] = useState('tous')
 
   const segments = (cfg.spinSegments as SegmentSpin[]) ?? []
   const banquesSel = (cfg.quizBanques as string[]) ?? []
@@ -139,15 +146,27 @@ function ConfigJeuContenu({
      les deux formats dans la meme colonne (voir l en-tete de lib/banques.ts).
      On ne cree donc rien : on trie ce qui est la et on propose deux listes. */
   if (EST_GABARIT(mod)) {
-    const bQuiz = banques.filter(b => sorteBanque(b.questions) === 'quiz' || sorteBanque(b.questions) === 'mixte')
-    const bBonus = banques.filter(b => sorteBanque(b.questions) === 'bonus' || sorteBanque(b.questions) === 'mixte')
+    /* Une banque deja cochee reste visible meme si le filtre la masque (jamais de selection cachee). */
+    const duMetier = (b: Banque) => metier === 'tous' || (b.tags ?? []).indexOf(metier) >= 0 || banquesSel.includes(b.id) || bonusSel.includes(b.id)
+    const bQuiz = banques.filter(b => (sorteBanque(b.questions) === 'quiz' || sorteBanque(b.questions) === 'mixte') && duMetier(b))
+    const bBonus = banques.filter(b => (sorteBanque(b.questions) === 'bonus' || sorteBanque(b.questions) === 'mixte') && duMetier(b))
     const nbDispoQuiz = banques.filter(b => banquesSel.includes(b.id))
-      .reduce((n, b) => n + (b.questions ?? []).filter(q => q.type === 'qcm').length, 0)
+      .reduce((n, b) => n + (b.questions ?? []).filter(q => q.type === 'qcm' && compterJouables([q as QuestionBanque]).jouables === 1).length, 0)
     const nbDispoBonus = banques.filter(b => bonusSel.includes(b.id))
       .reduce((n, b) => n + (b.questions ?? []).filter(q => q.type === 'single' || q.type === 'multi').length, 0)
+    const metiersPresents = METIERS.filter(m => banques.some(b => (b.tags ?? []).indexOf(m.id) >= 0))
 
     return (
       <div>
+        {metiersPresents.length > 0 && (
+          <div role="tablist" aria-label="Filtrer les banques par métier" data-filtre-metier-jeu style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 12 }}>
+            {[{ id: 'tous', nom: 'Tous les métiers' }].concat(metiersPresents).map(m => (
+              <button key={m.id} type="button" role="tab" aria-selected={metier === m.id} data-metier={m.id}
+                className={'sa-btn' + (metier === m.id ? ' primary' : '')} style={{ padding: '4px 11px', fontSize: 12 }}
+                onClick={() => setMetier(m.id)}>{m.nom}</button>
+            ))}
+          </div>
+        )}
         <div style={{ fontSize: 12.5, fontWeight: 700, marginBottom: 8 }}>Banques de questions — quiz</div>
         <ListeBanques
           banques={bQuiz} choisies={banquesSel} banquesStation={banquesStation}

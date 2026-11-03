@@ -22,7 +22,8 @@ import { PageHeader, EmptyState } from '@/components/dashboard/DashboardUI'
 import { fetchLandings, type Landing } from '@/lib/administratif'
 import { Ico } from '@/lib/proicons'
 import { OutilCarte } from '@/components/dashboard/OutilCarte'
-import { OUTILS, OUTILS_MANQUANTS, PUBLICS, urlProd, type Outil } from '@/lib/outilsCommerciaux'
+import { OUTILS as OUTILS_BASE, OUTILS_MANQUANTS, PUBLICS, urlProd, lireValides, ecrireValides, type Outil } from '@/lib/outilsCommerciaux'
+import { BarreActionsOutil, type CibleBarre } from '@/components/dashboard/BarreActionsOutil'
 
 /* MAJ 01/11 -- UNE seule page pour tout le materiel de diffusion (decision Romain) : les 12 pages de
    reference statiques qui vivaient ici en dur sont desormais dans le catalogue unique
@@ -123,6 +124,15 @@ export default function Page() {
   const [charge, setCharge] = useState(true)
   const [q, setQ] = useState('')
   const [idx, setIdx] = useState(0)
+  const [plein, setPlein] = useState(false)
+  /* Validation faite par le Super Admin depuis l'apercu : stockage local (aucun SQL), voir lib/outilsCommerciaux.ts. */
+  const [valides, setValides] = useState<string[]>([])
+  useEffect(() => { setValides(lireValides()) }, [])
+  const OUTILS = useMemo<Outil[]>(() => OUTILS_BASE.map(o => valides.indexOf(o.id) >= 0 ? { ...o, statut: 'validé' as const } : o), [valides])
+  function basculerValidation(id: string, v: boolean) {
+    const n = v ? (valides.indexOf(id) >= 0 ? valides : [...valides, id]) : valides.filter(x => x !== id)
+    setValides(n); ecrireValides(n)
+  }
 
   useEffect(() => {
     fetchLandings().then(setList).finally(() => setCharge(false))
@@ -145,17 +155,31 @@ export default function Page() {
   const outilsFiltres = useMemo(() =>
     OUTILS.filter(o => filtre !== 'gerees' && (filtre === 'tous' || o.public.indexOf(filtre) >= 0)
       && (!t || (o.titre + ' ' + o.description).toLowerCase().includes(t)))
-  , [filtre, t])
+  , [OUTILS, filtre, t])
 
   /* Carrousel : landings gerees avec URL, puis tous les outils (les videos « a venir » y figurent). */
   const slides: Slide[] = useMemo(() => [
     ...list.filter(l => l.deploy_url).map(l => ({ id: l.id, nom: l.nom ?? l.id, src: l.deploy_url as string, genre: 'geree' as const })),
     ...OUTILS.map(o => ({ id: o.id, nom: o.titre, src: o.aVenir ? '' : o.chemin, aVenir: !!o.aVenir, genre: 'outil' as const })),
-  ], [list])
+  ], [list, OUTILS])
   const avecUrl = slides
   const courant = slides[idx] ?? null
   const urlCourante = courant ? (courant.genre === 'outil' ? urlProd(OUTILS.find(o => o.id === courant.id) as Outil) : courant.src) : ''
   const libelle = (x: Slide | null) => x?.genre === 'outil' ? (x.aVenir ? ' · vidéo à venir' : ' · outil commercial') : ' · landing gérée'
+
+  /* Cible de la barre d'actions : outil du catalogue (regle valide / brouillon) ou landing geree (en ligne ou non). */
+  const outilCourant = courant?.genre === 'outil' ? OUTILS.find(o => o.id === courant.id) ?? null : null
+  const landingCourante = courant?.genre === 'geree' ? list.find(l => l.id === courant.id) ?? null : null
+  const cible: CibleBarre | null = outilCourant ? {
+    titre: outilCourant.titre, url: urlCourante, message: outilCourant.message,
+    partageable: outilCourant.statut === 'validé' && !outilCourant.aVenir,
+    motif: 'Brouillon : à valider avant partage',
+    valide: outilCourant.statut === 'validé',
+    onValider: v => basculerValidation(outilCourant.id, v),
+  } : landingCourante ? {
+    titre: landingCourante.nom ?? landingCourante.id, url: urlCourante, message: 'Bonjour, voici une page Flowin :',
+    partageable: landingCourante.published === true, motif: 'Landing hors ligne : à publier avant partage',
+  } : null
 
   const enLigne = list.filter(l => l.published === true).length
 
@@ -197,6 +221,22 @@ export default function Page() {
               Ouvrir cette page en plein écran ↗
             </a>
           )}
+          {urlCourante && (
+            <button className="sa-btn" data-plein onClick={() => setPlein(true)} style={{ fontSize: 12, fontWeight: 700, padding: '6px 12px' }}>Aperçu plein écran avec envoi</button>
+          )}
+          {cible && <BarreActionsOutil cible={cible} />}
+        </div>
+      )}
+
+      {plein && courant && courant.src && (
+        <div role="dialog" aria-modal="true" aria-label="Aperçu plein écran" data-plein-vue
+          style={{ position: 'fixed', inset: 0, zIndex: 1000, background: '#fff', display: 'flex', flexDirection: 'column' }}>
+          <div style={{ display: 'flex', gap: 8, alignItems: 'center', padding: '8px 12px', borderBottom: '1px solid var(--sa-border)', flexWrap: 'wrap', justifyContent: 'center' }}>
+            <strong style={{ fontSize: 14 }}>{courant.nom}</strong>
+            <button className="sa-btn" data-plein-fermer onClick={() => setPlein(false)} style={{ fontSize: 12, fontWeight: 700, padding: '6px 12px' }}>Fermer</button>
+          </div>
+          {cible && <BarreActionsOutil cible={cible} />}
+          <iframe src={courant.src} title={`Plein écran : ${courant.nom}`} style={{ flex: 1, border: 0, width: '100%' }} />
         </div>
       )}
 
