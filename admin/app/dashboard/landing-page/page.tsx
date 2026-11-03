@@ -22,8 +22,9 @@ import { PageHeader, EmptyState } from '@/components/dashboard/DashboardUI'
 import { fetchLandings, type Landing } from '@/lib/administratif'
 import { Ico } from '@/lib/proicons'
 import { OutilCarte } from '@/components/dashboard/OutilCarte'
-import { OUTILS as OUTILS_BASE, OUTILS_MANQUANTS, PUBLICS, urlProd, lireValides, ecrireValides, type Outil } from '@/lib/outilsCommerciaux'
+import { OUTILS as OUTILS_BASE, OUTILS_MANQUANTS, PUBLICS, urlProd, lireValides, ecrireValides, type Outil, type Public } from '@/lib/outilsCommerciaux'
 import { BarreActionsOutil, type CibleBarre } from '@/components/dashboard/BarreActionsOutil'
+import { avecSource } from '@/lib/source'
 
 /* MAJ 01/11 -- UNE seule page pour tout le materiel de diffusion (decision Romain) : les 12 pages de
    reference statiques qui vivaient ici en dur sont desormais dans le catalogue unique
@@ -32,7 +33,11 @@ import { BarreActionsOutil, type CibleBarre } from '@/components/dashboard/Barre
    statut (valide / brouillon). Les landings gerees (table `landings`) restent inchangees. */
 
 /** Une diapositive du carrousel d'apercu : landing geree OU outil du catalogue. */
-interface Slide { id: string; nom: string; src: string; aVenir?: boolean; genre: 'geree' | 'outil' }
+interface Slide {
+  id: string; nom: string; src: string; aVenir?: boolean; genre: 'geree' | 'outil'
+  /** Animation video : lecteur au lieu de l'iframe. */
+  video?: { src: string; poster?: string; vertical: boolean; pret: boolean }
+}
 
 function PhoneApercu({ landing, onPrev, onNext, position }: { landing: Slide | null; onPrev: () => void; onNext: () => void; position: string }) {
   const W = 220, H = 442, SCALE = 0.586
@@ -118,6 +123,39 @@ function OrdiApercu({ landing, onPrev, onNext, position }: { landing: Slide | nu
   )
 }
 
+/** Lecteur d'animation : cadre telephone vertical ou 16:9, jamais de lecture automatique. */
+function VideoApercu({ slide, onPrev, onNext, position }: { slide: Slide; onPrev: () => void; onNext: () => void; position: string }) {
+  const v = slide.video as NonNullable<Slide['video']>
+  const [erreur, setErreur] = useState(false)
+  useEffect(() => { setErreur(false) }, [slide.id])
+  const W = v.vertical ? 220 : 480, H = v.vertical ? 391 : 270
+  const enPrep = !v.pret || erreur
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', gap: 14, maxWidth: '100%' }}>
+      <button className="sa-btn icon" onClick={onPrev} aria-label="Landing précédente" style={{ fontSize: 18 }}>‹</button>
+      <div style={{ width: Math.min(W + 20, 520), maxWidth: 'calc(100vw - 130px)' }}>
+        <div style={{ borderRadius: v.vertical ? 32 : 14, padding: 9, background: '#0F172A', boxShadow: '0 20px 50px rgba(15,23,42,.25)' }}>
+          <div style={{ borderRadius: v.vertical ? 24 : 8, overflow: 'hidden', background: '#000', width: '100%', aspectRatio: v.vertical ? '9 / 16' : '16 / 9', position: 'relative', maxHeight: H + 60 }}>
+            {enPrep ? (
+              <div data-video-prep style={{ position: 'absolute', inset: 0, display: 'grid', placeItems: 'center', padding: 16, textAlign: 'center', color: '#E2E8F0', fontSize: 13, background: '#0F172A' }}>
+                <div><strong style={{ display: 'block', fontSize: 15, marginBottom: 4 }}>Version de travail en préparation</strong>La vidéo sera lisible ici dès que le fichier sera déposé.</div>
+              </div>
+            ) : (
+              <video key={slide.id} data-video controls playsInline preload="metadata" poster={v.poster} src={v.src}
+                onError={() => setErreur(true)} style={{ width: '100%', height: '100%', objectFit: 'contain', background: '#000', display: 'block' }} />
+            )}
+          </div>
+        </div>
+        <div style={{ textAlign: 'center', marginTop: 10 }}>
+          <div style={{ fontWeight: 800, fontSize: 13 }}>{slide.nom}</div>
+          <div className="sa-muted" style={{ fontSize: 11, marginTop: 2 }}>{position}</div>
+        </div>
+      </div>
+      <button className="sa-btn icon" onClick={onNext} aria-label="Landing suivante" style={{ fontSize: 18 }}>›</button>
+    </div>
+  )
+}
+
 export default function Page() {
   const [vue, setVue] = useState<'tel' | 'ordi'>('tel')
   const [list, setList] = useState<Landing[]>([])
@@ -145,27 +183,44 @@ export default function Page() {
      demandee : CHAQUE page listee a un lien direct qui ouvre la vraie page
      en plein ecran dans un nouvel onglet -- donc toutes les pages vivent
      maintenant dans la meme liste, filtree par la meme recherche. */
-  const [filtre, setFiltre] = useState<'tous' | 'gerees' | 'commerce' | 'organisateur' | 'partenaire'>('tous')
+  const [filtre, setFiltre] = useState<'tous' | 'gerees' | 'animations' | Public>('tous')
   const haut = useRef<HTMLDivElement>(null)
+  /* Envoi groupé : plusieurs outils cochés, un seul message WhatsApp / email / presse-papiers. */
+  const [coches, setCoches] = useState<string[]>([])
+  const [groupeCopie, setGroupeCopie] = useState(false)
   const t = q.trim().toLowerCase()
 
   const landingsFiltrees = useMemo(() =>
     (filtre === 'tous' || filtre === 'gerees') ? list.filter(l => !t || (l.nom ?? l.id).toLowerCase().includes(t)) : []
   , [list, filtre, t])
   const outilsFiltres = useMemo(() =>
-    OUTILS.filter(o => filtre !== 'gerees' && (filtre === 'tous' || o.public.indexOf(filtre) >= 0)
+    OUTILS.filter(o => filtre !== 'gerees' && (filtre === 'tous' || (filtre === 'animations' ? o.type === 'animation' : o.public.indexOf(filtre) >= 0))
       && (!t || (o.titre + ' ' + o.description).toLowerCase().includes(t)))
   , [OUTILS, filtre, t])
+
+  const partageables = useMemo(() => outilsFiltres.filter(o => o.statut === 'validé' && !o.aVenir && !!o.chemin), [outilsFiltres])
+  const choisis = useMemo(() => OUTILS.filter(o => coches.indexOf(o.id) >= 0 && o.statut === 'validé' && !o.aVenir && !!o.chemin), [OUTILS, coches])
+  const lienDe = (o: Outil) => avecSource(urlProd(o), o.suivi ? (o.canalDefaut ?? 'direct') : 'direct')
+  const texteGroupe = () => choisis.map(o => o.titre + '\n' + lienDe(o)).join('\n\n')
+  function basculerCoche(o: Outil) { setCoches(c => c.indexOf(o.id) >= 0 ? c.filter(x => x !== o.id) : [...c, o.id]) }
+  async function copierGroupe() {
+    let ok = false
+    try { await navigator.clipboard.writeText(texteGroupe()); ok = true } catch {
+      try { const ta = document.createElement('textarea'); ta.value = texteGroupe(); ta.style.position = 'fixed'; ta.style.opacity = '0'; document.body.appendChild(ta); ta.select(); ok = document.execCommand('copy'); document.body.removeChild(ta) } catch { ok = false }
+    }
+    setGroupeCopie(ok); window.setTimeout(() => setGroupeCopie(false), 2000)
+  }
 
   /* Carrousel : landings gerees avec URL, puis tous les outils (les videos « a venir » y figurent). */
   const slides: Slide[] = useMemo(() => [
     ...list.filter(l => l.deploy_url).map(l => ({ id: l.id, nom: l.nom ?? l.id, src: l.deploy_url as string, genre: 'geree' as const })),
-    ...OUTILS.map(o => ({ id: o.id, nom: o.titre, src: o.aVenir ? '' : o.chemin, aVenir: !!o.aVenir, genre: 'outil' as const })),
+    ...OUTILS.map(o => ({ id: o.id, nom: o.titre, src: o.aVenir ? '' : o.chemin, aVenir: !!o.aVenir, genre: 'outil' as const,
+      video: o.animation ? { src: o.animation.mp4, poster: o.animation.poster, vertical: o.animation.format === 'vertical', pret: o.animation.pret } : undefined })),
   ], [list, OUTILS])
   const avecUrl = slides
   const courant = slides[idx] ?? null
   const urlCourante = courant ? (courant.genre === 'outil' ? urlProd(OUTILS.find(o => o.id === courant.id) as Outil) : courant.src) : ''
-  const libelle = (x: Slide | null) => x?.genre === 'outil' ? (x.aVenir ? ' · vidéo à venir' : ' · outil commercial') : ' · landing gérée'
+  const libelle = (x: Slide | null) => x?.video ? ' · animation' : x?.genre === 'outil' ? (x.aVenir ? ' · vidéo à venir' : ' · outil commercial') : ' · landing gérée'
 
   /* Cible de la barre d'actions : outil du catalogue (regle valide / brouillon) ou landing geree (en ligne ou non). */
   const outilCourant = courant?.genre === 'outil' ? OUTILS.find(o => o.id === courant.id) ?? null : null
@@ -197,11 +252,13 @@ export default function Page() {
 
       {!charge && avecUrl.length > 0 && (
         <div ref={haut} data-carrousel style={{ scrollMarginTop: 12, background: 'var(--sa-subtle)', borderRadius: 14, padding: '18px 14px', marginBottom: 18, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8 }}>
-          <div style={{ display: 'flex', gap: 6, marginBottom: 6 }}>
+          <div style={{ display: 'flex', gap: 6, marginBottom: 6, visibility: courant?.video ? 'hidden' : 'visible' }}>
             <button className="sa-btn" onClick={() => setVue('tel')} style={{ fontSize: 12, fontWeight: 700, padding: '6px 12px', background: vue === 'tel' ? 'var(--sa-accent)' : undefined, color: vue === 'tel' ? '#fff' : undefined }}>Téléphone</button>
             <button className="sa-btn" onClick={() => setVue('ordi')} style={{ fontSize: 12, fontWeight: 700, padding: '6px 12px', background: vue === 'ordi' ? 'var(--sa-accent)' : undefined, color: vue === 'ordi' ? '#fff' : undefined }}>Ordinateur</button>
           </div>
-          {vue === 'tel' ? (
+          {courant?.video ? (
+            <VideoApercu slide={courant} onPrev={() => setIdx(i => (i - 1 + avecUrl.length) % avecUrl.length)} onNext={() => setIdx(i => (i + 1) % avecUrl.length)} position={`${idx + 1} / ${avecUrl.length} · animation`} />
+          ) : vue === 'tel' ? (
             <PhoneApercu
               landing={courant}
               onPrev={() => setIdx(i => (i - 1 + avecUrl.length) % avecUrl.length)}
@@ -236,7 +293,13 @@ export default function Page() {
             <button className="sa-btn" data-plein-fermer onClick={() => setPlein(false)} style={{ fontSize: 12, fontWeight: 700, padding: '6px 12px' }}>Fermer</button>
           </div>
           {cible && <BarreActionsOutil cible={cible} />}
-          <iframe src={courant.src} title={`Plein écran : ${courant.nom}`} style={{ flex: 1, border: 0, width: '100%' }} />
+          {courant.video ? (
+            courant.video.pret
+              ? <video data-video-plein controls playsInline preload="metadata" poster={courant.video.poster} src={courant.video.src} style={{ flex: 1, minHeight: 0, width: '100%', background: '#000', objectFit: 'contain' }} />
+              : <div data-video-prep style={{ flex: 1, display: 'grid', placeItems: 'center', background: '#0F172A', color: '#E2E8F0', textAlign: 'center', padding: 20 }}><strong>Version de travail en préparation</strong></div>
+          ) : (
+            <iframe src={courant.src} title={`Plein écran : ${courant.nom}`} style={{ flex: 1, border: 0, width: '100%' }} />
+          )}
         </div>
       )}
 
@@ -248,11 +311,27 @@ export default function Page() {
           onChange={e => setQ(e.target.value)}
           style={{ maxWidth: 320 }}
         />
-        {([{ v: 'tous', label: 'Tous' }, { v: 'gerees', label: 'Landings gérées' }, ...PUBLICS] as { v: typeof filtre; label: string }[]).map(p => (
+        {([{ v: 'tous', label: 'Tous' }, { v: 'gerees', label: 'Landings gérées' }, { v: 'animations', label: 'Animations' }, ...PUBLICS] as { v: typeof filtre; label: string }[]).map(p => (
           <button key={p.v} className="sa-btn" aria-pressed={filtre === p.v} onClick={() => setFiltre(p.v)}
             style={{ fontSize: 12, fontWeight: 700, padding: '6px 12px', background: filtre === p.v ? 'var(--sa-accent)' : undefined, color: filtre === p.v ? '#fff' : undefined }}>{p.label}</button>
         ))}
       </div>
+
+      {partageables.length > 1 && (
+        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center', marginBottom: 10, padding: '8px 10px', border: '1px solid var(--sa-border)', borderRadius: 10, background: 'var(--sa-card, #fff)', position: 'sticky', top: 0, zIndex: 5 }} data-envoi-groupe>
+          <strong style={{ fontSize: 13 }}>{choisis.length} sélectionné{choisis.length > 1 ? 's' : ''}</strong>
+          <button className="sa-btn" style={{ fontSize: 12, fontWeight: 700 }} onClick={() => setCoches(partageables.map(o => o.id))}>Tout sélectionner ({partageables.length})</button>
+          <button className="sa-btn" style={{ fontSize: 12, fontWeight: 700 }} disabled={!choisis.length} onClick={() => setCoches([])}>Tout effacer</button>
+          <a className="sa-btn" aria-disabled={!choisis.length} data-groupe-wa
+            href={choisis.length ? 'https://wa.me/?text=' + encodeURIComponent('Bonjour, voici les présentations Flowin :\n\n' + texteGroupe()) : undefined}
+            target="_blank" rel="noopener noreferrer"
+            style={{ fontSize: 12, fontWeight: 700, background: '#1FA855', color: '#fff', opacity: choisis.length ? 1 : 0.4, pointerEvents: choisis.length ? 'auto' : 'none', textDecoration: 'none' }}>Envoyer la sélection par WhatsApp</a>
+          <a className="sa-btn" aria-disabled={!choisis.length} data-groupe-mail
+            href={choisis.length ? 'mailto:?subject=' + encodeURIComponent('Flowin : nos présentations') + '&body=' + encodeURIComponent('Bonjour,\n\nVoici les présentations Flowin :\n\n' + texteGroupe() + '\n\nL’équipe Flowin') : undefined}
+            style={{ fontSize: 12, fontWeight: 700, opacity: choisis.length ? 1 : 0.4, pointerEvents: choisis.length ? 'auto' : 'none', textDecoration: 'none' }}>Email</a>
+          <button className="sa-btn" disabled={!choisis.length} onClick={copierGroupe} data-groupe-copier style={{ fontSize: 12, fontWeight: 700 }}>{groupeCopie ? 'Copié ✓' : 'Copier les liens'}</button>
+        </div>
+      )}
 
       {charge && <div className="sa-muted" style={{ fontSize: 13 }}>Chargement…</div>}
 
@@ -328,7 +407,7 @@ export default function Page() {
             </div>
           ))}
           {outilsFiltres.map(o => (
-            <OutilCarte key={o.id} o={o} actif={courant?.id === o.id} onApercu={(x) => ouvrirApercu(x.id)} onSelect={(x) => ouvrirApercu(x.id)} />
+            <OutilCarte key={o.id} o={o} actif={courant?.id === o.id} coche={coches.indexOf(o.id) >= 0} onCoche={basculerCoche} onApercu={(x) => ouvrirApercu(x.id)} onSelect={(x) => ouvrirApercu(x.id)} />
           ))}
         </div>
       )}

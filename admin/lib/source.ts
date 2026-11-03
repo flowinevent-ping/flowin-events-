@@ -15,6 +15,8 @@ export const CANAUX: { v: string; label: string }[] = [
   { v: 'email', label: 'Email' },
   { v: 'qr-affiche', label: 'QR sur affiche / vitrine' },
   { v: 'video-commerce', label: 'Vidéo commerces' },
+  { v: 'video-participant', label: 'Vidéo participants' },
+  { v: 'video-participant-se', label: 'Vidéo participants super event' },
   { v: 'video-partenaire-se', label: 'Vidéo partenaires / super-event' },
   { v: 'video-organisateur', label: 'Vidéo organisateurs' },
   { v: 'salon', label: 'Salon / rencontre' },
@@ -30,8 +32,10 @@ export function nettoyerSrc(v: string | null | undefined): string {
 /** Ajoute `?src=` (ou `&src=`) à un lien ; `direct` / vide = lien inchangé. */
 export function avecSource(url: string, canal: string): string {
   const c = nettoyerSrc(canal)
-  if (!c || c === 'direct') return url
-  return url + (url.indexOf('?') >= 0 ? '&' : '?') + 'src=' + c
+  /* Un lien porte au plus UN canal : on remplace celui qui existe deja. */
+  const base = url.replace(/([?&])src=[^&]*&?/, '$1').replace(/[?&]$/, '')
+  if (!c || c === 'direct') return base
+  return base + (base.indexOf('?') >= 0 ? '&' : '?') + 'src=' + c
 }
 
 /** À appeler au chargement d'une page d'arrivée : retient le canal de la 1re visite et le renvoie. */
