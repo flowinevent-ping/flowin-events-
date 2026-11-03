@@ -7,6 +7,26 @@ import { enregistrerBanque, nouvelleQuestionQuiz, nouvelleQuestionBonus, blocDeQ
 import { CARD, MUTED, ACC } from '@/lib/proui'
 import { Ico } from '@/lib/proicons'
 import { supabase } from '@/lib/supabase'
+import { diagnostiquerModele } from '@/lib/banquesModeles/resoudre'
+import { BANQUES_MODELES, METIERS, type Metier } from '@/lib/banquesModeles'
+
+/* Applique une modification a la question n°i. Pour une question personnalisee, le nom de
+   l etablissement est recopie dans les autres questions personnalisees encore « synchronisees »
+   (vides ou egales a l ancienne valeur) : on le saisit une fois, pas quatorze. */
+function appliquerPatch(qs: QuestionBanque[], i: number, patch: Partial<QuestionQuiz> | Partial<QuestionBonus>): QuestionBanque[] {
+  const avant = qs[i] as QuestionQuiz
+  const apres = { ...avant, ...patch } as QuestionBanque
+  const ancien = avant.modele?.variables.find(v => v.cle === 'etablissement')?.valeur ?? ''
+  const nouveau = (apres as QuestionQuiz).modele?.variables.find(v => v.cle === 'etablissement')?.valeur ?? ''
+  return qs.map((x, k) => {
+    if (k === i) return apres
+    const m = (x as QuestionQuiz).modele
+    if (!m || ancien === nouveau) return x
+    const v = m.variables.find(y => y.cle === 'etablissement')
+    if (!v || (v.valeur ?? '') !== ancien) return x
+    return { ...(x as QuestionQuiz), modele: { ...m, variables: m.variables.map(y => y.cle === 'etablissement' ? { ...y, valeur: nouveau } : y) } }
+  })
+}
 
 const btn: React.CSSProperties = { border: 'none', borderRadius: 10, padding: '9px 16px', fontWeight: 800, fontSize: 13, cursor: 'pointer' }
 const inputStyle: React.CSSProperties = { width: '100%', border: '1.5px solid #efe9f2', borderRadius: 9, padding: '9px 11px', fontSize: 13.5, fontFamily: 'inherit' }
@@ -57,7 +77,8 @@ export default function BanqueEditor({ banque, proId, estBonus, lienRetour }: { 
      la derniere question passee. */
   const [etape, setEtape] = useState<number | 'recap'>(0)
 
-  const [panneau, setPanneau] = useState<'ia' | 'import' | null>(null)
+  const [panneau, setPanneau] = useState<'ia' | 'import' | 'modeles' | null>(null)
+  const [metierModele, setMetierModele] = useState<Metier>('restaurateur')
   const [themeIA, setThemeIA] = useState('')
   /* `nombreIA` reste une CHAINE brute tant qu'on tape : la convertir en Number()
      a chaque frappe puis la reinjecter dans `value` produisait des courses avec
@@ -185,13 +206,13 @@ export default function BanqueEditor({ banque, proId, estBonus, lienRetour }: { 
       {qActuelle && typeof etape === 'number' && (estBonus ? (
         <UneQuestionBonus
           question={qActuelle as QuestionBonus} index={etape} total={questions.length}
-          onChange={patch => setQuestions(qs => qs.map((x, i) => i === etape ? { ...(x as QuestionBonus), ...patch } : x))}
+          onChange={patch => setQuestions(qs => appliquerPatch(qs, etape, patch))}
           onRetirer={() => retirerQuestion(etape)}
         />
       ) : (
         <UneQuestionQuiz
           question={qActuelle as QuestionQuiz} index={etape} total={questions.length}
-          onChange={patch => setQuestions(qs => qs.map((x, i) => i === etape ? { ...(x as QuestionQuiz), ...patch } : x))}
+          onChange={patch => setQuestions(qs => appliquerPatch(qs, etape, patch))}
           onRetirer={() => retirerQuestion(etape)}
         />
       ))}
@@ -217,15 +238,18 @@ export default function BanqueEditor({ banque, proId, estBonus, lienRetour }: { 
             {(() => {
               const uneQuestion = (qst: QuestionBanque, i: number) => {
                 const intitule = estBonus ? (qst as QuestionBonus).label : (qst as QuestionQuiz).texte
-                const bonne = !estBonus ? (qst as QuestionQuiz).options[(qst as QuestionQuiz).bonne] : null
+                const mod = !estBonus && (qst as QuestionQuiz).modele ? diagnostiquerModele(qst as QuestionQuiz) : null
+                const bonne = !estBonus ? (mod ? (mod.resolue ? mod.resolue.options[mod.resolue.bonne] : null) : (qst as QuestionQuiz).options[(qst as QuestionQuiz).bonne]) : null
                 return (
                   <button key={qst.id} onClick={() => setEtape(i)} style={{ display: 'block', width: '100%', textAlign: 'left', background: 'none', border: 'none', borderTop: '1px solid #efe9f2', padding: '10px 0', cursor: 'pointer' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                       <span style={{ fontSize: 11, fontWeight: 800, color: '#94A3B8' }}>Q{i + 1}</span>
+                      {mod && <span data-a-completer style={{ fontSize: 10, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '.04em', color: mod.complet ? '#15803D' : '#B45309', background: mod.complet ? 'rgba(21,128,61,.1)' : 'rgba(180,83,9,.1)', borderRadius: 99, padding: '1px 7px' }}>{mod.complet ? 'Personnalisée' : 'À compléter'}</span>}
                       {qst.difficulte && <span style={{ fontSize: 10, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '.04em', color: ACC, background: 'rgba(122,79,224,.08)', borderRadius: 99, padding: '1px 7px' }}>{qst.difficulte}</span>}
                     </div>
-                    <div style={{ fontSize: 13.5, fontWeight: 700, color: intitule?.trim() ? '#1c1024' : '#B45309' }}>{intitule?.trim() || 'Intitulé manquant'}</div>
+                    <div style={{ fontSize: 13.5, fontWeight: 700, color: intitule?.trim() ? '#1c1024' : '#B45309' }}>{mod?.resolue ? mod.resolue.texte : (intitule?.trim() || 'Intitulé manquant')}</div>
                     {bonne != null && <div style={{ fontSize: 12, color: '#15803D', marginTop: 2 }}>Bonne réponse : {bonne || '—'}</div>}
+                    {mod && !mod.complet && <div style={{ fontSize: 12, color: '#B45309', marginTop: 2 }}>{mod.probleme ?? `Pas encore posée aux joueurs : il manque ${mod.manquants.length} champ${mod.manquants.length > 1 ? 's' : ''} à compléter.`}</div>}
                   </button>
                 )
               }
@@ -255,6 +279,9 @@ export default function BanqueEditor({ banque, proId, estBonus, lienRetour }: { 
             <button onClick={() => ajouter(blocDeQuatre(estBonus))}
               style={{ ...btn, background: '#fff', border: '1.5px solid #efe9f2', color: '#1c1024' }}
             ><Ico k="plus" size={13} style={{ marginRight: 6 }} />Un bloc de 4</button>
+            <button onClick={() => setPanneau(p => p === 'modeles' ? null : 'modeles')} data-panneau-modeles
+              style={{ ...btn, background: panneau === 'modeles' ? 'rgba(122,79,224,.08)' : '#fff', border: `1.5px solid ${panneau === 'modeles' ? ACC : '#efe9f2'}`, color: ACC }}
+            ><Ico k="plus" size={13} style={{ marginRight: 6 }} />Piocher dans les modèles</button>
             <button onClick={() => setPanneau(p => p === 'ia' ? null : 'ia')}
               style={{ ...btn, background: panneau === 'ia' ? 'rgba(122,79,224,.08)' : '#fff', border: `1.5px solid ${panneau === 'ia' ? ACC : '#efe9f2'}`, color: ACC }}
             ><Ico k="sparkle" size={13} style={{ marginRight: 6 }} />Générer avec l&apos;IA</button>
@@ -262,6 +289,13 @@ export default function BanqueEditor({ banque, proId, estBonus, lienRetour }: { 
               style={{ ...btn, background: panneau === 'import' ? 'rgba(122,79,224,.08)' : '#fff', border: `1.5px solid ${panneau === 'import' ? ACC : '#efe9f2'}`, color: ACC }}
             ><Ico k="upload" size={13} style={{ marginRight: 6 }} />Importer</button>
           </div>
+
+          {panneau === 'modeles' && (
+            <PanneauModeles
+              estBonus={estBonus} metier={metierModele} onMetier={setMetierModele}
+              onAjouter={nouvelles => { ajouter(nouvelles); setPanneau(null) }}
+            />
+          )}
 
           {panneau === 'ia' && (
             <div style={{ ...CARD, background: '#faf7fd' }}>
@@ -361,7 +395,8 @@ function UneQuestionQuiz({ question: qst, index, total, onChange, onRetirer }: {
       <div style={{ paddingLeft: 30 }}>
         <ThemeEtDifficulte theme={qst.theme} difficulte={qst.difficulte} onChange={onChange} />
       </div>
-      <div style={{ paddingLeft: 30, display: 'flex', flexDirection: 'column', gap: 7, marginTop: 10 }}>
+      {qst.modele && <BlocModele question={qst} onChange={onChange} />}
+      {!qst.modele && <div style={{ paddingLeft: 30, display: 'flex', flexDirection: 'column', gap: 7, marginTop: 10 }}>
         <div style={{ fontSize: 11, fontWeight: 700, color: '#94A3B8', marginBottom: -2 }}>Réponses — cochez la bonne</div>
         {qst.options.map((opt, oi) => (
           <div key={oi} style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
@@ -373,7 +408,7 @@ function UneQuestionQuiz({ question: qst, index, total, onChange, onRetirer }: {
         <button onClick={ajoutOpt} style={{ ...btn, background: 'transparent', color: ACC, alignSelf: 'flex-start', padding: '4px 0', fontSize: 12 }}>+ Ajouter une réponse</button>
         <div style={{ fontSize: 11, fontWeight: 700, color: '#94A3B8', marginTop: 4 }}>En cas de mauvaise réponse</div>
         <input value={qst.explication ?? ''} onChange={e => onChange({ explication: e.target.value })} placeholder="Explication affichée après une réponse fausse (optionnel)" style={{ ...inputStyle, fontSize: 12.5 }} />
-      </div>
+      </div>}
     </div>
   )
 }
@@ -410,6 +445,104 @@ function UneQuestionBonus({ question: qst, index, total, onChange, onRetirer }: 
           </div>
         ))}
         <button onClick={ajoutOpt} style={{ ...btn, background: 'transparent', color: ACC, alignSelf: 'flex-start', padding: '4px 0', fontSize: 12 }}>+ Ajouter une réponse</button>
+      </div>
+    </div>
+  )
+}
+
+/* ---- Piocher dans les banques modeles : questions deja ecrites, par metier ---- */
+function PanneauModeles({ estBonus, metier, onMetier, onAjouter }: {
+  estBonus: boolean; metier: Metier; onMetier: (m: Metier) => void; onAjouter: (qs: QuestionBanque[]) => void
+}) {
+  const banques = BANQUES_MODELES.filter(b => (estBonus ? b.genre === 'bonus' : b.genre === 'quiz') && b.metiers.indexOf(metier) >= 0)
+  /* Copie profonde + nouveaux identifiants : la meme question peut etre ajoutee dans plusieurs banques. */
+  const copier = (qs: QuestionBanque[]): QuestionBanque[] => qs.map(q => ({ ...JSON.parse(JSON.stringify(q)), id: 'q_' + Math.random().toString(36).slice(2, 9) }))
+  return (
+    <div style={{ ...CARD, background: '#faf7fd' }} data-panneau="modeles">
+      <div style={{ fontWeight: 800, fontSize: 13.5, marginBottom: 4 }}>Questions prêtes à l&apos;emploi</div>
+      <div style={{ fontSize: 12, ...MUTED, marginBottom: 10, lineHeight: 1.5 }}>
+        Choisissez votre métier, puis ajoutez une question ou toute une série. Les <b>questions personnalisées</b> restent « à compléter » :
+        vous renseignez vous-même vos réponses.
+      </div>
+      <select value={metier} onChange={e => onMetier(e.target.value as Metier)} aria-label="Métier" style={{ ...inputStyle, maxWidth: 240, marginBottom: 10 }}>
+        {METIERS.map(m => <option key={m.id} value={m.id}>{m.nom}</option>)}
+      </select>
+      {banques.length === 0 && <div style={{ fontSize: 12.5, ...MUTED }}>Aucun modèle pour ce métier.</div>}
+      {banques.map(b => (
+        <details key={b.id} style={{ borderTop: '1px solid #efe9f2', padding: '8px 0' }}>
+          <summary style={{ cursor: 'pointer', fontWeight: 700, fontSize: 13 }}>
+            {b.nom} <span style={{ ...MUTED, fontWeight: 600 }}>({b.questions.length})</span>
+            {b.personnalisable && <span style={{ marginLeft: 8, fontSize: 10, fontWeight: 800, color: '#0B7A4F' }}>À COMPLÉTER</span>}
+          </summary>
+          <button onClick={() => onAjouter(copier(b.questions))} style={{ ...btn, background: ACC, color: '#fff', padding: '6px 12px', fontSize: 12, margin: '8px 0' }}>Ajouter les {b.questions.length} questions</button>
+          {b.questions.map(q => {
+            const t = q.type === 'qcm' ? (q as QuestionQuiz).texte : (q as QuestionBonus).label
+            return (
+              <div key={q.id} style={{ display: 'flex', gap: 8, alignItems: 'flex-start', padding: '5px 0', fontSize: 12.5 }}>
+                <span style={{ flex: 1 }}>{t}</span>
+                <button onClick={() => onAjouter(copier([q]))} style={{ ...btn, background: '#fff', border: '1.5px solid #efe9f2', color: ACC, padding: '3px 10px', fontSize: 11.5, flexShrink: 0 }}>Ajouter</button>
+              </div>
+            )
+          })}
+        </details>
+      ))}
+    </div>
+  )
+}
+
+/* ---- Question personnalisee : champs « a completer par le commercant » + apercu joueur ---- */
+function BlocModele({ question: qst, onChange }: { question: QuestionQuiz; onChange: (patch: Partial<QuestionQuiz>) => void }) {
+  const m = qst.modele!
+  const d = diagnostiquerModele(qst)
+  const majVar = (cle: string, valeur: string) => onChange({ modele: { ...m, variables: m.variables.map(v => v.cle === cle ? { ...v, valeur } : v) } })
+  const majOpt = (i: number, val: string) => onChange({ options: qst.options.map((o, oi) => (oi === i ? val : o)) })
+  return (
+    <div data-bloc-modele style={{ margin: '4px 0 12px 30px', border: '1.5px solid #bfe3d3', background: '#f3fbf7', borderRadius: 12, padding: 12 }}>
+      <div style={{ fontWeight: 800, fontSize: 13, color: '#0B7A4F', marginBottom: 2 }}>Question personnalisée : à compléter par le commerçant</div>
+      <div style={{ fontSize: 11.5, ...MUTED, marginBottom: 10, lineHeight: 1.5 }}>
+        Les mots entre {'{'}accolades{'}'} sont remplacés par vos réponses. Tant qu&apos;un champ est vide, la question n&apos;est jamais posée aux joueurs.
+      </div>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+        {m.variables.map(v => {
+          const vide = !(v.valeur ?? '').trim()
+          return (
+            <label key={v.cle} style={{ display: 'block' }}>
+              <span style={{ fontSize: 11, fontWeight: 700, display: 'flex', gap: 6, alignItems: 'center', marginBottom: 3 }}>
+                {v.label}
+                {vide && <span style={{ fontSize: 9.5, fontWeight: 800, color: '#B45309', background: 'rgba(180,83,9,.1)', borderRadius: 99, padding: '1px 7px' }}>À COMPLÉTER</span>}
+              </span>
+              <input data-variable={v.cle} value={v.valeur ?? ''} onChange={e => majVar(v.cle, e.target.value)} placeholder={v.placeholder}
+                inputMode={m.mode === 'annee' && v.cle === 'reponse' ? 'numeric' : m.mode === 'nombre' && v.cle === 'reponse' ? 'numeric' : undefined}
+                style={{ ...inputStyle, boxSizing: 'border-box', borderColor: vide ? '#f0c27a' : '#bfe3d3', background: '#fff' }} />
+            </label>
+          )
+        })}
+      </div>
+      {m.mode === 'choix' && (
+        <div style={{ marginTop: 10 }}>
+          <div style={{ fontSize: 11, fontWeight: 700, marginBottom: 4 }}>Mauvaises réponses proposées par défaut (modifiables)</div>
+          {[1, 2, 3].map(i => <input key={i} value={qst.options[i] ?? ''} onChange={e => majOpt(i, e.target.value)} style={{ ...inputStyle, boxSizing: 'border-box', marginBottom: 6, background: '#fff' }} />)}
+        </div>
+      )}
+      {(m.mode === 'annee' || m.mode === 'nombre') && (
+        <div style={{ fontSize: 11.5, ...MUTED, marginTop: 10 }}>Les 3 mauvaises propositions sont calculées automatiquement autour de votre réponse.</div>
+      )}
+      <div data-apercu-joueur style={{ marginTop: 12, background: '#fff', border: '1px solid #e5e1ea', borderRadius: 10, padding: 10 }}>
+        <div style={{ fontSize: 10.5, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '.05em', color: '#94A3B8', marginBottom: 4 }}>Aperçu joueur</div>
+        {d.resolue ? (
+          <>
+            <div style={{ fontWeight: 800, fontSize: 13.5, marginBottom: 6 }}>{d.resolue.texte}</div>
+            {d.resolue.options.map((o, i) => (
+              <div key={i} style={{ fontSize: 12.5, padding: '3px 0', color: i === d.resolue!.bonne ? '#15803D' : '#1c1024', fontWeight: i === d.resolue!.bonne ? 800 : 500 }}>
+                {String.fromCharCode(65 + i)}. {o}{i === d.resolue!.bonne ? '  (bonne réponse)' : ''}
+              </div>
+            ))}
+          </>
+        ) : (
+          <div style={{ fontSize: 12.5, color: '#B45309' }}>
+            {d.probleme ?? `Pas encore jouable : il manque ${d.manquants.map(x => x.label.toLowerCase()).join(', ')}.`}
+          </div>
+        )}
       </div>
     </div>
   )
