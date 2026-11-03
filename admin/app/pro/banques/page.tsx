@@ -4,6 +4,7 @@ import { fetchBanquesPro, type Banque } from '@/lib/banques'
 import ProShell from '@/components/pro/ProShell'
 import { lireDroitsPro } from '@/lib/droitsPro'
 import ModelesBanques from '@/components/banques/ModelesBanques'
+import CopierCommune from '@/components/banques/CopierCommune'
 import { CARD, MUTED, H1, SUB, ACC } from '@/lib/proui'
 
 /**
@@ -20,8 +21,11 @@ export default async function ProBanquesPage({ searchParams }: { searchParams: {
   const q = proId ? `?pro=${encodeURIComponent(proId)}` : ''
   const peutCreer = (await lireDroitsPro(proId)).creer_banques
 
-  const quiz = banques.filter(b => !estBonus(b))
-  const bonus = banques.filter(estBonus)
+  /* Les siennes, puis les banques communes Flowin validees (lecture seule, a copier pour modifier). */
+  const siennes = banques.filter(b => b.pro_id === proId)
+  const communes = banques.filter(b => b.pro_id === 'flowin')
+  const quiz = siennes.filter(b => !estBonus(b))
+  const bonus = siennes.filter(estBonus)
 
   const Groupe = ({ titre, sous, items, tagsDefaut, hrefCreer }: { titre: string; sous: string; items: Banque[]; tagsDefaut: string[]; hrefCreer: string }) => (
     <div style={{ marginBottom: 26 }}>
@@ -72,6 +76,25 @@ export default async function ProBanquesPage({ searchParams }: { searchParams: {
         tagsDefaut={['bonus']}
         hrefCreer="/pro/banques/nouvelle"
       />
+
+      {communes.length > 0 && (
+        <div style={{ marginBottom: 26 }} data-banques-communes>
+          <div style={{ display: 'flex', alignItems: 'baseline', gap: 10, marginBottom: 4 }}>
+            <div style={{ fontSize: 15, fontWeight: 800 }}>Banques communes Flowin</div>
+            <div style={{ fontSize: 12, ...MUTED }}>{communes.length}</div>
+          </div>
+          <div style={{ fontSize: 12.5, ...MUTED, marginBottom: 12 }}>Proposées et validées par Flowin, lecture seule. Vous pouvez les choisir telles quelles pour une animation, ou les copier dans vos banques pour les modifier.</div>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(240px,1fr))', gap: 12 }}>
+            {communes.map(b => (
+              <div key={b.id} style={{ ...CARD, marginBottom: 0 }}>
+                <div style={{ fontWeight: 700, fontSize: 13.5, marginBottom: 6 }}>{b.nom || 'Sans nom'}</div>
+                <div style={{ fontSize: 12, ...MUTED, marginBottom: 8 }}>{estBonus(b) ? 'Sondage bonus' : 'Quiz'} · {b.questions?.length ?? 0} question{(b.questions?.length ?? 0) > 1 ? 's' : ''} · Flowin</div>
+                {peutCreer && proId && <CopierCommune source={b} proId={proId} lienBase="/pro/banques/" lienSuffixe={q} />}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {peutCreer && proId && <ModelesBanques proId={proId} lienBase="/pro/banques/" lienSuffixe={q} />}
 

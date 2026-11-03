@@ -6,7 +6,7 @@ import { creerQuiz, creerBonus, type BanqueModele } from './outils'
 
 const bq = creerQuiz('bl-quiz')
 export const QUIZ_BOULANGER: BanqueModele = {
-  id: 'bq-modele-boulanger-quiz', nom: 'Boulanger · Quiz pain, viennoiserie et pâtisserie', metiers: ['boulanger'], genre: 'quiz', personnalisable: false,
+  id: 'bq-modele-boulanger-quiz', nom: 'Boulanger · Culture du pain', metiers: ['boulanger'], genre: 'quiz', personnalisable: false,
   description: 'Farine, levain, pétrissage, cuisson, croissant, baguette : 20 questions pour les gourmands de pain.',
   questions: [
     bq('Pain', 'facile', 'Quels sont les ingrédients de base d’un pain ?', 'Farine, eau, sel et levure ou levain', ['Farine, œufs, beurre et sucre', 'Maïs, lait et huile', 'Riz, eau et vinaigre'], 'Quatre ingrédients suffisent pour un pain : farine, eau, sel et levure (ou levain).'),
@@ -34,7 +34,7 @@ export const QUIZ_BOULANGER: BanqueModele = {
 
 const bb = creerBonus('bl-bonus')
 export const BONUS_BOULANGER: BanqueModele = {
-  id: 'bq-modele-boulanger-bonus', nom: 'Boulanger · Sondage bonus', metiers: ['boulanger'], genre: 'bonus', personnalisable: false,
+  id: 'bq-modele-boulanger-bonus', nom: 'Boulanger · Sondage clients', metiers: ['boulanger'], genre: 'bonus', personnalisable: false,
   description: 'Pain préféré, viennoiserie, moment de la journée, idées : dix mini-sondages.',
   questions: [
     bb('Goûts', 'Ton pain de cœur ?', ['La baguette', 'Le pain de campagne', 'Le pain complet', 'Un pain aux graines ou aux noix']),
@@ -52,7 +52,7 @@ export const BONUS_BOULANGER: BanqueModele = {
 
 const bc = creerQuiz('bo-quiz')
 export const QUIZ_BOUCHER: BanqueModele = {
-  id: 'bq-modele-boucher-quiz', nom: 'Boucher · Quiz viandes, morceaux et cuissons', metiers: ['boucher'], genre: 'quiz', personnalisable: false,
+  id: 'bq-modele-boucher-quiz', nom: 'Boucher · Viandes et cuissons', metiers: ['boucher'], genre: 'quiz', personnalisable: false,
   description: 'Morceaux, cuissons, labels, charcuterie, plats mijotés et régions : 20 questions pour les gourmands de viande.',
   questions: [
     bc('Morceaux', 'moyen', 'Quel morceau de bœuf est réputé le plus tendre ?', 'Le filet', ['Le jarret', 'La joue', 'Le collier'], 'Le filet est un muscle peu sollicité, donc très tendre.'),
@@ -80,7 +80,7 @@ export const QUIZ_BOUCHER: BanqueModele = {
 
 const bd = creerBonus('bo-bonus')
 export const BONUS_BOUCHER: BanqueModele = {
-  id: 'bq-modele-boucher-bonus', nom: 'Boucher · Sondage bonus', metiers: ['boucher'], genre: 'bonus', personnalisable: false,
+  id: 'bq-modele-boucher-bonus', nom: 'Boucher · Sondage clients', metiers: ['boucher'], genre: 'bonus', personnalisable: false,
   description: 'Viande préférée, cuisson, barbecue, origine : dix mini-sondages.',
   questions: [
     bd('Goûts', 'La viande de ta table du dimanche ?', ['Le rôti', 'Le poulet', 'Les grillades', 'Un plat mijoté']),
@@ -98,7 +98,7 @@ export const BONUS_BOUCHER: BanqueModele = {
 
 const bl = creerQuiz('lb-quiz')
 export const QUIZ_LIBRAIRE: BanqueModele = {
-  id: 'bq-modele-libraire-quiz', nom: 'Libraire · Quiz littérature et livres', metiers: ['libraire'], genre: 'quiz', personnalisable: false,
+  id: 'bq-modele-libraire-quiz', nom: 'Libraire · Littérature et livres', metiers: ['libraire'], genre: 'quiz', personnalisable: false,
   description: 'Classiques, poésie, théâtre, prix littéraires, vocabulaire du livre et auteurs de la région : 20 questions.',
   questions: [
     bl('Classiques', 'facile', 'Qui a écrit « Les Misérables » ?', 'Victor Hugo', ['Émile Zola', 'Honoré de Balzac', 'Gustave Flaubert'], 'Victor Hugo a publié « Les Misérables » en 1862.'),
@@ -126,7 +126,7 @@ export const QUIZ_LIBRAIRE: BanqueModele = {
 
 const bm = creerBonus('lb-bonus')
 export const BONUS_LIBRAIRE: BanqueModele = {
-  id: 'bq-modele-libraire-bonus', nom: 'Libraire · Sondage bonus', metiers: ['libraire'], genre: 'bonus', personnalisable: false,
+  id: 'bq-modele-libraire-bonus', nom: 'Libraire · Sondage clients', metiers: ['libraire'], genre: 'bonus', personnalisable: false,
   description: 'Genres, formats, lieux de lecture, idées d’animations : dix mini-sondages.',
   questions: [
     bm('Goûts', 'Ton genre préféré ?', ['Roman', 'Policier', 'BD et manga', 'Documentaire ou histoire', 'Jeunesse']),

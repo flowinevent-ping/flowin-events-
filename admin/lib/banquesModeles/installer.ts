@@ -1,4 +1,4 @@
-import { creerBanque, enregistrerBanque, type Banque, type QuestionBanque } from '../banques'
+import { creerBanque, enregistrerBanque, PRO_COMMUN, type Banque, type QuestionBanque } from '../banques'
 import { tagsDe, type BanqueModele } from './index'
 
 /**
@@ -11,7 +11,9 @@ export async function installerModele(proId: string, modele: BanqueModele): Prom
   const b = await creerBanque({ proId, nom: modele.nom, tags: tagsDe(modele) })
   if (!b) return null
   const questions = JSON.parse(JSON.stringify(modele.questions)) as QuestionBanque[]
-  const ok = await enregistrerBanque(b.id, questions, !modele.personnalisable)
+  /* Banque commune (Super Admin) : toujours en brouillon, le Super Admin la valide avant diffusion. */
+  const valider = !modele.personnalisable && proId !== PRO_COMMUN
+  const ok = await enregistrerBanque(b.id, questions, valider)
   if (!ok) return null
-  return { ...b, questions, statut: modele.personnalisable ? 'brouillon' : 'valide' }
+  return { ...b, questions, statut: valider ? 'valide' : 'brouillon' }
 }

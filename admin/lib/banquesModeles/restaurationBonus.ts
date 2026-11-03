@@ -11,7 +11,7 @@ const hb = creerBonus('rb-habitude')
 const id = creerBonus('rb-idee')
 
 export const BONUS_GOUTS: BanqueModele = {
-  id: 'bq-modele-resto-sondage-gouts', nom: 'Restauration · Sondage : vos goûts', metiers: ['restaurateur', 'pizzeria'], genre: 'bonus', personnalisable: false,
+  id: 'bq-modele-resto-sondage-gouts', nom: 'Restaurateur · Sondage : vos goûts', metiers: ['restaurateur', 'pizzeria'], genre: 'bonus', personnalisable: false,
   description: 'Pizza, dessert, boisson, piquant : huit questions pour mieux connaître les goûts de vos clients.',
   questions: [
     gf('Pizza', 'Ta pizza de rêve, tu la commences par…', ['Une base tomate', 'Une base crème', 'Beaucoup de fromage', 'Ce que le chef conseille']),
@@ -26,7 +26,7 @@ export const BONUS_GOUTS: BanqueModele = {
 }
 
 export const BONUS_HABITUDES: BanqueModele = {
-  id: 'bq-modele-resto-sondage-habitudes', nom: 'Restauration · Sondage : vos habitudes', metiers: ['restaurateur', 'pizzeria'], genre: 'bonus', personnalisable: false,
+  id: 'bq-modele-resto-sondage-habitudes', nom: 'Restaurateur · Sondage : vos habitudes', metiers: ['restaurateur', 'pizzeria'], genre: 'bonus', personnalisable: false,
   description: 'Fréquence, moment de la journée, compagnie, sur place ou à emporter, et « quel client êtes-vous ? ».',
   questions: [
     hb('Fréquence', 'À quelle fréquence manges-tu au restaurant ?', ['Chaque semaine', 'Quelques fois par mois', 'Quelques fois par an', 'Pour les grandes occasions']),
@@ -42,7 +42,7 @@ export const BONUS_HABITUDES: BanqueModele = {
 }
 
 export const BONUS_IDEES: BanqueModele = {
-  id: 'bq-modele-resto-sondage-idees', nom: 'Restauration · Sondage : vos idées et votre avis', metiers: ['restaurateur', 'pizzeria'], genre: 'bonus', personnalisable: false,
+  id: 'bq-modele-resto-sondage-idees', nom: 'Restaurateur · Sondage : idées et satisfaction', metiers: ['restaurateur', 'pizzeria'], genre: 'bonus', personnalisable: false,
   description: 'Idées de plats, animations, produits locaux, anti-gaspi et satisfaction.',
   questions: [
     id('Idées', 'Quelle idée de plat aimerais-tu voir à la carte ?', ['Un plat de saison', 'Un plat du terroir local', 'Un plat végétarien', 'Une création surprise du chef']),

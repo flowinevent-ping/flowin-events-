@@ -15,7 +15,7 @@ const rg = creerQuiz('rq-region')
 const cu = creerQuiz('rq-culture')
 
 export const QUIZ_PIZZA: BanqueModele = {
-  id: 'bq-modele-resto-pizza', nom: 'Restauration · La pizza, de la pâte au four', metiers: ['restaurateur', 'pizzeria'], genre: 'quiz', personnalisable: false,
+  id: 'bq-modele-resto-pizza', nom: 'Restaurateur · Pizza', metiers: ['restaurateur', 'pizzeria'], genre: 'quiz', personnalisable: false,
   description: 'Pâte, repos, levure, température du four et temps de cuisson : tout sur la fabrication d’une pizza.',
   questions: [
     pz('Pizza', 'facile', 'Quel ingrédient fait gonfler la pâte à pizza ?', 'La levure', ['Le sel', 'L’huile d’olive', 'La tomate'], 'La levure produit du gaz carbonique qui fait lever la pâte.'),
@@ -34,7 +34,7 @@ export const QUIZ_PIZZA: BanqueModele = {
 }
 
 export const QUIZ_CUISSONS: BanqueModele = {
-  id: 'bq-modele-resto-cuissons', nom: 'Restauration · Temps de cuisson', metiers: ['restaurateur', 'pizzeria'], genre: 'quiz', personnalisable: false,
+  id: 'bq-modele-resto-cuissons', nom: 'Restaurateur · Temps de cuisson', metiers: ['restaurateur', 'pizzeria'], genre: 'quiz', personnalisable: false,
   description: 'Œuf, pâtes, riz, viandes, poissons, frites : les bons réflexes de cuisson.',
   questions: [
     ck('Temps de cuisson', 'facile', 'Combien de temps cuit un œuf à la coque dans l’eau bouillante ?', 'Environ 3 minutes', ['Environ 30 secondes', 'Environ 12 minutes', 'Environ 25 minutes'], 'Trois minutes environ : le blanc est pris et le jaune reste liquide.'),
@@ -52,7 +52,7 @@ export const QUIZ_CUISSONS: BanqueModele = {
 }
 
 export const QUIZ_ORIGINES: BanqueModele = {
-  id: 'bq-modele-resto-origines', nom: 'Restauration · D’où viennent nos aliments ?', metiers: ['restaurateur', 'pizzeria'], genre: 'quiz', personnalisable: false,
+  id: 'bq-modele-resto-origines', nom: 'Restaurateur · Origines des aliments', metiers: ['restaurateur', 'pizzeria'], genre: 'quiz', personnalisable: false,
   description: 'Tomate, pomme de terre, riz, cacao, café, fromages : les origines des produits du quotidien.',
   questions: [
     og('Origines', 'facile', 'Sur quel continent la tomate a-t-elle été cultivée en premier ?', 'En Amérique', ['En Europe', 'En Asie', 'En Afrique'], 'La tomate vient d’Amérique et est arrivée en Europe au XVIe siècle.'),
@@ -69,7 +69,7 @@ export const QUIZ_ORIGINES: BanqueModele = {
 }
 
 export const QUIZ_SAISONS: BanqueModele = {
-  id: 'bq-modele-resto-saisons', nom: 'Restauration · Fruits et légumes de saison', metiers: ['restaurateur', 'pizzeria'], genre: 'quiz', personnalisable: false,
+  id: 'bq-modele-resto-saisons', nom: 'Restaurateur · Fruits et légumes de saison', metiers: ['restaurateur', 'pizzeria'], genre: 'quiz', personnalisable: false,
   description: 'Printemps, été, automne, hiver : quels produits sont de saison (France métropolitaine) ?',
   questions: [
     sa('Printemps', 'facile', 'Quel fruit rouge est de saison au printemps en France ?', 'La fraise', ['La clémentine', 'La châtaigne', 'La mandarine'], 'Les premières fraises de France arrivent au printemps.'),
@@ -86,7 +86,7 @@ export const QUIZ_SAISONS: BanqueModele = {
 }
 
 export const QUIZ_EVEIL: BanqueModele = {
-  id: 'bq-modele-resto-eveil', nom: 'Restauration · Bien manger, bien consommer', metiers: ['restaurateur', 'pizzeria'], genre: 'quiz', personnalisable: false,
+  id: 'bq-modele-resto-eveil', nom: 'Restaurateur · Anti-gaspi, labels et allergènes', metiers: ['restaurateur', 'pizzeria'], genre: 'quiz', personnalisable: false,
   description: 'Gaspillage, circuits courts, labels, allergènes, dates limites : de quoi sensibiliser sans ennuyer.',
   questions: [
     ev('Anti-gaspi', 'facile', 'Que signifie « DLC » sur un emballage ?', 'Date limite de consommation', ['Dosage légal en calories', 'Délai de livraison courant', 'Date de lancement commerciale'], 'Passé la DLC, le produit ne doit plus être consommé : elle figure sur les produits très périssables.'),
@@ -106,7 +106,7 @@ export const QUIZ_EVEIL: BanqueModele = {
 }
 
 export const QUIZ_REGION: BanqueModele = {
-  id: 'bq-modele-resto-region', nom: 'Restauration · Provence, pays niçois et Vence', metiers: ['restaurateur', 'pizzeria'], genre: 'quiz', personnalisable: false,
+  id: 'bq-modele-resto-region', nom: 'Restaurateur · Provence, pays niçois et Vence', metiers: ['restaurateur', 'pizzeria'], genre: 'quiz', personnalisable: false,
   description: 'Produits locaux, spécialités, histoire culinaire et culture de la région de Vence et de l’arrière-pays niçois.',
   questions: [
     rg('Spécialités', 'facile', 'De quoi est faite la socca niçoise ?', 'De farine de pois chiche', ['De farine de maïs', 'De pommes de terre', 'De semoule de blé'], 'La socca est une galette fine de farine de pois chiche, d’eau et d’huile d’olive, cuite à four très chaud.'),
@@ -134,7 +134,7 @@ export const QUIZ_REGION: BanqueModele = {
 }
 
 export const QUIZ_CULTURE: BanqueModele = {
-  id: 'bq-modele-resto-culture', nom: 'Restauration · Culture gastronomique', metiers: ['restaurateur', 'pizzeria'], genre: 'quiz', personnalisable: false,
+  id: 'bq-modele-resto-culture', nom: 'Restaurateur · Culture gastronomique', metiers: ['restaurateur', 'pizzeria'], genre: 'quiz', personnalisable: false,
   description: 'Vocabulaire de cuisine, techniques, saveurs et patrimoine gastronomique.',
   questions: [
     cu('Vocabulaire', 'facile', 'Que signifie « mise en place » en cuisine ?', 'Tout préparer avant le service', ['Mettre la table en terrasse', 'Nettoyer la cuisine après le service', 'Choisir le menu du jour'], 'La mise en place, ce sont les préparatifs qui permettent d’aller vite pendant le service.'),

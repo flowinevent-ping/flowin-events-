@@ -115,40 +115,87 @@ if (mode === 'controle') {
   console.log('Banques modèles :', cat.BANQUES_MODELES.length)
   if (erreurs.length) { console.error('\nERREURS (' + erreurs.length + ') :\n- ' + erreurs.join('\n- ')); process.exit(1) }
   console.log('OK : 0 erreur de contrôle.')
+} else if (mode === 'json') {
+  // Jeu de donnees de test (captures) : banques communes en brouillon, forme de la table `banques`.
+  const out = cat.BANQUES_MODELES.filter((b) => !b.personnalisable).map((b, i) => ({ id: b.id, nom: b.nom, description: null, pro_id: 'flowin', event_ids: [], tags: cat.tagsDe(b), questions: b.questions, statut: i % 5 === 0 ? 'valide' : 'brouillon', created_at: '', updated_at: '' }))
+  console.log(JSON.stringify(out))
 } else if (mode === 'sql') {
   if (erreurs.length) { console.error(erreurs.join('\n')); process.exit(1) }
   const esc = (s) => s.replace(/'/g, "''")
   const lignes = []
   lignes.push(`-- ══════════════════════════════════════════════════════════════════════════
--- FLOWIN · BANQUES MODÈLES — restauration, boulanger, boucher, libraire
+-- FLOWIN · BANQUES COMMUNES (modèles) — restaurateur, boulanger, boucher, libraire
 -- Généré par admin/scripts/banques-modeles.mjs depuis admin/lib/banquesModeles/ (source de vérité).
 -- NE PAS RÉÉDITER À LA MAIN : modifier les fichiers TypeScript puis relancer
 --   node scripts/banques-modeles.mjs sql
 --
--- ⚠ FICHIER NON APPLIQUÉ. À relire puis exécuter par Romain (execute_sql = DML).
--- Aucun DDL : la table public.banques et ses colonnes (nom, pro_id, event_ids, questions, tags,
--- statut) existent déjà en production.
+-- ⚠ FICHIER NON APPLIQUÉ PAR CLAUDE. À exécuter par Romain (DDL additif + DML).
 --
--- Idempotent ET non destructif : ON CONFLICT (id) DO NOTHING. Si un pro a déjà modifié une banque
--- modèle, le rejouer n'écrase rien.
--- Banques « communes » : pro_id = 'flowin' (comme les banques communes du Super Admin).
--- Les banques « questions personnalisées (à compléter) » ne sont PAS insérées ici : elles se copient
--- depuis l'écran « Banques de questions » vers le compte du commerçant, qui renseigne ses réponses.
+-- QUI POSSÈDE, AVEC QUI ON PARTAGE
+--   * Banque COMMUNE  : pro_id = 'flowin' (propriétaire Flowin, géré par le Super Admin).
+--     Partagée en LECTURE avec tous les pros dès qu'elle est « validée ».
+--   * Banque de pro   : pro_id = id du pro ; visible et modifiable par ce pro (et le SA).
+--   * Seul le Super Admin crée / modifie / valide / supprime une banque commune (garde ci-dessous).
+--   * Un pro la COPIE dans « mes banques » (bouton de l'écran) puis la modifie librement.
+--   * Statut : 'brouillon' (visible du seul SA) ou 'valide' (visible dans le sélecteur des pros).
+--     Les 16 banques ci-dessous sont insérées en BROUILLON : Romain les relit et les valide une
+--     à une depuis /dashboard/banques (onglet « Banques communes Flowin »).
+--
+-- Idempotent (rejouable sans dommage), non destructif : ON CONFLICT (id) DO NOTHING.
+-- Les banques « questions personnalisées (à compléter) » ne sont pas insérées : elles se copient
+-- depuis l'écran des banques vers le compte du commerçant, qui renseigne ses réponses.
 -- ══════════════════════════════════════════════════════════════════════════
+
+-- 1. Colonnes (additif ; l'application fonctionne aussi sans, la règle repose sur pro_id)
+ALTER TABLE public.banques ADD COLUMN IF NOT EXISTS statut       TEXT DEFAULT 'brouillon';
+ALTER TABLE public.banques ADD COLUMN IF NOT EXISTS proprietaire TEXT DEFAULT 'pro';      -- 'flowin' | 'pro'
+ALTER TABLE public.banques ADD COLUMN IF NOT EXISTS partage      TEXT DEFAULT 'prive';    -- 'prive' | 'tous_pros'
+
+-- 2. Garde : une banque commune ne se crée, modifie ou supprime que par le Super Admin.
+--    Même logique que les droits pro (06-droits-pro.sql) : les rôles serveur (postgres,
+--    service_role) passent ; anon / authenticated doivent être Super Admin.
+CREATE OR REPLACE FUNCTION public.banques_commune_garde()
+RETURNS trigger
+LANGUAGE plpgsql
+AS $$
+DECLARE v_commune boolean;
+BEGIN
+  IF tg_op = 'DELETE' THEN v_commune := (old.pro_id = 'flowin');
+  ELSIF tg_op = 'INSERT' THEN v_commune := (new.pro_id = 'flowin');
+  ELSE v_commune := (old.pro_id = 'flowin' OR new.pro_id = 'flowin');
+  END IF;
+  IF NOT v_commune THEN
+    IF tg_op = 'DELETE' THEN RETURN old; END IF;
+    RETURN new;
+  END IF;
+  IF coalesce(nullif(current_setting('role', true), ''), 'none') NOT IN ('anon', 'authenticated')
+     OR public.est_super_admin() THEN
+    IF tg_op = 'DELETE' THEN RETURN old; END IF;
+    RETURN new;
+  END IF;
+  RAISE EXCEPTION 'Les banques communes Flowin sont gérées par le Super Admin : copiez-la dans vos banques pour la modifier.'
+    USING errcode = '42501', hint = 'banque_commune';
+END;
+$$;
+DROP TRIGGER IF EXISTS trg_banques_commune_garde ON public.banques;
+CREATE TRIGGER trg_banques_commune_garde BEFORE INSERT OR UPDATE OR DELETE ON public.banques
+  FOR EACH ROW EXECUTE FUNCTION public.banques_commune_garde();
+
+-- 3. Les banques communes (statut 'brouillon' : à valider une à une par Romain)
 `)
   let n = 0
   for (const b of cat.BANQUES_MODELES) {
     if (b.personnalisable) continue
     n++
     const tags = cat.tagsDe(b).map((t) => `'${esc(t)}'`).join(',')
-    lignes.push(`INSERT INTO public.banques (id, nom, pro_id, event_ids, questions, tags, statut)
+    lignes.push(`INSERT INTO public.banques (id, nom, pro_id, event_ids, questions, tags, statut, proprietaire, partage)
 VALUES ('${b.id}', '${esc(b.nom)}', 'flowin', ARRAY[]::text[],
   '${esc(JSON.stringify(b.questions))}'::jsonb,
-  ARRAY[${tags}]::text[], 'valide')
+  ARRAY[${tags}]::text[], 'brouillon', 'flowin', 'tous_pros')
 ON CONFLICT (id) DO NOTHING;
 `)
   }
-  lignes.push(`-- Contrôle après exécution : ${n} banques attendues.\nSELECT id, nom, jsonb_array_length(questions) AS nb_questions, tags FROM public.banques WHERE id LIKE 'bq-modele-%' ORDER BY id;\n`)
+  lignes.push(`-- Contrôle après exécution : ${n} banques attendues, toutes en brouillon tant que non validées.\nSELECT id, nom, statut, jsonb_array_length(questions) AS nb_questions FROM public.banques WHERE id LIKE 'bq-modele-%' ORDER BY id;\n`)
   const sortie = path.join(racine, '..', 'sql', '12-banques-quiz.sql')
   fs.writeFileSync(sortie, lignes.join('\n'))
   console.log('SQL écrit :', sortie, '(', n, 'banques )')

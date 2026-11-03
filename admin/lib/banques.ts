@@ -83,12 +83,26 @@ export interface Banque {
   updated_at: string
 }
 
+/**
+ * PROPRIETE ET PARTAGE DES BANQUES (11/2026).
+ * - Une banque COMMUNE appartient a « Flowin » (pro_id = 'flowin', gere par le Super Admin) ;
+ *   elle est partagee en LECTURE avec tous les pros, des qu elle est validee.
+ * - Une banque de pro (pro_id = id du pro) n est visible et modifiable que par ce pro (et le SA).
+ * - Seul le Super Admin cree, modifie, valide ou supprime une banque commune (garde SQL dans
+ *   sql/12-banques-quiz.sql ; cote ecran, le pro ne voit que « Copier dans mes banques »).
+ * La regle repose sur pro_id : elle marche meme si les colonnes `proprietaire` / `partage`
+ * (ajoutees par le SQL 12, informatives) n existent pas encore.
+ */
+export const PRO_COMMUN = 'flowin'
+export const estCommune = (b: { pro_id: string }) => b.pro_id === PRO_COMMUN
+
+/** Banques d un pro : les siennes + les banques communes VALIDEES (jamais les brouillons communs). */
 export async function fetchBanquesPro(proId: string): Promise<Banque[]> {
   if (!proId) return []
   const { data, error } = await supabase
     .from('banques')
     .select('*')
-    .eq('pro_id', proId)
+    .or(`pro_id.eq.${proId},and(pro_id.eq.${PRO_COMMUN},statut.eq.valide)`)
     .order('updated_at', { ascending: false })
   if (error) { console.error('[fetchBanquesPro]', error.message); return [] }
   return (data ?? []) as Banque[]
@@ -120,6 +134,29 @@ export async function creerBanque(params: { proId: string; nom: string; tags: st
     .maybeSingle()
   if (error) { console.error('[creerBanque]', error.message); return null }
   return data as Banque | null
+}
+
+/** Valide (ou repasse en brouillon) une banque sans toucher a son contenu. */
+export async function changerStatutBanque(id: string, valide: boolean): Promise<boolean> {
+  const { error } = await supabase.from('banques').update({ statut: valide ? 'valide' : 'brouillon', updated_at: new Date().toISOString() }).eq('id', id)
+  if (error) { console.error('[changerStatutBanque]', error.message); return false }
+  return true
+}
+
+export async function supprimerBanque(id: string): Promise<boolean> {
+  const { error } = await supabase.from('banques').delete().eq('id', id)
+  if (error) { console.error('[supprimerBanque]', error.message); return false }
+  return true
+}
+
+/** Copie une banque (typiquement commune) dans les banques d un pro : le pro peut ensuite la modifier. */
+export async function copierBanque(source: Banque, proId: string): Promise<Banque | null> {
+  const b = await creerBanque({ proId, nom: source.nom, tags: source.tags ?? [] })
+  if (!b) return null
+  const questions = JSON.parse(JSON.stringify(source.questions ?? [])) as QuestionBanque[]
+  const valider = source.statut === 'valide' && (source.tags ?? []).indexOf('a-completer') < 0
+  if (!(await enregistrerBanque(b.id, questions, valider))) return null
+  return { ...b, questions, statut: valider ? 'valide' : 'brouillon' }
 }
 
 /** Enregistre le contenu des questions. `valider=true` passe le statut a 'valide' (bouton Valider). */

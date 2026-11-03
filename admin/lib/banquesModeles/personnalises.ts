@@ -9,7 +9,7 @@ const NOM_ETAB = V('etablissement', 'Nom de votre établissement', '[nom de votr
 
 const rp = creerPerso('rp-perso')
 export const PERSO_RESTAURATEUR: BanqueModele = {
-  id: 'bq-modele-resto-perso', nom: 'Restauration · Questions personnalisées (à compléter)', metiers: ['restaurateur', 'pizzeria'], genre: 'quiz', personnalisable: true,
+  id: 'bq-modele-resto-perso', nom: 'Restaurateur · Questions personnalisées (à compléter)', metiers: ['restaurateur', 'pizzeria'], genre: 'quiz', personnalisable: true,
   description: 'Vos clients répondent sur VOTRE maison : serveuse préférée, année de création, plat signature, chef… Vous renseignez chaque réponse vous-même.',
   questions: [
     rp('Notre équipe', 'facile', 'Comment s’appelle notre serveuse ou notre serveur préféré chez {etablissement} ?', 'saisie', [NOM_ETAB, V('reponse', 'Prénom du serveur ou de la serveuse', '[prénom à compléter]'), ...LEURRES3('prénom')], 'C’est {reponse} ! Dites-lui bonjour à votre prochaine visite.'),
