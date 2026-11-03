@@ -11,7 +11,7 @@ import { CHARTE_PRO as C } from '@/lib/charte'
 import { CANAUX, avecSource } from '@/lib/source'
 import { PUBLICS, urlProd, lienWhatsApp, lienEmail, type Outil } from '@/lib/outilsCommerciaux'
 
-const TYPES: Record<string, string> = { page: 'Page', plaquette: 'Plaquette', document: 'Document', video: 'Vidéo', scenario: 'Scénario vidéo', parcours: 'Parcours' }
+const TYPES: Record<string, string> = { page: 'Page', plaquette: 'Plaquette', document: 'Document', video: 'Vidéo', scenario: 'Scénario vidéo', animation: 'Animation', parcours: 'Parcours' }
 
 function nomFichier(o: Outil, canal: string, ext: string) {
   return `qr-${o.id}${canal && canal !== 'direct' ? '-' + canal : ''}.${ext}`

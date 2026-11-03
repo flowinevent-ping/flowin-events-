@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<title>Animation participant (chez les commerces) · Flowin</title>
+<style>
+  html,body{margin:0;height:100%;background:#0b1626;color:#fff;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
+  .scene{position:relative;height:100vh;height:100dvh;display:flex;align-items:center;justify-content:center}
+  video{width:100%;height:100%;object-fit:contain;background:#000;display:block}
+  .travail{position:absolute;top:10px;left:10px;right:10px;text-align:center;font-size:12px;font-weight:700;pointer-events:none}
+  .travail span{background:#C62F2F;border-radius:6px;padding:3px 10px}
+  .fin{position:absolute;inset:0;background:rgba(11,22,38,.92);display:none;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:24px;text-align:center}
+  .fin.on{display:flex}
+  .fin h1{font-size:22px;margin:0 0 6px;line-height:1.25}
+  .btn{display:block;box-sizing:border-box;width:100%;max-width:340px;min-height:52px;line-height:52px;border-radius:14px;font-size:17px;font-weight:800;text-decoration:none;text-align:center;border:0;cursor:pointer;font-family:inherit;color:#fff}
+  .b1{background:#7A4FE0}
+  .b2{background:#fff;color:#1B3A5C}
+  .rejouer{background:none;border:0;color:#cbd5e1;font-size:14px;text-decoration:underline;cursor:pointer;font-family:inherit}
+  .aide{max-width:340px;font-size:14px;line-height:1.45;color:#e2e8f0;display:none}
+  .prep{position:absolute;inset:0;display:none;flex-direction:column;align-items:center;justify-content:center;gap:8px;padding:24px;text-align:center;background:#0b1626}
+  .prep.on{display:flex}
+  .prep strong{font-size:20px}
+</style>
+</head>
+<body>
+<div class="scene">
+  <video id="v" controls playsinline preload="metadata" poster="/animations/anim-participant-commerces.jpg" src="/animations/anim-participant-commerces.mp4"></video>
+  <div class="travail"><span>Version de travail : ne pas diffuser</span></div>
+  <div class="prep" id="prep"><strong>Version de travail en préparation</strong><span>La vidéo « Animation participant (chez les commerces) » sera disponible ici dès qu’elle sera prête.</span></div>
+  <div class="fin" id="fin">
+    <h1>Animation participant (chez les commerces)</h1>
+    <a class="btn b1" id="com" href="/pro/premiere-fois">Je suis commerçant</a>
+    <button class="btn b2" id="app" type="button">Installer l’appli</button>
+    <div class="aide" id="aide">Pour installer l’appli : ouvrez le menu de votre navigateur, puis « Ajouter à l’écran d’accueil ».</div>
+    <button class="rejouer" id="rej" type="button">Revoir la vidéo</button>
+  </div>
+</div>
+<script>
+(function(){
+  var DEFAUT = 'video-participant';
+  var m = /[?&]src=([a-z0-9_-]{1,40})/i.exec(location.search);
+  var src = m ? m[1].toLowerCase() : DEFAUT;
+  try { if (!window.localStorage.getItem('flowin_src')) window.localStorage.setItem('flowin_src', src); } catch (e) {}
+  document.getElementById('com').setAttribute('href', '/pro/premiere-fois?src=' + encodeURIComponent(src));
+  var v = document.getElementById('v'), fin = document.getElementById('fin'), prep = document.getElementById('prep');
+  v.addEventListener('error', function(){ prep.className = 'prep on'; v.style.display = 'none'; });
+  v.addEventListener('ended', function(){ fin.className = 'fin on'; });
+  v.addEventListener('play', function(){ fin.className = 'fin'; });
+  document.getElementById('rej').addEventListener('click', function(){ fin.className = 'fin'; v.currentTime = 0; v.play(); });
+  var diff = null;
+  window.addEventListener('beforeinstallprompt', function(e){ e.preventDefault(); diff = e; });
+  document.getElementById('app').addEventListener('click', function(){
+    if (diff) { diff.prompt(); } else { document.getElementById('aide').style.display = 'block'; }
+  });
+})();
+</script>
+</body>
+</html>
