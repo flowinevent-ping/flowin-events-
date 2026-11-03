@@ -20,6 +20,7 @@ import { useRouter } from 'next/navigation'
 import { useDashboard } from '@/contexts/DashboardContext'
 import { Ico } from '@/lib/proicons'
 import AlerteLotsRetires from '@/components/dashboard/AlerteLotsRetires'
+import AlerteRappels from '@/components/dashboard/AlerteRappels'
 
 const COULEURS_VILLE = ['#2563EB', '#F59E0B', '#10B981', '#A855F7', '#BE123C']
 const COULEUR_HOMME = '#2563EB'
@@ -153,6 +154,7 @@ export default function DashboardPage() {
 
   return (
     <div className="sa-content">
+      <AlerteRappels />
       <AlerteLotsRetires />
 
       <div className="sa-kpi-rep-grid">

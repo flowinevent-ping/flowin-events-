@@ -24,6 +24,7 @@ Numéros uniques : plus aucune collision (les trois anciens `08-*` sont devenus 
 13. `sql/10-resultats-tirage.sql` — résultats de tirage par participant (profil joueur + alerte). **Avant la section 4** : remplacer `<ANON_KEY>` comme ci-dessus.
 14. `sql/11-super-events-demo.sql` — **données** : colonnes de position des super events, « Nice Jazz Festival » (Nice) et « Nuits du Sud » (Vence, position seulement) sur la carte, démo des Fêtes du haut et moyen pays (logo, Quiz + bonus). Dates non inventées (« [à compléter] »).
 15. `sql/13-demandes-pack-souhaite.sql` — pack et tarif souhaités dans la demande de rejoindre un super event (facultatif ; sans lui le pack est rangé dans le texte de la demande).
+16. `sql/14-demandes-rappel.sql` — demandes de rappel des plaquettes : table + dépôt public sécurisé. **À appliquer AVANT de fusionner la PR qui change les plaquettes** (sinon le formulaire échoue).
 
 ## Comment c'est testé
 

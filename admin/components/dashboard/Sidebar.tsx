@@ -15,6 +15,7 @@ interface NavItem {
   /** Badge « alarme » (ambre) -- distinct du compteur neutre : signale une
    *  action en attente plutot qu un simple total. */
   alerte?: number
+  titreAlerte?: string
   external?: boolean
 }
 
@@ -75,7 +76,7 @@ const ICON_BY_ID: Record<string, string> = {
   'crm-landing': 'inbox', 'crm-retours': 'clipboard', cgv: 'receipt', jeux: 'gamepad', 'wizard-event': 'sparkles',
   'wizard-event-se': 'sparkles', 'wizard-pro': 'sparkles', 'envoi-masse': 'megaphone', 'apercu-pro': 'layout',
   'theme-parcours': 'layout',
-  'demandes-rattachement': 'handshake',
+  'demandes-rattachement': 'handshake', 'demandes-rappel': 'phone',
   'facture-nds': 'receipt',
   roadmap: 'map', parametres: 'settings', maintenance: 'wrench', controle: 'check',
 }
@@ -105,6 +106,14 @@ export default function Sidebar() {
      gagnants confirmes attendent encore d'etre relances. Meme calcul que
      etatTirage() === 'confirme' (lib/operations.ts), refait en SQL pour ne
      recuperer qu'un compte, pas les lignes. */
+  /* Demandes de rappel (plaquettes) pas encore traitees : badge visible partout, rafraichi a chaque page. */
+  const [nbRappels, setNbRappels] = useState(0)
+  useEffect(() => {
+    let vivant = true
+    supabase.from('demandes_rappel').select('id', { count: 'exact', head: true }).eq('statut', 'nouvelle')
+      .then(({ count }) => { if (vivant) setNbRappels(count ?? 0) })
+    return () => { vivant = false }
+  }, [pathname])
   const [aRelancer, setARelancer] = useState(0)
   useEffect(() => {
     let vivant = true
@@ -197,6 +206,7 @@ export default function Sidebar() {
         { id: 'wizard-pro', label: 'Créer un pro', href: '/dashboard/wizard-pro' },
         { id: 'partenaires', label: 'Partenaires (fiche commerce)', count: partenaires.length, href: '/dashboard/partenaires' },
         { id: 'apercu-pro', label: 'Aperçu Pro', href: '/dashboard/apercu-pro' },
+        { id: 'demandes-rappel', label: 'Demandes de rappel', href: '/dashboard/demandes-rappel', alerte: nbRappels, titreAlerte: 'Demandes de rappel à traiter' },
         { id: 'demandes-rattachement', label: 'Demandes de participation', href: '/dashboard/demandes-rattachement' },
         { id: 'crm-landing', label: 'CRM Landing pages', href: '/dashboard/crm-landing' },
         { id: 'crm-retours', label: 'Retours CRM', href: '/dashboard/crm-retours' },
@@ -256,7 +266,7 @@ export default function Sidebar() {
       return identique ? prev : n
     })
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [pathname, aRelancer])
+  }, [pathname, aRelancer, nbRappels])
   function basculerGroupe(nom: string) {
     setOuverts(prev => {
       const n = new Set(prev)
@@ -305,7 +315,7 @@ export default function Sidebar() {
                 {item.live ? (
                   <span className="sa-sb-badge live">{item.live} live</span>
                 ) : item.alerte ? (
-                  <span className="sa-sb-badge alerte" title="Gagnants confirmés, lot pas encore retiré"><Ico k="bell" size={13} style={{ marginRight: 5, verticalAlign: -2 }} />{item.alerte}</span>
+                  <span className="sa-sb-badge alerte" title={item.titreAlerte ?? 'Gagnants confirmés, lot pas encore retiré'}><Ico k="bell" size={13} style={{ marginRight: 5, verticalAlign: -2 }} />{item.alerte}</span>
                 ) : item.count !== undefined && item.count > 0 ? (
                   <span className="sa-sb-badge">{item.count}</span>
                 ) : null}

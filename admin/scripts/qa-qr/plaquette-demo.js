@@ -9,6 +9,7 @@ let ko = 0; const v = (n, ok, d) => { console.log((ok ? 'OK ' : 'KO ') + n + (d 
     const ctx = await br.newContext({ viewport: { width: w, height: h } }); const p = await ctx.newPage()
     let envois = 0
     await ctx.route('**/functions/v1/notify-rappel', r => { envois++; return r.fulfill({ status: 200, contentType: 'application/json', body: '{"ok":true}' }) })
+    await ctx.route('**/rest/v1/rpc/deposer_demande_rappel', r => { envois++; return r.fulfill({ status: 200, contentType: 'application/json', body: '{"ok":true}' }) })
     await p.goto(BASE + '/' + page + '#rappel', { waitUntil: 'networkidle' })
     await p.waitForTimeout(600)
     v(nom + ' : pastille « Démo » discrète présente, mode désactivé par défaut', await p.locator('#fdPill').count() === 1 && !(await p.evaluate(() => sessionStorage.getItem('flowin_demo_mode'))))

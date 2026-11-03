@@ -534,7 +534,7 @@ language plpgsql security definer set search_path = public as $$
 declare pid text; mail text := lower(coalesce(auth.jwt()->>'email', '')); n integer;
 begin
   if auth.uid() is null or mail = '' then return 0; end if;
-  select id into pid from public.pros where auth_id = auth.uid() order by created_at limit 1;
+  select id into pid from public.pros where auth_id = auth.uid() order by id limit 1;
   if pid is null then return 0; end if;
   update public.commandes_animation set pro_id = pid
    where pro_id is null and lower(email) = mail;
