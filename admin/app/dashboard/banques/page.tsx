@@ -14,6 +14,8 @@ import { useSearchParams } from 'next/navigation'
 import { useDashboard } from '@/contexts/DashboardContext'
 import { fetchBanquesToutes, fetchBanque, creerBanque, type Banque } from '@/lib/banques'
 import BanqueEditor from '@/components/pro/BanqueEditor'
+import ModelesBanques from '@/components/banques/ModelesBanques'
+import { METIERS } from '@/lib/banquesModeles'
 
 const estBonus = (b: Banque) => !!b.tags && b.tags.indexOf('bonus') >= 0
 
@@ -25,6 +27,7 @@ function Contenu() {
   const [proId, setProId] = useState('flowin')
   const [erreur, setErreur] = useState('')
   const [creation, setCreation] = useState(false)
+  const [metier, setMetier] = useState('tous')
 
   const charger = useCallback(() => { fetchBanquesToutes().then(setListe) }, [])
   useEffect(() => { charger() }, [charger])
@@ -62,10 +65,17 @@ function Contenu() {
         <button className="sa-btn primary" disabled={creation} onClick={() => nouvelle(true)} data-nouvelle="bonus">+ Banque de questions bonus</button>
       </div>
       {erreur && <div className="sa-alert info" role="alert">{erreur}</div>}
+      <ModelesBanques proId={proId} onInstalle={b => { setOuverte(b); charger() }} />
+      <h2 style={{ fontSize: 17, fontWeight: 800, margin: '0 0 8px' }}>Banques enregistrées</h2>
+      <div role="tablist" aria-label="Filtrer les banques enregistrées par métier" style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 12 }}>
+        {[{ id: 'tous', nom: 'Tous' }].concat(METIERS).map(m => (
+          <button key={m.id} role="tab" aria-selected={metier === m.id} data-filtre-metier={m.id} className={'sa-btn' + (metier === m.id ? ' primary' : '')} onClick={() => setMetier(m.id)} style={{ padding: '5px 12px', fontSize: 12 }}>{m.nom}</button>
+        ))}
+      </div>
       {liste === null && <div className="sa-muted">Chargement…</div>}
-      {liste && liste.length === 0 && <div className="sa-muted">Aucune banque.</div>}
+      {liste && liste.length === 0 && <div className="sa-muted">Aucune banque. Ajoutez-en une depuis les banques modèles ci-dessus.</div>}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(250px,1fr))', gap: 12 }}>
-        {(liste ?? []).map(b => (
+        {(liste ?? []).filter(b => metier === 'tous' || (b.tags ?? []).indexOf(metier) >= 0).map(b => (
           <button key={b.id} data-banque={b.id} onClick={() => setOuverte(b)} style={{ textAlign: 'left', background: '#fff', border: '1px solid var(--sa-border)', borderRadius: 12, padding: 14, cursor: 'pointer' }}>
             <div style={{ fontWeight: 800, fontSize: 13.5 }}>{b.nom || 'Sans nom'}</div>
             <div className="sa-muted" style={{ fontSize: 12, margin: '4px 0' }}>{estBonus(b) ? 'Bonus' : 'Quiz'} · {b.questions?.length ?? 0} question(s) · {nomPro(b.pro_id)}</div>

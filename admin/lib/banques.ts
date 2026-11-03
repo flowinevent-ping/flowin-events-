@@ -29,6 +29,35 @@ export interface QuestionQuiz {
   explication?: string
   theme?: string
   difficulte?: Difficulte
+  /** Question personnalisee (modele a variables) -- voir lib/banquesModeles/resoudre.ts.
+   *  Absent pour une question ordinaire : le format historique reste inchange. */
+  modele?: ModeleQuestion
+}
+
+/**
+ * QUESTION PERSONNALISEE AU COMMERCE (ajout additif, 11/2026).
+ * L enonce, les options et l explication contiennent des {variables} que le commercant
+ * renseigne lui-meme dans l editeur ; rien n est invente par Flowin. Tant qu une variable est
+ * vide, la question reste en banque mais n est JAMAIS posee au joueur (voir resoudreQuestion).
+ *  - 'saisie' : le pro tape la bonne reponse ET les mauvaises propositions ;
+ *  - 'choix'  : le pro tape la bonne reponse, des mauvaises propositions sont proposees par defaut ;
+ *  - 'annee'  : le pro donne une annee, les 3 autres propositions sont calculees ;
+ *  - 'nombre' : le pro donne un nombre, les 3 autres propositions sont calculees.
+ */
+export type ModeReponseModele = 'saisie' | 'choix' | 'annee' | 'nombre'
+export interface VariableModele {
+  /** Nom utilise dans les accolades : {reponse}, {etablissement}... */
+  cle: string
+  /** Intitule du champ « a completer par le commercant ». */
+  label: string
+  /** Texte d aide affiche tant que le champ est vide (jamais une valeur inventee). */
+  placeholder: string
+  /** Valeur saisie par le commercant (vide = question incomplete). */
+  valeur?: string
+}
+export interface ModeleQuestion {
+  mode: ModeReponseModele
+  variables: VariableModele[]
 }
 export interface OptionBonus { val: string; label: string }
 export interface QuestionBonus {

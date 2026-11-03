@@ -3,6 +3,7 @@ import { fetchProDashboard } from '@/lib/pro'
 import { fetchBanquesPro, type Banque } from '@/lib/banques'
 import ProShell from '@/components/pro/ProShell'
 import { lireDroitsPro } from '@/lib/droitsPro'
+import ModelesBanques from '@/components/banques/ModelesBanques'
 import { CARD, MUTED, H1, SUB, ACC } from '@/lib/proui'
 
 /**
@@ -71,6 +72,8 @@ export default async function ProBanquesPage({ searchParams }: { searchParams: {
         tagsDefaut={['bonus']}
         hrefCreer="/pro/banques/nouvelle"
       />
+
+      {peutCreer && proId && <ModelesBanques proId={proId} lienBase="/pro/banques/" lienSuffixe={q} />}
 
       <div style={{ ...CARD, background: '#faf7fd', fontSize: 12.5, ...MUTED, lineHeight: 1.6 }}>
         Une banque <b>brouillon</b> reste modifiable librement. Cliquez <b>Valider</b> dans l&apos;éditeur pour la figer et pouvoir la sélectionner lors de la création d&apos;une animation.
