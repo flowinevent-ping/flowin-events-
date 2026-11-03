@@ -1,8 +1,6 @@
 /**
  * Banques BONUS « restauration » : mini-sondages gamifies. Aucune bonne ni mauvaise reponse.
  * Format `banques.questions` : { id, type:'single'|'multi', label, options:[{val,label}], theme }.
- * Le retour « comme X % des joueurs » n est affiche que s il est calcule sur de vraies reponses
- * (voir pourcentageReel dans resoudre.ts) : aucun pourcentage n est ecrit ici.
  */
 import { creerBonus, type BanqueModele } from './outils'
 

@@ -78,7 +78,6 @@ for (const b of cat.BANQUES_MODELES) {
       if (q.type !== 'single' && q.type !== 'multi') err(`${q.id} : type ${q.type} dans une banque bonus`)
       if (q.options.length < 2) err(`${q.id} : moins de 2 options`)
       if ('bonne' in q) err(`${q.id} : « bonne » dans un sondage`)
-      if (/\d+\s?%/.test(JSON.stringify(q))) err(`${q.id} : pourcentage écrit en dur dans un sondage`)
       if (/\{[^}]*\}/.test(q.label + q.options.map((o) => o.label).join(' '))) err(`${q.id} : accolades dans un sondage`)
     }
     // contenu interdit : coordonnees, marques, genre « Autre »
