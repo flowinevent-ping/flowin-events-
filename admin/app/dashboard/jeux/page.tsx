@@ -64,10 +64,10 @@ function Modeles() {
       <div style={{ background: 'var(--sa-subtle)', borderRadius: 12, padding: 20, border: '1px solid var(--sa-border)' }}>
         <div style={{ fontWeight: 800, fontSize: 15, marginBottom: 4 }}>Modèles de jeu</div>
         <div style={{ fontSize: 12, color: 'var(--sa-muted)', marginBottom: 16 }}>
-          Un modèle se fabrique à partir d’un événement existant : il en reprend le module, la
+          Un modèle se fabrique à partir d’une animation existante : il en reprend le module, la
           configuration du jeu, les lots, la visibilité pro et la couleur. Le parcours de création
-          le propose ensuite à l’étape « Module ». Le QR et les partenaires de l’événement d’origine
-          ne sont pas repris — ils appartiennent à cet événement, pas au gabarit.
+          le propose ensuite à l’étape « Module ». Le QR et les partenaires de l’animation d’origine
+          ne sont pas repris — ils appartiennent à cette animation, pas au gabarit.
         </div>
 
         {retour && (
@@ -80,7 +80,7 @@ function Modeles() {
 
         <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0,1fr) minmax(0,1fr) minmax(0,1.2fr) auto', gap: 10, alignItems: 'end' }}>
           <div>
-            <label style={{ display: 'block', fontSize: 11.5, fontWeight: 700, marginBottom: 4 }}>Événement source</label>
+            <label style={{ display: 'block', fontSize: 11.5, fontWeight: 700, marginBottom: 4 }}>Animation source</label>
             <select className="sa-input" style={{ width: '100%' }} value={source} onChange={e => choisirSource(e.target.value)}>
               <option value="">— choisir —</option>
               {events.map(ev => <option key={ev.id} value={ev.id}>{ev.nom} · {libelleModule(ev.module)}</option>)}
@@ -105,7 +105,7 @@ function Modeles() {
           {liste === null && <div style={{ fontSize: 12, color: 'var(--sa-muted)' }}>Chargement…</div>}
           {liste !== null && liste.length === 0 && (
             <div style={{ fontSize: 12, color: 'var(--sa-muted)' }}>
-              Aucun modèle enregistré. Choisissez un événement ci-dessus pour en fabriquer le premier.
+              Aucun modèle enregistré. Choisissez une animation ci-dessus pour en fabriquer le premier.
             </div>
           )}
           {(liste ?? []).map(m => {

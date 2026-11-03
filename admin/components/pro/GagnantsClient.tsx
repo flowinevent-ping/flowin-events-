@@ -31,6 +31,7 @@ import { useMailGagnant } from '@/lib/mailGagnant'
 import { CARD, MUTED, H1, SUB } from '@/lib/proui'
 import { Ico } from '@/lib/proicons'
 import ReglageTirage from '@/components/operations/ReglageTirage'
+import { messageFr } from '@/lib/erreursFr'
 
 const input: React.CSSProperties = {
   border: '1.5px solid #E3E8EF', borderRadius: 10, padding: '10px 12px',
@@ -119,7 +120,7 @@ function Tirage({ op, data, setMessage, onChange }: {
   const [dernierToken, setDernierToken] = useState<string | null>(null)
   /* « Terminer le tirage » : le commerce clot SON tirage quand il le souhaite. Cela pose
      events.cfg.tirage.fait_le ; la base enregistre alors le resultat de chaque participant
-     (sql/08-resultats-tirage.sql) : profil joueur + alerte (gagne / pas tire). */
+     (sql/10-resultats-tirage.sql) : profil joueur + alerte (gagne / pas tire). */
   const [fin, setFin] = useState<'idle' | 'envoi' | 'ok' | 'ko'>('idle')
   const terminer = async () => {
     setFin('envoi')
@@ -266,13 +267,13 @@ function LigneGain({ g, superEvent, opId, opNom, partenaireNom, setMessage, onCh
     const { data: pinOk, error: e1 } = await supabase.rpc('verifier_pin_pro', { p_token: g.retraitToken, p_pin: pin })
     if (e1 || pinOk !== true) {
       setEnvoi(false)
-      setMessage({ ok: false, texte: e1 ? `Vérification impossible — ${e1.message}` : 'Code PIN incorrect.' })
+      setMessage({ ok: false, texte: e1 ? `Vérification impossible — ${messageFr(e1)}` : 'Code PIN incorrect.' })
       return
     }
     const { data, error } = await supabase.rpc('valider_lot', { p_token: g.retraitToken })
     setEnvoi(false)
     const r = (Array.isArray(data) ? data[0] : data) as { ok?: boolean; raison?: string; avertissement?: string | null } | null
-    if (error || !r) { setMessage({ ok: false, texte: `Validation refusée${error ? ` — ${error.message}` : ''}.` }); return }
+    if (error || !r) { setMessage({ ok: false, texte: `Validation refusée${error ? ` — ${messageFr(error)}` : '.'}` }); return }
     if (r.ok) {
       setMessage({ ok: true, texte: r.avertissement ? `Billet validé. ${r.avertissement}` : 'Billet validé. Le lot est décompté du stock.' })
       setPin(''); setOuvert(false); onChange()

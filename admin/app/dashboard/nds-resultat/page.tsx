@@ -157,7 +157,7 @@ export default function Page() {
 
         {stations !== null && stations.length > 0 && (
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 16, flexWrap: 'wrap', padding: '10px 12px', background: 'var(--sa-subtle)', borderRadius: 10 }}>
-            <label style={{ fontSize: 11.5, fontWeight: 800 }}><Ico k="game" size={13} style={{ marginRight: 5, verticalAlign: -2 }} />Filtrer par event / station :</label>
+            <label style={{ fontSize: 11.5, fontWeight: 800 }}><Ico k="game" size={13} style={{ marginRight: 5, verticalAlign: -2 }} />Filtrer par animation / station :</label>
             <select className="sa-input" style={{ maxWidth: 320 }} value={stationFiltre} onChange={e => setStationFiltre(e.target.value)}>
               <option value="toutes">Toutes les stations / tous les commerces</option>
               {stations.map(s => <option key={s.event_id} value={s.event_id}>{s.nom}</option>)}

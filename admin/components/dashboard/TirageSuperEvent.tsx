@@ -60,7 +60,7 @@ export default function TirageSuperEvent({ seId, stations }: { seId: string; sta
   }
 
   /* Fin du tirage : chaque participant voit son resultat (gagne / pas tire) dans son profil
-     (sql/08-resultats-tirage.sql). Sans cette fonction en base : message clair, rien ne casse. */
+     (sql/10-resultats-tirage.sql). Sans cette fonction en base : message clair, rien ne casse. */
   async function terminer() {
     setOccupe('fin'); setMessage(null)
     const { data, error } = await supabase.rpc('enregistrer_resultats_tirage_super', { p_super_event_id: seId })

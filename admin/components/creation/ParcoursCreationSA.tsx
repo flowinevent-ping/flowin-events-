@@ -26,6 +26,8 @@ import { CARD, CHAMP, LABEL, BTN, BTN2, MUTED, choix } from '@/lib/proui'
 import { Ico } from '@/lib/proicons'
 import ParcoursCreation, { PC_CSS, PastillesEtapes, type ProNouvelle, type SuperOuvert, type ProCatalogue } from './ParcoursCreation'
 
+import PrecisionAutre from './PrecisionAutre'
+import SelectActivite from './SelectActivite'
 const versPro = (x: FlowinPro): ProNouvelle => ({
   id: x.id, nom: x.nom ?? null, secteur: x.secteur ?? null, adresse: x.adresse ?? null,
   code_postal: x.code_postal ?? null, ville: x.ville ?? null, email: x.email ?? null, tel: x.tel ?? null,
@@ -104,6 +106,7 @@ export default function ParcoursCreationSA({ typeInitial = null }: { typeInitial
   const bloque = !f.nom.trim() ? 'Indiquez le nom de l’établissement.'
     : idPris ? 'Ce pro existe déjà : choisissez-le dans la liste.'
     : !f.secteur ? 'Choisissez le secteur.'
+    : (f.secteur === 'Autre' || (f.secteur === 'Commerce & Négoce' && f.activite === 'Autre')) && (f.secteurAutre ?? '').trim().length < 3 ? 'Précisez l’activité (secteur « Autre »).'
     : !f.ville.trim() ? 'Indiquez la ville.'
     : !f.email.includes('@') && !f.tel.trim() ? 'Un email ou un téléphone.' : null
   const maj = (c: Partial<FichePro>) => setF(x => ({ ...x, ...c }))
@@ -196,6 +199,14 @@ export default function ParcoursCreationSA({ typeInitial = null }: { typeInitial
               </select>
             </label>
           </div>
+          <PrecisionAutre secteur={f.secteur} valeur={f.secteurAutre ?? ''} onChange={v => maj({ secteurAutre: v })} id="sa-secteur-autre" style={{ ...CHAMP }} />
+          {f.secteur === 'Commerce & Négoce' && (
+            <div style={{ marginTop: 12 }}>
+              <span style={LABEL}>Activité (facultatif)</span>
+              <SelectActivite id="sa-activite" style={CHAMP} valeur={f.activite ?? ''} onChange={v => maj({ activite: v })} />
+              <PrecisionAutre secteur={f.activite ?? ''} valeur={f.secteurAutre ?? ''} onChange={v => maj({ secteurAutre: v })} id="sa-activite-autre" style={{ ...CHAMP }} />
+            </div>
+          )}
           <label style={{ display: 'block', marginTop: 12 }}><span style={LABEL}>Adresse</span><input style={CHAMP} value={f.adresse} onChange={e => maj({ adresse: e.target.value })} placeholder="N°, rue" /></label>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: 12, marginTop: 12 }}>
             <label style={{ display: 'block' }}><span style={LABEL}>Code postal</span><input style={CHAMP} value={f.codePostal} onChange={e => maj({ codePostal: e.target.value })} /></label>

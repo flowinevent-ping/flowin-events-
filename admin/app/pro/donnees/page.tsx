@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import { fetchOperationsPro, libelleDates } from '@/lib/operations'
-import { fetchCrmPro } from '@/lib/crmPro'
+import { fetchCrmProDetail } from '@/lib/crmPro'
 import { rangerParPeriode, groupesChoix } from '@/lib/rangementOperations'
 import ProShell from '@/components/pro/ProShell'
 import GagnantsClient from '@/components/pro/GagnantsClient'
@@ -31,7 +31,7 @@ export default async function Page({ searchParams }: { searchParams: { pro?: str
   const proId = searchParams.pro ?? ''
   const brut = searchParams.onglet ?? ''
   const onglet: Onglet = ONGLETS.find(o => o.id === brut)?.id ?? ALIAS[brut] ?? 'crm'
-  const [ops, contacts] = await Promise.all([fetchOperationsPro(proId), onglet === 'crm' ? fetchCrmPro(proId) : Promise.resolve([])])
+  const [ops, crm] = await Promise.all([fetchOperationsPro(proId), onglet === 'crm' ? fetchCrmProDetail(proId) : Promise.resolve({ contacts: [], erreur: null })])
   const cle = ops.operations.some(o => o.cle === searchParams.op) ? (searchParams.op as string) : ''
   const choix = groupesChoix(ops.operations, o => libelleDates(o.dateD, o.dateF))
   const lien = (o: Onglet, op?: string) => {
@@ -62,7 +62,7 @@ export default async function Page({ searchParams }: { searchParams: { pro?: str
 
       {onglet === 'crm' && (
         <CrmPro
-          proId={proId} proNom={ops.proNom ?? ''} contacts={contacts}
+          proId={proId} proNom={ops.proNom ?? ''} contacts={crm.contacts} erreur={crm.erreur}
           operations={choix.flatMap(g => g.ops)} operationInitiale={cle || null}
         />
       )}

@@ -22,6 +22,7 @@
 
 import { jsPDF } from "npm:jspdf@2.5.1";
 // Modèle unique du bon de commande (identique au navigateur) : pose FlowinBonPDF sur globalThis. Copie de public/bon-commande-pdf.js (MD5 identique, scripts/verifier-bon-commande-pdf.sh).
+import "../_shared/flowin-config.js"; // interrupteur central (GARANTIE_ACTIVE) : pose FLOWIN_CONFIG sur globalThis, AVANT le modèle PDF
 import "../_shared/bon-commande-pdf.js";
 import { emailAccuse, emailDocuments, emailFlowin, emailMensualite, esc, eur, pdfContrat, pdfFacture, type Commande, type Facture } from "./documents.ts";
 

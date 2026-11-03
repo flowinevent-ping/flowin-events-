@@ -39,7 +39,7 @@
     if (c.kit === 'physique') lignes.push({ lib: 'Kit physique imprimé', det: 'Par boutique : 1 support de caisse, 3 affiches A4, 3 macarons autocollants, ' + eur(PRIX.kitPhysique) + ' HT', q: nb, ht: kitHt });
     else lignes.push({ lib: 'Kit digital', det: 'Fichiers des affiches, macarons et support de caisse, QR inclus, à imprimer', q: 1, ht: 0 });
     var optHt = 0;
-    if (quiz > 0) { lignes.push({ lib: 'Option : quiz personnalisé', det: eur(PRIX.optQuiz) + ' HT par événement', q: quiz, ht: PRIX.optQuiz * quiz }); optHt += PRIX.optQuiz * quiz; }
+    if (quiz > 0) { lignes.push({ lib: 'Option : quiz personnalisé', det: eur(PRIX.optQuiz) + ' HT par animation', q: quiz, ht: PRIX.optQuiz * quiz }); optHt += PRIX.optQuiz * quiz; }
     if (bonus > 0) { lignes.push({ lib: 'Option : questions bonus', det: eur(PRIX.optBonus) + ' HT par sondage', q: bonus, ht: PRIX.optBonus * bonus }); optHt += PRIX.optBonus * bonus; }
     var ht = abo + kitHt + optHt;
     var tva = Math.round(ht * PRIX.tva * 100) / 100;
@@ -117,7 +117,8 @@
       y = wrap((rec.offre === 'mensuelle' ? 'Offre mensuelle : virement chaque mois de ' + eur(t.aboTtc) + ' TTC. Premier virement : ' : 'Virement bancaire de ') + eur(t.ttc) + ' TTC a l\'ordre de BAITA EURL - IBAN ' + IBAN + ' - BIC ' + BIC + ' - reference a rappeler : ' + rec.id + '. Commande enregistree en attente de paiement.', x, y, 8.5, ink, CW, 4.2);
     }
     y += 3;
-    if (rec.garantie) {
+    /* Interrupteur central (flowin-config.js) : bloc « satisfait ou rembourse » suspendu tant que GARANTIE_ACTIVE n'est pas true. */
+    if (rec.garantie && root.FLOWIN_CONFIG && root.FLOWIN_CONFIG.GARANTIE_ACTIVE === true) {
       T('SATISFAIT OU REMBOURSE', x, y, 7.5, 'bold', teal); y += 5;
       y = wrap('Offre premiers adherents, formule annuelle : objectif de ' + (rec.garantie_clients_objectif || '-') + ' clients venus retirer leur lot en boutique sur 12 mois, avec au moins 4 animations (panier moyen declare : ' + (rec.panier_moyen ? eur(rec.panier_moyen) : '-') + ', flux journalier : ' + (rec.flux_journalier || '-') + '), donnees certifiees par ' + (rec.garantie_certifiee_par || '-') + ' le ' + (rec.garantie_certifiee_le ? fmtDateHeure(new Date(rec.garantie_certifiee_le)) : '-') + ', non modifiables. Conditions dans les CGV.', x, y, 8.5, ink, CW, 4.2) + 3;
     }

@@ -204,7 +204,7 @@ export default function OpsDetailClient({ se, commerces, parr, landing, fiches =
               </span>
             </div>
             <div className="sa-muted" style={{ fontSize: 11.5, marginBottom: 12 }}>
-              Toucher un commerce ouvre sa fiche event détaillée.
+              Toucher un commerce ouvre sa fiche d’animation détaillée.
             </div>
 
             {commerces.length === 0 && <EmptyState title="Aucun commerce rattaché" />}
@@ -288,7 +288,7 @@ export default function OpsDetailClient({ se, commerces, parr, landing, fiches =
               {adding ? 'Ajout…' : 'Créer le commerce (QR perso + carte)'}
             </button>
             <div className="sa-muted" style={{ fontSize: 11.5, marginTop: 8 }}>
-              Crée le pro + l'event rattaché, génère son QR perso, le place sur la carte. Lat/lng = position sur la carte du festival.
+              Crée le pro + l'animation rattachée, génère son QR perso, le place sur la carte. Lat/lng = position sur la carte du festival.
             </div>
             {addMsg && <div style={{ fontSize: 12.5, color: 'var(--sa-accent)', marginTop: 8 }}>{addMsg}</div>}
           </div>

@@ -65,7 +65,7 @@ export default function ParcoursMobil({ events = [], showTitle = true }: { event
   const groupes = events.reduce<{ cle: string; nom: string; evs: Ev[] }[]>((acc, e) => {
     const cle = e.super_event_id ?? ''
     let g = acc.find(x => x.cle === cle)
-    if (!g) { g = { cle, nom: cle ? (supers[cle] ?? cle) : 'Events autonomes', evs: [] }; acc.push(g) }
+    if (!g) { g = { cle, nom: cle ? (supers[cle] ?? cle) : 'Animations autonomes', evs: [] }; acc.push(g) }
     g.evs.push(e)
     return acc
   }, [])
@@ -157,7 +157,9 @@ export default function ParcoursMobil({ events = [], showTitle = true }: { event
           </p>
         </div>
 
-        <div style={{ order: 2, display: 'flex', alignItems: 'center', gap: 10 }}>
+        <div className="pm-rangee" style={{ order: 2, display: 'flex', alignItems: 'center', gap: 10, maxWidth: '100%' }}>
+          {/* Petit ecran (390 px) : le cadre telephone + 2 fleches depassait la largeur ; les fleches passent sous le cadre. */}
+          <style dangerouslySetInnerHTML={{ __html: '@media (max-width:520px){.pm-rangee{flex-wrap:wrap;justify-content:center;width:100%}.pm-rangee>div{order:1;flex:0 0 100%;display:flex;justify-content:center}.pm-rangee>button{order:2}}' }} />
           {url && (
             <button onClick={() => naviguer('prev')} aria-label="Écran précédent"
               style={{ flexShrink: 0, width: 36, height: 36, borderRadius: '50%', border: `1.5px solid ${C.bordureChamp}`, background: '#fff', cursor: 'pointer', fontSize: 16, color: C.texte }}>‹</button>

@@ -66,8 +66,11 @@
   <div class="card"><table><thead><tr><th>Date</th><th>Commande</th><th>Client</th><th>Formule</th><th>Paiement</th><th class="r">Montant TTC</th><th>Statut</th><th>Facture</th><th>Actions</th></tr></thead><tbody id="rows"><tr><td colspan="9" class="vide">Chargement&hellip;</td></tr></tbody></table></div>
 </div>
 <script src="/nds/vendor/jspdf.umd.min.js"></script>
+<script src="/flowin-config.js"></script>
 <script src="/bon-commande-pdf.js"></script>
 <script>
+  /* Interrupteur central (flowin-config.js) : offre « satisfait ou remboursé » suspendue tant que GARANTIE_ACTIVE n'est pas true. */
+  var GAR = !!(window.FLOWIN_CONFIG && window.FLOWIN_CONFIG.GARANTIE_ACTIVE === true);
 (function(){
   'use strict';
   var SUPA = 'https://ywcqtupgoxfzkddqkztk.supabase.co';
@@ -151,7 +154,7 @@
       var retard = (g2 === 'attente' && jours(c.created_at) > JOURS) ? '<span class="retard">En attente depuis ' + jours(c.created_at) + ' j</span>' : '';
       h += '<tr><td>' + dh(c.created_at) + retard + '</td><td><b>' + esc(c.id) + '</b>' + (c.commercial ? '<small>Commercial : ' + esc(c.commercial) + '</small>' : '') + '</td>' +
         '<td><b>' + esc(c.raison_sociale) + '</b><small>' + esc(c.ville) + ' · SIRET ' + esc(c.siret) + '</small><small>' + esc(c.contact_nom) + ' · ' + esc(c.email) + '</small></td>' +
-        '<td>' + (c.offre === 'mensuelle' ? 'Mensuelle · 3 mois min.' : 'Annuelle · 12 mois') + '<small>' + (c.kit === 'physique' ? 'Kit physique × ' + c.nb_boutiques : 'Kit digital') + (c.opt_quiz_qte ? ' · quiz' : '') + (c.opt_bonus_qte ? ' · bonus' : '') + (c.garantie ? ' · garantie' : '') + '<br>' + (c.type_commande === 'renouvellement' ? 'Renouvellement (sans garantie)' : 'Première souscription') + '</small></td>' +
+        '<td>' + (c.offre === 'mensuelle' ? 'Mensuelle · 3 mois min.' : 'Annuelle · 12 mois') + '<small>' + (c.kit === 'physique' ? 'Kit physique × ' + c.nb_boutiques : 'Kit digital') + (c.opt_quiz_qte ? ' · quiz' : '') + (c.opt_bonus_qte ? ' · bonus' : '') + (GAR && c.garantie ? ' · garantie' : '') + '<br>' + (c.type_commande === 'renouvellement' ? (GAR ? 'Renouvellement (sans garantie)' : 'Renouvellement') : 'Première souscription') + '</small></td>' +
         '<td>' + (c.mode_paiement === 'prelevement_sepa' ? 'Prélèvement SEPA' : 'Virement') + (c.paiement_valide_le ? '<small>Validé le ' + dh(c.paiement_valide_le) + '<br>par ' + esc(c.paiement_valide_par || c.paiement_source) + '</small>' : '') + '</td>' +
         '<td class="r"><b>' + eur(c.montant_ttc) + '</b><small>' + eur(c.montant_ht) + ' HT</small></td>' +
         '<td><span class="st ' + s[1] + '">' + esc(s[0]) + '</span>' + (c.documents_envoyes_le ? '<small>Envoyés le ' + dh(c.documents_envoyes_le) + (c.documents_envois > 1 ? ' (' + c.documents_envois + ' envois)' : '') + '</small>' : '') + '</td>' +

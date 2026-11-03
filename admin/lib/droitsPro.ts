@@ -25,7 +25,7 @@ export const DROITS_DEFAUT: DroitsPro = {
 }
 
 export const DROITS_LISTE: { cle: CleDroit; titre: string; aide: string; verrouBase: boolean }[] = [
-  { cle: 'creer_animation', titre: 'Peut créer une animation (event)', aide: 'Le bouton « Créer une animation » et le parcours de création.', verrouBase: true },
+  { cle: 'creer_animation', titre: 'Peut créer une animation', aide: 'Le bouton « Créer une animation » et le parcours de création.', verrouBase: true },
   { cle: 'creer_super_event', titre: 'Peut créer un super event', aide: 'Désactivé : le pro peut seulement « proposer » un super event à Flowin. Activé : il le crée lui-même.', verrouBase: true },
   { cle: 'rejoindre_super_event', titre: 'Peut rejoindre / intégrer un super event', aide: 'Demander à devenir une station d’un super event existant.', verrouBase: true },
   { cle: 'creer_banques', titre: 'Peut créer des banques de quiz', aide: 'Créer et alimenter ses banques de questions (quiz et bonus).', verrouBase: true },

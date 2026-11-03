@@ -66,10 +66,10 @@ export default function Page() {
 
   return (
     <div className="sa-content">
-      <PageHeader title="Planning" subtitle="Super events et events, par statut" />
+      <PageHeader title="Planning" subtitle="Super events et animations, par statut" />
 
       {operations.length === 0 ? (
-        <EmptyState icon="📅" title="Aucune operation" desc="Créez votre premier event ou super event depuis la section Events." />
+        <EmptyState icon="📅" title="Aucune operation" desc="Créez votre première animation ou votre premier super event depuis la section Animations." />
       ) : (
         <div className="sa-kanban">
           {colonnes.map(col => (

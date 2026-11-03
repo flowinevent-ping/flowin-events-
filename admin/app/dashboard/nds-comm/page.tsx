@@ -86,7 +86,7 @@ export default function Page() {
       {!charge && actifs.length > 0 && (
         <>
           <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 14, fontSize: 11.5 }}>
-            <span className="sa-chip">{cfg?.evenement ?? 'événement non configuré'}</span>
+            <span className="sa-chip">{cfg?.evenement ?? 'super event non configuré'}</span>
             {cfg?.edition && <span className="sa-chip">{cfg.edition}</span>}
             {cfg?.lieu && <span className="sa-chip">{cfg.lieu}</span>}
             <span className="sa-chip">{CONTACT_PARTENAIRE.email}</span>

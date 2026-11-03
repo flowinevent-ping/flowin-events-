@@ -92,7 +92,7 @@ export function nbSourcesQuestions(cfg: Record<string, unknown> | null | undefin
  */
 export function controler(d: BrouillonEvent): Probleme[] {
   const p: Probleme[] = []
-  if (!d.nom.trim()) p.push({ etape: 'A', message: "Le nom de l'événement est obligatoire." })
+  if (!d.nom.trim()) p.push({ etape: 'A', message: "Le nom de l'animation est obligatoire." })
   if (!d.pro_id) p.push({ etape: 'A', message: 'Un pro client doit être sélectionné.' })
   if (!d.date_d) p.push({ etape: 'A', message: 'La date de début est obligatoire.' })
   if (d.date_d && d.date_f && d.date_f < d.date_d) {
@@ -184,8 +184,8 @@ export async function enregistrer(
   }
 
   const { error: errEvent } = await supabase.from('events').upsert(ligne, { onConflict: 'id' })
-  if (errEvent) return { ok: false, erreur: `Événement non enregistré — ${errEvent.message}` }
-  fait.push('événement')
+  if (errEvent) return { ok: false, erreur: `Animation non enregistrée — ${errEvent.message}` }
+  fait.push('animation')
 
   /* Lots : uniquement a la creation. En edition ils se gerent depuis la fiche event,
      pour ne pas ecraser silencieusement des lots deja distribues. */
@@ -207,7 +207,7 @@ export async function enregistrer(
     if (lignes.length) {
       const { error } = await supabase.from('lots').insert(lignes)
       if (error) {
-        return { ok: false, eventId: evId, partiel: fait, erreur: `Événement créé, mais lots non enregistrés — ${error.message}` }
+        return { ok: false, eventId: evId, partiel: fait, erreur: `Animation créée, mais lots non enregistrés — ${error.message}` }
       }
       fait.push(`${lignes.length} lot${lignes.length > 1 ? 's' : ''}`)
     }

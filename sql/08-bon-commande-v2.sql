@@ -43,6 +43,11 @@ create table if not exists public.facturation_config (
   source_numerotation text not null default 'flowin' check (source_numerotation in ('flowin','crm')),
   modifie_le          timestamptz not null default now()
 );
+-- Offre « satisfait ou remboursé » SUSPENDUE par defaut (decision du 03/11/2026). Interrupteur unique cote base :
+-- garantie_active = false => toute commande est enregistree sans garantie, meme si un appel API fabrique la demande ;
+-- souscrire_garantie_animation() refuse. Pour reactiver : update public.facturation_config set garantie_active = true where id = 1;
+-- (en meme temps que GARANTIE_ACTIVE = true dans admin/public/flowin-config.js).
+alter table public.facturation_config add column if not exists garantie_active boolean not null default false;
 insert into public.facturation_config (id) values (1) on conflict (id) do nothing;
 alter table public.facturation_config enable row level security;
 revoke all on public.facturation_config from anon;
@@ -50,6 +55,28 @@ grant select on public.facturation_config to authenticated;
 grant select, update on public.facturation_config to service_role;
 drop policy if exists facturation_config_sa on public.facturation_config;
 create policy facturation_config_sa on public.facturation_config for select to authenticated using (public.est_super_admin());
+
+create or replace function public.garantie_active()
+returns boolean language sql stable security definer set search_path = public
+as $$ select coalesce((select garantie_active from public.facturation_config where id = 1), false) $$;
+grant execute on function public.garantie_active() to anon, authenticated, service_role;
+
+-- Garde-fou : tant que l'offre est suspendue, une commande ne peut PAS porter la garantie (se declenche apres
+-- trg_commandes_animation_avant_insert : ordre alphabetique des triggers).
+create or replace function public.commandes_animation_garantie_suspendue()
+returns trigger language plpgsql set search_path = public
+as $$
+begin
+  if not public.garantie_active() then
+    NEW.garantie := false; NEW.garantie_clients_objectif := null;
+    NEW.garantie_certifiee_le := null; NEW.garantie_certifiee_par := null;
+  end if;
+  return NEW;
+end;
+$$;
+drop trigger if exists trg_commandes_animation_garantie_suspendue on public.commandes_animation;
+create trigger trg_commandes_animation_garantie_suspendue before insert on public.commandes_animation
+  for each row execute function public.commandes_animation_garantie_suspendue();
 
 -- ---------------------------------------------------------------------------
 -- 3. LA fonction de numérotation. Pour brancher un CRM plus tard, on remplace UNIQUEMENT cette fonction
@@ -120,7 +147,7 @@ begin
       'lib', case when c.kit = 'physique' then 'Kit physique imprime' else 'Kit digital' end,
       'det', case when c.kit = 'physique' then 'Par boutique : 1 support de caisse, 3 affiches A4, 3 macarons' else 'Fichiers a imprimer, QR inclus' end,
       'q', case when c.kit = 'physique' then c.nb_boutiques else 1 end, 'ht', c.montant_kit_ht));
-    if c.opt_quiz_qte > 0 then lignes := lignes || jsonb_build_array(jsonb_build_object('lib','Option : quiz personnalise','det','180 EUR HT par evenement','q',c.opt_quiz_qte,'ht',180 * c.opt_quiz_qte)); end if;
+    if c.opt_quiz_qte > 0 then lignes := lignes || jsonb_build_array(jsonb_build_object('lib','Option : quiz personnalise','det','180 EUR HT par animation','q',c.opt_quiz_qte,'ht',180 * c.opt_quiz_qte)); end if;
     if c.opt_bonus_qte > 0 then lignes := lignes || jsonb_build_array(jsonb_build_object('lib','Option : questions bonus','det','180 EUR HT','q',c.opt_bonus_qte,'ht',180 * c.opt_bonus_qte)); end if;
     ht := c.montant_ht; tva := c.montant_tva;
   else
@@ -258,6 +285,7 @@ declare
   obj integer;
   nom text := btrim(coalesce(p_nom, ''));
 begin
+  if not public.garantie_active() then raise exception 'garantie_suspendue: offre satisfait ou rembourse suspendue'; end if;
   select * into c from public.commandes_animation where id = p_commande for update;
   if not found then raise exception 'garantie_introuvable: commande inconnue'; end if;
   if c.offre <> 'annuelle' then raise exception 'garantie_non_eligible: formule mensuelle, garantie reservee a la formule annuelle'; end if;

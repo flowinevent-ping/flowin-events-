@@ -118,7 +118,7 @@ export function TypeChip({ estSuper }: { estSuper: boolean }) {
   const accent = estSuper ? ACCENT_SUPER : ACCENT_ANIM
   return (
     <span style={{ fontSize: 9.5, fontWeight: 800, letterSpacing: '.06em', textTransform: 'uppercase', whiteSpace: 'nowrap', color: accent, background: `${accent}17`, borderRadius: 99, padding: '3px 8px' }}>
-      {estSuper ? 'Super event' : 'Event'}
+      {estSuper ? 'Super event' : 'Animation'}
     </span>
   )
 }

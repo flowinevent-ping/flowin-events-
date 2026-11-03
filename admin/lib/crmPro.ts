@@ -17,9 +17,19 @@ export interface ContactPro {
   premiere: string | null; derniere: string | null
 }
 
-/** `sa: true` (dashboard Super Admin) : coordonnees completes. Espace pro : consentants seulement. */
-export async function fetchCrmPro(proId: string, opts?: { sa?: boolean }): Promise<ContactPro[]> {
-  if (!proId) return []
+/** Message en francais pour une erreur de lecture du CRM (jamais le texte technique de la base). */
+export function messageErreurCrm(brut: string): string {
+  if (/permission denied|42501|row-level security/i.test(brut)) return 'Vos contacts ne sont pas accessibles avec ce compte pour le moment. Reconnectez-vous ou contactez Flowin.'
+  if (/fetch|network|timeout|failed to fetch/i.test(brut)) return 'Connexion impossible : vérifiez votre réseau puis rechargez la page.'
+  return 'Vos contacts n’ont pas pu être chargés. Rechargez la page ; si le problème continue, contactez Flowin.'
+}
+
+/**
+ * `sa: true` (dashboard Super Admin) : coordonnees completes. Espace pro : consentants seulement.
+ * Renvoie aussi l'erreur (en francais) : « liste vide » et « lecture impossible » ne doivent jamais se confondre.
+ */
+export async function fetchCrmProDetail(proId: string, opts?: { sa?: boolean }): Promise<{ contacts: ContactPro[]; erreur: string | null }> {
+  if (!proId) return { contacts: [], erreur: null }
   /* Espace pro : fonction qui ne renvoie les coordonnees que des joueurs consentants
      (sql/05-confidentialite-contacts.sql, phase 1). Tant qu'elle n'est pas appliquee, repli
      sur crm_pro + masque cote application (limiterAuConsentement ci-dessous). Le SA garde
@@ -27,12 +37,17 @@ export async function fetchCrmPro(proId: string, opts?: { sa?: boolean }): Promi
   let rep = await supabase.rpc(opts?.sa ? 'crm_pro' : 'crm_pro_consentants', { p_pro: proId })
   if (rep.error && !opts?.sa) rep = await supabase.rpc('crm_pro', { p_pro: proId })
   const { data, error } = rep
-  if (error) { console.error('[fetchCrmPro]', error.message); return [] }
-  return ((data ?? []) as ContactPro[]).map(c => (opts?.sa ? c : limiterAuConsentement(c))).map(c => ({
+  if (error) { console.error('[fetchCrmPro]', error.message); return { contacts: [], erreur: messageErreurCrm(error.message) } }
+  const contacts = ((data ?? []) as ContactPro[]).map(c => (opts?.sa ? c : limiterAuConsentement(c))).map(c => ({
     ...c,
     origines: c.origines ?? [], operations: c.operations ?? [], lots: c.lots ?? [],
     nb_parties: Number(c.nb_parties ?? 0), nb_tickets: Number(c.nb_tickets ?? 0), nb_gains: Number(c.nb_gains ?? 0),
   }))
+  return { contacts, erreur: null }
+}
+
+export async function fetchCrmPro(proId: string, opts?: { sa?: boolean }): Promise<ContactPro[]> {
+  return (await fetchCrmProDetail(proId, opts)).contacts
 }
 
 /** Libelle lisible d une origine : celui du trafic (lib/nds libelleSource). */

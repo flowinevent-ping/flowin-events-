@@ -85,7 +85,7 @@ export async function creerModeleDepuisEvent(
   if (!nom.trim()) return { ok: false, erreur: 'Le modèle doit avoir un nom.' }
 
   const ev = await fetchEvent(eventId)
-  if (!ev) return { ok: false, erreur: `Événement ${eventId} introuvable.` }
+  if (!ev) return { ok: false, erreur: `Animation ${eventId} introuvable.` }
 
   /* Les lots de l event, si la lecture echoue on ne bloque pas la creation du
      modele : un gabarit sans lots reste utilisable, et le dire vaut mieux que

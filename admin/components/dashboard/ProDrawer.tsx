@@ -12,6 +12,7 @@ import ActionsFichePro from './ActionsFichePro'
 import DroitsPro from './DroitsPro'
 import { Ico } from '@/lib/proicons'
 
+import { libelleSecteur } from '@/lib/proCreation'
 export default function ProDrawer() {
   const { drawer, closeDrawer, setDrawerTab, pros, setPros, events, openDrawer } = useDashboard()
   const [edit, setEdit] = useState(drawer.edit)
@@ -78,7 +79,7 @@ export default function ProDrawer() {
           <div className="sa-avatar">{initials}</div>
           <div>
             <div className="sa-drawer-title"><Ico k="building" size={13} style={{ marginRight: 5, verticalAlign: -2 }} />{p.nom}</div>
-            <div className="sa-drawer-sub">{p.ville} · {p.secteur}</div>
+            <div className="sa-drawer-sub">{p.ville} · {libelleSecteur(p.secteur, p.tags)}</div>
           </div>
         </div>
         <button className="sa-drawer-close" onClick={closeDrawer}>×</button>
@@ -102,7 +103,7 @@ export default function ProDrawer() {
         {drawer.tab === 'infos' && !edit && (
           <>
             <FieldRow label="Nom" value={<strong>{p.nom}</strong>} />
-            <FieldRow label="Secteur" value={p.secteur} />
+            <FieldRow label="Secteur" value={libelleSecteur(p.secteur, p.tags)} />
             <FieldRow label="Ville" value={p.ville} />
             <FieldRow label="Code postal" value={p.code_postal} />
             <FieldRow label="Adresse" value={p.adresse} />

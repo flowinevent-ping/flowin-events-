@@ -97,7 +97,7 @@ export function ContenuCrm({ op, mode = 'sa' }: { op: DonneesOperation; mode?: '
 
   function exporter() {
     const esc = (v: unknown) => `"${String(v ?? '').replace(/"/g, '""')}"`
-    const entete = ['Prénom', 'Nom', 'Email', 'Tél', 'Ville', 'Code postal', 'Opt-in', 'Parties', 'Dernière partie', op.type === 'super' ? 'Stations' : 'Event']
+    const entete = ['Prénom', 'Nom', 'Email', 'Tél', 'Ville', 'Code postal', 'Opt-in', 'Parties', 'Dernière partie', op.type === 'super' ? 'Stations' : 'Animation']
     const csv = '﻿' + [entete.map(esc).join(',')].concat(filtres.map(c => [
       c.prenom, c.nom, c.email, c.tel, c.ville, c.code_postal, c.optin ? 'oui' : 'non', c.parties,
       c.derniere ? new Date(c.derniere).toLocaleString('fr-FR') : '', c.stations.join(' / '),

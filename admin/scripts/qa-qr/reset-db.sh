@@ -12,7 +12,7 @@ $P -d postgres -c "drop database if exists flowin_qa" -c "create database flowin
 sed -n 1,150p "$REPO/sql/2026-11-01-tirage-auto-liste-gagnants.sql" > /tmp/qa-lot-sections-1-3.sql
 for f in "$HERE/db/00-prelude.sql" "$REPO/sql/FINAL_CONSOLIDATED.sql" "$REPO/sql/SCHEMA_ALIGNMENT_v2.sql" \
          "$REPO/sql/01-identite-super-admin.sql" "$HERE/db/10-prod-supplement.sql" /tmp/qa-lot-sections-1-3.sql \
-         "$REPO/sql/08-qr-permaliens.sql" "$HERE/seed.sql"; do
+         "$REPO/sql/09-qr-permaliens.sql" "$HERE/seed.sql"; do
   echo "== $(basename "$f")"
   $P -d flowin_qa -f "$f" 2>&1 | grep -i "error" | grep -v 'relation "public.events" does not exist' || true
 done

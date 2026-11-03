@@ -21,7 +21,7 @@ import { supabase } from '@/lib/supabase'
 import { capturerSource, tagSource } from '@/lib/source'
 import { CHARTE_PRO as C, VARIABLES_PRO_CSS } from '@/lib/charte'
 import {
-  PROFILS_PRO, SECTEURS_PRO, ficheProVide, identifiantPro, lignePro, ligneProEntreprise,
+  PROFILS_PRO, SECTEURS_PRO, SECTEUR_AUTRE, nettoyerPrecision, ficheProVide, identifiantPro, lignePro, ligneProEntreprise,
   type FichePro, type ProfilPro,
 } from '@/lib/proCreation'
 import {
@@ -29,6 +29,11 @@ import {
   type EntrepriseTrouvee,
 } from '@/lib/entreprise'
 
+import { messageFr, messageAuth } from '@/lib/erreursFr'
+import { retourSur } from '@/lib/retour'
+import { GARANTIE_ACTIVE } from '@/lib/flowinConfig'
+import PrecisionAutre from '@/components/creation/PrecisionAutre'
+import SelectActivite from '@/components/creation/SelectActivite'
 const CLE_BROUILLON = 'flowin.premiere-fois.v1'
 
 const ETAPES = [
@@ -54,7 +59,8 @@ function lireSelection(): string {
     const out = new URLSearchParams()
     PARAMS_OFFRE.forEach(k => { const v = u.get(k); if (v) out.set(k, v.slice(0, 120)) })
     /* Garantie satisfait ou remboursé : offre ANNUELLE uniquement. */
-    if (out.get('offre') !== 'annuelle') ['garantie', 'panier', 'flux', 'certif_le', 'certif_par'].forEach(k => out.delete(k))
+    /* Offre suspendue (lib/flowinConfig) : aucun parametre de garantie n'est repris ni transmis. */
+    if (!GARANTIE_ACTIVE || out.get('offre') !== 'annuelle') ['garantie', 'panier', 'flux', 'certif_le', 'certif_par'].forEach(k => out.delete(k))
     return out.toString()
   } catch { return '' }
 }
@@ -66,7 +72,7 @@ function resumeSelection(sel: string): string {
   if (u.get('kit') === 'physique') morceaux.push(`kit physique (${u.get('boutiques') ?? '1'} boutique${Number(u.get('boutiques') ?? 1) > 1 ? 's' : ''})`)
   if (u.get('quiz')) morceaux.push('quiz personnalisé')
   if (u.get('bonus')) morceaux.push('questions bonus')
-  if (u.get('garantie') === '1' && u.get('offre') === 'annuelle') morceaux.push('garantie satisfait ou remboursé')
+  if (GARANTIE_ACTIVE && u.get('garantie') === '1' && u.get('offre') === 'annuelle') morceaux.push('garantie satisfait ou remboursé')
   return morceaux.filter(Boolean).join(', ')
 }
 
@@ -112,6 +118,11 @@ export default function PremiereFois() {
   const [fin, setFin] = useState<{ proId: string; session: boolean; degrade: boolean } | null>(null)
   const [selection, setSelection] = useState('')
   const haut = useRef<HTMLDivElement>(null)
+  /* Compte d'acces deja cree pendant cette visite (reprise apres un echec d'enregistrement de la fiche). */
+  /* Retour vers une demande en cours (parcours « rejoindre un super event » sans compte) : ?retour=/rejoindre?... */
+  const [retour, setRetour] = useState<string | null>(null)
+  useEffect(() => { try { setRetour(retourSur(new URLSearchParams(window.location.search).get('retour'))) } catch { /* rien */ } }, [])
+  const compteCree = useRef<{ email: string; id: string } | null>(null)
 
   /* Recherche entreprise */
   const [recherche, setRecherche] = useState('')
@@ -161,6 +172,7 @@ export default function PremiereFois() {
       if (f.siret.trim() && !siretValide(f.siret)) e.siret = erreurNumero(f.siret) ?? 'SIRET invalide.'
     }
     if (id === 'secteur' && !f.secteur) e.secteur = 'Choisissez le secteur le plus proche (ou « Autre »).'
+    if (id === 'secteur' && (f.secteur === SECTEUR_AUTRE || (f.secteur === 'Commerce & Négoce' && f.activite === SECTEUR_AUTRE)) && nettoyerPrecision(f.secteurAutre).length < 3) e.secteurAutre = 'Précisez votre activité (3 lettres minimum).'
     if (id === 'produits' && (f.produits ?? '').trim().length < 3) e.produits = 'Quelques mots suffisent : ce que vos clients viennent chercher chez vous.'
     if (id === 'adresse') {
       if (f.profil !== 'annonceur' && f.adresse.trim().length < 3) e.adresse = 'Le numéro et la rue.'
@@ -223,26 +235,40 @@ export default function PremiereFois() {
   async function creer() {
     setEnvoi('loading'); setErreur('')
     const fiche: FichePro = { ...f, contact: `${perso.prenom.trim()} ${perso.nom.trim()}`.trim(), siret: chiffres(f.siret) }
-    const { data: authData, error: authErr } = await supabase.auth.signUp({ email: fiche.email.trim(), password: fiche.motdepasse })
-    if (authErr || !authData.user) {
-      setErreur(authErr?.message === 'User already registered'
-        ? 'Un compte existe déjà avec cet email. Connectez-vous plutôt.'
-        : (authErr?.message ?? 'La création du compte a échoué. Réessayez dans un instant.'))
-      setEnvoi('error'); return
-    }
-    /* Email deja inscrit : Supabase ne renvoie pas d'erreur (protection contre l'enumeration des comptes)
-       mais un faux utilisateur, sans identite. Sans ce controle, l'insertion de la fiche echoue sur la cle
-       etrangere pros_auth_id_fkey alors qu'aucun compte n'a ete cree. */
-    if (Array.isArray(authData.user.identities) && authData.user.identities.length === 0) {
-      setErreur('Un compte existe déjà avec cet email. Connectez-vous plutôt, ou utilisez une autre adresse.')
-      setEnvoi('error'); return
+    const adresse = fiche.email.trim()
+    /* Reprise apres un echec de l'enregistrement de la fiche : le compte d'acces existe deja (cree au 1er essai).
+       On le reutilise au lieu de refaire un signUp, qui repondrait « compte deja existant » et bloquerait le pro. */
+    let userId = '', aSession = false
+    if (compteCree.current && compteCree.current.email === adresse.toLowerCase()) {
+      userId = compteCree.current.id
+    } else {
+      const { data: authData, error: authErr } = await supabase.auth.signUp({ email: adresse, password: fiche.motdepasse })
+      if (authErr || !authData.user) {
+        setErreur(messageAuth(authErr)); setEnvoi('error'); return
+      }
+      /* Email deja inscrit : Supabase ne renvoie pas d'erreur (protection contre l'enumeration des comptes)
+         mais un faux utilisateur, sans identite. On tente alors la connexion avec le mot de passe saisi :
+         si le compte n'a pas de fiche pro (inscription interrompue), on la complete ; sinon on renvoie vers la connexion. */
+      if (Array.isArray(authData.user.identities) && authData.user.identities.length === 0) {
+        const { data: conn, error: connErr } = await supabase.auth.signInWithPassword({ email: adresse, password: fiche.motdepasse })
+        if (connErr || !conn.user) {
+          setErreur('Un compte existe déjà avec cet email. Connectez-vous, ou utilisez « Mot de passe oublié » sur la page de connexion.')
+          setEnvoi('error'); return
+        }
+        const { data: dejaPro } = await supabase.from('pros').select('id').eq('auth_id', conn.user.id).maybeSingle()
+        if (dejaPro) { setErreur('Votre espace existe déjà : connectez-vous avec cet email.'); setEnvoi('error'); return }
+        userId = conn.user.id; aSession = true
+      } else {
+        userId = authData.user.id; aSession = !!authData.session
+      }
+      compteCree.current = { email: adresse.toLowerCase(), id: userId }
     }
     let idPro = identifiantPro(fiche)
     const { data: existe } = await supabase.from('pros').select('id').eq('id', idPro).maybeSingle()
     if (existe) idPro = `${idPro}-${Math.random().toString(36).slice(2, 6)}`
     const ligne = lignePro(fiche, 'pro')
     const tSrc = tagSource(src)
-    const base = { ...ligne, tags: tSrc ? [...(ligne.tags ?? []), tSrc] : ligne.tags, id: idPro, auth_id: authData.user.id }
+    const base = { ...ligne, tags: tSrc ? [...(ligne.tags ?? []), tSrc] : ligne.tags, id: idPro, auth_id: userId }
     let degrade = false
     let { error: insErr } = await supabase.from('pros').insert({ ...base, ...ligneProEntreprise(fiche, 'premiere-fois') })
     /* Migration sql/02-pros-entreprise-onboarding.sql pas encore appliquee :
@@ -253,10 +279,12 @@ export default function PremiereFois() {
       insErr = r.error
     }
     if (insErr) {
-      /* 23503 = cle etrangere : le compte d'acces n'existe pas (email deja utilise ou compte non cree). */
+      /* 23503 = cle etrangere : le compte d'acces n'existe pas. 23505 = identifiant ou SIRET deja pris. */
       setErreur(insErr.code === '23503'
-        ? 'Un compte existe déjà avec cet email, ou la création de l’accès n’a pas abouti. Connectez-vous plutôt, ou utilisez une autre adresse.'
-        : `Votre accès est créé mais la fiche entreprise n’a pas pu être enregistrée (${insErr.message}). Contactez l’équipe Flowin.`)
+        ? 'La création de votre accès n’a pas abouti. Réessayez ; si cela continue, utilisez une autre adresse email.'
+        : insErr.code === '23505'
+          ? 'Un établissement avec ces informations existe déjà. Connectez-vous, ou contactez l’équipe Flowin.'
+          : `Votre accès est créé, mais la fiche entreprise n’a pas pu être enregistrée : ${messageFr(insErr)} Vous pouvez réessayer : votre compte est conservé.`)
       setEnvoi('error'); return
     }
     effacerBrouillon()
@@ -270,7 +298,7 @@ export default function PremiereFois() {
       }))
     } catch { /* navigation privee : le bon de commande se remplit a la main */ }
     setEnvoi('idle')
-    setFin({ proId: idPro, session: !!authData.session, degrade })
+    setFin({ proId: idPro, session: aSession, degrade })
     setEtape(7)
   }
 
@@ -428,6 +456,14 @@ export default function PremiereFois() {
                   })}
                 </div>
                 {err('secteur')}
+                <PrecisionAutre secteur={f.secteur} valeur={f.secteurAutre ?? ''} onChange={v => maj({ secteurAutre: v })} id="pf-secteur-autre" erreur={tente ? erreurs.secteurAutre : null} />
+                {f.secteur === 'Commerce & Négoce' && (
+                  <div style={{ display: 'block', marginTop: 12 }}>
+                    <span style={{ display: 'block', fontSize: 12, fontWeight: 800, marginBottom: 5 }}>Votre activité (facultatif)</span>
+                    <SelectActivite id="pf-activite" valeur={f.activite ?? ''} onChange={v => maj({ activite: v })} style={{ width: '100%', padding: '12px 14px', borderRadius: 12, border: '1.5px solid #C9D4E3', fontSize: 16, fontFamily: 'inherit' }} />
+                    <PrecisionAutre secteur={f.activite ?? ''} valeur={f.secteurAutre ?? ''} onChange={v => maj({ secteurAutre: v })} id="pf-activite-autre" />
+                  </div>
+                )}
               </>
             )}
 
@@ -539,7 +575,10 @@ export default function PremiereFois() {
               <div className="pf-suite-l"><span className="pf-ic">3</span><span><b>Espace pro</b> : vos animations, vos lots, vos contacts</span></div>
             </div>
             <div className="pf-row" style={{ justifyContent: 'center', marginTop: 16 }}>
-              <a className="pf-btn pf-grand" href={`/bon-commande-animation.html${selection ? `?${selection}` : ''}`}>Choisir mon offre et signer</a>
+              {retour && (
+                <a className="pf-btn pf-grand" href={fin.session ? retour : `/pro/connexion?retour=${encodeURIComponent(retour)}`}>Reprendre ma demande pour le super event</a>
+              )}
+              <a className={retour ? 'pf-btn2' : 'pf-btn pf-grand'} href={`/bon-commande-animation.html${selection ? `?${selection}` : ''}`}>Choisir mon offre et signer</a>
               {fin.session
                 ? <a className="pf-btn2" href={`/pro?pro=${encodeURIComponent(fin.proId)}&bienvenue=1`}>Plus tard : entrer dans mon espace pro</a>
                 : <a className="pf-btn2" href="/pro/connexion">Plus tard : me connecter</a>}

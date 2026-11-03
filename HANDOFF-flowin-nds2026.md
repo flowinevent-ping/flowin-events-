@@ -1,3 +1,9 @@
+### SESSION 01/11 (soir) — ESPACE PRO : FINALISATION (branche feat/espace-pro-finalisation, PR brouillon)
+
+**Fait** : participants d'un super event avec droits SA/pro (onglet « Participants » de la fiche super event côté pro, bandeau de droits côté SA) · vocabulaire « animation » dans l'interface pro et le Super Admin Next (« Super event » inchangé ; zones NDS, `dashboard.html` et marketing non touchés) · confidentialité des contacts : **phase 1 seulement** (SQL 05 + code déjà branché, testé sur Postgres local) · lien compte pro ↔ commandes/factures (SQL 03 : `rattacher_mes_commandes()`, lecture par `pro_id` OU `espace_pro_id`) et pré-remplissage du bon de commande depuis la fiche du pro connecté · messages d'erreur en français (`lib/erreursFr.ts`) · 4 écrans qui débordaient à 390 px et un bouton superposé corrigés.
+**SQL renumérotés** : `08-bon-commande-v2`, `09-qr-permaliens`, `10-resultats-tirage` ; ordre d'application complet dans `sql/README-ORDRE.md`. **Aucun SQL appliqué en production.** Test : `admin/scripts/qa-qr/chaine-sql.sh` (Postgres local jetable, 2 passages + contrôles + tests de comportement).
+**Reste (décisions de Romain)** : animation en brouillon AVANT paiement (l'accès est aujourd'hui bloqué jusqu'au paiement, décision du 31/10) · « lancement assisté » : aucune spécification dans le dépôt (seule la « vente assistée » `?commercial=` existe) · droit « voir les participants » pilotable par pro (6e droit) : non ajouté · phases 2 et 3 de la confidentialité (connexion du Super Admin, fermeture des lectures publiques de `joueurs`) · simplification de l'inscription pro (écrans à cadrer, roadmap 21/10).
+
 ### SESSION 19-20/07 — AUDIT COMPTAGE, CLÔTURE, TIRAGES, BILLETS (commits 7010ee4 → 8a53337)
 
 **PÉRIMÈTRE DE TRAVAIL** : `super_event_id='se-nds-2026'`, fenêtre **09 → 18 juillet 2026**. Ne jamais mélanger avec la base joueurs globale ni avec d'autres événements. Un joueur ayant joué à Pâques puis au NDS n'est **pas** un doublon.

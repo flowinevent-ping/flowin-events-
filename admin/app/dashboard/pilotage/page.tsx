@@ -113,13 +113,13 @@ export default function Page() {
       <SectionHeader>Cockpit</SectionHeader>
 
       {!events.length ? (
-        <EmptyState icon="🎯" title="Aucun événement" desc="Aucun événement n'est enregistré." />
+        <EmptyState icon="🎯" title="Aucune animation" desc="Aucune animation n'est enregistrée." />
       ) : (
         <div className="sa-kanban">
           {colonne('Live maintenant', 'bell', live,
-            aVenir.length ? `Aucun event en cours. Prochain le ${dateFr(aVenir[0].date_d)}.` : 'Aucun event en cours.')}
-          {colonne('À venir', 'calendar', aVenir, 'Aucun event programmé.')}
-          {colonne('Passés', 'clock', passes, 'Aucun event terminé.')}
+            aVenir.length ? `Aucune animation en cours. Prochain le ${dateFr(aVenir[0].date_d)}.` : 'Aucune animation en cours.')}
+          {colonne('À venir', 'calendar', aVenir, 'Aucune animation programmée.')}
+          {colonne('Passés', 'clock', passes, 'Aucune animation terminée.')}
         </div>
       )}
     </div>

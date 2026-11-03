@@ -39,6 +39,51 @@ export const SECTEURS_PRO = [
   'Association', 'Institution', 'Autre',
 ] as const
 
+/* « Autre » dans un selecteur de secteur : le pro precise son activite (03/11/2026).
+   Aucune colonne nouvelle : `secteur` garde la valeur « Autre » (les regroupements par secteur restent justes) et la precision
+   voyage dans `tags` sous la forme `secteur-autre:<precision>` (pros.tags existe deja). Cote demande de rattachement, la
+   colonne texte `categorie` porte « Autre : <precision> ». */
+export const SECTEUR_AUTRE = 'Autre'
+const PREFIXE_AUTRE = 'secteur-autre:'
+export const PRECISION_AUTRE_MAX = 80
+export function nettoyerPrecision(v: string | null | undefined): string { return (v ?? '').replace(/\s+/g, ' ').trim().slice(0, PRECISION_AUTRE_MAX) }
+export function tagSecteurAutre(precision: string | null | undefined): string | null {
+  const p = nettoyerPrecision(precision)
+  return p ? PREFIXE_AUTRE + p : null
+}
+export function lireSecteurAutre(tags: readonly string[] | null | undefined): string {
+  const t = (tags ?? []).find(x => typeof x === 'string' && x.indexOf(PREFIXE_AUTRE) === 0)
+  return t ? t.slice(PREFIXE_AUTRE.length) : ''
+}
+const PREFIXE_ACTIVITE = 'activite:'
+export function lireActivite(tags: readonly string[] | null | undefined): string {
+  const t = (tags ?? []).find(x => typeof x === 'string' && x.indexOf(PREFIXE_ACTIVITE) === 0)
+  return t ? t.slice(PREFIXE_ACTIVITE.length) : ''
+}
+/** Tags a ecrire : les tags existants, sans l'ancienne activite / precision, plus les nouvelles. `activite` = typologie choisie dans la liste
+ *  structuree (lib/activites) ; « Autre » (secteur ou activite) = precision libre. */
+export function tagsAvecSecteurAutre(tags: readonly string[] | null | undefined, secteur: string, precision: string, activite = ''): string[] {
+  const base = (tags ?? []).filter(x => !(typeof x === 'string' && (x.indexOf(PREFIXE_AUTRE) === 0 || x.indexOf(PREFIXE_ACTIVITE) === 0)))
+  const out = base.slice()
+  if (activite && activite !== SECTEUR_AUTRE) out.push(PREFIXE_ACTIVITE + activite.slice(0, PRECISION_AUTRE_MAX))
+  const nv = (secteur === SECTEUR_AUTRE || activite === SECTEUR_AUTRE) ? tagSecteurAutre(precision) : null
+  if (nv) out.push(nv)
+  return out
+}
+/** « Autre : Cave a bieres » ou le secteur tel quel. */
+export function libelleSecteur(secteur: string | null | undefined, tags?: readonly string[] | null): string {
+  const s = secteur ?? ''
+  const act = lireActivite(tags)
+  if (act && s !== SECTEUR_AUTRE) return `${s} · ${act}`
+  if (s === SECTEUR_AUTRE) { const p = lireSecteurAutre(tags); return p ? `${SECTEUR_AUTRE} : ${p}` : SECTEUR_AUTRE }
+  return s
+}
+/** Categorie de demande de rattachement : « Autre : precision » si precisee. */
+export function categorieAvecPrecision(categorie: string, precision: string): string {
+  const p = nettoyerPrecision(precision)
+  return categorie === SECTEUR_AUTRE && p ? `${SECTEUR_AUTRE} : ${p}` : categorie
+}
+
 /* Les deux profils du parcours pro, avec leurs propres mots. */
 export const PROFILS_PRO = [
   {
@@ -63,6 +108,10 @@ export interface FichePro {
   nom: string
   identifiant: string
   secteur: string
+  /** Precision de l'activite quand secteur = « Autre » (voir tagSecteurAutre). */
+  secteurAutre?: string
+  /** Typologie choisie dans la liste structuree (lib/activites), facultative. */
+  activite?: string
   adresse: string
   codePostal: string
   ville: string
@@ -88,7 +137,7 @@ export interface FichePro {
 
 export function ficheProVide(): FichePro {
   return {
-    profil: '', nom: '', identifiant: '', secteur: '', adresse: '', codePostal: '',
+    profil: '', nom: '', identifiant: '', secteur: '', secteurAutre: '', activite: '', adresse: '', codePostal: '',
     ville: '', siret: '', contact: '', roleContact: '', email: '', tel: '',
     motdepasse: '', notes: '',
     siren: '', formeJuridique: '', formeJuridiqueCode: '', codeNaf: '', activiteNaf: '',
@@ -246,7 +295,7 @@ export function lignePro(f: FichePro, cote: CotePro, statutSA: 'valide' | 'en_at
     tel: f.tel,
     notes: cote === 'sa' ? f.notes : '',
     statut: cote === 'pro' ? ('en_attente' as const) : statutSA,
-    tags: f.profil ? [f.profil] : [],
+    tags: tagsAvecSecteurAutre(f.profil ? [f.profil] : [], f.secteur, f.secteurAutre ?? '', f.activite ?? ''),
   }
 }
 

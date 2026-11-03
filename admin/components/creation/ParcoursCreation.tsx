@@ -37,7 +37,7 @@
  * + se_lots, crm_retours (demandes adressees a Flowin). Aucune table nouvelle.
  */
 
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { supabase, supabasePublic } from '@/lib/supabase'
 import { creerAnimation, enregistrerDemandeQuiz, enregistrerDemandeSuperEvent } from '@/lib/pro'
 import type { Banque, QuestionQuiz } from '@/lib/banques'
@@ -46,7 +46,7 @@ import { creerSuperEvent, slugSuperEvent, type SuperEvent } from '@/lib/nds'
 import type { PackParticipation } from '@/lib/commercial'
 import { GABARIT_MODULE, GABARIT_NOM, sorteBanque } from '@/lib/gabarit'
 import { libelleModule, libelleDates } from '@/lib/operations'
-import { SECTEURS_PRO } from '@/lib/proCreation'
+import { SECTEURS_PRO, ficheProVide } from '@/lib/proCreation'
 import { CHARTE_PRO as C, ACCENT_ANIM, ACCENT_SUPER } from '@/lib/charte'
 import { CARD, CHAMP, LABEL, BTN, BTN2, MUTED, choix } from '@/lib/proui'
 import { Ico, IcoModule } from '@/lib/proicons'
@@ -63,9 +63,19 @@ import { creerQrTrace, QR_PAR_DEFAUT, type TypeQr } from '@/lib/qrTraces'
 import SelecteurLot, { RecapLots, LogoSuperEvent, CarteSuperEvent } from '@/components/masters/SelecteurLot'
 import PersoMaster, { ChoixAchat, cfgMaster, MASTER_VIDE, type EtatMaster } from '@/components/masters/PersoMaster'
 import { DROITS_DEFAUT, type DroitsPro } from '@/lib/droitsPro'
+import { inscrirePro } from '@/lib/inscriptionPro'
+import { messageFr } from '@/lib/erreursFr'
+import PrecisionAutre from '@/components/creation/PrecisionAutre'
+import SelectActivite from '@/components/creation/SelectActivite'
+import GrilleTarifs from '@/components/creation/GrilleTarifs'
+import { SECTEUR_AUTRE, nettoyerPrecision, categorieAvecPrecision } from '@/lib/proCreation'
+import { texteDemandePack, packsPourSuperEvent, MENTION_TARIF_A_CONFIRMER, prixAffiche } from '@/lib/commercial'
+import { estFeteHautMoyenPays, cfgApercuDemo, estSuperEventDemo, FHMP_DEMO } from '@/lib/demoFetes'
+import { retourSur } from '@/lib/retour'
 
 type TypeOp = 'animation' | 'rejoindre' | 'super' | 'demande'
-export type ModeParcours = 'pro' | 'sa'
+/** `visiteur` : page publique /rejoindre, sans compte : on peut tout parcourir, mais l'envoi exige un compte pro. */
+export type ModeParcours = 'pro' | 'sa' | 'visiteur'
 type Lot = { id: string; nom: string; quantite: number; valeur: number; type: 'tirage' | 'instantane'; conditions: string }
 
 export interface ProNouvelle {
@@ -86,7 +96,7 @@ const JEUX: { m: string; t: string; s: string; banque: boolean }[] = [
   { m: 'tombola', t: 'Tombola', s: 'Inscription + grand tirage', banque: false },
   { m: 'vote', t: 'Vote', s: 'Vote produits / artistes', banque: false },
 ]
-const CATEGORIES = ['Boulangerie', 'Restaurant', 'Bar · Café', 'Caviste', 'Fleuriste', 'Librairie', 'Épicerie fine', 'Mode', 'Beauté · Coiffure', 'Décoration', 'Autre']
+/* Categories de commerce : lib/activites.ts (liste structuree par familles, source unique) ; SelectActivite. */
 const TEL_FLOWIN = '04 93 59 91 37'
 const MAIL_FLOWIN = 'flowinevent@gmail.com'
 const BASE = BASE_CANONIQUE
@@ -139,7 +149,7 @@ export const PC_CSS = `.nop-carte{position:relative;overflow:hidden;display:flex
   .pc-step.done{color:#16a34a;cursor:pointer}
   .pc-step.done .n{background:#16a34a}
   .pc-grille{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:26px;align-items:start}
-  @media (max-width:1020px){.pc-grille{grid-template-columns:1fr}}
+  @media (max-width:1020px){.pc-grille{grid-template-columns:minmax(0,1fr)}}
   .pc-qr{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
   @media (max-width:720px){.pc-qr{grid-template-columns:1fr}}
   .pc-qr-tuile{background:#fff;border:1.5px solid ${C.bordure};border-radius:16px;padding:16px;text-align:center}
@@ -182,7 +192,7 @@ export function BlocAide() {
   )
 }
 
-export default function ParcoursCreation({ mode = 'pro', pro, banques, supers, packs, typeInitial, seInitial, prefill, prosCatalogue = [], onChangerPro, droits = DROITS_DEFAUT }: {
+export default function ParcoursCreation({ mode = 'pro', pro, banques, supers, packs, typeInitial, seInitial, prefill, prosCatalogue = [], onChangerPro, droits = DROITS_DEFAUT, reprise = false }: {
   mode?: ModeParcours
   /** Droits donnes par le Super Admin (sql/06-droits-pro.sql). Sans effet en mode SA. */
   droits?: DroitsPro
@@ -198,9 +208,17 @@ export default function ParcoursCreation({ mode = 'pro', pro, banques, supers, p
   prosCatalogue?: ProCatalogue[]
   /** SA : revenir au choix du pro. */
   onChangerPro?: () => void
+  /** Visiteur de retour apres connexion / creation de compte : on restaure sa saisie et on l'amene a l'envoi. */
+  reprise?: boolean
 }) {
   const sa = mode === 'sa'
-  const p = pro ?? PRO_VIDE
+  const visiteur = mode === 'visiteur'
+  /* Visiteur : si une session pro existe deja (connecte, ou compte tout juste cree), c'est elle qui envoie la demande. */
+  const [proSession, setProSession] = useState<ProNouvelle | null>(null)
+  const [sessionVerifiee, setSessionVerifiee] = useState(!visiteur)
+  const p = pro ?? proSession ?? PRO_VIDE
+  /* Interface a carte et « mode autonome » : Super Admin, ou pro DEJA valide par Flowin. Les autres naviguent, mais envoient une demande. */
+  const autonome = sa || (!visiteur && p.statut !== 'en_attente')
   const [type, setType] = useState<TypeOp | null>(typeInitial ?? null)
   const [etape, setEtape] = useState(typeInitial && typeInitial !== 'demande' ? 1 : 0)
   const estSuper = type === 'super'
@@ -216,6 +234,7 @@ export default function ParcoursCreation({ mode = 'pro', pro, banques, supers, p
   const [persona, setPersona] = useState<'commerce' | 'annonceur'>('commerce')
   const [nomCommerce, setNomCommerce] = useState(p.nom ?? '')
   const [categorie, setCategorie] = useState('')
+  const [categorieAutre, setCategorieAutre] = useState('')
   const [adresse, setAdresse] = useState(p.adresse ?? '')
   const [cp, setCp] = useState(p.code_postal ?? '')
   const [ville, setVille] = useState(p.ville ?? '')
@@ -223,6 +242,32 @@ export default function ParcoursCreation({ mode = 'pro', pro, banques, supers, p
   const [uploadEnCours, setUploadEnCours] = useState(false)
   const [uploadErreur, setUploadErreur] = useState('')
   const se = supers.find(s => s.id === seId) ?? null
+  /* VISITEUR : coordonnees saisies a la fin (2e chemin d'inscription). Vide = on reprend nom / ville deja saisis plus haut. */
+  const [coNom, setCoNom] = useState('')
+  const [coSecteur, setCoSecteur] = useState('')
+  const [coSecteurAutre, setCoSecteurAutre] = useState('')
+  const [coContact, setCoContact] = useState('')
+  const [coEmail, setCoEmail] = useState('')
+  const [coTel, setCoTel] = useState('')
+  const [coVille, setCoVille] = useState('')
+  const [coMdp, setCoMdp] = useState('')
+  const [coMdp2, setCoMdp2] = useState('')
+  const compteCree = useRef<{ email: string; id: string } | null>(null)
+  const [attenteEmail, setAttenteEmail] = useState(false)
+  const coNomEff = coNom || nomCommerce
+  const coVilleEff = coVille || ville
+  const coSecteurEff = coSecteur || (categorie === SECTEUR_AUTRE ? SECTEUR_AUTRE : persona === 'commerce' ? 'Commerce & Négoce' : '')
+  const coSecteurAutreEff = coSecteurAutre || (categorie === SECTEUR_AUTRE ? categorieAutre : '')
+  const coordonneesKo: string | null =
+    !coNomEff.trim() ? 'Indiquez le nom de votre structure.'
+    : !coSecteurEff ? 'Choisissez votre secteur.'
+    : coSecteurEff === SECTEUR_AUTRE && nettoyerPrecision(coSecteurAutreEff).length < 3 ? 'Précisez votre activité.'
+    : !coContact.trim() ? 'Indiquez le nom du contact.'
+    : !/^[^@\s]+@[^@\s]+\.[^@\s]{2,}$/.test(coEmail.trim()) ? 'Indiquez un email valide.'
+    : !coTel.trim() ? 'Indiquez un téléphone.'
+    : !coVilleEff.trim() ? 'Indiquez la ville.'
+    : coMdp.length < 8 ? 'Choisissez un mot de passe d’au moins 8 caractères.'
+    : coMdp !== coMdp2 ? 'Les deux mots de passe ne sont pas identiques.' : null
 
   /* 2. Jeu */
   const [module_, setModule] = useState<string | null>(prefill?.module && JEUX.some(j => j.m === prefill.module) ? prefill.module : null)
@@ -248,7 +293,11 @@ export default function ParcoursCreation({ mode = 'pro', pro, banques, supers, p
   const [banqueSuggeree, setBanqueSuggeree] = useState<Banque | null>(null)
   const [validationSuggestions, setValidationSuggestions] = useState<'' | 'enregistrement' | 'ok' | 'echec'>('')
   const jeu = JEUX.find(j => j.m === module_)
-  const moduleActif = rejoindre ? (se?.module || GABARIT_MODULE) : module_
+  /* Apercu d'un super event : son jeu. « nds2026 » est le parcours des Nuits du Sud : il ne doit PAS servir d'apercu aux autres
+     operations (les Fetes du haut et moyen pays montraient le visuel Nuits du Sud) -> jeu Quiz + bonus du gabarit. */
+  const moduleActif = rejoindre
+    ? ((se?.module === 'nds2026' && se.id !== 'se-nds-2026') || !se?.module ? GABARIT_MODULE : se.module)
+    : module_
 
   /* 3. Lots */
   const [lots, setLots] = useState<Lot[]>([lotVide()])
@@ -271,9 +320,10 @@ export default function ParcoursCreation({ mode = 'pro', pro, banques, supers, p
   const diffQr = false /* remplace par les QR traces crees ci-dessous (lot QR) */
   const [qrBrouillons, setQrBrouillons] = useState<{ nom: string; support: string; type: TypeQr }[]>([])
   const [offre, setOffre] = useState('')
-  const packsProposes = !sa && rejoindre && seId === 'se-nds-2026' ? packs : []
-  const [packId, setPackId] = useState<string | null>(null)
-  useEffect(() => { if (packsProposes.length && !packId) setPackId(packsProposes[0].id) }, [packsProposes, packId])
+  /* Tarifs : grille a cocher (3 packs de nds-partenaire.html), pour PRESELECTIONNER la demande. Aucun prix invente, rien n'est facture. */
+  const [packChoisi, setPackChoisi] = useState<string | null>(null)
+  const packsSE = packsPourSuperEvent(se)
+  void packs
 
   /* Proposition de super event a Flowin (pro) */
   const [dNom, setDNom] = useState('')
@@ -309,6 +359,68 @@ export default function ParcoursCreation({ mode = 'pro', pro, banques, supers, p
     })()
   }, [p.id, p.partenaire_id])
 
+  /* VISITEUR : y a-t-il deja une session pro (connecte, ou compte tout juste cree) ? Sinon, l'envoi proposera de creer un compte. */
+  useEffect(() => {
+    if (!visiteur) return
+    let fini = false
+    ;(async () => {
+      try {
+        const { data: s } = await supabase.auth.getSession()
+        const uid = s.session?.user?.id
+        if (uid) {
+          const { data } = await supabase.from('pros').select('*').eq('auth_id', uid).order('created_at', { ascending: true }).limit(1)
+          const pr = ((data ?? [])[0] ?? null) as ProNouvelle | null
+          if (pr && !fini) {
+            setProSession(pr)
+            setNomCommerce(v => v || pr.nom || ''); setAdresse(v => v || pr.adresse || ''); setCp(v => v || pr.code_postal || ''); setVille(v => v || pr.ville || '')
+            setContactNom(pr.contact ?? ''); setContactTel(pr.tel ?? ''); setContactEmail(pr.email ?? '')
+          }
+        }
+      } catch { /* pas de session : le visiteur parcourt, puis cree son compte au moment d'envoyer */ }
+      if (!fini) setSessionVerifiee(true)
+    })()
+    return () => { fini = true }
+  }, [visiteur])
+
+  /* VISITEUR : la saisie est gardee sur l'appareil pendant la creation de compte / la connexion, puis restauree au retour (?reprise=1). */
+  const CLE_BROUILLON = 'flowin.rejoindre.brouillon.v1'
+  function sauverBrouillon() {
+    try {
+      window.localStorage.setItem(CLE_BROUILLON, JSON.stringify({ seId, persona, nomCommerce, categorie, categorieAutre, adresse, cp, ville, dateD, dateF, lots, offre, packChoisi, diffPhysique, diffDigital, coNom, coSecteur, coSecteurAutre, coContact, coEmail, coTel, coVille }))
+    } catch { /* navigation privee : le visiteur ressaisira */ }
+  }
+  useEffect(() => {
+    if (!visiteur || !reprise) return
+    try {
+      const t = window.localStorage.getItem(CLE_BROUILLON); if (!t) return
+      const b = JSON.parse(t) as Record<string, unknown>
+      if (typeof b.seId === 'string') setSeId(b.seId)
+      if (b.persona === 'commerce' || b.persona === 'annonceur') setPersona(b.persona)
+      if (typeof b.nomCommerce === 'string') setNomCommerce(b.nomCommerce)
+      if (typeof b.categorie === 'string') setCategorie(b.categorie)
+      if (typeof b.categorieAutre === 'string') setCategorieAutre(b.categorieAutre)
+      if (typeof b.adresse === 'string') setAdresse(b.adresse)
+      if (typeof b.cp === 'string') setCp(b.cp)
+      if (typeof b.ville === 'string') setVille(b.ville)
+      if (typeof b.dateD === 'string') setDateD(b.dateD)
+      if (typeof b.dateF === 'string') setDateF(b.dateF)
+      if (Array.isArray(b.lots) && b.lots.length) setLots(b.lots as Lot[])
+      if (typeof b.offre === 'string') setOffre(b.offre)
+      if (typeof b.packChoisi === 'string') setPackChoisi(b.packChoisi)
+      if (typeof b.diffPhysique === 'boolean') setDiffPhysique(b.diffPhysique)
+      if (typeof b.diffDigital === 'boolean') setDiffDigital(b.diffDigital)
+      if (typeof b.coNom === 'string') setCoNom(b.coNom)
+      if (typeof b.coSecteur === 'string') setCoSecteur(b.coSecteur)
+      if (typeof b.coSecteurAutre === 'string') setCoSecteurAutre(b.coSecteurAutre)
+      if (typeof b.coContact === 'string') setCoContact(b.coContact)
+      if (typeof b.coEmail === 'string') setCoEmail(b.coEmail)
+      if (typeof b.coTel === 'string') setCoTel(b.coTel)
+      if (typeof b.coVille === 'string') setCoVille(b.coVille)
+      setEtape(FIN)
+    } catch { /* brouillon illisible : on repart de zero */ }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [visiteur, reprise])
+
   /* Rejoindre : le super event choisi donne le jeu et la periode par defaut. */
   useEffect(() => {
     if (!rejoindre || !se) return
@@ -332,6 +444,7 @@ export default function ParcoursCreation({ mode = 'pro', pro, banques, supers, p
       ? (!seId ? 'Choisissez le super event.'
         : !nomCommerce.trim() ? 'Indiquez le nom.'
         : !categorie ? 'Choisissez la catégorie.'
+        : categorie === SECTEUR_AUTRE && nettoyerPrecision(categorieAutre).length < 3 ? 'Précisez votre activité.'
         : persona === 'commerce' && !adresse.trim() ? 'Indiquez l’adresse.'
         : !ville.trim() ? 'Indiquez la ville.' : null)
       : (!nom.trim() ? (estSuper ? 'Donnez un nom au super event.' : 'Donnez un nom à l’animation.')
@@ -344,7 +457,7 @@ export default function ParcoursCreation({ mode = 'pro', pro, banques, supers, p
       : module_ === 'vote' && !itemsOk ? 'Ajoutez au moins deux éléments.' : null,
     3: sansLots ? null : !lotsNommes.length ? 'Ajoutez au moins un lot.' : aUnTirage ? erreurTirage(tirage) : null,
     [ETAPE_PROS]: null,
-    [FIN]: packsProposes.length && !packId ? 'Choisissez un pack.' : null,
+    [FIN]: rejoindre && visiteur && !proSession ? coordonneesKo : null,
   }
 
   function aller(n: number) {
@@ -404,10 +517,10 @@ export default function ParcoursCreation({ mode = 'pro', pro, banques, supers, p
     ...(module_ === GABARIT_MODULE && bonusIds.length ? { bonusBanques: bonusIds } : {}),
   }), [module_, cfgJeu, jeu, banqueId, bonusIds])
   const saisie = useMemo(() => ({
-    nom: rejoindre ? nomCommerce : nom,
+    nom: rejoindre ? (nomCommerce || (estFeteHautMoyenPays(seId) ? FHMP_DEMO.nom : '')) : nom,
     lots: lotsNommes.map(l => ({ nom: l.nom, quantite: l.quantite, valeur: l.valeur, conditions: l.conditions })),
-    cfg: rejoindre ? undefined : { ...cfgContenu, ...cfgPresentation, ...(estSuper && logoUrl.trim() ? { logoUrl: logoUrl.trim() } : {}) },
-  }), [rejoindre, nomCommerce, nom, lotsNommes, cfgContenu, cfgPresentation, estSuper, logoUrl])
+    cfg: rejoindre ? cfgApercuDemo(seId) : { ...cfgContenu, ...cfgPresentation, ...(estSuper && logoUrl.trim() ? { logoUrl: logoUrl.trim() } : {}) },
+  }), [rejoindre, nomCommerce, nom, lotsNommes, cfgContenu, cfgPresentation, estSuper, logoUrl, seId])
   /* Station montree : celle du super event rejoint ; sinon la demo du module. */
   const stationApercu = rejoindre ? (se?.station ?? null) : null
 
@@ -415,22 +528,46 @@ export default function ParcoursCreation({ mode = 'pro', pro, banques, supers, p
   async function envoyer() {
     setEnvoi('envoi'); setErreur('')
     if (rejoindre) {
+      /* Demande a Flowin : le pack coche presélectionne la demande (texte dans `offre`, colonne existante, + colonnes
+         pack_souhaite / tarif_souhaite_ht si sql/13 est applique). Tarif a confirmer par Flowin : rien n'est facture. */
+      let proIdEnvoi = p.id
+      if (visiteur && !p.id) {
+        /* 2e chemin d'inscription : le compte pro se cree ici avec les coordonnees saisies (meme mecanisme que « Ma premiere fois »). */
+        if (coordonneesKo) { setEnvoi('echec'); setErreur(coordonneesKo); return }
+        const fiche = {
+          ...ficheProVide(), profil: '' as const, nom: coNomEff.trim(), secteur: coSecteurEff, secteurAutre: coSecteurEff === SECTEUR_AUTRE ? nettoyerPrecision(coSecteurAutreEff) : '',
+          contact: coContact.trim(), email: coEmail.trim(), tel: coTel.trim(), ville: coVilleEff.trim(), adresse: adresse.trim(), codePostal: cp.trim(), motdepasse: coMdp,
+          activite: categorie !== SECTEUR_AUTRE ? categorie : '',
+        }
+        const ins = await inscrirePro(supabase, fiche, compteCree)
+        if (!ins.ok || !ins.proId) { setEnvoi('echec'); setErreur(ins.erreur ?? 'Création du compte impossible.'); return }
+        proIdEnvoi = ins.proId
+        if (!ins.session) setAttenteEmail(true)
+      }
+      const packTexte = texteDemandePack(packChoisi, packsSE)
       const ligne = {
-        pro_id: p.id, super_event_id: seId, persona,
-        nom_commerce: nomCommerce.trim(), categorie,
+        pro_id: proIdEnvoi, super_event_id: seId, persona,
+        nom_commerce: nomCommerce.trim(), categorie: categorieAvecPrecision(categorie, categorieAutre),
         adresse: persona === 'commerce' ? adresse.trim() : null,
         code_postal: persona === 'commerce' ? (cp.trim() || null) : null, ville: ville.trim(),
-        regle_jeu: persona === 'commerce' ? moduleActif : null,
-        offre: offre.trim() || null,
+        regle_jeu: persona === 'commerce' ? (se?.module || GABARIT_MODULE) : null,
+        offre: [packTexte, offre.trim()].filter(Boolean).join('\n\n') || null,
         date_debut_souhaite: dateD || null, date_fin_souhaite: dateF || null,
         lots: persona === 'commerce' ? lotsNommes.map(l => ({ titre: l.nom.trim(), valeur_euros: Number(l.valeur) || 0, quantite: Number(l.quantite) || 1, conditions: l.conditions.trim() })) : [],
-        pack_id: packId,
         diffusion_physique: diffPhysique, diffusion_digital: diffDigital, diffusion_qr_tracking: diffQr,
         statut: 'en_attente',
       }
+      const packExtra = packsSE.find(x => x.cle === packChoisi)
+      const extras = packExtra ? { pack_souhaite: packExtra.cle, tarif_souhaite_ht: packExtra.prixHt } : {}
+      /* Sans compte, l'envoi est impossible (le bouton est bloque) ; garde-fou si l'appel arrive quand meme. */
       if (!sa) {
-        const { error } = await supabase.from('demandes_rattachement_super_event').insert(ligne)
-        if (error) { setEnvoi('echec'); setErreur(error.message); return }
+        let { error } = await supabase.from('demandes_rattachement_super_event').insert({ ...ligne, ...extras })
+        /* sql/13 pas encore applique : colonnes inconnues -> meme demande sans elles (le pack reste dans `offre`). */
+        if (error && Object.keys(extras).length && (error.code === 'PGRST204' || error.code === '42703' || /column/i.test(error.message))) {
+          ;({ error } = await supabase.from('demandes_rattachement_super_event').insert(ligne))
+        }
+        if (error) { setEnvoi('echec'); setErreur(messageFr(error)); return }
+        try { window.localStorage.removeItem(CLE_BROUILLON) } catch { /* rien */ }
         setFait({ eventId: null, superId: seId }); setEnvoi('')
         return
       }
@@ -440,12 +577,12 @@ export default function ParcoursCreation({ mode = 'pro', pro, banques, supers, p
       const coords = persona === 'commerce' ? await geocoderAdresse(ligne.adresse, ligne.code_postal, ligne.ville).catch(() => null) : null
       const { data: ins, error: eIns } = await supabasePublic.from('demandes_rattachement_super_event')
         .insert({ ...ligne, ...(coords ? { lat: coords.lat, lng: coords.lng } : {}) }).select('id').single()
-      if (eIns || !ins) { setEnvoi('echec'); setErreur(eIns?.message ?? 'demande non enregistrée'); return }
+      if (eIns || !ins) { setEnvoi('echec'); setErreur(eIns ? messageFr(eIns) : 'Votre demande n’a pas pu être enregistrée.'); return }
       const { data, error } = await supabasePublic.rpc('approuver_demande_rattachement', { p_id: (ins as { id: number }).id })
       const r = (data ?? {}) as { ok?: boolean; erreur?: string; event_id?: string | null }
       if (error || !r.ok) {
         setEnvoi('echec')
-        setErreur(`la demande est enregistrée mais le rattachement n’a pas abouti (${error?.message ?? r.erreur ?? 'erreur inconnue'}) : elle reste dans « Demandes de participation »`)
+        setErreur(`la demande est enregistrée mais le rattachement n’a pas abouti (${error ? messageFr(error) : r.erreur ?? 'erreur inconnue'}) : elle reste dans « Demandes de participation »`)
         return
       }
       const infoQr = r.event_id ? await enregistrerQr(r.event_id) : ''
@@ -476,7 +613,7 @@ export default function ParcoursCreation({ mode = 'pro', pro, banques, supers, p
       let info = r.erreur
       if (lignes.length) {
         const { error } = await supabasePublic.from('se_lots').insert(lignes)
-        if (error) info = `Super event créé, mais ses lots n’ont pas été enregistrés — ${error.message}`
+        if (error) info = `Super event créé, mais ses lots n’ont pas été enregistrés — ${messageFr(error)}`
       }
       setFait({ eventId: null, superId: id, info }); setEnvoi('')
       return
@@ -555,7 +692,7 @@ export default function ParcoursCreation({ mode = 'pro', pro, banques, supers, p
               L’équipe Flowin vous recontacte pour monter « {dNom.trim()} » avec vous. Une fois le super event créé, vous le rejoignez depuis cet écran.
             </div>
             <div style={{ display: 'flex', gap: 10, justifyContent: 'center', flexWrap: 'wrap', marginTop: 18 }}>
-              <a style={{ ...BTN2, textDecoration: 'none' }} href={`/pro${q}`}>Mes opérations</a>
+              <a style={{ ...BTN2, display: 'inline-block', textDecoration: 'none' }} href={`/pro${q}`}>Mes opérations</a>
             </div>
           </div>
           <BlocAide />
@@ -588,9 +725,15 @@ export default function ParcoursCreation({ mode = 'pro', pro, banques, supers, p
           </div>
           <div style={{ padding: 22 }}>
             {fait.info && <div style={{ fontSize: 13, color: '#B45309', fontWeight: 700, marginBottom: 14 }}>{fait.info}</div>}
+            {rejoindre && visiteur && (
+              <div data-compte-cree role="status" style={{ fontSize: 13, color: '#15803D', fontWeight: 700, marginBottom: 14, lineHeight: 1.5 }}>
+                {coEmail.trim() || proSession ? 'Votre compte pro est créé.' : ''}{' '}
+                {attenteEmail ? 'Confirmez votre adresse email (message envoyé), puis connectez-vous pour suivre votre demande.' : <a href="/pro" style={{ color: C.accent }}>Suivre ma demande dans mon espace pro →</a>}
+              </div>
+            )}
             {rejoindre && (
               <div style={{ border: `1.5px solid ${C.bordure}`, borderRadius: 18, padding: '6px 16px', marginBottom: 16, background: '#fff' }}>
-                {[['Événement', se?.nom ?? '—'], ['Jeu', libelleModule(moduleActif || GABARIT_MODULE)], ['Statut', sa ? 'Station créée' : 'En attente de validation']].map(([k, v]) => (
+                {[['Super event', se?.nom ?? '—'], ['Jeu', libelleModule(moduleActif || GABARIT_MODULE)], ['Statut', sa ? 'Station créée' : 'En attente de validation']].map(([k, v]) => (
                   <div key={k} style={{ display: 'flex', justifyContent: 'space-between', gap: 12, padding: '11px 0', borderTop: k === 'Événement' ? 'none' : `1px solid ${C.bordure}` }}>
                     <span style={{ ...MUTED, fontSize: 13 }}>{k}</span><b style={{ fontSize: 14 }}>{v}</b>
                   </div>
@@ -623,9 +766,9 @@ export default function ParcoursCreation({ mode = 'pro', pro, banques, supers, p
                 <div style={{ fontSize: 13, fontWeight: 800, margin: '18px 0 8px' }}>Le texte pour l’annoncer</div>
                 <textarea readOnly value={texte} style={{ ...CHAMP, minHeight: 150, resize: 'vertical' }} />
                 <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginTop: 10 }}>
-                  <a style={{ ...BTN2, textDecoration: 'none' }} target="_blank" rel="noreferrer"
+                  <a style={{ ...BTN2, display: 'inline-block', textDecoration: 'none' }} target="_blank" rel="noreferrer"
                     href={`https://mail.google.com/mail/?view=cm&fs=1&su=${encodeURIComponent(nomAffiche)}&body=${encodeURIComponent(texte)}`}>Email</a>
-                  <a style={{ ...BTN2, textDecoration: 'none' }} target="_blank" rel="noreferrer" href={`https://wa.me/?text=${encodeURIComponent(texte)}`}>WhatsApp</a>
+                  <a style={{ ...BTN2, display: 'inline-block', textDecoration: 'none' }} target="_blank" rel="noreferrer" href={`https://wa.me/?text=${encodeURIComponent(texte)}`}>WhatsApp</a>
                   <button style={BTN2} onClick={() => navigator.clipboard?.writeText(texte)}>Copier (Instagram, SMS…)</button>
                 </div>
               </>
@@ -636,14 +779,14 @@ export default function ParcoursCreation({ mode = 'pro', pro, banques, supers, p
             <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginTop: 22 }}>
               {sa ? (
                 <>
-                  {fait.superId && (estSuper || rejoindre) && <a style={{ ...BTN, textDecoration: 'none' }} href={`/dashboard/operations/${encodeURIComponent(fait.superId)}`}>Ouvrir le super event →</a>}
-                  {!estSuper && !rejoindre && <a style={{ ...BTN, textDecoration: 'none' }} href="/dashboard/events">Voir les animations →</a>}
-                  {p.id && <a style={{ ...BTN2, textDecoration: 'none' }} href={`/pro/historique${q}${opCle ? `&op=${encodeURIComponent(opCle)}` : ''}`}>Voir l’espace du pro</a>}
+                  {fait.superId && (estSuper || rejoindre) && <a style={{ ...BTN, display: 'inline-block', textDecoration: 'none' }} href={`/dashboard/operations/${encodeURIComponent(fait.superId)}`}>Ouvrir le super event →</a>}
+                  {!estSuper && !rejoindre && <a style={{ ...BTN, display: 'inline-block', textDecoration: 'none' }} href="/dashboard/events">Voir les animations →</a>}
+                  {p.id && <a style={{ ...BTN2, display: 'inline-block', textDecoration: 'none' }} href={`/pro/historique${q}${opCle ? `&op=${encodeURIComponent(opCle)}` : ''}`}>Voir l’espace du pro</a>}
                 </>
               ) : (
                 <>
-                  {opCle && <a style={{ ...BTN, textDecoration: 'none' }} href={`/pro/historique${q}&op=${encodeURIComponent(opCle)}`}>Ouvrir mon opération →</a>}
-                  <a style={{ ...BTN2, textDecoration: 'none' }} href={`/pro${q}`}>Mes opérations</a>
+                  {opCle && <a style={{ ...BTN, display: 'inline-block', textDecoration: 'none' }} href={`/pro/historique${q}&op=${encodeURIComponent(opCle)}`}>Ouvrir mon opération →</a>}
+                  <a style={{ ...BTN2, display: 'inline-block', textDecoration: 'none' }} href={`/pro${q}`}>Mes opérations</a>
                 </>
               )}
             </div>
@@ -678,7 +821,7 @@ export default function ParcoursCreation({ mode = 'pro', pro, banques, supers, p
           </div>
           {sa && onChangerPro && <button onClick={onChangerPro} style={{ ...BTN2, marginLeft: 'auto', padding: '9px 16px', fontSize: 13 }}>Changer de pro</button>}
         </div>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(260px,1fr))', gap: 16 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(min(260px,100%),1fr))', gap: 16 }}>
           {cartes.map(c => (
             <button key={c.t} className={`nop-carte${type === c.t ? ' nop-actif' : ''}`}
               style={{ ...choix(false), padding: '34px 26px 28px', background: '#fff', ['--acc' as string]: c.accent, ['--acc-tint' as string]: `${c.accent}17` } as React.CSSProperties}
@@ -698,7 +841,7 @@ export default function ParcoursCreation({ mode = 'pro', pro, banques, supers, p
             <Champ label="Nom envisagé"><input style={CHAMP} value={dNom} onChange={e => setDNom(e.target.value)} placeholder="Ex. Fête des commerçants 2027" /></Champ>
             <Champ label="Période souhaitée"><input style={CHAMP} value={dDates} onChange={e => setDDates(e.target.value)} placeholder="Ex. du 12 au 20 juin 2027" /></Champ>
             <Champ label="Votre projet"><textarea style={{ ...CHAMP, minHeight: 84 }} value={dDescription} onChange={e => setDDescription(e.target.value)} placeholder="Le lieu, le nombre de commerces envisagés, le public…" /></Champ>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(180px,1fr))', gap: 10 }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(min(180px,100%),1fr))', gap: 10 }}>
               <Champ label="Personne à contacter"><input style={CHAMP} value={contactNom} onChange={e => setContactNom(e.target.value)} /></Champ>
               <Champ label="Téléphone"><input style={CHAMP} value={contactTel} onChange={e => setContactTel(e.target.value)} /></Champ>
               <Champ label="Email"><input style={CHAMP} value={contactEmail} onChange={e => setContactEmail(e.target.value)} /></Champ>
@@ -802,7 +945,12 @@ export default function ParcoursCreation({ mode = 'pro', pro, banques, supers, p
           {etape === 1 && rejoindre && (
             <>
               <Titre t="Quel super event ?" s="Choisissez l’opération : son jeu est déjà choisi par l’organisateur." />
-              {supers.some(s => s.lat != null && s.lng != null) && (
+              {visiteur && (
+                <div role="note" data-visiteur-info style={{ background: C.violetClair, border: `1px solid ${C.bordureChamp}`, borderRadius: 14, padding: '10px 14px', marginBottom: 14, fontSize: 13, lineHeight: 1.55 }}>
+                  <b>Vous parcourez sans compte.</b> Choisissez l’opération, le jeu, les lots, la diffusion et regardez l’aperçu en direct. Pour <b>envoyer votre demande à Flowin</b>, il faudra un compte pro (gratuit, créé en 2 minutes) : vous le créerez à la dernière étape et votre saisie sera conservée.
+                </div>
+              )}
+              {autonome && supers.some(s => s.lat != null && s.lng != null) && (
                 <div style={{ marginBottom: 14 }}>
                   <SuperEventMap
                     lieux={supers.map(s => ({ id: s.id, nom: s.nom, lat: s.lat ?? null, lng: s.lng ?? null, module: s.module, couleur: ACCENT_SUPER }))}
@@ -812,9 +960,9 @@ export default function ParcoursCreation({ mode = 'pro', pro, banques, supers, p
                 </div>
               )}
               {supers.length === 0 && <div style={{ fontSize: 13, ...MUTED, marginBottom: 12 }}>Aucun super event ouvert aux inscriptions pour le moment.</div>}
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(300px,1fr))', gap: 10, marginBottom: 18 }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(min(300px,100%),1fr))', gap: 10, marginBottom: 18 }}>
                 {supers.map(s => (
-                  <CarteSuperEvent key={s.id} nom={s.nom} dates={libelleDates(s.date_d, s.date_f)} jeu={libelleModule(s.module || GABARIT_MODULE)} actif={seId === s.id} onClick={() => setSeId(s.id)} />
+                  <CarteSuperEvent key={s.id} nom={s.nom} dates={(s.date_d ? libelleDates(s.date_d, s.date_f) : '[dates à compléter]') + (estSuperEventDemo(s) ? ' · DÉMO' : '')} jeu={libelleModule(s.module || GABARIT_MODULE)} actif={seId === s.id} onClick={() => setSeId(s.id)} />
                 ))}
               </div>
               <div style={{ display: 'flex', gap: 8, marginBottom: 16, flexWrap: 'wrap' }}>
@@ -826,10 +974,15 @@ export default function ParcoursCreation({ mode = 'pro', pro, banques, supers, p
                 <input style={CHAMP} value={nomCommerce} onChange={e => setNomCommerce(e.target.value)} />
               </Champ>
               <Champ label={persona === 'commerce' ? 'Catégorie' : 'Secteur d’activité'}>
-                <select style={CHAMP} value={categorie} onChange={e => setCategorie(e.target.value)}>
-                  <option value="">— Choisir —</option>
-                  {(persona === 'commerce' ? CATEGORIES : (SECTEURS_PRO as readonly string[])).map(c => <option key={c} value={c}>{c}</option>)}
-                </select>
+                {persona === 'commerce'
+                  ? <SelectActivite id="rej-categorie" style={CHAMP} valeur={categorie} onChange={setCategorie} />
+                  : (
+                    <select style={CHAMP} value={categorie} onChange={e => setCategorie(e.target.value)}>
+                      <option value="">— Choisir —</option>
+                      {(SECTEURS_PRO as readonly string[]).map(c => <option key={c} value={c}>{c}</option>)}
+                    </select>
+                  )}
+                <PrecisionAutre secteur={categorie} valeur={categorieAutre} onChange={setCategorieAutre} id="rej-categorie-autre" style={{ ...CHAMP }} />
               </Champ>
               {persona === 'commerce' && (
                 <Champ label="Adresse"><input style={CHAMP} value={adresse} onChange={e => setAdresse(e.target.value)} placeholder="N°, rue" /></Champ>
@@ -864,7 +1017,7 @@ export default function ParcoursCreation({ mode = 'pro', pro, banques, supers, p
           {etape === 2 && !rejoindre && (
             <>
               <Titre t="Quel jeu ?" s={estSuper ? 'Choisi une fois pour tout le super event : chaque station le propose. Tirage au sort uniquement.' : 'Touchez un jeu : il s’affiche à droite tel que les clients le verront.'} />
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(170px,1fr))', gap: 10, marginBottom: 18 }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(min(170px,100%),1fr))', gap: 10, marginBottom: 18 }}>
                 {jeuxProposes.map(g => (
                   <button key={g.m} style={{ ...choix(module_ === g.m), display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: 6 }} onClick={() => { if (module_ !== g.m) { setModule(g.m); setCfgJeu({}) } }}>
                     <span style={{ width: 40, height: 40, borderRadius: 999, background: module_ === g.m ? C.accent : `${C.accent}14`, color: module_ === g.m ? '#fff' : C.accent, display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}><IcoModule module={g.m} size={20} /></span>
@@ -898,7 +1051,7 @@ export default function ParcoursCreation({ mode = 'pro', pro, banques, supers, p
                     )}
                   </div>
                   <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginTop: 10 }}>
-                    {(sa || droits.creer_banques) && <a href={sa ? '/dashboard/banques' : `/pro/banques/nouvelle${q}&tags=quiz&depuis=jeu`} target="_blank" rel="noreferrer" style={{ ...BTN2, textDecoration: 'none', padding: '9px 16px', fontSize: 13 }}>+ Créer une banque</a>}
+                    {(sa || droits.creer_banques) && <a href={sa ? '/dashboard/banques' : `/pro/banques/nouvelle${q}&tags=quiz&depuis=jeu`} target="_blank" rel="noreferrer" style={{ ...BTN2, display: 'inline-block', textDecoration: 'none', padding: '9px 16px', fontSize: 13 }}>+ Créer une banque</a>}
                     <button style={{ ...BTN2, padding: '9px 16px', fontSize: 13, ...(panneauSuggestions ? { borderColor: C.magenta } : {}) }} onClick={() => { setPanneauSuggestions(v => !v); setVoieFlowin(false) }}>3 questions suggérées, à adapter</button>
                     {!sa && <button style={{ ...BTN2, padding: '9px 16px', fontSize: 13, ...(voieFlowin ? { borderColor: C.magenta } : {}) }} onClick={() => { setVoieFlowin(true); setBanqueId(null); setPanneauSuggestions(false) }}>Je n’ai pas de questions : demander à Flowin</button>}
                   </div>
@@ -1137,22 +1290,7 @@ export default function ParcoursCreation({ mode = 'pro', pro, banques, supers, p
                 </Champ>
               )}
 
-              {packsProposes.length > 0 && (
-                <>
-                  <div style={{ fontSize: 14, fontWeight: 800, margin: '14px 0 8px' }}>Votre participation</div>
-                  {packsProposes.map(pk => (
-                    <button key={pk.id} style={{ ...choix(packId === pk.id), width: '100%', marginBottom: 8 }} onClick={() => setPackId(pk.id)}>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', gap: 10 }}>
-                        <b>{pk.nom}</b><b>{pk.prix_ht.toLocaleString('fr-FR')} € HT</b>
-                      </div>
-                      {pk.sous_titre && <div style={{ fontSize: 12.5, ...MUTED }}>{pk.sous_titre}</div>}
-                    </button>
-                  ))}
-                </>
-              )}
-              {rejoindre && !sa && !packsProposes.length && se?.frais_pro != null && (
-                <div style={{ fontSize: 13, marginTop: 8 }}>Frais de participation : <b>{se.frais_pro} € HT</b></div>
-              )}
+              {rejoindre && !sa && <GrilleTarifs valeur={packChoisi} onChange={setPackChoisi} accent={ACCENT_SUPER} packs={packsSE} />}
 
               <div style={{ fontSize: 14, fontWeight: 800, margin: '20px 0 8px' }}>Récapitulatif</div>
               <div style={{ border: `1px solid ${C.bordure}`, borderRadius: 14, overflow: 'hidden' }}>
@@ -1161,6 +1299,7 @@ export default function ParcoursCreation({ mode = 'pro', pro, banques, supers, p
                   ...(sa && p.id && !estSuper ? [['Pro', p.nom ?? p.id]] : []),
                   rejoindre ? ['Super event', se?.nom ?? '—'] : ['Nom', nom || '—'],
                   ...(rejoindre ? [['Nom affiché', nomCommerce || '—']] : []),
+                  ...(rejoindre && !sa ? [['Tarif souhaité', (() => { const pk = packsSE.find(x => x.cle === packChoisi); return pk ? `${pk.nom} · ${prixAffiche(pk)} (${MENTION_TARIF_A_CONFIRMER.toLowerCase()})` : 'Aucun pack coché' })()]] : []),
                   ...(estSuper ? [['Identifiant', slugSuperEvent(nom) || '—']] : []),
                   ['Dates', dateD ? libelleDates(dateD, dateF || null) : 'Non précisées'],
                   ['Jeu', libelleModule(moduleActif)],
@@ -1177,12 +1316,41 @@ export default function ParcoursCreation({ mode = 'pro', pro, banques, supers, p
               </div>
 
               {envoi === 'echec' && <div style={{ fontSize: 13, color: '#B91C1C', fontWeight: 700, marginTop: 12 }}>Enregistrement impossible{erreur ? ` — ${erreur.replace(/\.+$/, '')}` : ''}. Réessayez.</div>}
+              {rejoindre && visiteur && sessionVerifiee && !proSession && (
+                <div data-compte-requis data-coordonnees role="region" aria-label="Vos coordonnées" style={{ border: `2px solid ${ACCENT_SUPER}`, borderRadius: 16, padding: '14px 16px', marginTop: 16, background: '#FFF7ED' }}>
+                  <div style={{ fontSize: 15, fontWeight: 800 }}>Dernière étape : vos coordonnées</div>
+                  <div style={{ fontSize: 13, lineHeight: 1.55, marginTop: 4, marginBottom: 12 }}>
+                    Flowin vous rappelle pour valider votre participation. Vos coordonnées créent aussi votre <b>espace pro gratuit</b> pour suivre la demande. Rien n’est enregistré avant « Envoyer ma demande à Flowin ».
+                  </div>
+                  <Champ label="Nom de la structure *"><input data-co="nom" style={CHAMP} value={coNomEff} onChange={e => setCoNom(e.target.value)} autoComplete="organization" /></Champ>
+                  <Champ label="Secteur *">
+                    <select data-co="secteur" style={CHAMP} value={coSecteurEff} onChange={e => setCoSecteur(e.target.value)}>
+                      <option value="">Choisir…</option>
+                      {SECTEURS_PRO.map(x => <option key={x} value={x}>{x}</option>)}
+                    </select>
+                    <PrecisionAutre secteur={coSecteurEff} valeur={coSecteurAutreEff} onChange={setCoSecteurAutre} id="co-secteur-autre" style={{ ...CHAMP }} />
+                  </Champ>
+                  <Champ label="Contact (prénom et nom) *"><input data-co="contact" style={CHAMP} value={coContact} onChange={e => setCoContact(e.target.value)} autoComplete="name" /></Champ>
+                  <Champ label="Email *"><input data-co="email" type="email" inputMode="email" style={CHAMP} value={coEmail} onChange={e => setCoEmail(e.target.value)} autoComplete="email" /></Champ>
+                  <Champ label="Téléphone *"><input data-co="tel" type="tel" inputMode="tel" style={CHAMP} value={coTel} onChange={e => setCoTel(e.target.value)} autoComplete="tel" /></Champ>
+                  <Champ label="Ville *"><input data-co="ville" style={CHAMP} value={coVilleEff} onChange={e => setCoVille(e.target.value)} autoComplete="address-level2" /></Champ>
+                  <Champ label="Mot de passe de votre espace pro (8 caractères minimum) *"><input data-co="mdp" type="password" style={CHAMP} value={coMdp} onChange={e => setCoMdp(e.target.value)} autoComplete="new-password" /></Champ>
+                  <Champ label="Confirmez le mot de passe *"><input data-co="mdp2" type="password" style={CHAMP} value={coMdp2} onChange={e => setCoMdp2(e.target.value)} autoComplete="new-password" /></Champ>
+                  <div style={{ fontSize: 13, marginTop: 4 }}>
+                    Vous avez déjà un compte ?{' '}
+                    <a href={`/pro/connexion?retour=${encodeURIComponent('/rejoindre?se=' + seId + '&reprise=1')}`} onClick={sauverBrouillon} style={{ color: C.accent, fontWeight: 800 }}>Me connecter</a>
+                  </div>
+                </div>
+              )}
+              {rejoindre && visiteur && proSession && (
+                <div role="status" style={{ fontSize: 13, color: '#15803D', fontWeight: 700, marginTop: 14 }}>Connecté : {proSession.nom ?? 'votre compte pro'}. Votre demande partira de ce compte.</div>
+              )}
               {bloque[FIN] && <div style={{ fontSize: 12.5, color: '#B45309', fontWeight: 700, marginTop: 12, textAlign: 'right' }}>{bloque[FIN]}</div>}
               <div style={{ display: 'flex', justifyContent: 'space-between', gap: 10, marginTop: 20 }}>
                 <button style={BTN2} onClick={precedent}>← Précédent</button>
                 <button style={{ ...BTN, opacity: envoi === 'envoi' || bloque[FIN] ? 0.5 : 1 }} disabled={envoi === 'envoi' || !!bloque[FIN]} onClick={envoyer}>
                   {envoi === 'envoi' ? 'Enregistrement…'
-                    : rejoindre ? (sa ? 'Rattacher au super event' : 'Envoyer ma demande')
+                    : rejoindre ? (sa ? 'Rattacher au super event' : 'Envoyer ma demande à Flowin')
                     : estSuper ? 'Créer le super event'
                     : sa ? 'Créer l’animation' : 'Créer mon animation'}
                 </button>

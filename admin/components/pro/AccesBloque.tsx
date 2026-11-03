@@ -5,6 +5,7 @@
  * encore valide. Il retrouve sa commande, ses coordonnees de virement, et l'espace s'ouvre
  * tout seul des que le paiement est valide (virement : validation par l'equipe Flowin).
  */
+import LienBonCommande from './LienBonCommande'
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { CHARTE_PRO as C } from '@/lib/charte'
@@ -41,7 +42,7 @@ export default function AccesBloque({ proId }: { proId: string }) {
       )}
       {c === null && (
         <div style={{ marginTop: 16 }}>
-          <a href="/bon-commande-animation.html" style={{ ...BTN, display: 'inline-block', textDecoration: 'none' }}>Choisir mon offre et signer</a>
+          <LienBonCommande proId={proId} style={{ ...BTN, display: 'inline-block', textDecoration: 'none' }}>Choisir mon offre et signer</LienBonCommande>
         </div>
       )}
       <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginTop: 18 }}>

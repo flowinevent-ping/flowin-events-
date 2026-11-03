@@ -14,6 +14,7 @@
 import { useEffect, useState } from 'react'
 import { PageHeader, SectionHeader } from '@/components/dashboard/DashboardUI'
 import { useDashboard } from '@/contexts/DashboardContext'
+import { GARANTIE_ACTIVE } from '@/lib/flowinConfig'
 import { fetchCommConfig, CONTACT_PARTENAIRE, type CommConfig } from '@/lib/comm'
 import { fetchSuperEvents, type SuperEvent } from '@/lib/nds'
 import { fetchDocumentsLegaux, type DocumentLegal } from '@/lib/administratif'
@@ -71,6 +72,15 @@ export default function Page() {
         est signalé, avec l&apos;endroit où ça se règle.
       </div>
 
+      <SectionHeader>Offres commerciales</SectionHeader>
+      <Bloc titre="Interrupteur central">
+        <Ligne
+          cle="Offre satisfait ou remboursé"
+          valeur={GARANTIE_ACTIVE ? 'Affichée' : 'Suspendue'}
+          note="Se règle dans admin/public/flowin-config.js (GARANTIE_ACTIVE), puis « node admin/scripts/appliquer-config.mjs » et redéploiement de notify-commande-animation. Suspendue : l'offre n'apparaît ni sur le bon de commande, ni dans les PDF, emails, CGV, plaquettes et espace pro. Rien n'est supprimé."
+        />
+      </Bloc>
+
       <SectionHeader>Coordonnées de contact</SectionHeader>
       <Bloc titre="Supports partenaires et clients">
         <Ligne cle="Email" valeur={CONTACT_PARTENAIRE.email} />
@@ -82,8 +92,8 @@ export default function Page() {
       </Bloc>
 
       <SectionHeader>Communication</SectionHeader>
-      <Bloc titre="Configuration de l'événement en cours">
-        <Ligne cle="Événement" valeur={cfg?.evenement ?? absent} />
+      <Bloc titre="Configuration du super event en cours">
+        <Ligne cle="Super event" valeur={cfg?.evenement ?? absent} />
         <Ligne cle="Édition" valeur={cfg?.edition ?? absent} />
         <Ligne cle="Lieu" valeur={cfg?.lieu ?? absent} />
         <Ligne
@@ -108,7 +118,7 @@ export default function Page() {
       <SectionHeader>Volumétrie</SectionHeader>
       <Bloc titre="Données chargées">
         <Ligne cle="Super events" valeur={String(supers.length)} />
-        <Ligne cle="Événements" valeur={String(events.length)} />
+        <Ligne cle="Animations" valeur={String(events.length)} />
         <Ligne cle="Partenaires" valeur={String(partenaires.length)} />
         <Ligne cle="Professionnels" valeur={String(pros.length)} />
         <Ligne cle="Joueurs CRM" valeur={String(joueurs.length)} />

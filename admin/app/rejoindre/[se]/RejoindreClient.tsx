@@ -42,7 +42,7 @@ function slug(s: string): string {
 }
 
 export default function RejoindreClient({ se }: { se: SE }) {
-  const frais = se.frais_pro ?? 49
+  /* Plus aucun prix de repli (« 49 € HT » etait invente) : sans pack, « Tarif à confirmer par Flowin ». */
   const [etape, setEtape] = useState<Etape>('intro')
   const [anim, setAnim] = useState(0)
   const [done, setDone] = useState(false)
@@ -66,7 +66,7 @@ export default function RejoindreClient({ se }: { se: SE }) {
     fetchPacksParticipation().then(ps => { setPacks(ps); if (ps.length) setPackId(ps[0].id) })
   }, [se.id])
   const packChoisi = packs.find(p => p.id === packId) ?? null
-  const prixAffiche = packChoisi ? packChoisi.prix_ht : frais
+  const prixAffiche: number | null = packChoisi ? packChoisi.prix_ht : null
 
   function set<K extends keyof typeof f>(k: K, v: string) { setF(p => ({ ...p, [k]: v })) }
 
@@ -230,8 +230,8 @@ export default function RejoindreClient({ se }: { se: SE }) {
                   Nous validons votre commerce sous 24–48h. Votre <strong>QR à afficher en boutique</strong> et votre <strong>tableau de bord</strong> seront activés à ce moment-là.
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '14px 16px', border: `1px solid ${CHARTE.bordure}`, borderRadius: 12 }}>
-                  <span style={{ fontSize: 13.5, color: CHARTE.attenue }}>{packChoisi ? packChoisi.nom : 'Frais de participation'}</span>
-                  <span style={{ fontSize: 18, fontWeight: 800 }}>{prixAffiche.toLocaleString('fr-FR')} € HT</span>
+                  <span style={{ fontSize: 13.5, color: CHARTE.attenue }}>{packChoisi ? packChoisi.nom : 'Participation'}</span>
+                  <span style={{ fontSize: 18, fontWeight: 800 }}>{prixAffiche !== null ? `${prixAffiche.toLocaleString('fr-FR')} € HT` : 'Tarif à confirmer par Flowin'}</span>
                 </div>
                 <div style={{ fontSize: 12.5, color: CHARTE.attenue, marginTop: 10, lineHeight: 1.5 }}>
                   Déductible si vous souscrivez ensuite à un abonnement Flowin. Les modalités de règlement vous seront communiquées par email.
@@ -282,7 +282,7 @@ export default function RejoindreClient({ se }: { se: SE }) {
               <button className="rj-btn" style={{ width: '100%' }} onClick={() => aller('commerce')}>
                 Commencer <Ico k="chevronRight" size={16} />
               </button>
-              <div style={{ fontSize: 12, color: CHARTE.attenue, marginTop: 12 }}>Sans engagement · {packs.length ? `à partir de ${Math.min(...packs.map(p => p.prix_ht)).toLocaleString('fr-FR')}` : prixAffiche.toLocaleString('fr-FR')} € HT de participation</div>
+              <div style={{ fontSize: 12, color: CHARTE.attenue, marginTop: 12 }}>Sans engagement · {packs.length ? `à partir de ${Math.min(...packs.map(p => p.prix_ht)).toLocaleString('fr-FR')} € HT de participation` : 'Tarif à confirmer par Flowin'}</div>
             </div>
           )}
 
@@ -398,8 +398,8 @@ export default function RejoindreClient({ se }: { se: SE }) {
               </div>
             ))}
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '14px 0 4px', marginTop: 8 }}>
-              <span style={{ fontSize: 13.5, color: CHARTE.attenue }}>{packChoisi ? packChoisi.nom : 'Frais de participation'}</span>
-              <span style={{ fontSize: 18, fontWeight: 800 }}>{prixAffiche.toLocaleString('fr-FR')} € HT</span>
+              <span style={{ fontSize: 13.5, color: CHARTE.attenue }}>{packChoisi ? packChoisi.nom : 'Participation'}</span>
+              <span style={{ fontSize: 18, fontWeight: 800 }}>{prixAffiche !== null ? `${prixAffiche.toLocaleString('fr-FR')} € HT` : 'Tarif à confirmer par Flowin'}</span>
             </div>
             {err && <div style={{ background: '#FEECEC', color: '#B42318', borderRadius: 10, padding: '11px 14px', fontSize: 13.5, margin: '10px 0 0' }}>{err}</div>}
             <div className="rj-nav">

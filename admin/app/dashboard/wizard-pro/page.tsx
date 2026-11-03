@@ -156,7 +156,7 @@ export default function Page() {
           {retour?.ok && (
             <div className="sa-alert info texte" style={{ fontSize: 12.5, lineHeight: 1.55 }}>
               {retour.texte} Un pro n’a pas encore de station : c’est la création
-              d’event qui lui en donne une.
+              d’animation qui lui en donne une.
               <div style={{ display: 'flex', gap: 8, marginTop: 10, flexWrap: 'wrap' }}>
                 <button className="sa-btn sm primary" onClick={() => router.push(`/dashboard/wizard-event?pro=${encodeURIComponent(retour.id ?? '')}`)}>
                   Lui créer une station →

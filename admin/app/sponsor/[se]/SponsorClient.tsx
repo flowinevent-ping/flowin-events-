@@ -3,6 +3,8 @@ import { useState } from 'react'
 import { supabase } from '@/lib/supabase'
 import { Ico } from '@/lib/proicons'
 
+import PrecisionAutre from '@/components/creation/PrecisionAutre'
+import { nettoyerPrecision } from '@/lib/proCreation'
 type SE = { id: string; nom: string; description?: string | null; date_d?: string | null; date_f?: string | null; pct_flowin?: number | null }
 type Lot = { rang: number | null; valeur: number | null; libelle?: string | null }
 
@@ -18,7 +20,7 @@ export default function SponsorClient({ se, lots }: { se: SE; lots: Lot[] }) {
   const [submitting, setSubmitting] = useState(false)
   const [err, setErr] = useState('')
   const [f, setF] = useState({
-    structure: '', secteur: '', ville: '',
+    structure: '', secteur: '', secteurAutre: '', ville: '',
     prenom: '', nom: '', email: '', tel: '',
     montant: '', logo: '', message: '',
   })
@@ -29,7 +31,7 @@ export default function SponsorClient({ se, lots }: { se: SE; lots: Lot[] }) {
   async function submit() {
     setErr('')
     const montant = Number(f.montant)
-    if (!f.structure.trim() || !f.secteur || !f.prenom.trim() || !f.nom.trim() || !f.email.includes('@') || f.tel.replace(/\s/g, '').length < 8 || !montant || montant <= 0) {
+    if (!f.structure.trim() || !f.secteur || (f.secteur === 'Autre' && nettoyerPrecision(f.secteurAutre).length < 3) || !f.prenom.trim() || !f.nom.trim() || !f.email.includes('@') || f.tel.replace(/\s/g, '').length < 8 || !montant || montant <= 0) {
       setErr('Merci de remplir tous les champs obligatoires (dont un montant valide).')
       return
     }
@@ -38,7 +40,7 @@ export default function SponsorClient({ se, lots }: { se: SE; lots: Lot[] }) {
       const emailLower = f.email.toLowerCase().trim()
       const id = 'part-' + slug(emailLower)
       const { error } = await supabase.from('partenaires').upsert({
-        id, nom: f.structure.trim(), description: 'Secteur : ' + f.secteur, ville: f.ville.trim() || null,
+        id, nom: f.structure.trim(), description: 'Secteur : ' + (f.secteur === 'Autre' && nettoyerPrecision(f.secteurAutre) ? 'Autre : ' + nettoyerPrecision(f.secteurAutre) : f.secteur), ville: f.ville.trim() || null,
         contact: `${f.prenom.trim()} ${f.nom.trim()}`, email: emailLower, tel: f.tel.trim(),
         image_url: f.logo.trim() || null, notes: f.message.trim() || null,
         super_event_id: se.id, montant_sponsoring: montant, statut_paiement: 'en_attente',
@@ -109,6 +111,7 @@ export default function SponsorClient({ se, lots }: { se: SE; lots: Lot[] }) {
                 <option value="">Choisir…</option>
                 {SECTEURS.map(s => <option key={s} value={s}>{s}</option>)}
               </select>
+              <PrecisionAutre secteur={f.secteur} valeur={f.secteurAutre} onChange={v => set('secteurAutre', v)} id="sp-secteur-autre" style={{ ...input }} />
             </div>
             <div><label style={label}>Ville</label><input style={input} value={f.ville} onChange={e => set('ville', e.target.value)} /></div>
           </div>
