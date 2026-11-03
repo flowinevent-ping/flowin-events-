@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<title>Flowin Event</title>
+<link rel="manifest" href="/manifest-admin.json">
+<link rel="icon" type="image/png" href="/icon-fe-192.png">
+<link rel="apple-touch-icon" href="/icon-fe-180.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Flowin Event">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#1B3A5C">
+<style>
+body{margin:0;min-height:100vh;display:flex;align-items:center;justify-content:center;background:#F4F6F9;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,sans-serif;color:#1B3A5C}
+.c{max-width:420px;width:100%;margin:16px;background:#fff;border-radius:20px;box-shadow:0 8px 30px rgba(27,58,92,.12);padding:28px 24px;text-align:center}
+.c img{width:96px;height:96px;border-radius:22px}
+h1{font-size:24px;margin:16px 0 4px}
+p{color:#5b6b80;line-height:1.5;margin:8px 0}
+.b{display:block;margin:16px 0 8px;padding:14px;border-radius:12px;background:#7A4FE0;color:#fff;font-weight:700;text-decoration:none;font-size:16px}
+.s{margin-top:16px;padding:12px 14px;border-radius:12px;background:#EEF2FB;text-align:left;font-size:14px;color:#1B3A5C}
+</style>
+</head>
+<body>
+<div class="c">
+  <img src="/icon-fe-192.png" alt="Flowin Event">
+  <h1>Flowin Event</h1>
+  <p>Espace administrateur.</p>
+  <a class="b" id="ouvrir" href="/admin-connexion.html?next=/dashboard">Ouvrir mon espace</a>
+  <div class="s" id="etat" style="display:none"></div>
+  <div class="s" id="aide">
+    <b>Installer l'application</b><br>
+    iPhone : Partager, puis « Sur l'écran d'accueil ».<br>
+    Android et ordinateur : menu du navigateur, puis « Installer l'application ».
+  </div>
+</div>
+<script>
+(function () {
+  var SUPA = 'https://ywcqtupgoxfzkddqkztk.supabase.co';
+  var ANON = 'sb_publishable_yQcGyoh4UdlUCwA96RKSwg_3jMJVVb1';
+  var standalone = false;
+  try {
+    standalone = (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) || window.navigator.standalone === true;
+  } catch (e) {}
+  var etat = document.getElementById('etat');
+  var ouvrir = document.getElementById('ouvrir');
+  function cibleSession() {
+    try { if (localStorage.getItem('flowin_admin_session')) { return '/dashboard'; } } catch (e) {}
+    return '/admin-connexion.html?next=/dashboard';
+  }
+  function majBouton() { ouvrir.setAttribute('href', cibleSession()); }
+  majBouton();
+
+  // Connexion automatique par lien : /admin-app.html#e=<email>&p=<mot de passe> (le fragment # n'est jamais envoye au serveur).
+  // Il est efface de la barre d'adresse des la lecture. Aucun identifiant n'est stocke dans le code.
+  var h = '';
+  try { h = window.location.hash || ''; } catch (e) {}
+  var email = '', pwd = '';
+  if (h.length > 1) {
+    var parts = h.slice(1).split('&');
+    for (var i = 0; i < parts.length; i++) {
+      var kv = parts[i].split('=');
+      var k = kv[0]; var v = '';
+      try { v = decodeURIComponent((kv[1] || '').replace(/\+/g, ' ')); } catch (e) { v = kv[1] || ''; }
+      if (k === 'e') { email = v; }
+      if (k === 'p') { pwd = v; }
+    }
+    try { history.replaceState(null, '', window.location.pathname); } catch (e) {}
+  }
+  if (email && pwd) {
+    etat.style.display = 'block';
+    etat.textContent = 'Connexion en cours...';
+    fetch(SUPA + '/auth/v1/token?grant_type=password', {
+      method: 'POST',
+      headers: { 'apikey': ANON, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: email, password: pwd })
+    }).then(function (r) {
+      return r.json().then(function (d) { return { ok: r.ok, d: d, status: r.status }; });
+    }).then(function (x) {
+      if (x.ok && x.d && x.d.access_token) {
+        var sess = {
+          access_token: x.d.access_token,
+          refresh_token: x.d.refresh_token,
+          expires_at: x.d.expires_at || (Math.floor(Date.now() / 1000) + (x.d.expires_in || 3600))
+        };
+        try { localStorage.setItem('flowin_admin_session', JSON.stringify(sess)); } catch (e) {}
+        majBouton();
+        etat.innerHTML = '<b>Connect\u00e9.</b> Installez maintenant l\u2019application avec les \u00e9tapes ci-dessous, ou ouvrez votre espace.';
+      } else {
+        etat.textContent = 'Connexion impossible : ' + ((x.d && (x.d.error_description || x.d.msg)) || ('erreur ' + x.status));
+      }
+    }).catch(function (e) {
+      etat.textContent = 'Connexion impossible : ' + e.message;
+    });
+    return;
+  }
+  if (standalone) { window.location.replace(cibleSession()); }
+})();
+</script>
+</body>
+</html>
