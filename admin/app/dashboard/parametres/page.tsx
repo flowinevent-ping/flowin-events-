@@ -14,6 +14,7 @@
 import { useEffect, useState } from 'react'
 import { PageHeader, SectionHeader } from '@/components/dashboard/DashboardUI'
 import { useDashboard } from '@/contexts/DashboardContext'
+import { GARANTIE_ACTIVE } from '@/lib/flowinConfig'
 import { fetchCommConfig, CONTACT_PARTENAIRE, type CommConfig } from '@/lib/comm'
 import { fetchSuperEvents, type SuperEvent } from '@/lib/nds'
 import { fetchDocumentsLegaux, type DocumentLegal } from '@/lib/administratif'
@@ -70,6 +71,15 @@ export default function Page() {
         Cette page montre ce qui est <b>réellement en vigueur</b>. Ce qui ne se règle pas ici
         est signalé, avec l&apos;endroit où ça se règle.
       </div>
+
+      <SectionHeader>Offres commerciales</SectionHeader>
+      <Bloc titre="Interrupteur central">
+        <Ligne
+          cle="Offre satisfait ou remboursé"
+          valeur={GARANTIE_ACTIVE ? 'Affichée' : 'Suspendue'}
+          note="Se règle dans admin/public/flowin-config.js (GARANTIE_ACTIVE), puis « node admin/scripts/appliquer-config.mjs » et redéploiement de notify-commande-animation. Suspendue : l'offre n'apparaît ni sur le bon de commande, ni dans les PDF, emails, CGV, plaquettes et espace pro. Rien n'est supprimé."
+        />
+      </Bloc>
 
       <SectionHeader>Coordonnées de contact</SectionHeader>
       <Bloc titre="Supports partenaires et clients">

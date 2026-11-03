@@ -31,6 +31,7 @@
   .back{display:inline-block;margin-top:24px;color:var(--tealD);font-weight:800;font-size:14px;text-decoration:none}
   @media(max-width:600px){.head,.body{padding:20px 16px}h1{font-size:22px}}
   @media print{.back{display:none}}
+[data-garantie][hidden]{display:none!important}
 </style>
 </head>
 <body>
@@ -81,6 +82,7 @@
 <p>Les sommes versées pour les kits et les options restent acquises.</p>
 <h2>Article 7 — Volume de participation</h2>
 <p><span class="ph">[Conditions d'usage éventuelles (nombre de participants, d'animations ou de boutiques couverts par l'abonnement) : à compléter.]</span> Le jeu n'est jamais interrompu sans information préalable du Client.</p>
+<div data-garantie hidden>
 <h2>Article 7 bis — Offre spéciale premiers adhérents « satisfait ou remboursé »</h2>
 <p>Réservée aux <b>premiers adhérents</b>, à la <b>première souscription annuelle</b> <span class="ph">[nombre ou date limite à compléter]</span>, pour le Client ayant coché la case d'adhésion sur le bon de commande. Elle ne s'applique ni à la formule mensuelle, ni aux renouvellements : un Client qui a déjà une commande payée (même SIRET ou même adresse email) est un renouvellement, et la case est alors bloquée. Cette qualité est déterminée par Flowin à l'enregistrement de la commande ; le Client ne peut pas la modifier.</p>
 <ul>
@@ -92,6 +94,7 @@
 <li><b>Remboursement :</b> si le nombre de clients venus est inférieur à l'objectif, Flowin rembourse la différence entre le prix payé et la valeur des clients venus (clients venus × panier moyen déclaré), déduction faite de la part digitale non remboursable de <span class="ph">[montant à compléter]</span> et des kits et options.</li>
 <li>La demande est faite par le Client dans <span class="ph">[délai à compléter]</span> après la fin de la période ; le remboursement intervient dans <span class="ph">[délai à compléter]</span>.</li>
 </ul>
+</div>
 <h2>Article 8 — Obligations des parties</h2>
 <p><b>Flowin</b> met le service à disposition avec diligence (obligation de moyens), assure son hébergement et sa maintenance, et informe le Client des interruptions programmées.</p>
 <p><b>Le Client</b> :</p>
@@ -123,5 +126,7 @@
     <a class="back" href="/bon-commande-animation.html">&larr; Retour au bon de commande</a>
   </div>
 </div></div>
+<script src="/flowin-config.js"></script>
+<script>(function(){ if (window.FLOWIN_CONFIG && window.FLOWIN_CONFIG.GARANTIE_ACTIVE === true) { var b = document.querySelectorAll("[data-garantie]"); for (var i = 0; i < b.length; i++) b[i].removeAttribute("hidden"); } })();</script>
 </body>
 </html>

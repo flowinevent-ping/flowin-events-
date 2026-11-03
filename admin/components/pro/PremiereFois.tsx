@@ -21,7 +21,7 @@ import { supabase } from '@/lib/supabase'
 import { capturerSource, tagSource } from '@/lib/source'
 import { CHARTE_PRO as C, VARIABLES_PRO_CSS } from '@/lib/charte'
 import {
-  PROFILS_PRO, SECTEURS_PRO, ficheProVide, identifiantPro, lignePro, ligneProEntreprise,
+  PROFILS_PRO, SECTEURS_PRO, SECTEUR_AUTRE, nettoyerPrecision, ficheProVide, identifiantPro, lignePro, ligneProEntreprise,
   type FichePro, type ProfilPro,
 } from '@/lib/proCreation'
 import {
@@ -30,6 +30,10 @@ import {
 } from '@/lib/entreprise'
 
 import { messageFr, messageAuth } from '@/lib/erreursFr'
+import { retourSur } from '@/lib/retour'
+import { GARANTIE_ACTIVE } from '@/lib/flowinConfig'
+import PrecisionAutre from '@/components/creation/PrecisionAutre'
+import SelectActivite from '@/components/creation/SelectActivite'
 const CLE_BROUILLON = 'flowin.premiere-fois.v1'
 
 const ETAPES = [
@@ -55,7 +59,8 @@ function lireSelection(): string {
     const out = new URLSearchParams()
     PARAMS_OFFRE.forEach(k => { const v = u.get(k); if (v) out.set(k, v.slice(0, 120)) })
     /* Garantie satisfait ou remboursé : offre ANNUELLE uniquement. */
-    if (out.get('offre') !== 'annuelle') ['garantie', 'panier', 'flux', 'certif_le', 'certif_par'].forEach(k => out.delete(k))
+    /* Offre suspendue (lib/flowinConfig) : aucun parametre de garantie n'est repris ni transmis. */
+    if (!GARANTIE_ACTIVE || out.get('offre') !== 'annuelle') ['garantie', 'panier', 'flux', 'certif_le', 'certif_par'].forEach(k => out.delete(k))
     return out.toString()
   } catch { return '' }
 }
@@ -67,7 +72,7 @@ function resumeSelection(sel: string): string {
   if (u.get('kit') === 'physique') morceaux.push(`kit physique (${u.get('boutiques') ?? '1'} boutique${Number(u.get('boutiques') ?? 1) > 1 ? 's' : ''})`)
   if (u.get('quiz')) morceaux.push('quiz personnalisé')
   if (u.get('bonus')) morceaux.push('questions bonus')
-  if (u.get('garantie') === '1' && u.get('offre') === 'annuelle') morceaux.push('garantie satisfait ou remboursé')
+  if (GARANTIE_ACTIVE && u.get('garantie') === '1' && u.get('offre') === 'annuelle') morceaux.push('garantie satisfait ou remboursé')
   return morceaux.filter(Boolean).join(', ')
 }
 
@@ -114,6 +119,9 @@ export default function PremiereFois() {
   const [selection, setSelection] = useState('')
   const haut = useRef<HTMLDivElement>(null)
   /* Compte d'acces deja cree pendant cette visite (reprise apres un echec d'enregistrement de la fiche). */
+  /* Retour vers une demande en cours (parcours « rejoindre un super event » sans compte) : ?retour=/rejoindre?... */
+  const [retour, setRetour] = useState<string | null>(null)
+  useEffect(() => { try { setRetour(retourSur(new URLSearchParams(window.location.search).get('retour'))) } catch { /* rien */ } }, [])
   const compteCree = useRef<{ email: string; id: string } | null>(null)
 
   /* Recherche entreprise */
@@ -164,6 +172,7 @@ export default function PremiereFois() {
       if (f.siret.trim() && !siretValide(f.siret)) e.siret = erreurNumero(f.siret) ?? 'SIRET invalide.'
     }
     if (id === 'secteur' && !f.secteur) e.secteur = 'Choisissez le secteur le plus proche (ou « Autre »).'
+    if (id === 'secteur' && (f.secteur === SECTEUR_AUTRE || (f.secteur === 'Commerce & Négoce' && f.activite === SECTEUR_AUTRE)) && nettoyerPrecision(f.secteurAutre).length < 3) e.secteurAutre = 'Précisez votre activité (3 lettres minimum).'
     if (id === 'produits' && (f.produits ?? '').trim().length < 3) e.produits = 'Quelques mots suffisent : ce que vos clients viennent chercher chez vous.'
     if (id === 'adresse') {
       if (f.profil !== 'annonceur' && f.adresse.trim().length < 3) e.adresse = 'Le numéro et la rue.'
@@ -447,6 +456,14 @@ export default function PremiereFois() {
                   })}
                 </div>
                 {err('secteur')}
+                <PrecisionAutre secteur={f.secteur} valeur={f.secteurAutre ?? ''} onChange={v => maj({ secteurAutre: v })} id="pf-secteur-autre" erreur={tente ? erreurs.secteurAutre : null} />
+                {f.secteur === 'Commerce & Négoce' && (
+                  <div style={{ display: 'block', marginTop: 12 }}>
+                    <span style={{ display: 'block', fontSize: 12, fontWeight: 800, marginBottom: 5 }}>Votre activité (facultatif)</span>
+                    <SelectActivite id="pf-activite" valeur={f.activite ?? ''} onChange={v => maj({ activite: v })} style={{ width: '100%', padding: '12px 14px', borderRadius: 12, border: '1.5px solid #C9D4E3', fontSize: 16, fontFamily: 'inherit' }} />
+                    <PrecisionAutre secteur={f.activite ?? ''} valeur={f.secteurAutre ?? ''} onChange={v => maj({ secteurAutre: v })} id="pf-activite-autre" />
+                  </div>
+                )}
               </>
             )}
 
@@ -558,7 +575,10 @@ export default function PremiereFois() {
               <div className="pf-suite-l"><span className="pf-ic">3</span><span><b>Espace pro</b> : vos animations, vos lots, vos contacts</span></div>
             </div>
             <div className="pf-row" style={{ justifyContent: 'center', marginTop: 16 }}>
-              <a className="pf-btn pf-grand" href={`/bon-commande-animation.html${selection ? `?${selection}` : ''}`}>Choisir mon offre et signer</a>
+              {retour && (
+                <a className="pf-btn pf-grand" href={fin.session ? retour : `/pro/connexion?retour=${encodeURIComponent(retour)}`}>Reprendre ma demande pour le super event</a>
+              )}
+              <a className={retour ? 'pf-btn2' : 'pf-btn pf-grand'} href={`/bon-commande-animation.html${selection ? `?${selection}` : ''}`}>Choisir mon offre et signer</a>
               {fin.session
                 ? <a className="pf-btn2" href={`/pro?pro=${encodeURIComponent(fin.proId)}&bienvenue=1`}>Plus tard : entrer dans mon espace pro</a>
                 : <a className="pf-btn2" href="/pro/connexion">Plus tard : me connecter</a>}

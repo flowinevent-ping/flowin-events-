@@ -12,6 +12,12 @@ const http = require('http')
 const { Pool, types } = require('pg')
 // Comme PostgREST : une date reste « AAAA-MM-JJ » (pas un objet Date), les numeriques et bigint sont des nombres JSON.
 types.setTypeParser(1082, v => v); types.setTypeParser(1700, parseFloat); types.setTypeParser(20, Number)
+/* PostgREST accepte un tableau JSON pour une colonne text[] ; node-pg non : on le convertit en litteral de tableau (tableaux de primitives seulement). */
+function valeurPg(x) {
+  if (x === null || typeof x !== 'object') return x === undefined ? null : x
+  if (Array.isArray(x) && x.every(e => e === null || typeof e !== 'object')) return '{' + x.map(e => e === null ? 'NULL' : '"' + String(e).replace(/\\/g, '\\\\').replace(/"/g, '\\"') + '"').join(',') + '}'
+  return JSON.stringify(x)
+}
 const pool = new Pool({ host: '/tmp', port: 54399, user: 'postgres', database: process.env.PGDB || 'flowin_qa', max: 8 })
 let identite = { role: 'anon', sub: '' }
 
@@ -139,7 +145,7 @@ http.createServer(async (req, res) => {
       const list = Array.isArray(json) ? json : [json]
       const ks = Array.from(new Set(list.flatMap(o => Object.keys(o))))
       const vals = []
-      const tuples = list.map(o => '(' + ks.map(k => { vals.push(o[k] !== null && typeof o[k] === 'object' ? JSON.stringify(o[k]) : (o[k] === undefined ? null : o[k])); return '$' + vals.length }).join(',') + ')')
+      const tuples = list.map(o => '(' + ks.map(k => { vals.push(valeurPg(o[k])); return '$' + vals.length }).join(',') + ')')
       let sql = 'insert into public.' + id(m[2]) + ' (' + ks.map(id).join(',') + ') values ' + tuples.join(',')
       if (u.searchParams.get('on_conflict')) sql += ' on conflict (' + u.searchParams.get('on_conflict').split(',').map(id).join(',') + ') ' + (/ignore-duplicates/.test(prefer) ? 'do nothing' : 'do update set ' + ks.map(k => id(k) + '=excluded.' + id(k)).join(','))
       sql += ' returning *'
@@ -147,7 +153,7 @@ http.createServer(async (req, res) => {
     } else if (req.method === 'PATCH') {
       const vals = []
       const ks = Object.keys(json)
-      const sets = ks.map(k => { vals.push(json[k] !== null && typeof json[k] === 'object' ? JSON.stringify(json[k]) : json[k]); return id(k) + ' = $' + vals.length }).join(',')
+      const sets = ks.map(k => { vals.push(valeurPg(json[k])); return id(k) + ' = $' + vals.length }).join(',')
       const where = filtres(u.searchParams, vals)
       const r = await execSoigne('update public.' + id(m[2]) + ' set ' + sets + where + ' returning *', vals, m[2]); rows = r.rows
     } else if (req.method === 'DELETE') {

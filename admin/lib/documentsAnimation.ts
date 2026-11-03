@@ -196,9 +196,16 @@ function tableHtml(r: Commande): string {
 ${r.offre === "mensuelle" ? `<p style="font-size:13px;color:#3B5CC4;font-weight:700">Puis 110 € HT (132 € TTC) par mois, engagement 3 mois minimum.</p>` : ""}`;
 }
 
+/** Interrupteur central de l'offre « satisfait ou remboursé » (admin/public/flowin-config.js, poste sur globalThis par
+ *  supabase/functions/_shared/flowin-config.js côté Deno, par lib/flowinConfig.ts côté Next). Suspendue tant que ce n'est pas true.
+ *  Lue à chaque appel (pas au chargement du module) : l'ordre des imports n'a donc pas d'importance. */
+export function garantieActive(): boolean {
+  return (globalThis as unknown as { FLOWIN_CONFIG?: { GARANTIE_ACTIVE?: boolean } }).FLOWIN_CONFIG?.GARANTIE_ACTIVE === true;
+}
+
 /** Rappel cliquable « satisfait ou remboursé » : formule annuelle sans garantie, hors renouvellement. */
 export function rappelGarantie(r: Commande): string {
-  if (r.offre !== "annuelle" || r.garantie || r.type_commande === "renouvellement") return "";
+  if (!garantieActive() || r.offre !== "annuelle" || r.garantie || r.type_commande === "renouvellement") return "";
   const lien = "https://flowin-events.vercel.app/bon-commande-animation.html?garantie=demarche&commande=" + encodeURIComponent(String(r.id));
   return `<div style="border:2px solid #7A4FE0;border-radius:12px;padding:12px 14px;margin-top:14px;font-size:14px"><b>Satisfait ou remboursé</b> : la garantie des premiers adhérents (formule annuelle) n'est pas encore activée sur votre commande. Remplissez et certifiez votre fiche découverte en deux minutes :<br><a href="${lien}" style="display:inline-block;margin-top:10px;background:#7A4FE0;color:#fff;text-decoration:none;font-weight:800;padding:10px 18px;border-radius:100px">Je veux bénéficier du satisfait ou remboursé</a></div>`;
 }
@@ -241,8 +248,8 @@ export function emailFlowin(r: Commande, type: string, ancien?: string): { sujet
     ["Établissement", esc(r.raison_sociale) + (r.enseigne ? " (" + esc(r.enseigne) + ")" : "")], ["SIRET", esc(r.siret)], ["Contact", esc(r.contact_nom) + " · " + esc(r.email) + " · " + esc(r.tel)],
     ["Formule", esc(FORMULES[String(r.offre)] ?? r.offre)], ["Supports", r.kit === "physique" ? "Kit physique × " + esc(r.nb_boutiques) : "Kit digital"],
     ["Total TTC", eur(r.montant_ttc)], ["Paiement", r.mode_paiement === "prelevement_sepa" ? "Prélèvement SEPA" : "Virement"],
-    ["Souscription", r.type_commande === "renouvellement" ? "Renouvellement (pas de garantie)" : "Première souscription"],
-    ["Garantie", r.garantie ? "Oui, objectif " + esc(r.garantie_clients_objectif) + " clients" : "Non"],
+    ["Souscription", r.type_commande === "renouvellement" ? (garantieActive() ? "Renouvellement (pas de garantie)" : "Renouvellement") : "Première souscription"],
+    ...(garantieActive() ? [["Garantie", r.garantie ? "Oui, objectif " + esc(r.garantie_clients_objectif) + " clients" : "Non"] as [string, string]] : []),
   ];
   const t = lignes.map(([k, v]) => `<tr><td style="padding:4px 10px 4px 0;color:#5a6b80;font-size:13px">${k}</td><td style="padding:4px 0;font-size:14px;font-weight:700">${v}</td></tr>`).join("");
   return {

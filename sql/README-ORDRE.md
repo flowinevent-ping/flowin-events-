@@ -22,6 +22,8 @@ Numéros uniques : plus aucune collision (les trois anciens `08-*` sont devenus 
 11. `sql/08-bon-commande-v2.sql` — bon de commande v2 : numérotation, export CRM, garantie souscrite après coup (requiert 01 et 03).
 12. `sql/09-qr-permaliens.sql` — QR permanents `/q/<code>` (requiert 01 et `2026-11-01-tirage-auto-liste-gagnants.sql`, sections 1 et 2 au minimum).
 13. `sql/10-resultats-tirage.sql` — résultats de tirage par participant (profil joueur + alerte). **Avant la section 4** : remplacer `<ANON_KEY>` comme ci-dessus.
+14. `sql/11-super-events-demo.sql` — **données** : colonnes de position des super events, « Nice Jazz Festival » (Nice) et « Nuits du Sud » (Vence, position seulement) sur la carte, démo des Fêtes du haut et moyen pays (logo, Quiz + bonus). Dates non inventées (« [à compléter] »).
+15. `sql/12-demandes-pack-souhaite.sql` — pack et tarif souhaités dans la demande de rejoindre un super event (facultatif ; sans lui le pack est rangé dans le texte de la demande).
 
 ## Comment c'est testé
 

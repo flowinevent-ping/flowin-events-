@@ -43,7 +43,7 @@ export const PUBLICS: { v: Public; label: string }[] = [
 
 export const OUTILS: Outil[] = [
   { statut: 'validé', id: 'plaquette-animation', titre: 'Plaquette Animation magasin', public: ['commerce'], type: 'plaquette', suivi: true,
-    description: 'L’offre Animation pour un commerce : formules, prix, garantie, bouton « je m’inscris ».',
+    description: 'L’offre Animation pour un commerce : formules, prix, bouton « je m’inscris ».',
     chemin: '/plaquette-animation-magasin.html',
     message: 'Bonjour, voici la présentation de Flowin Animation pour votre magasin :' },
   { statut: 'validé', id: 'premiere-fois', titre: 'Inscription pro « Ma première fois »', public: ['commerce'], type: 'parcours', suivi: true,

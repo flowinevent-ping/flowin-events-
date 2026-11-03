@@ -1,10 +1,11 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { supabase } from '@/lib/supabase'
 import { messageAuth } from '@/lib/erreursFr'
+import { retourSur } from '@/lib/retour'
 import {
   wrap, pageWrap, cardFloating, Hero, Field, fieldInput,
   primaryBtn, ghostLink, errorBox, helpText, SuccessScreen,
@@ -17,6 +18,8 @@ export default function ConnexionProPage() {
   const [etat, setEtat] = useState<'idle' | 'loading' | 'attente' | 'refuse' | 'error'>('idle')
   const [erreur, setErreur] = useState('')
   const [oubli, setOubli] = useState(false)
+  const [retourParam, setRetourParam] = useState<string | null>(null)
+  useEffect(() => { try { setRetourParam(retourSur(new URLSearchParams(window.location.search).get('retour'))) } catch { /* rien */ } }, [])
   const [info, setInfo] = useState('')
 
   async function connecter() {
@@ -30,6 +33,9 @@ export default function ConnexionProPage() {
     }
 
     const { data: pro } = await supabase.from('pros').select('id, nom, statut').eq('auth_id', data.user.id).maybeSingle()
+    /* Retour vers une demande en cours (?retour=/rejoindre?...) : le compte est libre, la demande part meme avant le paiement. */
+    const retour = retourSur(new URLSearchParams(window.location.search).get('retour'))
+    if (pro && retour && retour.indexOf('/rejoindre') === 0) { router.push(retour); return }
     if (!pro) {
       setErreur("Compte connecté mais aucun profil pro associé — contactez l'équipe Flowin.")
       setEtat('error')
@@ -93,7 +99,7 @@ export default function ConnexionProPage() {
               <div style={helpText}><button type="button" onClick={() => { setOubli(false); setErreur(''); setInfo('') }} style={{ ...ghostLink, background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'inherit', fontSize: 13, padding: 6 }}>← Retour à la connexion</button></div>
             </>
           )}
-          <div style={helpText}>Pas encore de compte ? <Link href="/pro/premiere-fois" style={ghostLink}>Ma première fois</Link></div>
+          <div style={helpText}>Pas encore de compte ? <Link href={retourParam ? `/pro/premiere-fois?retour=${encodeURIComponent(retourParam)}` : '/pro/premiere-fois'} style={ghostLink}>Ma première fois</Link></div>
         </div>
       </div>
     </div>

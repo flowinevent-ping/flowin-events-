@@ -56,6 +56,7 @@ export default async function Page({ searchParams }: { searchParams: { pro?: str
             nom_commercial: p.nom_commercial ?? null, forme_juridique: p.forme_juridique ?? null, siren: p.siren ?? null,
             code_naf: p.code_naf ?? null, activite_naf: p.activite_naf ?? null, produits_services: p.produits_services ?? null,
             nb_points_vente: p.nb_points_vente ?? null,
+            tags: Array.isArray(p.tags) ? p.tags : undefined,
           }} avecFicheEntreprise={'siren' in p} />
         : <div style={CARD}>Établissement introuvable.</div>)}
       {onglet === 'rib' && (p.id

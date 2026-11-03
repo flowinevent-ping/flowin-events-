@@ -43,7 +43,7 @@ CTRL="$($P -d $DB -t -A -f "$HERE/chaine-sql-controles.sql" 2>&1)"
 echo "$CTRL"
 echo "$CTRL" | grep -q "^KO" && ECHECS=$((ECHECS+1))
 echo "== comportement (droits, consentement, commande -> facture -> mise en service)"
-COMP="$($P -d $DB -v ON_ERROR_STOP=0 -t -A -f "$HERE/chaine-sql-comportement.sql" 2>&1 | grep -E "^(OK|KO|psql:.*ERROR)")"
+COMP="$($P -d $DB -v ON_ERROR_STOP=0 -v chemin_sql11="$REPO/sql/11-super-events-demo.sql" -t -A -f "$HERE/chaine-sql-comportement.sql" 2>&1 | grep -E "^(OK|KO|psql:.*ERROR)")"
 echo "$COMP"
 echo "$COMP" | grep -qE "^(KO|psql)" && ECHECS=$((ECHECS+1))
 # 4. (facultatif) jeu de donnees fictif de l'espace pro pour les captures : SEED_PRO=1 bash chaine-sql.sh

@@ -79,7 +79,7 @@ export default function CoordonneesBancaires({ proId, titulaireParDefaut }: { pr
   const usage = (
     <div style={{ background: C.violetClair, color: C.encre, borderRadius: 12, padding: '11px 14px', fontSize: 13.5, lineHeight: 1.5, marginBottom: 14 }}>
       <b>Pour vos remboursements, pas pour le prélèvement.</b> Ces coordonnées servent uniquement à vous verser de l’argent
-      (remboursement de la garantie, virements). Le prélèvement de votre abonnement passe par un mandat GoCardless :
+      (remboursements éventuels, virements). Le prélèvement de votre abonnement passe par un mandat GoCardless :
       Flowin ne vous demande jamais votre IBAN pour cela.
     </div>
   )

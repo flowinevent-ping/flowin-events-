@@ -213,6 +213,7 @@
     table.recap th,table.recap td{padding:8px 6px}
     .actions .btn{width:100%}
   }
+[data-garantie][hidden]{display:none!important}
 </style>
 </head>
 <body>
@@ -296,11 +297,11 @@
       <div class="subh">Options <span style="font-weight:700;color:var(--muted)">(facultatives)</span></div>
       <div class="choices">
         <div class="choice" id="optQuiz" role="button" tabindex="0"><span class="ck"></span><div class="cn">Quiz personnalis&eacute;</div><div class="cd">Vos questions, r&eacute;dig&eacute;es pour un &eacute;v&eacute;nement.</div><div class="cp">180 &euro; <small>HT par &eacute;v&eacute;nement</small></div>
-          <div class="opt-qty">&Eacute;v&eacute;nements <span class="stepper"><button type="button" data-q="quiz" data-d="-1">&minus;</button><input id="qQuiz" value="1" inputmode="numeric" aria-label="Nombre d'&eacute;v&eacute;nements"><button type="button" data-q="quiz" data-d="1">+</button></span></div></div>
+          <div class="opt-qty">Animations <span class="stepper"><button type="button" data-q="quiz" data-d="-1">&minus;</button><input id="qQuiz" value="1" inputmode="numeric" aria-label="Nombre d'&eacute;v&eacute;nements"><button type="button" data-q="quiz" data-d="1">+</button></span></div></div>
         <div class="choice" id="optBonus" role="button" tabindex="0"><span class="ck"></span><div class="cn">Questions bonus</div><div class="cd">Votre sondage sur mesure : avis client, sensibilisation.</div><div class="cp">180 &euro; <small>HT</small></div>
           <div class="opt-qty">Sondages <span class="stepper"><button type="button" data-q="bonus" data-d="-1">&minus;</button><input id="qBonus" value="1" inputmode="numeric" aria-label="Nombre de sondages"><button type="button" data-q="bonus" data-d="1">+</button></span></div></div>
       </div>
-      <div class="guarbox" id="guarBox">
+      <div class="guarbox" id="guarBox" data-garantie hidden>
         <span class="gtag">Offre sp&eacute;ciale premiers adh&eacute;rents &middot; formule annuelle</span>
         <div class="gprinc" id="garTxt">Satisfait ou rembours&eacute; : sur 12 mois, avec au moins 4 animations, si le nombre de clients venus retirer leur lot en boutique n&rsquo;atteint pas l&rsquo;objectif fix&eacute; avec votre panier moyen, Flowin vous rembourse la diff&eacute;rence (hors part digitale). <a href="/cgv-animation-magasin.html" target="_blank" rel="noopener">Conditions d&eacute;taill&eacute;es dans les CGV</a>.</div>
         <div class="gd" id="garMens" style="display:none;font-size:13px;font-weight:700">La garantie satisfait ou rembours&eacute; est r&eacute;serv&eacute;e &agrave; la <b>formule annuelle</b>. <a href="#" id="garToAn">Passer en formule annuelle</a> pour en b&eacute;n&eacute;ficier.</div>
@@ -397,7 +398,7 @@
         R&eacute;f&eacute;rence &agrave; rappeler : <b id="mRef">&mdash;</b>
       </div>
     </div>
-    <div class="mgar" id="mGarantie" style="display:none"><div id="mGarTxt"></div><button type="button" class="btn" id="mGarBtn">Je veux b&eacute;n&eacute;ficier du satisfait ou rembours&eacute;</button></div>
+    <div class="mgar" id="mGarantie" data-garantie hidden style="display:none"><div id="mGarTxt"></div><button type="button" class="btn" id="mGarBtn">Je veux b&eacute;n&eacute;ficier du satisfait ou rembours&eacute;</button></div>
     <div class="sec">
       <div class="sec-h"><span class="n" id="mStepsN">3</span><h2>Les prochaines &eacute;tapes</h2></div>
       <ol class="steps" id="mSteps"></ol>
@@ -412,7 +413,7 @@
   </div>
 
   <!-- ================= DEMARCHE GARANTIE (lien de l'email) ================= -->
-  <div class="body" id="gdem">
+  <div class="body" id="gdem" data-garantie hidden>
     <div class="thanks"><h2>Votre garantie <em>satisfait ou rembours&eacute;</em></h2><p>Commande n&deg; <b id="gdNum">&mdash;</b></p></div>
     <div class="banner info" id="gdMsg">Remplissez et certifiez votre fiche d&eacute;couverte : cela prend deux minutes.</div>
     <div class="actions"><button type="button" class="btn" id="gdBtn">Je veux b&eacute;n&eacute;ficier du satisfait ou rembours&eacute;</button><a class="btn ghost" href="/plaquette-animation-magasin.html">Retour &agrave; la plaquette</a></div>
@@ -454,10 +455,20 @@
   </div>
 </div>
 
+<script src="/flowin-config.js"></script>
 <script src="/nds/vendor/jspdf.umd.min.js"></script>
 <script src="/bon-commande-pdf.js"></script>
 <script>
 (function(){
+  /* INTERRUPTEUR CENTRAL (flowin-config.js) : offre « satisfait ou remboursé » suspendue tant que GARANTIE_ACTIVE n'est pas true.
+     Tout le code de la garantie est conservé ; seul l'affichage et l'envoi sont coupes. */
+  var GAR = !!(window.FLOWIN_CONFIG && window.FLOWIN_CONFIG.GARANTIE_ACTIVE === true);
+  /* Les blocs data-garantie sont masques par defaut dans le HTML (aucun affichage sans JavaScript) ; reactives seulement si GARANTIE_ACTIVE. */
+  if (GAR) {
+    var blocsGar = document.querySelectorAll('[data-garantie]');
+    for (var bg = 0; bg < blocsGar.length; bg++) blocsGar[bg].removeAttribute('hidden');
+  }
+
   'use strict';
   var SUPA = 'https://ywcqtupgoxfzkddqkztk.supabase.co';
   var KEY = 'sb_publishable_yQcGyoh4UdlUCwA96RKSwg_3jMJVVb1'; /* clé publishable : publique par design */
@@ -547,7 +558,7 @@
     $('tSuite').textContent = suite; $('mSuite').textContent = suite;
     $('kitNb').textContent = st.nb + ' boutique' + (st.nb > 1 ? 's' : '');
     var annuelle = st.offre === 'annuelle';
-    var eligible = annuelle && !st.renouv;   /* garantie : formule annuelle ET premiere souscription */
+    var eligible = GAR && annuelle && !st.renouv;   /* garantie : formule annuelle ET premiere souscription */
     st.garantie = !!(st.certif && eligible);
     $('garChk').checked = st.garantie;
     $('garMens').style.display = annuelle ? 'none' : 'block';
@@ -600,7 +611,7 @@
     /* Garantie : seules les données certifiées sur la page Garantie sont acceptées, puis verrouillées */
     var pm = parseFloat(qs('panier') || ''), fx = qs('flux'), cle = qs('certif_le'), cpar = qs('certif_par');
     var dCert = cle ? new Date(cle) : null;
-    if (qs('garantie') === '1' && !isNaN(pm) && pm > 0 && (fx === '15+' || fx === '50+' || fx === '100+') && dCert && !isNaN(dCert.getTime()) && cpar) {
+    if (GAR && qs('garantie') === '1' && !isNaN(pm) && pm > 0 && (fx === '15+' || fx === '50+' || fx === '100+') && dCert && !isNaN(dCert.getTime()) && cpar) {
       st.certif = { le: dCert.toISOString(), par: cpar.slice(0, 120) };
       st.garantie = true;
       $('f_panier').value = String(pm).replace('.', ','); $('f_panier').readOnly = true;
@@ -839,7 +850,7 @@
       h.push('<b>R\u00e9glez ' + eur(t.ttc) + ' TTC par virement</b> avec la r\u00e9f\u00e9rence ' + esc(rec.id) + '.' + (rec.offre === 'mensuelle' ? ' Puis ' + eur(t.aboTtc) + ' TTC chaque mois.' : ' Votre commande passe en \u00ab pay\u00e9e \u00bb \u00e0 r\u00e9ception.'));
       h.push('<b>L\u2019\u00e9quipe Flowin prend contact avec vous dans la journ\u00e9e</b> pour valider votre inscription et la r\u00e9ception du paiement. Votre espace pro s\u2019ouvre d\u00e8s cette validation.');
     }
-    if (rec.garantie) h.push('<b>Satisfait ou rembours\u00e9</b> : objectif de ' + (rec.garantie_clients_objectif || '\u2014') + ' clients venus retirer leur lot sur 12 mois, avec au moins 4 animations.');
+    if (GAR && rec.garantie) h.push('<b>Satisfait ou rembours\u00e9</b> : objectif de ' + (rec.garantie_clients_objectif || '\u2014') + ' clients venus retirer leur lot sur 12 mois, avec au moins 4 animations.');
     h.push('<b>Flowin vous contacte</b> pour préparer votre animation : lots, questions, couleurs' + (rec.logo ? '' : ', logo') + '.');
     h.push(rec.kit === 'physique' ? '<b>Votre kit est en préparation</b> : macarons, affiches et support de caisse pour ' + rec.nb_boutiques + ' boutique' + (rec.nb_boutiques > 1 ? 's' : '') + '.' : '<b>Vous recevez votre kit digital</b> : les fichiers des affiches et macarons à imprimer.');
     h.push('<b>Vous collez, ils flashent, vous mesurez</b> : vos accès au tableau de bord vous sont envoyés par email.');
@@ -1050,6 +1061,7 @@
   function majRappelGarantie(rec, opts){
     var box = $('mGarantie'), txt = $('mGarTxt'), btn = $('mGarBtn');
     btn.style.display = 'none';
+    if (!GAR) { box.style.display = 'none'; return; }
     if (rec.garantie || opts.horsLigne || opts.echec) { box.style.display = 'none'; return; }
     box.style.display = 'block';
     if (rec.offre !== 'annuelle') { txt.innerHTML = '<b>Satisfait ou remboursé</b> : cette garantie est réservée à la formule annuelle.'; return; }
@@ -1069,7 +1081,7 @@
   /* Lien de l'email : ?garantie=demarche&commande=AM-... */
   (function(){
     var cid = qs('commande');
-    if (qs('garantie') !== 'demarche' || !cid || !/^AM-[0-9]{8}-[A-Z0-9]{8}$/.test(cid)) return;
+    if (!GAR || qs('garantie') !== 'demarche' || !cid || !/^AM-[0-9]{8}-[A-Z0-9]{8}$/.test(cid)) return;
     document.body.className = 'gdem'; $('gdNum').textContent = cid;
     $('gdBtn').addEventListener('click', function(){
       ouvrirDemarche('commande', cid, function(r){

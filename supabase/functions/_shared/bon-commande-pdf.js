@@ -117,7 +117,8 @@
       y = wrap((rec.offre === 'mensuelle' ? 'Offre mensuelle : virement chaque mois de ' + eur(t.aboTtc) + ' TTC. Premier virement : ' : 'Virement bancaire de ') + eur(t.ttc) + ' TTC a l\'ordre de BAITA EURL - IBAN ' + IBAN + ' - BIC ' + BIC + ' - reference a rappeler : ' + rec.id + '. Commande enregistree en attente de paiement.', x, y, 8.5, ink, CW, 4.2);
     }
     y += 3;
-    if (rec.garantie) {
+    /* Interrupteur central (flowin-config.js) : bloc « satisfait ou rembourse » suspendu tant que GARANTIE_ACTIVE n'est pas true. */
+    if (rec.garantie && root.FLOWIN_CONFIG && root.FLOWIN_CONFIG.GARANTIE_ACTIVE === true) {
       T('SATISFAIT OU REMBOURSE', x, y, 7.5, 'bold', teal); y += 5;
       y = wrap('Offre premiers adherents, formule annuelle : objectif de ' + (rec.garantie_clients_objectif || '-') + ' clients venus retirer leur lot en boutique sur 12 mois, avec au moins 4 animations (panier moyen declare : ' + (rec.panier_moyen ? eur(rec.panier_moyen) : '-') + ', flux journalier : ' + (rec.flux_journalier || '-') + '), donnees certifiees par ' + (rec.garantie_certifiee_par || '-') + ' le ' + (rec.garantie_certifiee_le ? fmtDateHeure(new Date(rec.garantie_certifiee_le)) : '-') + ', non modifiables. Conditions dans les CGV.', x, y, 8.5, ink, CW, 4.2) + 3;
     }

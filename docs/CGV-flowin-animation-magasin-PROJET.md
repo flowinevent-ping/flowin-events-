@@ -74,6 +74,9 @@ Les sommes versées pour les kits et les options restent acquises.
 
 [Conditions d'usage éventuelles (nombre de participants, d'animations ou de boutiques couverts par l'abonnement) : à compléter.] Le jeu n'est jamais interrompu sans information préalable du Client.
 
+<!-- ARTICLE 7 BIS SUSPENDU (03/11/2026) : offre « satisfait ou remboursé » suspendue tant que GARANTIE_ACTIVE = false
+     (admin/public/flowin-config.js). Texte conservé ci-dessous pour la réactivation ; à ne pas publier tant que suspendue.
+
 ## Article 7 bis — Offre spéciale premiers adhérents « satisfait ou remboursé »
 
 Réservée aux **premiers adhérents**, à la **première souscription annuelle** [nombre ou date limite à compléter], pour le Client ayant coché la case d'adhésion sur le bon de commande. Elle ne s'applique ni à la formule mensuelle, ni aux renouvellements : un Client qui a déjà une commande payée (même SIRET ou même adresse email) est un renouvellement, et la case est alors bloquée. Cette qualité est déterminée par Flowin à l'enregistrement de la commande ; le Client ne peut pas la modifier.
@@ -85,6 +88,7 @@ Réservée aux **premiers adhérents**, à la **première souscription annuelle*
 - **Client venu :** un gagnant dont le retrait du lot a été validé en boutique dans l'application Flowin.
 - **Remboursement :** si le nombre de clients venus est inférieur à l'objectif, Flowin rembourse la différence entre le prix payé et la valeur des clients venus (clients venus × panier moyen déclaré), déduction faite de la part digitale non remboursable de [montant à compléter] et des kits et options.
 - La demande est faite par le Client dans [délai à compléter] après la fin de la période ; le remboursement intervient dans [délai à compléter].
+-->
 
 ## Article 8 — Obligations des parties
 

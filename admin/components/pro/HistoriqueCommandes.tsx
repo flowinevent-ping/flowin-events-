@@ -22,6 +22,7 @@ import LienBonCommande from './LienBonCommande'
 import { telechargerContrat, telechargerFacture } from '@/lib/pdfCommande'
 import type { Facture } from '@/lib/documentsAnimation'
 
+import { GARANTIE_ACTIVE } from '@/lib/flowinConfig'
 const TEINTE: Record<StatutAffiche, { fond: string; texte: string }> = {
   attente: { fond: '#FFF4E0', texte: '#9A5B00' },
   paye: { fond: '#E6F7F4', texte: C.ok },
@@ -155,8 +156,8 @@ export default function HistoriqueCommandes({ proId }: { proId: string }) {
                       <div style={LIGNE}><span style={MUTED}>Total HT</span><b>{eur(c.montant_ht)}</b></div>
                       <div style={LIGNE}><span style={MUTED}>TVA 20 %</span><b>{eur(c.montant_tva)}</b></div>
                       <div style={{ ...LIGNE, fontSize: 15 }}><span style={{ fontWeight: 900 }}>Total TTC</span><b>{eur(c.montant_ttc)}</b></div>
-                      {c.garantie && <div style={{ fontSize: 12.5, ...MUTED, marginTop: 8, lineHeight: 1.5 }}>Satisfait ou remboursé (première souscription annuelle) : objectif de {c.garantie_clients_objectif} clients venus retirer leur lot sur 12 mois.</div>}
-                      {c.type_commande === 'renouvellement' && <div style={{ fontSize: 12.5, ...MUTED, marginTop: 8, lineHeight: 1.5 }}>Renouvellement : la garantie satisfait ou remboursé est réservée à la première souscription annuelle.</div>}
+                      {GARANTIE_ACTIVE && c.garantie && <div style={{ fontSize: 12.5, ...MUTED, marginTop: 8, lineHeight: 1.5 }}>Satisfait ou remboursé (première souscription annuelle) : objectif de {c.garantie_clients_objectif} clients venus retirer leur lot sur 12 mois.</div>}
+                      {GARANTIE_ACTIVE && c.type_commande === 'renouvellement' && <div style={{ fontSize: 12.5, ...MUTED, marginTop: 8, lineHeight: 1.5 }}>Renouvellement : la garantie satisfait ou remboursé est réservée à la première souscription annuelle.</div>}
                     </div>
 
                     <div>

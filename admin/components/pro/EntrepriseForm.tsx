@@ -10,7 +10,9 @@
 
 import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase'
-import { SECTEURS_PRO } from '@/lib/proCreation'
+import { SECTEURS_PRO, SECTEUR_AUTRE, lireSecteurAutre, lireActivite, nettoyerPrecision, tagsAvecSecteurAutre } from '@/lib/proCreation'
+import SelectActivite from '@/components/creation/SelectActivite'
+import PrecisionAutre from '@/components/creation/PrecisionAutre'
 import { CARD, ACC } from '@/lib/proui'
 import { uploaderLogo, redimensionnerImage } from '@/lib/upload'
 import { Ico } from '@/lib/proicons'
@@ -18,7 +20,9 @@ import { messageFr } from '@/lib/erreursFr'
 
 type Pro = { id: string; nom: string | null; secteur: string | null; adresse: string | null; code_postal: string | null; ville: string | null; siret: string | null; contact: string | null; email: string | null; tel: string | null; partenaire_id: string | null
   /* Fiche entreprise de « Ma premiere fois » (sql/02-pros-entreprise-onboarding.sql) : presents seulement si la migration est appliquee. */
-  nom_commercial?: string | null; forme_juridique?: string | null; siren?: string | null; code_naf?: string | null; activite_naf?: string | null; produits_services?: string | null; nb_points_vente?: string | number | null }
+  nom_commercial?: string | null; forme_juridique?: string | null; siren?: string | null; code_naf?: string | null; activite_naf?: string | null; produits_services?: string | null; nb_points_vente?: string | number | null
+  /** Tags du pro (la precision du secteur « Autre » y est rangee, voir lib/proCreation). */
+  tags?: string[] | null }
 type Fiche = { image_url: string | null; site_web: string | null; instagram: string | null; facebook: string | null }
 
 const lbl: React.CSSProperties = { fontSize: 12, fontWeight: 700, color: '#5a6b80', marginBottom: 5, display: 'block' }
@@ -29,6 +33,8 @@ export default function EntrepriseForm({ initial, avecFicheEntreprise = false }:
   const [f, setF] = useState<Fiche>({ image_url: null, site_web: null, instagram: null, facebook: null })
   const [etat, setEtat] = useState<'' | 'envoi' | 'ok' | 'ko'>('')
   const [messageKo, setMessageKo] = useState('')
+  const [autre, setAutre] = useState(lireSecteurAutre(initial.tags))
+  const [activite, setActivite] = useState(lireActivite(initial.tags))
   const [uploadEnCours, setUploadEnCours] = useState(false)
   const [uploadErreur, setUploadErreur] = useState('')
 
@@ -67,6 +73,7 @@ export default function EntrepriseForm({ initial, avecFicheEntreprise = false }:
 
   async function enregistrer() {
     if (!(p.nom ?? '').trim()) { setMessageKo('Enregistrement impossible : le nom de l’établissement est obligatoire.'); setEtat('ko'); return }
+    if ((p.secteur === SECTEUR_AUTRE || (p.secteur === 'Commerce & Négoce' && activite === SECTEUR_AUTRE)) && nettoyerPrecision(autre).length < 3) { setMessageKo('Précisez votre activité (3 lettres minimum) puisque vous avez choisi « Autre ».'); setEtat('ko'); return }
     setEtat('envoi'); setMessageKo('')
     const vide = (v: string | null | undefined) => ((v ?? '').trim() || null)
     const nbPv = parseInt(String(p.nb_points_vente ?? ''), 10)
@@ -79,6 +86,8 @@ export default function EntrepriseForm({ initial, avecFicheEntreprise = false }:
       nom: (p.nom ?? '').trim(), secteur: vide(p.secteur), adresse: vide(p.adresse), code_postal: vide(p.code_postal),
       ville: vide(p.ville), siret: vide(p.siret), contact: vide(p.contact), email: vide(p.email)?.toLowerCase() ?? null, tel: vide(p.tel),
       ...entreprise,
+      /* Tags : seulement si la colonne est lue par la page (jamais d'ecrasement a l'aveugle). */
+      ...(initial.tags !== undefined ? { tags: tagsAvecSecteurAutre(p.tags ?? initial.tags, p.secteur ?? '', autre, p.secteur === 'Commerce & Négoce' ? activite : '') } : {}),
     }).eq('id', p.id)
     if (error) setMessageKo(`Enregistrement impossible : ${messageFr(error)}`)
     let ko = !!error
@@ -127,6 +136,14 @@ export default function EntrepriseForm({ initial, avecFicheEntreprise = false }:
               {(p.secteur && (SECTEURS_PRO as readonly string[]).indexOf(p.secteur) < 0 ? [p.secteur] : []).concat(SECTEURS_PRO as readonly string[]).map(s => <option key={s} value={s}>{s}</option>)}
             </select>
           </label>
+          <PrecisionAutre secteur={p.secteur ?? ''} valeur={autre} onChange={v => { setAutre(v); setEtat('') }} id="ent-secteur-autre" style={{ border: '1.5px solid #E3E8EF', fontSize: 14 }} />
+          {p.secteur === 'Commerce & Négoce' && (
+            <div style={{ marginBottom: 12 }}>
+              <span style={lbl}>Votre activité (facultatif)</span>
+              <SelectActivite id="ent-activite" valeur={activite} onChange={v => { setActivite(v); setEtat('') }} style={{ ...inp, marginBottom: 0 }} />
+              <PrecisionAutre secteur={activite} valeur={autre} onChange={v => { setAutre(v); setEtat('') }} id="ent-activite-autre" style={{ border: '1.5px solid #E3E8EF', fontSize: 14 }} />
+            </div>
+          )}
           {champ('adresse', 'Adresse', 'N°, rue')}
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: 10 }}>
             {champ('code_postal', 'Code postal')}
