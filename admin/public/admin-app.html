@@ -28,7 +28,7 @@ p{color:#5b6b80;line-height:1.5;margin:8px 0}
   <img src="/icon-fe-192.png" alt="Flowin Event">
   <h1>Flowin Event</h1>
   <p>Espace administrateur.</p>
-  <a class="b" id="ouvrir" href="/admin-connexion.html">Ouvrir mon espace</a>
+  <a class="b" id="ouvrir" href="/admin-connexion.html?next=/dashboard">Ouvrir mon espace</a>
   <div class="s" id="etat" style="display:none"></div>
   <div class="s" id="aide">
     <b>Installer l'application</b><br>
@@ -47,8 +47,8 @@ p{color:#5b6b80;line-height:1.5;margin:8px 0}
   var etat = document.getElementById('etat');
   var ouvrir = document.getElementById('ouvrir');
   function cibleSession() {
-    try { if (localStorage.getItem('flowin_admin_session')) { return '/dashboard.html'; } } catch (e) {}
-    return '/admin-connexion.html';
+    try { if (localStorage.getItem('flowin_admin_session')) { return '/dashboard'; } } catch (e) {}
+    return '/admin-connexion.html?next=/dashboard';
   }
   function majBouton() { ouvrir.setAttribute('href', cibleSession()); }
   majBouton();
