@@ -122,6 +122,9 @@ export function OutilCarte({ o, onApercu, onSelect, actif }: { o: Outil; onAperc
           </>
         )}
         <button type="button" onClick={() => onApercu(o, url)} data-apercu style={petit}>Aperçu</button>
+        {o.animation?.courte && (
+          <a href={`${o.chemin}${o.chemin.indexOf('?') >= 0 ? '&' : '?'}v=courte`} target="_blank" rel="noopener noreferrer" data-courte style={petit}>Version courte</a>
+        )}
       </div>
 
       {actif && (

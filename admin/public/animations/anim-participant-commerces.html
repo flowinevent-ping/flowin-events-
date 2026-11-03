@@ -17,6 +17,8 @@
   .btn{display:block;box-sizing:border-box;width:100%;max-width:340px;min-height:52px;line-height:52px;border-radius:14px;font-size:17px;font-weight:800;text-decoration:none;text-align:center;border:0;cursor:pointer;font-family:inherit;color:#fff}
   .b1{background:#7A4FE0}
   .b2{background:#fff;color:#1B3A5C}
+  .courte{position:absolute;bottom:64px;left:0;right:0;text-align:center}
+  .courte a{display:inline-block;background:rgba(11,22,38,.85);color:#fff;font-size:14px;font-weight:700;text-decoration:underline;border-radius:10px;padding:8px 14px}
   .rejouer{background:none;border:0;color:#cbd5e1;font-size:14px;text-decoration:underline;cursor:pointer;font-family:inherit}
   .aide{max-width:340px;font-size:14px;line-height:1.45;color:#e2e8f0;display:none}
   .prep{position:absolute;inset:0;display:none;flex-direction:column;align-items:center;justify-content:center;gap:8px;padding:24px;text-align:center;background:#0b1626}
@@ -27,6 +29,7 @@
 <body>
 <div class="scene">
   <video id="v" controls playsinline preload="metadata" poster="/animations/anim-participant-commerces.jpg" src="/animations/anim-participant-commerces.mp4"></video>
+  <div class="courte"><a id="ver" href="#">Version courte</a></div>
   <div class="travail"><span>Version de travail : ne pas diffuser</span></div>
   <div class="prep" id="prep"><strong>Version de travail en préparation</strong><span>La vidéo « Animation participant (chez les commerces) » sera disponible ici dès qu’elle sera prête.</span></div>
   <div class="fin" id="fin">
@@ -44,6 +47,13 @@
   var src = m ? m[1].toLowerCase() : DEFAUT;
   try { if (!window.localStorage.getItem('flowin_src')) window.localStorage.setItem('flowin_src', src); } catch (e) {}
   document.getElementById('com').setAttribute('href', '/pro/premiere-fois?src=' + encodeURIComponent(src));
+  var court = /[?&]v=courte/.test(location.search);
+  var vv = document.getElementById('v');
+  if (court) { vv.setAttribute('src', '/animations/anim-participant-commerces-courte.mp4'); }
+  var lv = document.getElementById('ver');
+  lv.textContent = court ? 'Version longue' : 'Version courte';
+  var qs = location.search.replace(/[?&]v=courte/, '').replace(/^&/, '?');
+  lv.setAttribute('href', location.pathname + (court ? qs : (qs ? qs + '&' : '?') + 'v=courte'));
   var v = document.getElementById('v'), fin = document.getElementById('fin'), prep = document.getElementById('prep');
   v.addEventListener('error', function(){ prep.className = 'prep on'; v.style.display = 'none'; });
   v.addEventListener('ended', function(){ fin.className = 'fin on'; });

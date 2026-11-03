@@ -32,6 +32,8 @@ export interface Outil {
     format: 'vertical' | 'paysage'
     /** Fichier video (admin/public/animations/<id>.mp4). Absent du depot tant que `pret` est faux. */
     mp4: string
+    /** Version courte (second MP4). */
+    courte?: string
     poster?: string
     /** Vrai quand le MP4 est dans le depot ; sinon « Version de travail en préparation ». */
     pret: boolean
@@ -111,27 +113,27 @@ export const OUTILS: Outil[] = [
   { statut: 'brouillon', id: 'anim-participant-commerces', titre: 'Animation participant (chez les commerces)', public: ['participant'], type: 'animation', suivi: true, canalDefaut: 'video-participant',
     description: 'Vidéo de présentation pour les participants : jouer chez les commerces du quartier.',
     chemin: '/animations/anim-participant-commerces.html',
-    animation: { format: 'vertical', mp4: '/animations/anim-participant-commerces.mp4', poster: '/animations/anim-participant-commerces.jpg', pret: true },
+    animation: { format: 'vertical', mp4: '/animations/anim-participant-commerces.mp4', courte: '/animations/anim-participant-commerces-courte.mp4', poster: '/animations/anim-participant-commerces.jpg', pret: true },
     message: 'Bonjour, une courte vidéo pour comprendre Flowin (version de travail) :' },
   { statut: 'brouillon', id: 'anim-commerce-plug-play', titre: 'Animation commerce : Flowin, animation Plug & Play', public: ['commerce'], type: 'animation', suivi: true, canalDefaut: 'video-commerce',
     description: 'Vidéo de présentation pour les commerçants : Flowin, l’animation Plug & Play.',
     chemin: '/animations/anim-commerce-plug-play.html',
-    animation: { format: 'vertical', mp4: '/animations/anim-commerce-plug-play.mp4', pret: false },
+    animation: { format: 'vertical', mp4: '/animations/anim-commerce-plug-play.mp4', courte: '/animations/anim-commerce-plug-play-courte.mp4', poster: '/animations/anim-commerce-plug-play.jpg', pret: true },
     message: 'Bonjour, une courte vidéo pour comprendre Flowin (version de travail) :' },
   { statut: 'brouillon', id: 'anim-participant-super-event', titre: 'Animation participant super event', public: ['participant'], type: 'animation', suivi: true, canalDefaut: 'video-participant-se',
     description: 'Vidéo de présentation pour les participants d’un super event.',
     chemin: '/animations/anim-participant-super-event.html',
-    animation: { format: 'vertical', mp4: '/animations/anim-participant-super-event.mp4', pret: false },
+    animation: { format: 'vertical', mp4: '/animations/anim-participant-super-event.mp4', courte: '/animations/anim-participant-super-event-courte.mp4', poster: '/animations/anim-participant-super-event.jpg', pret: true },
     message: 'Bonjour, une courte vidéo pour comprendre Flowin (version de travail) :' },
   { statut: 'brouillon', id: 'anim-organisateur', titre: 'Animation organisateur', public: ['organisateur'], type: 'animation', suivi: true, canalDefaut: 'video-organisateur',
     description: 'Vidéo de présentation pour les organisateurs de festival.',
     chemin: '/animations/anim-organisateur.html',
-    animation: { format: 'vertical', mp4: '/animations/anim-organisateur.mp4', pret: false },
+    animation: { format: 'vertical', mp4: '/animations/anim-organisateur.mp4', courte: '/animations/anim-organisateur-courte.mp4', poster: '/animations/anim-organisateur.jpg', pret: true },
     message: 'Bonjour, une courte vidéo pour comprendre Flowin (version de travail) :' },
   { statut: 'brouillon', id: 'anim-commerces-sponsors', titre: 'Animation commerces et sponsors (rejoindre un super event)', public: ['partenaire'], type: 'animation', suivi: true, canalDefaut: 'video-partenaire-se',
     description: 'Vidéo de présentation pour les commerces et sponsors qui rejoignent un super event.',
     chemin: '/animations/anim-commerces-sponsors.html',
-    animation: { format: 'vertical', mp4: '/animations/anim-commerces-sponsors.mp4', pret: false },
+    animation: { format: 'vertical', mp4: '/animations/anim-commerces-sponsors.mp4', courte: '/animations/anim-commerces-sponsors-courte.mp4', poster: '/animations/anim-commerces-sponsors.jpg', pret: true },
     message: 'Bonjour, une courte vidéo pour comprendre Flowin (version de travail) :' },
   { statut: 'brouillon', id: 'storyboard-commerce-v15', titre: 'Scénario vidéo commerçants (v15, à valider)', public: ['commerce'], type: 'scenario', suivi: false,
     description: 'Storyboard v15 de la vidéo Flowin Animation pour les commerçants (version à jour). Pas de MP4 : scénario à valider.',
