@@ -24,6 +24,7 @@ import { Ico } from '@/lib/proicons'
 import { OutilCarte } from '@/components/dashboard/OutilCarte'
 import { OUTILS as OUTILS_BASE, OUTILS_MANQUANTS, PUBLICS, urlProd, lireValides, ecrireValides, type Outil, type Public } from '@/lib/outilsCommerciaux'
 import { BarreActionsOutil, type CibleBarre } from '@/components/dashboard/BarreActionsOutil'
+import { avecSource } from '@/lib/source'
 
 /* MAJ 01/11 -- UNE seule page pour tout le materiel de diffusion (decision Romain) : les 12 pages de
    reference statiques qui vivaient ici en dur sont desormais dans le catalogue unique
@@ -184,6 +185,9 @@ export default function Page() {
      maintenant dans la meme liste, filtree par la meme recherche. */
   const [filtre, setFiltre] = useState<'tous' | 'gerees' | 'animations' | Public>('tous')
   const haut = useRef<HTMLDivElement>(null)
+  /* Envoi groupé : plusieurs outils cochés, un seul message WhatsApp / email / presse-papiers. */
+  const [coches, setCoches] = useState<string[]>([])
+  const [groupeCopie, setGroupeCopie] = useState(false)
   const t = q.trim().toLowerCase()
 
   const landingsFiltrees = useMemo(() =>
@@ -193,6 +197,19 @@ export default function Page() {
     OUTILS.filter(o => filtre !== 'gerees' && (filtre === 'tous' || (filtre === 'animations' ? o.type === 'animation' : o.public.indexOf(filtre) >= 0))
       && (!t || (o.titre + ' ' + o.description).toLowerCase().includes(t)))
   , [OUTILS, filtre, t])
+
+  const partageables = useMemo(() => outilsFiltres.filter(o => o.statut === 'validé' && !o.aVenir && !!o.chemin), [outilsFiltres])
+  const choisis = useMemo(() => OUTILS.filter(o => coches.indexOf(o.id) >= 0 && o.statut === 'validé' && !o.aVenir && !!o.chemin), [OUTILS, coches])
+  const lienDe = (o: Outil) => avecSource(urlProd(o), o.suivi ? (o.canalDefaut ?? 'direct') : 'direct')
+  const texteGroupe = () => choisis.map(o => o.titre + '\n' + lienDe(o)).join('\n\n')
+  function basculerCoche(o: Outil) { setCoches(c => c.indexOf(o.id) >= 0 ? c.filter(x => x !== o.id) : [...c, o.id]) }
+  async function copierGroupe() {
+    let ok = false
+    try { await navigator.clipboard.writeText(texteGroupe()); ok = true } catch {
+      try { const ta = document.createElement('textarea'); ta.value = texteGroupe(); ta.style.position = 'fixed'; ta.style.opacity = '0'; document.body.appendChild(ta); ta.select(); ok = document.execCommand('copy'); document.body.removeChild(ta) } catch { ok = false }
+    }
+    setGroupeCopie(ok); window.setTimeout(() => setGroupeCopie(false), 2000)
+  }
 
   /* Carrousel : landings gerees avec URL, puis tous les outils (les videos « a venir » y figurent). */
   const slides: Slide[] = useMemo(() => [
@@ -300,6 +317,22 @@ export default function Page() {
         ))}
       </div>
 
+      {partageables.length > 1 && (
+        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center', marginBottom: 10, padding: '8px 10px', border: '1px solid var(--sa-border)', borderRadius: 10, background: 'var(--sa-card, #fff)', position: 'sticky', top: 0, zIndex: 5 }} data-envoi-groupe>
+          <strong style={{ fontSize: 13 }}>{choisis.length} sélectionné{choisis.length > 1 ? 's' : ''}</strong>
+          <button className="sa-btn" style={{ fontSize: 12, fontWeight: 700 }} onClick={() => setCoches(partageables.map(o => o.id))}>Tout sélectionner ({partageables.length})</button>
+          <button className="sa-btn" style={{ fontSize: 12, fontWeight: 700 }} disabled={!choisis.length} onClick={() => setCoches([])}>Tout effacer</button>
+          <a className="sa-btn" aria-disabled={!choisis.length} data-groupe-wa
+            href={choisis.length ? 'https://wa.me/?text=' + encodeURIComponent('Bonjour, voici les présentations Flowin :\n\n' + texteGroupe()) : undefined}
+            target="_blank" rel="noopener noreferrer"
+            style={{ fontSize: 12, fontWeight: 700, background: '#1FA855', color: '#fff', opacity: choisis.length ? 1 : 0.4, pointerEvents: choisis.length ? 'auto' : 'none', textDecoration: 'none' }}>Envoyer la sélection par WhatsApp</a>
+          <a className="sa-btn" aria-disabled={!choisis.length} data-groupe-mail
+            href={choisis.length ? 'mailto:?subject=' + encodeURIComponent('Flowin : nos présentations') + '&body=' + encodeURIComponent('Bonjour,\n\nVoici les présentations Flowin :\n\n' + texteGroupe() + '\n\nL’équipe Flowin') : undefined}
+            style={{ fontSize: 12, fontWeight: 700, opacity: choisis.length ? 1 : 0.4, pointerEvents: choisis.length ? 'auto' : 'none', textDecoration: 'none' }}>Email</a>
+          <button className="sa-btn" disabled={!choisis.length} onClick={copierGroupe} data-groupe-copier style={{ fontSize: 12, fontWeight: 700 }}>{groupeCopie ? 'Copié ✓' : 'Copier les liens'}</button>
+        </div>
+      )}
+
       {charge && <div className="sa-muted" style={{ fontSize: 13 }}>Chargement…</div>}
 
       {!charge && !landingsFiltrees.length && !outilsFiltres.length && (
@@ -374,7 +407,7 @@ export default function Page() {
             </div>
           ))}
           {outilsFiltres.map(o => (
-            <OutilCarte key={o.id} o={o} actif={courant?.id === o.id} onApercu={(x) => ouvrirApercu(x.id)} onSelect={(x) => ouvrirApercu(x.id)} />
+            <OutilCarte key={o.id} o={o} actif={courant?.id === o.id} coche={coches.indexOf(o.id) >= 0} onCoche={basculerCoche} onApercu={(x) => ouvrirApercu(x.id)} onSelect={(x) => ouvrirApercu(x.id)} />
           ))}
         </div>
       )}

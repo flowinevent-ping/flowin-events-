@@ -42,7 +42,7 @@ const btn: React.CSSProperties = {
   fontSize: 13, cursor: 'pointer', textDecoration: 'none', fontFamily: 'inherit',
 }
 
-export function OutilCarte({ o, onApercu, onSelect, actif }: { o: Outil; onApercu: (o: Outil, url: string) => void; onSelect: (o: Outil, url: string) => void; actif?: boolean }) {
+export function OutilCarte({ o, onApercu, onSelect, actif, coche, onCoche }: { o: Outil; onApercu: (o: Outil, url: string) => void; onSelect: (o: Outil, url: string) => void; actif?: boolean; coche?: boolean; onCoche?: (o: Outil) => void }) {
   const [canal, setCanal] = useState(o.suivi ? (o.canalDefaut ?? 'direct') : 'direct')
   const [copie, setCopie] = useState(false)
   const [png, setPng] = useState('')
@@ -85,7 +85,13 @@ export function OutilCarte({ o, onApercu, onSelect, actif }: { o: Outil; onAperc
       style={{ background: '#fff', border: bord, borderRadius: 12, padding: actif ? 11 : 12, display: 'flex', flexDirection: 'column', gap: 8, cursor: 'pointer', boxShadow: actif ? `0 0 0 3px ${C.violetClair}` : 'none', alignSelf: 'start' }}>
       <div style={{ display: 'flex', gap: 10, alignItems: 'flex-start' }}>
         <div style={{ flex: 1, minWidth: 0 }}>
-          <div style={{ display: 'flex', gap: 5, flexWrap: 'wrap', marginBottom: 4 }}>
+          <div style={{ display: 'flex', gap: 5, flexWrap: 'wrap', marginBottom: 4, alignItems: 'center' }}>
+            {onCoche && !brouillon && !aVenir && (
+              <label onClick={stop} data-coche style={{ display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 11, fontWeight: 800, color: C.violet, cursor: 'pointer' }}>
+                <input type="checkbox" checked={!!coche} onChange={() => onCoche(o)} aria-label={`Sélectionner pour un envoi groupé : ${o.titre}`} style={{ width: 16, height: 16, accentColor: C.violet }} />
+                Envoyer
+              </label>
+            )}
             {brouillon && (
               <span data-brouillon style={{ fontSize: 11, fontWeight: 800, color: '#fff', background: C.ko, borderRadius: 6, padding: '1px 8px' }}>Brouillon : ne pas diffuser</span>
             )}
