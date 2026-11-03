@@ -4,7 +4,7 @@
  * Lecture :
  *   - participations du joueur (table existante) -> ses tickets ;
  *   - events / super_events -> commerce, animation, date du tirage ;
- *   - rpc mes_resultats_tirage (sql/08-resultats-tirage.sql) -> statut de CHAQUE
+ *   - rpc mes_resultats_tirage (sql/10-resultats-tirage.sql) -> statut de CHAQUE
  *     tirage (gagne / pas tire). Elle ne renvoie QUE les lignes de ce joueur,
  *     jamais d'e-mail.
  * MODE DEGRADE : si la fonction n'existe pas encore (SQL pas applique), `dispo`

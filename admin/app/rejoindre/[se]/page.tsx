@@ -1,5 +1,5 @@
+import { redirect } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
-import RejoindreClient from './RejoindreClient'
 
 export const revalidate = 60
 
@@ -21,5 +21,8 @@ export default async function Page({ params }: Props) {
   /* Un super event cree par un pro n est ouvert qu apres validation Flowin. */
   if (!se || se.status === 'pending') return NOTFOUND
 
-  return <RejoindreClient se={se} />
+  /* PARCOURS UNIQUE (03/11/2026) : ce formulaire creait un pro sans compte puis une demande. La demande a Flowin exige desormais un
+     compte pro : tous les anciens liens /rejoindre/<id> menent au parcours unique, avec l'operation preselectionnee.
+     RejoindreClient.tsx reste dans le depot (non supprime) mais n'est plus affiche. */
+  redirect(`/rejoindre?se=${encodeURIComponent(se.id)}`)
 }

@@ -21,6 +21,7 @@ import { useCallback, useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase'
 import { uploaderLogo, redimensionnerImage } from '@/lib/upload'
 import type { DonneesOperation } from '@/lib/operations'
+import { messageFr } from '@/lib/erreursFr'
 
 interface Ligne { id: string; nom: string | null; image_url: string | null; site_web: string | null; actif: boolean | null }
 const CHAMP: React.CSSProperties = { width: '100%', border: '1.5px solid #E3E9F8', borderRadius: 9, padding: '9px 11px', fontSize: 14, fontFamily: 'inherit', boxSizing: 'border-box' }
@@ -79,13 +80,13 @@ export default function ModalPartenaires({ op, onClose, onChange }: { op: Donnee
     const ligne: Record<string, unknown> = { id, nom: nom.trim(), image_url, site_web: site.trim() || null, actif: true, visible: true, type: 'Sponsor' }
     if (estSuper) ligne.super_event_id = op.id
     const { error } = await supabase.from('partenaires').insert(ligne)
-    if (error) { setEnvoi(false); setMsg({ ok: false, t: 'Partenaire non enregistré — ' + error.message }); return }
+    if (error) { setEnvoi(false); setMsg({ ok: false, t: 'Partenaire non enregistré — ' + messageFr(error) }); return }
     if (!estSuper) {
       const { data: ev } = await supabase.from('events').select('cfg').eq('id', evRef).maybeSingle()
       const cfg = ((ev as { cfg?: Record<string, unknown> } | null)?.cfg ?? {}) as Record<string, unknown>
       const ids = ((cfg.partenaires ?? []) as string[]).concat([id])
       const { error: e2 } = await supabase.from('events').update({ cfg: { ...cfg, partenaires: ids } }).eq('id', evRef)
-      if (e2) { setEnvoi(false); setMsg({ ok: false, t: 'Partenaire créé mais non rattaché à l’animation — ' + e2.message }); return }
+      if (e2) { setEnvoi(false); setMsg({ ok: false, t: 'Partenaire créé mais non rattaché à l’animation — ' + messageFr(e2) }); return }
     }
     setEnvoi(false); setNom(''); setSite(''); setLogo(null); setApercu('')
     setMsg({ ok: true, t: 'Partenaire ajouté : il apparaît dans le bandeau du jeu et sur la page Partenaires.' })
@@ -101,7 +102,7 @@ export default function ModalPartenaires({ op, onClose, onChange }: { op: Donnee
     const r = await uploaderLogo(redim, `partenaires/${l.id}`)
     if ('erreur' in r) { setMsg({ ok: false, t: r.erreur }); return }
     const { error } = await supabase.from('partenaires').update({ image_url: r.url }).eq('id', l.id)
-    if (error) { setMsg({ ok: false, t: 'Logo non enregistré — ' + error.message }); return }
+    if (error) { setMsg({ ok: false, t: 'Logo non enregistré — ' + messageFr(error) }); return }
     setMsg({ ok: true, t: 'Logo remplacé.' }); await charger(); onChange?.()
   }
 
@@ -110,13 +111,13 @@ export default function ModalPartenaires({ op, onClose, onChange }: { op: Donnee
     setMsg(null)
     if (estSuper) {
       const { error } = await supabase.from('partenaires').update({ actif: false }).eq('id', l.id)
-      if (error) { setMsg({ ok: false, t: error.message }); return }
+      if (error) { setMsg({ ok: false, t: messageFr(error) }); return }
     } else {
       const { data: ev } = await supabase.from('events').select('cfg').eq('id', evRef).maybeSingle()
       const cfg = ((ev as { cfg?: Record<string, unknown> } | null)?.cfg ?? {}) as Record<string, unknown>
       const ids = ((cfg.partenaires ?? []) as string[]).filter(x => x !== l.id)
       const { error } = await supabase.from('events').update({ cfg: { ...cfg, partenaires: ids } }).eq('id', evRef)
-      if (error) { setMsg({ ok: false, t: error.message }); return }
+      if (error) { setMsg({ ok: false, t: messageFr(error) }); return }
     }
     setMsg({ ok: true, t: 'Partenaire retiré du jeu.' }); await charger(); onChange?.()
   }

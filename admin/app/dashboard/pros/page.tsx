@@ -13,6 +13,7 @@ import type { FlowinPro } from '@/lib/types'
 import { useFiltreSuperEvent } from '@/lib/filtreSuperEvent'
 import { BandeauFiltreSE } from '@/components/dashboard/BandeauFiltreSE'
 import { Ico } from '@/lib/proicons'
+import AutresActivites from '@/components/dashboard/AutresActivites'
 
 const STATUT_STYLE: Record<string, { bg: string; c: string; label: string }> = {
   en_attente: { bg: '#FEF3C7', c: '#92400E', label: 'En attente' },
@@ -95,6 +96,7 @@ function ProsContenu() {
   return (
     <div className="sa-content">
       <div className="sa-page">
+        <AutresActivites pros={pros} />
         <ListeCRM<FlowinPro>
           titre="Pros"
           sousTitre={`${lignes.length} pro${lignes.length > 1 ? 's' : ''}${nbEnAttente ? ` · ${nbEnAttente} en attente de validation` : ''}`}

@@ -106,7 +106,7 @@ export default function Page() {
               <table className="sa-tbl" style={{ width: '100%', fontSize: 12.5 }}>
                 <thead><tr>
                   <th>Source</th><th style={{ textAlign: 'right' }}>Visiteurs</th>
-                  <th style={{ textAlign: 'right' }}>Événements</th><th style={{ textAlign: 'right' }}>Par visiteur</th>
+                  <th style={{ textAlign: 'right' }}>Actions suivies</th><th style={{ textAlign: 'right' }}>Par visiteur</th>
                 </tr></thead>
                 <tbody>
                   {t.origines.map(o => {

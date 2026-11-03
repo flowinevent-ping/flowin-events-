@@ -31,7 +31,7 @@ const MOIS = ['janvier', 'février', 'mars', 'avril', 'mai', 'juin', 'juillet', 
 const libMois = (ym: string) => { const [a, m] = ym.split('-'); return `${MOIS[Number(m) - 1] ?? m} ${a}` }
 const dateFr = (d: string | null) => d ? new Date(`${d.slice(0, 10)}T12:00:00`).toLocaleDateString('fr-FR') : '—'
 
-const petit: React.CSSProperties = { ...CHAMP, padding: '8px 11px', fontSize: 13, borderRadius: 10, width: 'auto' }
+const petit: React.CSSProperties = { ...CHAMP, padding: '8px 11px', fontSize: 13, borderRadius: 10, width: 'auto', maxWidth: '100%', minWidth: 0 }
 const bouton: React.CSSProperties = {
   border: `1.5px solid ${C.bordureChamp}`, background: '#fff', color: C.accent, borderRadius: 50,
   padding: '7px 13px', fontWeight: 800, fontSize: 12.5, cursor: 'pointer', fontFamily: 'inherit', whiteSpace: 'nowrap', textDecoration: 'none',
@@ -49,10 +49,12 @@ function Tuile({ v, l }: { v: React.ReactNode; l: string }) {
   )
 }
 
-export default function CrmPro({ proId, proNom, contacts, operations, operationFixe, operationInitiale }: {
+export default function CrmPro({ proId, proNom, contacts, erreur, operations, operationFixe, operationInitiale }: {
   proId: string
   proNom: string
   contacts: ContactPro[]
+  /** Lecture impossible (message en francais) : affichee a la place d'un faux « aucun contact ». */
+  erreur?: string | null
   /** Operations du pro, dans l ordre du rangement (pour le filtre). */
   operations: { cle: string; nom: string; dates: string }[]
   operationFixe?: string | null
@@ -138,10 +140,24 @@ export default function CrmPro({ proId, proNom, contacts, operations, operationF
   }
   const visibles = tous ? liste : liste.slice(0, 100)
 
+  /* Participants d'un SUPER EVENT (decision du 31/10 : seul le Super Admin lit tout) : le pro ne voit que les joueurs
+     passes par SES stations de ce super event, et leurs coordonnees seulement s'ils ont accepte d'etre contactes. */
+  const estSuper = !!operationFixe && operationFixe.indexOf('se:') === 0
+  const masques = base.length - nbOptin
+
   return (
     <div>
+      {erreur && <div role="alert" style={{ background: '#FEF2F2', border: '1px solid #FCA5A5', color: '#991B1B', borderRadius: 14, padding: '11px 14px', marginBottom: 12, fontSize: 13, fontWeight: 700 }}>{erreur}</div>}
+      {estSuper && (
+        <div role="note" style={{ background: C.violetClair, border: `1px solid ${C.bordureChamp}`, borderRadius: 14, padding: '11px 14px', marginBottom: 12, fontSize: 13, lineHeight: 1.55, color: C.texte }}>
+          <b>Participants de vos stations dans ce super event.</b> Vous voyez uniquement les joueurs passés par vos stations.
+          {' '}{nbOptin} {nbOptin > 1 ? 'ont accepté' : 'a accepté'} d’être contacté{nbOptin > 1 ? 's' : ''} : leurs coordonnées sont visibles.
+          {masques > 0 && <> {masques} {masques > 1 ? 'n’ont pas accepté' : 'n’a pas accepté'} : ils restent comptés dans les statistiques, sans coordonnées.</>}
+          {' '}La liste complète de tous les participants du super event est réservée à l’organisateur (Super Admin).
+        </div>
+      )}
       <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 12 }}>
-        <Tuile v={base.length} l="contacts" />
+        <Tuile v={base.length} l={estSuper ? 'participants (vos stations)' : 'contacts'} />
         <Tuile v={nbOptin} l="opt-in (relançables)" />
         <Tuile v={nbGagnants} l="gagnants" />
         <Tuile v={nbParties} l="participations" />
@@ -222,7 +238,7 @@ export default function CrmPro({ proId, proNom, contacts, operations, operationF
           )}
 
           <div style={{ background: '#fff', border: `1px solid ${C.bordure}`, borderRadius: 14, overflowX: 'auto' }}>
-            {liste.length === 0 ? <div style={{ padding: 16, fontSize: 13, color: C.attenue }}>Aucun contact avec ces filtres.</div> : (
+            {liste.length === 0 ? <div style={{ padding: 16, fontSize: 13, color: C.attenue }}>{base.length === 0 ? (erreur ? 'La liste n’a pas pu être chargée.' : 'Personne n’a encore joué ici : les participants apparaîtront dès les premières parties.') : 'Aucun contact avec ces filtres.'}</div> : (
               <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: 860 }}>
                 <thead>
                   <tr>

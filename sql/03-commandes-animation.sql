@@ -180,7 +180,7 @@ declare
   c_annuel  constant numeric := 990;  -- offre annuelle HT
   c_mensuel constant numeric := 110;  -- offre mensuelle HT, par mois (la commande porte le 1er mois)
   c_kit     constant numeric := 149;   -- kit physique HT par boutique
-  c_quiz  constant numeric := 180;   -- option quiz HT par événement
+  c_quiz  constant numeric := 180;   -- option quiz HT par animation
   c_bonus constant numeric := 180;   -- option questions bonus HT
   h json;
   ip text;
@@ -318,7 +318,7 @@ create policy commandes_animation_lecture on public.commandes_animation
   for select to authenticated
   using (
     public.est_super_admin()
-    or exists (select 1 from public.pros p where p.id = commandes_animation.pro_id and p.auth_id = auth.uid())
+    or exists (select 1 from public.pros p where p.id = coalesce(commandes_animation.pro_id, commandes_animation.espace_pro_id) and p.auth_id = auth.uid())
   );
 
 drop policy if exists commandes_animation_maj_admin on public.commandes_animation;
@@ -423,7 +423,7 @@ drop policy if exists factures_animation_lecture on public.factures_animation;
 create policy factures_animation_lecture on public.factures_animation for select to authenticated
   using (
     public.est_super_admin()
-    or exists (select 1 from public.commandes_animation c join public.pros p on p.id = c.pro_id
+    or exists (select 1 from public.commandes_animation c join public.pros p on p.id = coalesce(c.pro_id, c.espace_pro_id)
                 where c.id = factures_animation.commande_id and p.auth_id = auth.uid())
   );
 
@@ -457,7 +457,7 @@ begin
       'lib', case when c.kit = 'physique' then 'Kit physique imprime' else 'Kit digital' end,
       'det', case when c.kit = 'physique' then 'Par boutique : 1 support de caisse, 3 affiches A4, 3 macarons' else 'Fichiers a imprimer, QR inclus' end,
       'q', case when c.kit = 'physique' then c.nb_boutiques else 1 end, 'ht', c.montant_kit_ht));
-    if c.opt_quiz_qte > 0 then lignes := lignes || jsonb_build_array(jsonb_build_object('lib','Option : quiz personnalise','det','180 EUR HT par evenement','q',c.opt_quiz_qte,'ht',180 * c.opt_quiz_qte)); end if;
+    if c.opt_quiz_qte > 0 then lignes := lignes || jsonb_build_array(jsonb_build_object('lib','Option : quiz personnalise','det','180 EUR HT par animation','q',c.opt_quiz_qte,'ht',180 * c.opt_quiz_qte)); end if;
     if c.opt_bonus_qte > 0 then lignes := lignes || jsonb_build_array(jsonb_build_object('lib','Option : questions bonus','det','180 EUR HT','q',c.opt_bonus_qte,'ht',180 * c.opt_bonus_qte)); end if;
     ht := c.montant_ht; tva := c.montant_tva;
   else
@@ -510,7 +510,7 @@ begin
   execute 'update public.pros set statut = ''valide'', acces_active_at = coalesce(acces_active_at, now()) where id = $1 and coalesce(statut, '''') = ''en_attente'''
     using pid;
   get diagnostics n = row_count;
-  update public.commandes_animation set espace_pro_id = pid, espace_pro_active_le = now() where id = c.id;
+  update public.commandes_animation set espace_pro_id = pid, espace_pro_active_le = now(), pro_id = coalesce(pro_id, pid) where id = c.id;
   if n > 0 then
     insert into public.commandes_animation_journal (commande_id, par, action, details)
     values (c.id, coalesce(nullif(lower(coalesce(auth.jwt()->>'email', '')), ''), c.paiement_valide_par, 'systeme'), 'espace_pro_active', jsonb_build_object('pro_id', pid));
@@ -520,6 +520,30 @@ end;
 $$;
 revoke all on function public.activer_espace_pro_animation(text) from public, anon, authenticated;
 grant execute on function public.activer_espace_pro_animation(text) to service_role;
+
+-- ---------------------------------------------------------------------------
+-- LIEN COMPTE PRO <-> COMMANDES (01/11) : une commande passee sans compte (bon de commande ouvert a
+-- froid) n'a pas de pro_id : le pro ne la voyait pas dans « Mes commandes et factures ». Cette fonction
+-- rattache a SON compte les commandes sans pro_id dont l'email est celui de sa session CONFIRMEE
+-- (jamais par SIRET seul : un SIRET est public, il ne prouve rien). Appelee a l'ouverture de la page.
+-- Ne touche que le champ pro_id (ni montant, ni signature : voir le trigger de gel ci-dessus).
+-- ---------------------------------------------------------------------------
+create or replace function public.rattacher_mes_commandes()
+returns integer
+language plpgsql security definer set search_path = public as $$
+declare pid text; mail text := lower(coalesce(auth.jwt()->>'email', '')); n integer;
+begin
+  if auth.uid() is null or mail = '' then return 0; end if;
+  select id into pid from public.pros where auth_id = auth.uid() order by created_at limit 1;
+  if pid is null then return 0; end if;
+  update public.commandes_animation set pro_id = pid
+   where pro_id is null and lower(email) = mail;
+  get diagnostics n = row_count;
+  return n;
+end;
+$$;
+revoke all on function public.rattacher_mes_commandes() from public, anon;
+grant execute on function public.rattacher_mes_commandes() to authenticated;
 
 -- Paiement validé (statut -> payee) : facture émise dans la même transaction, AVANT la notification
 -- (les triggers AFTER s'exécutent par ordre alphabétique : trg_commandes_animation_facture < trg_notify_...)

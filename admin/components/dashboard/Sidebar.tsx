@@ -168,10 +168,10 @@ export default function Sidebar() {
       ],
     },
     {
-      group: 'Events',
+      group: 'Animations',
       ton: 'ev',
       items: [
-        { id: 'events', label: 'Events', count: events.length, live: liveCount, href: '/dashboard/events' },
+        { id: 'events', label: 'Animations', count: events.length, live: liveCount, href: '/dashboard/events' },
         { id: 'wizard-event-se', label: 'Nouvelle animation', href: '/dashboard/wizard-event' },
         { id: 'theme-parcours', label: 'Thème des parcours', href: '/dashboard/theme-parcours' },
       ],

@@ -1,0 +1,14 @@
+alter table public.demandes_rattachement_super_event add column if not exists persona text;
+alter table public.demandes_rattachement_super_event add column if not exists nom_commerce text;
+alter table public.demandes_rattachement_super_event add column if not exists categorie text;
+alter table public.demandes_rattachement_super_event add column if not exists adresse text;
+alter table public.demandes_rattachement_super_event add column if not exists code_postal text;
+alter table public.demandes_rattachement_super_event add column if not exists ville text;
+alter table public.demandes_rattachement_super_event add column if not exists regle_jeu text;
+alter table public.demandes_rattachement_super_event add column if not exists offre text;
+alter table public.demandes_rattachement_super_event add column if not exists date_debut_souhaite timestamptz;
+alter table public.demandes_rattachement_super_event add column if not exists date_fin_souhaite timestamptz;
+alter table public.demandes_rattachement_super_event add column if not exists lots jsonb;
+alter table public.demandes_rattachement_super_event add column if not exists diffusion_physique text;
+alter table public.demandes_rattachement_super_event add column if not exists diffusion_digital text;
+alter table public.demandes_rattachement_super_event add column if not exists diffusion_qr_tracking text;

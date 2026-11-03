@@ -1,5 +1,5 @@
 -- =============================================================================
--- sql/08-resultats-tirage.sql — RÉSULTATS DE TIRAGE PAR PARTICIPANT (01/11/2026)
+-- 10 — sql/10-resultats-tirage.sql — RÉSULTATS DE TIRAGE PAR PARTICIPANT (01/11/2026)
 -- Branche feat/jeux-tickets-profil. NON APPLIQUÉ EN BASE : à appliquer à la main
 -- (SQL editor), section par section, dans l'ordre. Chaque section est idempotente.
 --

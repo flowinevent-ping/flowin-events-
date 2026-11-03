@@ -17,7 +17,7 @@ export const PRIX_AM = {
   annuelleHt: 990, // formule annuelle, engagement 12 mois
   mensuelleHt: 110, // formule mensuelle, par mois, engagement 3 mois minimum
   kitPhysiqueHt: 149, // par boutique
-  optQuizHt: 180, // par evenement
+  optQuizHt: 180, // par animation
   optBonusHt: 180, // par sondage
   tva: 0.2,
 } as const

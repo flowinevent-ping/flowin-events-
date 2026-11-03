@@ -1,5 +1,5 @@
 /**
- * Tests SQL des QR permanents (sql/08-qr-permaliens.sql) sur la base locale JETABLE.
+ * Tests SQL des QR permanents (sql/09-qr-permaliens.sql) sur la base locale JETABLE.
  * Prerequis : base flowin_qa reconstruite (run.sh) + seed.sql. Aucune base distante.
  * usage : NODE_PATH=<dossier avec pg> node sql-tests.js <sortie.json>
  */

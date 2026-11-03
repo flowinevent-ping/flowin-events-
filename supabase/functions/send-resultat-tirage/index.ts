@@ -9,7 +9,7 @@
 // participation que la personne a elle-meme faite. Lien vers l'application.
 // (Les gagnants recoivent leur billet par send-ticket-gagnant, inchange.)
 //
-// Declenchement : sql/08-resultats-tirage.sql (_notifier_resultats_tirage, pg_net)
+// Declenchement : sql/10-resultats-tirage.sql (_notifier_resultats_tirage, pg_net)
 // a la fin d'un tirage, manuel comme programme.
 //
 // REGLAGE DU COMMERCE : events.cfg.tirage.notifierPerdants (defaut oui). Si

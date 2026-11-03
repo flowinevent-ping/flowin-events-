@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Flowin Animation magasin</title>
-<meta name="description" content="Flowin Animation magasin : faites jouer, gardez le contact, faites revenir. Le réseau des commerçants Flowin, les jeux, la mesure, les offres et la garantie.">
+<meta name="description" content="Flowin Animation magasin : faites jouer, gardez le contact, faites revenir. Le réseau des commerçants Flowin, les jeux, la mesure, les offres.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bangers&display=swap" rel="stylesheet">
@@ -493,6 +493,7 @@
   @media (min-width:860px){ .cfg{grid-template-columns:minmax(0,1fr) 300px} }
   @media (min-width:760px){ .why{grid-template-columns:repeat(2,minmax(0,1fr))} }
   @media (min-width:900px){ .ben6{grid-template-columns:repeat(3,minmax(0,1fr))} .chips4{grid-template-columns:repeat(4,minmax(0,1fr))} .temps4:not(.t3){grid-template-columns:repeat(4,minmax(0,1fr))} .t3{grid-template-columns:repeat(3,minmax(0,1fr))} }
+[data-garantie][hidden]{display:none!important}
 </style>
 </head>
 <body>
@@ -825,7 +826,7 @@
   </section>
 
   <!-- 9. GARANTIE certifiée et verrouillée -->
-  <section class="pg bg-paper" id="garantie" data-titre="Garantie">
+  <section class="bg-paper" id="garantie" data-pg data-garantie hidden data-titre="Garantie">
     <div class="in">
       <div class="eyebrow">Offre sp&eacute;ciale premiers adh&eacute;rents</div>
       <h2>Satisfait <em>ou rembours&eacute;</em>.</h2>
@@ -881,7 +882,7 @@
         <a class="cc js-inscr" href="/pro/inscription"><span class="cci b"><svg class="ic"><use href="#i-contact"/></svg></span><span><b>Je cr&eacute;e mon compte</b><small>J&rsquo;ouvre mon espace pro et je pr&eacute;pare mon animation.</small></span><span class="fl2">&rarr;</span></a>
         <button class="cc" type="button" data-go="rappel"><span class="cci l"><svg class="ic"><use href="#i-phone"/></svg></span><span><b>&Ecirc;tre contact&eacute;</b><small>Un conseiller vous rappelle au cr&eacute;neau de votre choix.</small></span><span class="fl2">&rarr;</span></button>
       </div>
-      <div class="plus"><span><svg class="ic"><use href="#i-libre"/></svg>Satisfait ou rembours&eacute;</span><span><svg class="ic"><use href="#i-ok"/></svg>Signature &eacute;lectronique</span><span><svg class="ic"><use href="#i-ok"/></svg>Virement ou pr&eacute;l&egrave;vement SEPA</span></div>
+      <div class="plus"><span data-garantie hidden><svg class="ic"><use href="#i-libre"/></svg>Satisfait ou rembours&eacute;</span><span><svg class="ic"><use href="#i-ok"/></svg>Signature &eacute;lectronique</span><span><svg class="ic"><use href="#i-ok"/></svg>Virement ou pr&eacute;l&egrave;vement SEPA</span></div>
     </div>
   </section>
 
@@ -911,6 +912,7 @@
 
 <div class="nav"><button id="prev" type="button">&larr; Pr&eacute;c&eacute;dent</button><span class="cnt" id="pgn">1 / 11</span><button class="next" id="next" type="button">Suivant &rarr;</button></div>
 
+<script src="/flowin-config.js"></script>
 <script>
 (function(){
   'use strict';
@@ -943,6 +945,21 @@
   }
   var blobs = document.querySelectorAll('[data-blob]');
   for (var bi = 0; bi < blobs.length; bi++) { var bv = blobs[bi].getAttribute('data-blob').split(','); blobs[bi].innerHTML = tache(80, bv[0], +bv[1]); }
+
+  /* ---------- INTERRUPTEUR CENTRAL (flowin-config.js) : offre « satisfait ou rembourse » ----------
+     Suspendue (GARANTIE_ACTIVE = false) : la page Garantie sort de la navigation, les boutons qui y menaient vont a « Commander »,
+     les mentions disparaissent. Reactivee : tout revient. Le code de certification plus bas est conserve. */
+  var GAR = !!(window.FLOWIN_CONFIG && window.FLOWIN_CONFIG.GARANTIE_ACTIVE === true);
+  (function(){
+    var g = document.getElementById('garantie'), blocs = document.querySelectorAll('[data-garantie]'), i;
+    if (GAR) {
+      for (i = 0; i < blocs.length; i++) blocs[i].removeAttribute('hidden');
+      if (g) g.className += ' pg';
+    } else {
+      var vers = document.querySelectorAll('[data-go="garantie"]');
+      for (i = 0; i < vers.length; i++) vers[i].setAttribute('data-go', 'commander');
+    }
+  })();
 
   /* ---------- Navigation page par page ---------- */
   var pages = document.querySelectorAll('.pg'), cur = 0, links = '', onAnim = null;
@@ -1253,7 +1270,7 @@
     if (st.kit === 'physique') p.push('boutiques=' + st.nb);
     if (st.quiz) p.push('quiz=1');
     if (st.bonus) p.push('bonus=1');
-    if (avecGarantie && certif && st.formule === 'annuelle') p.push('garantie=1', 'panier=' + certif.panier, 'flux=' + encodeURIComponent(certif.flux), 'certif_le=' + encodeURIComponent(certif.le), 'certif_par=' + encodeURIComponent(certif.nom));
+    if (GAR && avecGarantie && certif && st.formule === 'annuelle') p.push('garantie=1', 'panier=' + certif.panier, 'flux=' + encodeURIComponent(certif.flux), 'certif_le=' + encodeURIComponent(certif.le), 'certif_par=' + encodeURIComponent(certif.nom));
     if (commercial) p.push('commercial=' + encodeURIComponent(commercial));
     return '/bon-commande-animation.html?' + p.join('&');
   }
@@ -1274,7 +1291,7 @@
     var h = ''; for (i = 0; i < lignes.length; i++) h += '<div><span>' + lignes[i][0] + '</span><b>' + eur2(lignes[i][1]) + ' HT</b></div>';
     $('rLines').innerHTML = h;
     $('rHT').textContent = eur2(t.ht); $('rTVA').textContent = eur2(t.tva); $('rTTC').textContent = eur2(t.ttc) + ' TTC';
-    $('rGar').innerHTML = st.formule === 'mensuelle' ? 'Satisfait ou remboursé : réservé à la formule annuelle.' : (certif ? 'Satisfait ou remboursé : fiche découverte certifiée.' : 'Offre premiers adhérents : <button class="btn" type="button" id="rGarGo">Je veux bénéficier du satisfait ou remboursé</button>');
+    $('rGar').innerHTML = !GAR ? '' : st.formule === 'mensuelle' ? 'Satisfait ou remboursé : réservé à la formule annuelle.' : (certif ? 'Satisfait ou remboursé : fiche découverte certifiée.' : 'Offre premiers adhérents : <button class="btn" type="button" id="rGarGo">Je veux bénéficier du satisfait ou remboursé</button>');
     var rg = $('rGarGo'); if (rg) rg.onclick = function(){ go('garantie'); };
     $('rNote').textContent = st.formule === 'mensuelle' ? 'Puis 110 € HT par mois (132 € TTC), engagement 3 mois minimum.' : 'Engagement 12 mois, un seul paiement pour l’année.';
     /* Page Commander */
@@ -1284,7 +1301,7 @@
     $('endRecap').textContent = det.join(', ') + '. ' + (st.formule === 'mensuelle' ? 'Engagement 3 mois minimum, puis mois par mois.' : 'Engagement 12 mois.');
     $('endTTC').textContent = eur2(t.ttc) + ' TTC';
     $('gbox').className = 'card gbox' + (st.formule === 'mensuelle' ? ' mens' : '');
-    $('endGar').innerHTML = st.formule === 'mensuelle' ? 'Garantie satisfait ou remboursé : réservée à la formule annuelle.' :
+    $('endGar').innerHTML = !GAR ? '' : st.formule === 'mensuelle' ? 'Garantie satisfait ou remboursé : réservée à la formule annuelle.' :
       (certif ? 'Avec la garantie satisfait ou remboursé, fiche découverte certifiée.' : 'Garantie satisfait ou remboursé : <button type="button" id="endGarGo">Je veux bénéficier du satisfait ou remboursé</button>');
     var gg = $('endGarGo'); if (gg) gg.onclick = function(){ go('garantie'); };
     $('endOrder').href = lien(!!certif); $('gOrder').href = lien(true);
@@ -1381,5 +1398,6 @@
   if (h0 === 'rappel') { go('commander'); openSheet(); }
 })();
 </script>
+<script src="/plaquette-demo.js"></script>
 </body>
 </html>

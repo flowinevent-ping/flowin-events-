@@ -111,11 +111,11 @@ export default function Page() {
     <div className="sa-content">
       <div className="sa-page">
         <PageHeader
-          title="Events"
+          title="Animations"
           subtitle={`${list.length} animation${list.length > 1 ? 's' : ''} · ${parPro.length} pro${parPro.length > 1 ? 's' : ''} — hors super events (voir Super Events pour les stations NDS)`}
           actions={
             <>
-              <Link href="/dashboard/wizard-event" className="sa-btn primary sm"><Ico k="plus" size={12} style={{ marginRight: 5, verticalAlign: -2 }} />Nouvel event</Link>
+              <Link href="/dashboard/wizard-event" className="sa-btn primary sm"><Ico k="plus" size={12} style={{ marginRight: 5, verticalAlign: -2 }} />Nouvelle animation</Link>
               {/* L autre porte d entree : un pro qui demande a participer depuis /pro/rejoindre. */}
               <Link href="/dashboard/demandes-rattachement" className="sa-btn sm"><Ico k="handshake" size={12} style={{ marginRight: 5, verticalAlign: -2 }} />Demandes de participation</Link>
             </>

@@ -10,21 +10,31 @@
 
 import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase'
-import { SECTEURS_PRO } from '@/lib/proCreation'
+import { SECTEURS_PRO, SECTEUR_AUTRE, lireSecteurAutre, lireActivite, nettoyerPrecision, tagsAvecSecteurAutre } from '@/lib/proCreation'
+import SelectActivite from '@/components/creation/SelectActivite'
+import PrecisionAutre from '@/components/creation/PrecisionAutre'
 import { CARD, ACC } from '@/lib/proui'
 import { uploaderLogo, redimensionnerImage } from '@/lib/upload'
 import { Ico } from '@/lib/proicons'
+import { messageFr } from '@/lib/erreursFr'
 
-type Pro = { id: string; nom: string | null; secteur: string | null; adresse: string | null; code_postal: string | null; ville: string | null; siret: string | null; contact: string | null; email: string | null; tel: string | null; partenaire_id: string | null }
+type Pro = { id: string; nom: string | null; secteur: string | null; adresse: string | null; code_postal: string | null; ville: string | null; siret: string | null; contact: string | null; email: string | null; tel: string | null; partenaire_id: string | null
+  /* Fiche entreprise de « Ma premiere fois » (sql/02-pros-entreprise-onboarding.sql) : presents seulement si la migration est appliquee. */
+  nom_commercial?: string | null; forme_juridique?: string | null; siren?: string | null; code_naf?: string | null; activite_naf?: string | null; produits_services?: string | null; nb_points_vente?: string | number | null
+  /** Tags du pro (la precision du secteur « Autre » y est rangee, voir lib/proCreation). */
+  tags?: string[] | null }
 type Fiche = { image_url: string | null; site_web: string | null; instagram: string | null; facebook: string | null }
 
 const lbl: React.CSSProperties = { fontSize: 12, fontWeight: 700, color: '#5a6b80', marginBottom: 5, display: 'block' }
 const inp: React.CSSProperties = { width: '100%', border: '1.5px solid #E3E8EF', borderRadius: 12, padding: '11px 13px', fontSize: 14, fontFamily: 'inherit', boxSizing: 'border-box', marginBottom: 12, background: '#fff' }
 
-export default function EntrepriseForm({ initial }: { initial: Pro }) {
+export default function EntrepriseForm({ initial, avecFicheEntreprise = false }: { initial: Pro; /** Colonnes du SQL 02 presentes en base : on affiche et on enregistre la fiche entreprise complete. */ avecFicheEntreprise?: boolean }) {
   const [p, setP] = useState<Pro>(initial)
   const [f, setF] = useState<Fiche>({ image_url: null, site_web: null, instagram: null, facebook: null })
   const [etat, setEtat] = useState<'' | 'envoi' | 'ok' | 'ko'>('')
+  const [messageKo, setMessageKo] = useState('')
+  const [autre, setAutre] = useState(lireSecteurAutre(initial.tags))
+  const [activite, setActivite] = useState(lireActivite(initial.tags))
   const [uploadEnCours, setUploadEnCours] = useState(false)
   const [uploadErreur, setUploadErreur] = useState('')
 
@@ -51,7 +61,7 @@ export default function EntrepriseForm({ initial }: { initial: Pro }) {
   const champ = (k: keyof Pro, l: string, ph = '') => (
     <label>
       <span style={lbl}>{l}</span>
-      <input style={inp} value={(p[k] as string) ?? ''} placeholder={ph} onChange={e => { setP(x => ({ ...x, [k]: e.target.value })); setEtat('') }} />
+      <input style={inp} value={String(p[k] ?? '')} placeholder={ph} onChange={e => { setP(x => ({ ...x, [k]: e.target.value })); setEtat('') }} />
     </label>
   )
   const champF = (k: keyof Fiche, l: string, ph = '') => (
@@ -62,20 +72,31 @@ export default function EntrepriseForm({ initial }: { initial: Pro }) {
   )
 
   async function enregistrer() {
-    if (!(p.nom ?? '').trim()) { setEtat('ko'); return }
-    setEtat('envoi')
-    const vide = (v: string | null) => ((v ?? '').trim() || null)
+    if (!(p.nom ?? '').trim()) { setMessageKo('Enregistrement impossible : le nom de l’établissement est obligatoire.'); setEtat('ko'); return }
+    if ((p.secteur === SECTEUR_AUTRE || (p.secteur === 'Commerce & Négoce' && activite === SECTEUR_AUTRE)) && nettoyerPrecision(autre).length < 3) { setMessageKo('Précisez votre activité (3 lettres minimum) puisque vous avez choisi « Autre ».'); setEtat('ko'); return }
+    setEtat('envoi'); setMessageKo('')
+    const vide = (v: string | null | undefined) => ((v ?? '').trim() || null)
+    const nbPv = parseInt(String(p.nb_points_vente ?? ''), 10)
+    const entreprise = avecFicheEntreprise ? {
+      nom_commercial: vide(p.nom_commercial), forme_juridique: vide(p.forme_juridique), siren: vide(p.siren),
+      code_naf: vide(p.code_naf), activite_naf: vide(p.activite_naf), produits_services: vide(p.produits_services),
+      nb_points_vente: nbPv > 0 ? nbPv : null,
+    } : {}
     const { error } = await supabase.from('pros').update({
       nom: (p.nom ?? '').trim(), secteur: vide(p.secteur), adresse: vide(p.adresse), code_postal: vide(p.code_postal),
       ville: vide(p.ville), siret: vide(p.siret), contact: vide(p.contact), email: vide(p.email)?.toLowerCase() ?? null, tel: vide(p.tel),
+      ...entreprise,
+      /* Tags : seulement si la colonne est lue par la page (jamais d'ecrasement a l'aveugle). */
+      ...(initial.tags !== undefined ? { tags: tagsAvecSecteurAutre(p.tags ?? initial.tags, p.secteur ?? '', autre, p.secteur === 'Commerce & Négoce' ? activite : '') } : {}),
     }).eq('id', p.id)
+    if (error) setMessageKo(`Enregistrement impossible : ${messageFr(error)}`)
     let ko = !!error
     if (p.partenaire_id) {
       const r = await supabase.from('partenaires').update({
         image_url: vide(f.image_url), site_web: vide(f.site_web), instagram: vide(f.instagram), facebook: vide(f.facebook),
         adresse: vide(p.adresse), code_postal: vide(p.code_postal), ville: vide(p.ville), tel: vide(p.tel),
       }).eq('id', p.partenaire_id)
-      if (r.error) ko = true
+      if (r.error) { ko = true; setMessageKo(m => m || `Fiche commerce non enregistrée : ${messageFr(r.error)}`) }
     }
     setEtat(ko ? 'ko' : 'ok')
   }
@@ -115,6 +136,14 @@ export default function EntrepriseForm({ initial }: { initial: Pro }) {
               {(p.secteur && (SECTEURS_PRO as readonly string[]).indexOf(p.secteur) < 0 ? [p.secteur] : []).concat(SECTEURS_PRO as readonly string[]).map(s => <option key={s} value={s}>{s}</option>)}
             </select>
           </label>
+          <PrecisionAutre secteur={p.secteur ?? ''} valeur={autre} onChange={v => { setAutre(v); setEtat('') }} id="ent-secteur-autre" style={{ border: '1.5px solid #E3E8EF', fontSize: 14 }} />
+          {p.secteur === 'Commerce & Négoce' && (
+            <div style={{ marginBottom: 12 }}>
+              <span style={lbl}>Votre activité (facultatif)</span>
+              <SelectActivite id="ent-activite" valeur={activite} onChange={v => { setActivite(v); setEtat('') }} style={{ ...inp, marginBottom: 0 }} />
+              <PrecisionAutre secteur={activite} valeur={autre} onChange={v => { setAutre(v); setEtat('') }} id="ent-activite-autre" style={{ border: '1.5px solid #E3E8EF', fontSize: 14 }} />
+            </div>
+          )}
           {champ('adresse', 'Adresse', 'N°, rue')}
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: 10 }}>
             {champ('code_postal', 'Code postal')}
@@ -122,6 +151,18 @@ export default function EntrepriseForm({ initial }: { initial: Pro }) {
           </div>
           {champ('siret', 'SIRET')}
         </div>
+        {avecFicheEntreprise && (
+          <div style={CARD}>
+            <div style={{ fontSize: 12.5, fontWeight: 800, marginBottom: 8 }}>Fiche entreprise</div>
+            {champ('nom_commercial', 'Nom commercial (enseigne)')}
+            {champ('forme_juridique', 'Forme juridique')}
+            {champ('siren', 'SIREN')}
+            {champ('code_naf', 'Code NAF', 'ex. 10.71C')}
+            {champ('activite_naf', 'Activité (libellé NAF)')}
+            {champ('produits_services', 'Ce que vous proposez')}
+            {champ('nb_points_vente', 'Nombre de points de vente')}
+          </div>
+        )}
         <div style={CARD}>
           {champ('contact', 'Contact')}
           {champ('email', 'Email')}
@@ -144,7 +185,7 @@ export default function EntrepriseForm({ initial }: { initial: Pro }) {
           {etat === 'envoi' ? 'Enregistrement…' : 'Enregistrer'}
         </button>
         {etat === 'ok' && <span style={{ fontSize: 13, color: '#15803D', fontWeight: 700 }}>Coordonnées enregistrées.</span>}
-        {etat === 'ko' && <span style={{ fontSize: 13, color: '#B45309', fontWeight: 700 }}>Enregistrement impossible — le nom est obligatoire.</span>}
+        {etat === 'ko' && <span role="alert" style={{ fontSize: 13, color: '#B45309', fontWeight: 700 }}>{messageKo || 'Enregistrement impossible. Réessayez dans un instant.'}</span>}
       </div>
     </>
   )

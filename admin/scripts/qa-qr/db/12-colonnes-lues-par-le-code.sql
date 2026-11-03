@@ -1,0 +1,33 @@
+-- SUPPLEMENT DE TEST genere par l'auto-reparation du mini-PostgREST (HEAL=1) lors du parcours de tous les ecrans de l'espace pro :
+-- colonnes et tables que le code LIT en production mais dont le DDL n'est pas dans sql/. Type deduit du nom (approximatif). Test seulement.
+alter table public.events add column if not exists paiement_statut text;
+alter table public.pros add column if not exists partenaire_id text;
+create table if not exists public.bons_commande (id text primary key); alter table public.bons_commande enable row level security; create policy test_permissif on public.bons_commande for all to anon, authenticated using (true) with check (true);
+alter table public.tirages add column if not exists joueur_tel text;
+alter table public.bons_commande add column if not exists super_event_id text;
+alter table public.tirages add column if not exists lot_valeur text;
+alter table public.bons_commande add column if not exists event_id text;
+alter table public.bons_commande add column if not exists partenaire_id text;
+alter table public.tirages add column if not exists notifie_at timestamptz;
+alter table public.tirages add column if not exists retire_at timestamptz;
+alter table public.bons_commande add column if not exists montant_ttc numeric;
+alter table public.tirages add column if not exists relance_envoyee_at timestamptz;
+alter table public.bons_commande add column if not exists statut text;
+create table if not exists public.lots_stock (id text primary key); alter table public.lots_stock enable row level security; create policy test_permissif on public.lots_stock for all to anon, authenticated using (true) with check (true);
+alter table public.bons_commande add column if not exists created_at timestamptz;
+alter table public.bons_commande add column if not exists jeton_public text;
+alter table public.lots_stock add column if not exists lot_id text;
+alter table public.lots_stock add column if not exists utilise boolean;
+alter table public.lots_stock add column if not exists attribue_a text;
+alter table public.visites add column if not exists visiteur_id text;
+alter table public.joueurs add column if not exists actif boolean;
+alter table public.events add column if not exists gain_immediat text;
+alter table public.events add column if not exists gain_ticket boolean;
+alter table public.events add column if not exists categorie text;
+alter table public.events add column if not exists tel text;
+alter table public.events add column if not exists site_web text;
+alter table public.events add column if not exists photo_url text;
+alter table public.events add column if not exists horaires text;
+alter table public.super_events add column if not exists frais_pro text;
+create table if not exists public.packs_participation (id text primary key); alter table public.packs_participation enable row level security; create policy test_permissif on public.packs_participation for all to anon, authenticated using (true) with check (true);
+alter table public.packs_participation add column if not exists ordre numeric;

@@ -1,15 +1,11 @@
 -- ============================================================================
 -- 01 — IDENTITE DU SUPER ADMIN (une seule table, une seule fonction)  [01/11/2026]
 -- ============================================================================
--- ORDRE D'APPLICATION (tous les fichiers sont NON APPLIQUES, a lancer a la main, dans l'ordre) :
---   01-identite-super-admin.sql          prerequis de tous les suivants
---   02-pros-entreprise-onboarding.sql    champs entreprise de « Ma premiere fois »
---   03-commandes-animation.sql           commandes, factures, paiement, activation de l'espace pro
---                                        (requiert 01 et 02 ; fonction edge notify-commande-animation)
---   04-pros-rib.sql                      coordonnees bancaires du pro (requiert 01)
---   05-confidentialite-contacts.sql      contacts joueurs : phase 1 ; phases 2 et 3 = plan (requiert 01)
---   06-droits-pro.sql                    droits d'acces du pro pilotes par le Super Admin (requiert 01)
---   07-joueurs-optin-version.sql         colonne joueurs.optin_version ecrite par le code (independant ; a lancer en premier)
+-- ORDRE D'APPLICATION : voir sql/README-ORDRE.md (liste complete et a jour, testee par
+-- admin/scripts/qa-qr/chaine-sql.sh). Tous les fichiers sont NON APPLIQUES, a lancer a la main, dans l'ordre :
+--   07 (en premier, independant), 01 (celui-ci, prerequis de presque tout), 02, 03, 04, 05, 06,
+--   2026-10-31-jeux-masters, 2026-10-31-positions-joueurs, 2026-11-01-tirage-auto-liste-gagnants,
+--   08-bon-commande-v2, 09-qr-permaliens, 10-resultats-tirage.
 -- Chaque fichier peut etre rejoue sans dommage (idempotent), sauf mention contraire.
 --
 -- PREREQUIS : aucun.

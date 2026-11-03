@@ -102,7 +102,7 @@ export default function Page() {
               aria-disabled={!proParcours}
               style={!proParcours ? { opacity: 0.4, pointerEvents: 'none' } : undefined}
             >
-              Voir le parcours Event
+              Voir le parcours d’une animation
             </a>
             <a
               className="sa-btn sm"

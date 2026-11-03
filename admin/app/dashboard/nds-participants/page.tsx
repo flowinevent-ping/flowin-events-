@@ -272,6 +272,11 @@ export default function Page() {
                   La liste n&apos;a pas pu être chargée — {erreur}
                 </div>
               )}
+              <div className="sa-alert info" role="note" style={{ marginBottom: 12, fontSize: 12.5, lineHeight: 1.55 }}>
+                <b>Droits d’accès.</b> Vue Super Admin : tous les participants, coordonnées complètes. Un pro ne voit, dans sa fiche
+                de super event (onglet « Participants »), que les joueurs passés par <b>ses</b> stations, et leurs coordonnées seulement
+                s’ils ont accepté d’être contactés. Choisissez un pro ci-dessous pour voir la liste de ses stations.
+              </div>
               <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', alignItems: 'center', marginBottom: 14 }}>
                 <span style={{ fontSize: 11, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '.07em', color: 'var(--sa-muted)', marginRight: 4 }}>
                   Portée

@@ -70,6 +70,13 @@ export type EtatChargement = 'ok' | 'sans-session' | 'indisponible' | 'erreur'
 const TABLE_ABSENTE = (code?: string, msg?: string) =>
   code === '42P01' || code === 'PGRST205' || /does not exist|schema cache|Could not find/i.test(msg ?? '')
 
+/** Message en francais (jamais le texte technique de la base) pour une lecture de commandes impossible. */
+export function messageErreurCommandes(code?: string, msg?: string): string {
+  if (code === '42501' || /permission denied|row-level security|JWT/i.test(msg ?? '')) return 'votre session ne permet pas de lire ces commandes : reconnectez-vous'
+  if (/fetch|network|timeout/i.test(msg ?? '')) return 'connexion impossible : vérifiez votre réseau'
+  return 'erreur temporaire : rechargez la page'
+}
+
 export interface ResultatCommandes {
   etat: EtatChargement
   commandes: CommandeAnimation[]
@@ -83,10 +90,13 @@ export async function chargerCommandes(proId: string): Promise<ResultatCommandes
   const vide = { commandes: [], factures: {} }
   const { data: s } = await supabase.auth.getSession()
   if (!s.session) return { etat: 'sans-session', ...vide }
-  const rep = await supabase.from('commandes_animation').select(COLONNES).eq('pro_id', proId).order('created_at', { ascending: false })
+  /* Rattache d'abord les commandes passees sans compte avec l'email de la session (sql/03, rattacher_mes_commandes).
+     Fonction absente (SQL pas appliquee) ou sans effet : on lit simplement les commandes deja liees. */
+  await supabase.rpc('rattacher_mes_commandes')
+  const rep = await supabase.from('commandes_animation').select(COLONNES).or(`pro_id.eq.${proId},espace_pro_id.eq.${proId}`).order('created_at', { ascending: false })
   if (rep.error) {
     if (TABLE_ABSENTE(rep.error.code, rep.error.message) || /column/i.test(rep.error.message)) return { etat: 'indisponible', ...vide }
-    return { etat: 'erreur', ...vide, message: rep.error.message }
+    return { etat: 'erreur', ...vide, message: messageErreurCommandes(rep.error.code, rep.error.message) }
   }
   const commandes = (rep.data ?? []) as unknown as CommandeAnimation[]
   const factures: Record<string, Facture[]> = {}

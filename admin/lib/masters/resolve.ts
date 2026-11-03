@@ -154,6 +154,10 @@ function bonusReels(data: ParcoursPageData): VueMaster['bonus'] {
   const cfg = (data.ev?.cfg ?? {}) as Record<string, unknown>
   const ids = Array.isArray(cfg.bonusBanques) ? (cfg.bonusBanques as string[]) : []
   const out: VueMaster['bonus'] = []
+  /* Questions bonus saisies directement dans la cfg (apercu de demonstration : lib/demoFetes.ts). */
+  ;(Array.isArray(cfg.customBonus) ? (cfg.customBonus as Array<{ label?: string; options?: unknown[] }>) : []).forEach(q => {
+    if (q && q.label && Array.isArray(q.options) && q.options.length >= 2) out.push({ label: String(q.label), opts: q.options.map(o => String(o)) })
+  })
   ;(data.banques || []).filter(b => ids.indexOf(b.id) >= 0).forEach(b => {
     ;((b.questions || []) as unknown as BonusQuestion[]).forEach(q => {
       if (q && (q.type === 'single' || q.type === 'multi') && q.label && Array.isArray(q.options)) out.push({ label: q.label, opts: q.options.map(o => o.label) })

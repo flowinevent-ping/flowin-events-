@@ -2,7 +2,7 @@ import Link from 'next/link'
 import { fetchProDashboard } from '@/lib/pro'
 import { fetchBanquesPro, type Banque } from '@/lib/banques'
 import ProShell from '@/components/pro/ProShell'
-import { lireDroitsPro } from '@/lib/droitsPro'
+import { lireDroitsPro, MESSAGE_DROIT_REFUSE } from '@/lib/droitsPro'
 import ModelesBanques from '@/components/banques/ModelesBanques'
 import CopierCommune from '@/components/banques/CopierCommune'
 import { CARD, MUTED, H1, SUB, ACC } from '@/lib/proui'
@@ -61,6 +61,12 @@ export default async function ProBanquesPage({ searchParams }: { searchParams: {
     <ProShell proName={data.pro?.nom ?? 'Mon établissement'} proId={proId} active="banques">
       <h1 style={H1}>Mes banques de questions</h1>
       <div style={{ ...SUB, marginBottom: 20 }}>Organisées par catégorie — une banque s&apos;enrichit à chaque modification, elle sert à toutes vos animations.</div>
+
+      {!peutCreer && (
+        <div role="note" data-option-desactivee style={{ ...CARD, background: '#FFF7ED', border: '1px solid #FDBA74', fontSize: 13.5, lineHeight: 1.55, marginBottom: 20 }}>
+          <b>{MESSAGE_DROIT_REFUSE}</b> Vous gardez l’accès à vos banques existantes ; pour en créer de nouvelles, écrivez-nous à flowinevent@gmail.com.
+        </div>
+      )}
 
       <Groupe
         titre="Quiz"

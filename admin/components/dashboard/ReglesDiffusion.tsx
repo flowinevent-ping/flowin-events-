@@ -83,7 +83,7 @@ export default function ReglesDiffusion({ eventId, superEventId, module }: { eve
   return (
     <>
       <SectionHeader>Règles de diffusion des lots</SectionHeader>
-      {lots.length === 0 && <div className="sa-empty-inline">Aucun lot enregistré sur cet event.</div>}
+      {lots.length === 0 && <div className="sa-empty-inline">Aucun lot enregistré sur cette animation.</div>}
       {lots.map(l => (
         <div key={l.id} style={{ border: '1px solid var(--sa-border)', borderRadius: 10, padding: 10, marginBottom: 8 }}>
           <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap', marginBottom: 6 }}>

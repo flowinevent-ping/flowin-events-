@@ -1,5 +1,5 @@
 -- ============================================================================
--- 08 — QR PERMANENTS (« permaliens ») : un QR imprime ne change plus jamais  [01/11/2026]
+-- 09 — QR PERMANENTS (« permaliens ») : un QR imprime ne change plus jamais  [01/11/2026]
 -- ============================================================================
 -- NON APPLIQUE EN BASE. A lancer a la main, DANS L'ORDRE de la chaine, apres :
 --   01-identite-super-admin.sql                  (est_super_admin())

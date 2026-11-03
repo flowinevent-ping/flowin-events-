@@ -118,7 +118,7 @@ export default function DashboardPage() {
     { icone: 'users', val: String(joueurs.length), lbl: 'Joueurs CRM', sub: `${totalOptins} opt-in · ${totalGagnants} gagnants`, href: '/dashboard/joueurs' },
     { icone: 'building', val: String(pros.length), lbl: 'Pros enregistrés', sub: `${prosActifs} validés`, href: '/dashboard/pros' },
     { icone: 'handshake', val: String(partenaires.length), lbl: 'Partenaires', sub: `${partenairesActifs} actifs`, href: '/dashboard/partenaires' },
-    { icone: 'game', val: String(nbLive), lbl: 'Events en cours', sub: `${nbUpcoming} à venir`, href: '/dashboard/events' },
+    { icone: 'game', val: String(nbLive), lbl: 'Animations en cours', sub: `${nbUpcoming} à venir`, href: '/dashboard/events' },
     { icone: 'chart', val: `${sponsoring.toLocaleString('fr-FR')} €`, lbl: 'Sponsoring généré', sub: `sur ${partenaires.length} partenaires`, href: '/dashboard/partenaires' },
     { icone: 'gift', val: `${lotsUtilises} / ${lots.length}`, lbl: 'Lots utilisés', sub: `${lots.length - lotsUtilises} encore disponibles`, href: '/dashboard/nds-lots' },
   ]
@@ -134,7 +134,7 @@ export default function DashboardPage() {
     { icone: 'building', lbl: 'CRM Pro', n: `${pros.length} fiches`, href: '/dashboard/pros' },
     { icone: 'users', lbl: 'CRM Utilisateurs', n: `${joueurs.length} joueurs`, href: '/dashboard/joueurs' },
     { icone: 'game', lbl: 'Jeux', n: '7 modules', href: '/dashboard/jeux' },
-    { icone: 'calendar', lbl: 'Events', n: `${reels.length} events`, href: '/dashboard/events' },
+    { icone: 'calendar', lbl: 'Animations', n: `${reels.length} animations`, href: '/dashboard/events' },
     { icone: 'star', lbl: 'Super Events', n: 'Opérations', href: '/dashboard/super-events' },
   ]
 
