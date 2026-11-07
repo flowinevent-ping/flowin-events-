@@ -270,7 +270,8 @@ function LigneGain({ g, superEvent, opId, opNom, partenaireNom, setMessage, onCh
       setMessage({ ok: false, texte: e1 ? `Vérification impossible — ${messageFr(e1)}` : 'Code PIN incorrect.' })
       return
     }
-    const { data, error } = await supabase.rpc('valider_lot', { p_token: g.retraitToken })
+    /* Securite 07/11 : valider_lot exige desormais le PIN pro (meme controle que verifier_pin_pro, PIN vide refuse). */
+    const { data, error } = await supabase.rpc('valider_lot', { p_token: g.retraitToken, p_pin: pin })
     setEnvoi(false)
     const r = (Array.isArray(data) ? data[0] : data) as { ok?: boolean; raison?: string; avertissement?: string | null } | null
     if (error || !r) { setMessage({ ok: false, texte: `Validation refusée${error ? ` — ${messageFr(error)}` : '.'}` }); return }
@@ -278,7 +279,7 @@ function LigneGain({ g, superEvent, opId, opNom, partenaireNom, setMessage, onCh
       setMessage({ ok: true, texte: r.avertissement ? `Billet validé. ${r.avertissement}` : 'Billet validé. Le lot est décompté du stock.' })
       setPin(''); setOuvert(false); onChange()
     } else {
-      setMessage({ ok: false, texte: r.raison === 'deja_utilise' ? 'Ce billet a déjà été validé.' : 'Billet introuvable.' })
+      setMessage({ ok: false, texte: r.raison === 'deja_utilise' ? 'Ce billet a déjà été validé.' : (r.raison === 'pin_invalide' || r.raison === 'pin_requis') ? 'Code PIN incorrect.' : 'Billet introuvable.' })
     }
   }
 

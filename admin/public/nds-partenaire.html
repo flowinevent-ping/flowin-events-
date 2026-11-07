@@ -872,7 +872,7 @@
       ts:now, created_at:now
     };
     SENT_=true;
-    fetch(URL_,{method:'POST',headers:{'apikey':KEY_,'Authorization':'Bearer '+KEY_,'Content-Type':'application/json','Prefer':'resolution=merge-duplicates'},body:JSON.stringify(body)})
+    fetch(URL_,{method:'POST',headers:{'apikey':KEY_,'Authorization':'Bearer '+KEY_,'Content-Type':'application/json','Prefer':'resolution=ignore-duplicates,return=minimal'},body:JSON.stringify(body)})
       .catch(function(){SENT_=false;});
     // CRM Retours : capture du lead dans le pipeline commercial (origine + offre choisie)
     var noteCrm=v.type?('Categorie: '+v.type+(v.adresse?(' - '+v.adresse):'')):(v.adresse||null);
@@ -884,8 +884,10 @@
     if(!v.email||v.email.indexOf('@')<0) return;
     var em=v.email.toLowerCase().replace(/\s/g,'');
     var id='prosp-nds-'+em.replace(/[^a-z0-9]/g,'-').slice(0,36);
-    var patch={ statut_paiement:'paye', actif:true, visible:true };
-    fetch(URL_+'?id=eq.'+encodeURIComponent(id),{method:'PATCH',headers:{'apikey':KEY_,'Authorization':'Bearer '+KEY_,'Content-Type':'application/json','Prefer':'return=minimal'},body:JSON.stringify(patch)});
+    /* Securite 07/11 : l activation (statut paye, fiche visible) ne se fait plus depuis
+       le navigateur public -- c etait un contournement du paiement. Elle est faite par
+       l admin (dashboard) a reception du reglement. Rien a ecrire ici. */
+    return id;
   }
   if(document.readyState!=='loading') bindLogo(); else document.addEventListener('DOMContentLoaded',bindLogo);
   function initPCarousel(){

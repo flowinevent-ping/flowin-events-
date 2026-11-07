@@ -10,7 +10,8 @@
  * Utilise fetch directement (pas supabase-js) : aucun effet sur les autres clients,
  * qui restent en cle publique (anon).
  */
-import { SUPABASE_URL, SUPABASE_ANON } from './supabase'
+import { SUPABASE_URL, SUPABASE_ANON, sessionSAFraiche } from './supabase'
+export { sessionSAFraiche }
 
 const CLE = 'flowin_admin_session'
 export interface SessionSA { access_token: string; refresh_token?: string; expires_at: number }
@@ -43,8 +44,14 @@ function entetes(s: SessionSA): Record<string, string> {
   return { apikey: SUPABASE_ANON, Authorization: 'Bearer ' + s.access_token, 'Content-Type': 'application/json' }
 }
 
+/** Vrai si la session courante est bien celle d'un super admin (RPC est_super_admin, lue avec SON jeton). */
+export async function verifierSuperAdmin(): Promise<boolean> {
+  const r = await rpcSA<boolean>('est_super_admin', {})
+  return r.data === true
+}
+
 export async function rpcSA<T>(fn: string, args: Record<string, unknown>): Promise<{ data?: T; erreur?: string; sansSession?: boolean }> {
-  const s = lireSessionSA()
+  const s = await sessionSAFraiche()
   if (!s) return { sansSession: true, erreur: 'Connexion Super Admin requise.' }
   try {
     const r = await fetch(SUPABASE_URL + '/rest/v1/rpc/' + fn, { method: 'POST', headers: entetes(s), body: JSON.stringify(args) })
@@ -55,7 +62,7 @@ export async function rpcSA<T>(fn: string, args: Record<string, unknown>): Promi
 }
 
 export async function lireSA<T>(chemin: string): Promise<{ data?: T; erreur?: string; sansSession?: boolean }> {
-  const s = lireSessionSA()
+  const s = await sessionSAFraiche()
   if (!s) return { sansSession: true, erreur: 'Connexion Super Admin requise.' }
   try {
     const r = await fetch(SUPABASE_URL + '/rest/v1/' + chemin, { headers: entetes(s) })

@@ -3,6 +3,7 @@
 import { DashboardProvider } from '@/contexts/DashboardContext'
 import Sidebar from '@/components/dashboard/Sidebar'
 import Drawer from '@/components/dashboard/Drawer'
+import GardeSA from '@/components/dashboard/GardeSA'
 import type { FlowinJoueur, FlowinEvent, FlowinPartenaire, FlowinPro, FlowinLot } from '@/lib/types'
 
 interface Props {
@@ -32,13 +33,15 @@ export default function DashboardShell({
     >
       {/* Jetons de theme communs (accent violet) : public/flowin-theme.css */}
       <link rel="stylesheet" href="/flowin-theme.css" />
-      <div className="sa-shell">
-        <Sidebar />
-        <div className="sa-main">
-          {children}
+      <GardeSA>
+        <div className="sa-shell">
+          <Sidebar />
+          <div className="sa-main">
+            {children}
+          </div>
+          <Drawer />
         </div>
-        <Drawer />
-      </div>
+      </GardeSA>
     </DashboardProvider>
   )
 }

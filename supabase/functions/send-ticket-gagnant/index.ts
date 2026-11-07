@@ -22,6 +22,10 @@ const NOTIFY_FROM_ADDR = Deno.env.get("NOTIFY_FROM_ADDR") || "onboarding@resend.
 const NOTIFY_FROM_DEFAULT_NAME = Deno.env.get("NOTIFY_FROM_NAME") || "NDS x Flowin";
 const NOTIFY_TO = Deno.env.get("NOTIFY_TO") || "flowinevent@gmail.com";
 const SITE_ORIGIN = Deno.env.get("SITE_ORIGIN") || "https://flowin-events.vercel.app";
+// Fournies automatiquement par Supabase aux fonctions edge (jamais dans le depot).
+const SUPABASE_URL = Deno.env.get("SUPABASE_URL") || "";
+const SERVICE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || "";
+const ANON_KEY = Deno.env.get("SUPABASE_ANON_KEY") || "";
 
 function esc(v: unknown): string {
   if (v === null || v === undefined || v === "") return "";
@@ -54,22 +58,66 @@ Deno.serve(async (req: Request): Promise<Response> => {
     return new Response(JSON.stringify({ ok: false, error: "invalid json" }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
   }
 
-  const gagnantEmail = String(body.gagnant_email || "").trim();
-  const gagnantNom = String(body.gagnant_nom || "").trim();
-  const partenaireNom = String(body.partenaire_nom || "");
-  const partenaireAdresse = String(body.partenaire_adresse || "");
-  const partenaireTel = String(body.partenaire_tel || "");
-  const lotNom = String(body.lot_nom || "un lot");
-  const conditions = String(body.conditions || "");
-  const code = String(body.code || "");
-  const retraitToken = String(body.retrait_token || "");
+  // ---- SECURITE 07/11/2026 ------------------------------------------------------------
+  // Avant : destinataire, expediteur (from_name) et reply-to venaient du corps de la requete,
+  // fonction sans verify_jwt -> relais d'email ouvert a n'importe qui, au nom de Flowin.
+  // Apres :
+  //   * mode NORMAL : `retrait_token` obligatoire ; le destinataire, le nom, le lot, le code et
+  //     le commerce sont relus EN BASE (cle service, jamais exposee) depuis le tirage lie a ce
+  //     jeton. L'email du corps est ignore.
+  //   * mode ADMIN : sans jeton, accepte seulement si l'appelant presente le jeton d'un
+  //     super admin (RPC est_super_admin lue avec SON jeton) -- dashboard.html (se_gains).
+  //   * expediteur et reply-to : fixes cote serveur (NOTIFY_FROM_*, NOTIFY_TO), from_name /
+  //     reply_to du corps ignores.
+  const retraitToken = String(body.retrait_token || "").trim();
+  let gagnantEmail = "", gagnantNom = "", partenaireNom = "", partenaireAdresse = "", partenaireTel = "";
+  let lotNom = "un lot", conditions = "", code = "";
 
-  const fromName = String(body.from_name || "").trim() || NOTIFY_FROM_DEFAULT_NAME;
-  const from = `${fromName} <${NOTIFY_FROM_ADDR}>`;
-  const replyTo = String(body.reply_to || "").trim() || NOTIFY_TO;
+  const json = (o: unknown, status: number) =>
+    new Response(JSON.stringify(o), { status, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+
+  if (retraitToken) {
+    if (!SUPABASE_URL || !SERVICE_KEY) return json({ ok: false, error: "configuration serveur incomplete" }, 500);
+    const hSrv = { apikey: SERVICE_KEY, Authorization: "Bearer " + SERVICE_KEY, "Content-Type": "application/json" };
+    const rT = await fetch(SUPABASE_URL + "/rest/v1/tirages?select=joueur_email,joueur_nom,ticket_code,lot_nom&retrait_token=eq." + encodeURIComponent(retraitToken) + "&limit=1", { headers: hSrv });
+    const lignes = rT.ok ? (await rT.json().catch(() => [])) as Array<Record<string, string | null>> : [];
+    const t = lignes && lignes[0];
+    if (!t) return json({ ok: false, error: "jeton de retrait inconnu" }, 404);
+    gagnantEmail = String(t.joueur_email || "").trim();
+    gagnantNom = String(t.joueur_nom || "").trim();
+    lotNom = String(t.lot_nom || "") || "un lot";
+    code = String(t.ticket_code || "");
+    const rL = await fetch(SUPABASE_URL + "/rest/v1/rpc/consulter_lot", { method: "POST", headers: hSrv, body: JSON.stringify({ p_token: retraitToken }) });
+    const l = rL.ok ? (await rL.json().catch(() => null)) as Record<string, string | null> | null : null;
+    if (l) {
+      partenaireNom = String(l.partenaire_nom || "");
+      partenaireAdresse = String(l.partenaire_adresse || "");
+      partenaireTel = String(l.partenaire_tel || "");
+      conditions = String(l.conditions || "");
+    }
+  } else {
+    const auth = req.headers.get("authorization") || "";
+    let admin = false;
+    if (SUPABASE_URL && ANON_KEY && /^Bearer\s+\S+/.test(auth)) {
+      const rA = await fetch(SUPABASE_URL + "/rest/v1/rpc/est_super_admin", { method: "POST", headers: { apikey: ANON_KEY, Authorization: auth, "Content-Type": "application/json" }, body: "{}" });
+      admin = rA.ok && (await rA.json().catch(() => false)) === true;
+    }
+    if (!admin) return json({ ok: false, error: "retrait_token requis (ou session super admin)" }, 403);
+    gagnantEmail = String(body.gagnant_email || "").trim();
+    gagnantNom = String(body.gagnant_nom || "").trim();
+    partenaireNom = String(body.partenaire_nom || "");
+    partenaireAdresse = String(body.partenaire_adresse || "");
+    partenaireTel = String(body.partenaire_tel || "");
+    lotNom = String(body.lot_nom || "un lot");
+    conditions = String(body.conditions || "");
+    code = String(body.code || "");
+  }
+
+  const from = `${NOTIFY_FROM_DEFAULT_NAME} <${NOTIFY_FROM_ADDR}>`;
+  const replyTo = NOTIFY_TO;
 
   if (!gagnantEmail || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(gagnantEmail)) {
-    return new Response(JSON.stringify({ ok: false, error: "email gagnant invalide" }), { status: 422, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    return json({ ok: false, error: "email gagnant invalide ou absent pour ce tirage" }, 422);
   }
   if (!RESEND_API_KEY) {
     return new Response(JSON.stringify({ ok: false, error: "RESEND_API_KEY absent (configuration serveur)" }), { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } });

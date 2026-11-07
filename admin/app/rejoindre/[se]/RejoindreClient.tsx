@@ -113,7 +113,8 @@ export default function RejoindreClient({ se }: { se: SE }) {
       await supabasePublic.from('pros').upsert({
         id: proId, nom: f.commerce.trim(), adresse: f.adresse.trim(), secteur: f.categorie,
         contact: `${f.prenom.trim()} ${f.nom.trim()}`, email: emailLower, tel: f.tel.trim(),
-      }, { onConflict: 'id' })
+        statut: 'en_attente',
+      }, { onConflict: 'id', ignoreDuplicates: true }) /* securite 07/11 : anon = INSERT seul, une fiche pro existante n'est jamais ecrasee */
 
       /* REFERENTIEL 24 — UN SEUL CHEMIN. Cette page creait directement une
          station avec un jeu choisi par le commerce (roue par defaut) : le jeu du
