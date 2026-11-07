@@ -270,7 +270,6 @@ create policy bons_commande_anon_insert on public.bons_commande
     statut = 'signe'
     and coalesce(signature, '') <> ''
     and cgv_acceptee_at is not null
-    and jeton_public is null
     and partenaire_id is null
     and event_id is null
   );
