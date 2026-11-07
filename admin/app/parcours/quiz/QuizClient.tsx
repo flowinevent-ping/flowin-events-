@@ -141,7 +141,7 @@ export default function QuizClient({ ev, lots, partenaires, banques, evId }: Pro
     if (Object.keys(errs).length) return
     setSubmitting(true)
     const tc = generateTicket('PQ')
-    const res = await writeJoueur({ email: form.email, prenom: form.prenom, nom: form.nom, tel: form.tel, code_postal: form.cp, genre: form.genre, age_tranche: form.age, decouverte: form.source.replace(/^[^ ]+ /,'') || undefined, score_moy: `${score}/${questions.length}`, events: [evId], ticket_code: tc, source: 'quiz', prefix: 'PQ', bonus_reponses: bonusAnswers, optin: consentAnim, optin_version: CONSENTEMENT_VERSION, quiz_ticket: quizTk, bonus_ticket: bonusTk })
+    const res = await writeJoueur({ email: form.email, prenom: form.prenom, nom: form.nom, tel: form.tel, code_postal: form.cp, genre: form.genre, age_tranche: form.age, decouverte: form.source.replace(/^[^A-Za-zÀ-ÿ]+/,'') || undefined, score_moy: `${score}/${questions.length}`, events: [evId], ticket_code: tc, source: 'quiz', prefix: 'PQ', bonus_reponses: bonusAnswers, optin: consentAnim, optin_version: CONSENTEMENT_VERSION, quiz_ticket: quizTk, bonus_ticket: bonusTk })
     setGain(res.gain ?? null)
     setSubmitting(false)
     if (res.digitalRefuse) { setScreen('refusdigital'); return }

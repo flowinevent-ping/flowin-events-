@@ -81,7 +81,7 @@ export default function QuizmasterClient({ ev, lots, partenaires, banques, evId 
     setErrors(errs);if(Object.keys(errs).length)return
     setSubmitting(true)
     const tc=generateTicket('QM')
-    const res=await writeJoueur({email:form.email,prenom:form.prenom,nom:form.nom,tel:form.tel,code_postal:form.cp,genre:form.genre,age_tranche:form.age,decouverte:form.source.replace(/^[^ ]+ /,'')||undefined,score_moy:`${score}/${questions.length}`,events:[evId],ticket_code:tc,source:'quizmaster',prefix:'QM'})
+    const res=await writeJoueur({email:form.email,prenom:form.prenom,nom:form.nom,tel:form.tel,code_postal:form.cp,genre:form.genre,age_tranche:form.age,decouverte:form.source.replace(/^[^A-Za-zÀ-ÿ]+/,'')||undefined,score_moy:`${score}/${questions.length}`,events:[evId],ticket_code:tc,source:'quizmaster',prefix:'QM'})
     setGain(res.gain ?? null)
     setSubmitting(false)
     if(res.duplicate){setExistingTicket(res.ticket);try{localStorage.setItem(lsKey,res.ticket)}catch{};setScreen('already');return}

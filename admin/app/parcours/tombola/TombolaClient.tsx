@@ -112,7 +112,7 @@ export default function TombolaClient({ ev, lots, partenaires, evId }: Props) {
     const res = await writeJoueur({
       email: form.email, prenom: form.prenom, nom: form.nom, tel: form.tel,
       code_postal: form.cp, genre: form.genre, age_tranche: form.age,
-      decouverte: form.source.replace(/^[^ ]+ /, '') || undefined,
+      decouverte: form.source.replace(/^[^A-Za-zÀ-ÿ]+/,'') || undefined,
       events: [evId], ticket_code: tc, source: 'tombola', prefix: 'TB',
       optin: consentAnim, optin_version: CONSENTEMENT_VERSION,
     })

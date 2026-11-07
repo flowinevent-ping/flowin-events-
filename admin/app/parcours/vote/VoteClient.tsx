@@ -112,7 +112,7 @@ export default function VoteClient({ ev, lots, partenaires, evId }: Props) {
     // (participations.bonus_answers) pour exploitation dans le rapport.
     const voteData: Record<string, unknown> = { vote_mode: mode }
     items.forEach(it => { voteData[`vote_${it.id}`] = votes[it.id] ?? null })
-    const res = await writeJoueur({ email:form.email,prenom:form.prenom,nom:form.nom,tel:form.tel,code_postal:form.cp,genre:form.genre,age_tranche:form.age,decouverte:form.source.replace(/^[^ ]+ /,'')||undefined,events:[evId],ticket_code:tc,source:'vote',prefix:'VS',bonus_reponses:voteData,optin:consentAnim,optin_version:CONSENTEMENT_VERSION })
+    const res = await writeJoueur({ email:form.email,prenom:form.prenom,nom:form.nom,tel:form.tel,code_postal:form.cp,genre:form.genre,age_tranche:form.age,decouverte:form.source.replace(/^[^A-Za-zÀ-ÿ]+/,'')||undefined,events:[evId],ticket_code:tc,source:'vote',prefix:'VS',bonus_reponses:voteData,optin:consentAnim,optin_version:CONSENTEMENT_VERSION })
     setGain(res.gain ?? null)
     setSubmitting(false)
     if (res.digitalRefuse) { setScreen('refusdigital'); return }
