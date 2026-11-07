@@ -118,7 +118,7 @@ export default async function ProStationPage({ params, searchParams }: { params:
             {kpi(pointStation.heure_pic != null ? `${pointStation.heure_pic}h` : '—', 'heure de pic')}
           </div>
           <div style={{ fontSize: 11.5, color: '#94A3B8', marginTop: 8 }}>
-            Borné aux dates du super event — même source que le rapport détaillé du Super Admin (<code>super_event_rapport_points</code>), aucun recalcul.
+            Borné aux dates du super event — mêmes chiffres que le bilan suivi par Flowin.
           </div>
         </div>
       )}

@@ -144,7 +144,7 @@ export default async function ProSuperPage({ searchParams }: { searchParams: { p
       )}
       <h1 style={H1}>Ma participation — {choisi.nom}</h1>
       <div style={{ ...SUB }}>{libelleDates(choisi.dateD, choisi.dateF)}</div>
-      <div style={{ ...SUB, marginBottom: 16 }}>Vous ne voyez ici que vos propres stations. Le bilan global du super event est réservé à l'organisateur (Super Admin). Chiffres calculés comme côté Super Admin, limités à vos stations.</div>
+      <div style={{ ...SUB, marginBottom: 16 }}>Vous ne voyez ici que vos propres stations. Le bilan global du super event est suivi par Flowin, organisateur de l'opération. Vos chiffres sont calculés de la même façon, limités à vos stations.</div>
       {blocDemandes}
       <div style={{ borderRadius: 18, padding: 20, color: '#fff', marginBottom: 16, background: 'linear-gradient(135deg,#FF8A14 0%,#EA580C 55%,#C2410C 100%)' }}>
         <div style={{ fontSize: 11, fontWeight: 800, letterSpacing: '.1em', opacity: 0.9 }}>MA PARTICIPATION · BILAN</div>
