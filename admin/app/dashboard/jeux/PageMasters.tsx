@@ -23,7 +23,7 @@ import type { MasterId } from '@/lib/masters/types'
 /* Couleurs d'identite : jetons de public/flowin-theme.css (une seule source). */
 const COULEUR: Record<MasterId, string> = {
   quiz: 'var(--fl-quiz, #3B5CC4)', quizsolo: 'var(--fl-solo, #8E3B6E)', spin: 'var(--fl-spin, #13A89E)',
-  tombola: 'var(--fl-tombola, #0B9E6E)', vote: 'var(--fl-vote, #3A6FD8)', super: 'var(--fl-super-rouge, #E2231A)',
+  tombola: 'var(--fl-tombola, #0B9E6E)', vote: 'var(--fl-vote, #3A6FD8)', super: 'var(--fl-cat-super, #C2410C)',
 }
 
 export default function PageMasters() {
