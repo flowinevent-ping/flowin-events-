@@ -40,6 +40,7 @@ import { lienGmailTo, lienWhatsApp } from '@/lib/messaging'
 import { useMailGagnant } from '@/lib/mailGagnant'
 import { ACCENT_SUPER, ACCENT_ANIM } from '@/lib/charte'
 import { BASE_CANONIQUE } from '@/lib/qrPermalien'
+import { useFermetureOverlay } from '@/lib/useFermetureOverlay'
 
 const BRD = 'var(--sa-border, #E2E8F0)'
 const MUT = 'var(--sa-muted, #64748B)'
@@ -380,6 +381,7 @@ function CarteLot({ l, enSuperEvent, stockInfo, dAjust, onAjuste, maj, op, stati
 export default function ModalGererLots({ op, partenaire, onClose, onChange }: {
   op: DonneesOperation; partenaire: PartenaireMin | null; onClose: () => void; onChange: () => void
 }) {
+  useFermetureOverlay(true, onClose, true)
   const [lots, setLots] = useState<LotLigne[] | null>(null)
   const [regles, setRegles] = useState<Record<string, Regle>>({})
   const [ajustements, setAjustements] = useState<Record<string, number>>({})

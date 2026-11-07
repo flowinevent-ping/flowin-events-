@@ -33,6 +33,7 @@ import type { SuperEvent } from '@/lib/nds'
 import { mailPartenaireRelanceUrl } from '@/lib/nds'
 import { marquerRelance } from '@/lib/operations'
 import { Ico } from '@/lib/proicons'
+import { useFermetureOverlay } from '@/lib/useFermetureOverlay'
 
 const CARDBG = 'var(--sa-card, #FFFFFF)'
 const BRD = 'var(--sa-border, #E2E8F0)'
@@ -54,6 +55,7 @@ export default function ModalRelanceGlobale({ gagnants, partenaires, supers, onC
   supers: SuperEvent[]
   onClose: () => void
 }) {
+  useFermetureOverlay(true, onClose, true)
   /* Initialise depuis relance_envoyee_at (base) -- pas seulement « coché dans
      cette session » : rouvrir la boîte de dialogue, ou revenir demain,
      montre encore qui a deja ete relance. Un nouveau clic reste possible

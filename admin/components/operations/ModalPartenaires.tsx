@@ -22,6 +22,7 @@ import { supabase } from '@/lib/supabase'
 import { uploaderLogo, redimensionnerImage } from '@/lib/upload'
 import type { DonneesOperation } from '@/lib/operations'
 import { messageFr } from '@/lib/erreursFr'
+import { useFermetureOverlay } from '@/lib/useFermetureOverlay'
 
 interface Ligne { id: string; nom: string | null; image_url: string | null; site_web: string | null; actif: boolean | null }
 const CHAMP: React.CSSProperties = { width: '100%', border: '1.5px solid #E3E9F8', borderRadius: 9, padding: '9px 11px', fontSize: 14, fontFamily: 'inherit', boxSizing: 'border-box' }
@@ -30,6 +31,7 @@ const BTN: React.CSSProperties = { border: 'none', borderRadius: 10, padding: '9
 function slug(s: string) { return s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 30) || 'partenaire' }
 
 export default function ModalPartenaires({ op, onClose, onChange }: { op: DonneesOperation; onClose: () => void; onChange?: () => void }) {
+  useFermetureOverlay(true, onClose, true)
   const estSuper = op.type === 'super'
   const stationIds = op.stations.map(s => s.id)
   const evRef = stationIds[0] || ''
