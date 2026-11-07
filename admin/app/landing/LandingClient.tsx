@@ -226,6 +226,7 @@ const BODY = `<div class="app">
     <a data-to="solution">Comment ça marche</a>
     <a data-to="resultats">Résultats</a>
     <a data-to="contact">Contacter Flowin</a>
+    <a href="/pro/premiere-fois">Créer mon espace pro</a>
     <a class="cta" data-to="contact">Demander une démo</a>
   </aside>
 
@@ -431,7 +432,7 @@ const BODY = `<div class="app">
   <!-- 9b. VIGNETTES USAGE -->
   <section id="usages" style="padding-top:0">
     <div class="offer-grid">
-      <a class="use" href="/contact" style="text-decoration:none;cursor:pointer" data-to="contact">
+      <a class="use" href="/pro/premiere-fois" style="text-decoration:none;cursor:pointer">
         <div class="uh"><span class="ui" style="background:linear-gradient(135deg,var(--orange),var(--amber))"><svg class="ic" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.4"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0"/><path d="M17 7a3 3 0 0 1 0 6"/><path d="M20 20a6 6 0 0 0-4-5.6"/></svg></span>J'anime mon établissement</div>
         <p>Une animation à vos couleurs sur votre lieu ou votre event. Flowin s'installe en quelques minutes.</p>
       </a>
@@ -466,6 +467,7 @@ const BODY = `<div class="app">
     <div id="cThanks" hidden>
       <div class="thanks"><h3>Demande envoyée !</h3><p>On vous répond sous 24 h pour caler votre rendez-vous. Sans engagement.</p></div>
     </div>
+    <a class="btn" href="/pro/premiere-fois" style="margin-top:14px;display:inline-block;text-decoration:none;background:#fff;color:#0F172A">Créer mon espace pro →</a>
     <div class="ctaor">— ou joignez-nous directement —</div>
     <div class="calls">
       <a class="c-call" href="tel:+33616354936"><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M5 4h3l2 5-2.4 1.4a11 11 0 0 0 5 5L14 13l5 2v3a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2z"/></svg> Appel</a>
