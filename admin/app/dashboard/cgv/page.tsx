@@ -51,7 +51,7 @@ export default function Page() {
       {charge && <div className="sa-muted" style={{ fontSize: 13 }}>Chargement…</div>}
 
       {!charge && !docs.length && (
-        <EmptyState icon="📄" title="Aucun document" desc="Aucun document légal n'est enregistré." />
+        <EmptyState icon="file" title="Aucun document" desc="Aucun document légal n'est enregistré." />
       )}
 
       {!charge && docs.length > 0 && (

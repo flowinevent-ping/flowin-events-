@@ -26,6 +26,7 @@ import { PageHeader } from '@/components/dashboard/DashboardUI'
 import { Parcours, VignetteChoix, type EtapeParcours } from '@/components/dashboard/Parcours'
 import { useDashboard } from '@/contexts/DashboardContext'
 import { upsertPro } from '@/lib/dashboard'
+import { Ico } from '@/lib/proicons'
 import {
   ETAPES_FICHE_PRO, PROFILS_PRO, etapesPour, ficheProVide, identifiantPro,
   lignePro, recapPro, slugPro,
@@ -127,7 +128,7 @@ export default function Page() {
         <div className="sa-choix-grille">
           {PROFILS_PRO.map(p => (
             <VignetteChoix
-              key={p.id} titre={p.titre} sous={p.sousSA} icone={p.icone}
+              key={p.id} titre={p.titre} sous={p.sousSA} icone={<Ico k={p.icone} size={22} />}
               badges={[...p.badges]} actif={f.profil === p.id}
               onClick={() => maj({ profil: p.id as ProfilPro })}
             />
@@ -187,7 +188,7 @@ export default function Page() {
       )
     }
 
-    return { id: e.id, icone: e.icone, titre: e.titre, sous: e.sous, bloque, contenu }
+    return { id: e.id, icone: <Ico k={e.icone} size={20} />, titre: e.titre, sous: e.sous, bloque, contenu }
   })
 
   return (

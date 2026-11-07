@@ -124,17 +124,12 @@ export function TypeChip({ estSuper }: { estSuper: boolean }) {
 }
 
 /* ── Empty state ── */
-/* Pictogrammes au trait plutot qu emojis (demande Romain) : les appelants
-   passent encore un emoji, traduit ici en cle d icone. */
-const ICO_VIDE: Record<string, string> = {
-  '🧾': 'receipt', '🗺️': 'pin', '🗂️': 'list', '🔍': 'list', '📥': 'download', '📣': 'bell',
-  '📞': 'phone', '📝': 'edit', '📅': 'calendar', '📄': 'file', '🎯': 'game', '🎨': 'sparkle',
-  '🎟️': 'ticket', '🌐': 'globe',
-}
-export function EmptyState({ icon = '🔍', title = 'Aucun résultat', desc = '' }: { icon?: string; title?: string; desc?: string }) {
+/* Pictogrammes au trait plutot qu emojis (demande Romain) : `icon` est une
+   cle d icone de lib/proicons (file, list, ticket...). */
+export function EmptyState({ icon = 'list', title = 'Aucun résultat', desc = '' }: { icon?: string; title?: string; desc?: string }) {
   return (
     <div className="sa-empty">
-      <div className="sa-empty-icon" style={{ color: 'var(--sa-muted)' }}><Ico k={ICO_VIDE[icon] ?? icon} size={30} /></div>
+      <div className="sa-empty-icon" style={{ color: 'var(--sa-muted)' }}><Ico k={icon} size={30} /></div>
       <div className="sa-empty-title">{title}</div>
       {desc && <div className="sa-empty-desc">{desc}</div>}
     </div>

@@ -214,9 +214,9 @@ export function BoutonGererLots({ op, partenaire, onChange, cotePro }: { op: Don
   const [partenairesOuvert, setPartenairesOuvert] = useState(false)
   return (
     <>
-      <button onClick={() => setOuvert(true)} style={btnPrimaire}>⚙️ Gérer les lots</button>
+      <button onClick={() => setOuvert(true)} style={btnPrimaire}><Ico k="settings" size={14} style={{ marginRight: 5 }} />Gérer les lots</button>
       {/* Partenaires & logos : meme modale, meme emplacement cote Super Admin et cote pro. */}
-      {peutPartenaires && <button onClick={() => setPartenairesOuvert(true)} style={btn} data-ouvrir-partenaires>🤝 Partenaires &amp; logos</button>}
+      {peutPartenaires && <button onClick={() => setPartenairesOuvert(true)} style={btn} data-ouvrir-partenaires><Ico k="users" size={14} style={{ marginRight: 5 }} />Partenaires &amp; logos</button>}
       {ouvert && (
         <ModalGererLots op={op} partenaire={partenaire ?? null} onClose={() => setOuvert(false)} onChange={() => { setOuvert(false); onChange?.() }} />
       )}

@@ -191,7 +191,7 @@ export default function Page() {
           <SectionHeader>Questions bonus</SectionHeader>
 
           {!b || !b.familles.length ? (
-            <EmptyState icon="📝" title="Aucune réponse bonus" desc="Les questions bonus n'ont pas encore été renseignées." />
+            <EmptyState icon="edit" title="Aucune réponse bonus" desc="Les questions bonus n'ont pas encore été renseignées." />
           ) : (
             <>
               <div style={{ fontSize: 11.5, color: 'var(--sa-muted)', marginBottom: 12, lineHeight: 1.5 }}>
@@ -218,7 +218,7 @@ export default function Page() {
           <SectionHeader>Questionnaire de la landing</SectionHeader>
 
           {!ld || !ld.questions.length ? (
-            <EmptyState icon="🗂️" title="Aucune saisie" desc="Le questionnaire hors parcours n'a pas encore été utilisé." />
+            <EmptyState icon="list" title="Aucune saisie" desc="Le questionnaire hors parcours n'a pas encore été utilisé." />
           ) : (
             <>
               <div style={{ fontSize: 11.5, color: 'var(--sa-muted)', marginBottom: 10, lineHeight: 1.5 }}>

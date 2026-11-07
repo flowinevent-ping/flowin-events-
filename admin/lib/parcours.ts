@@ -870,7 +870,7 @@ export const CONSENTEMENT_VERSION = 'flowin-consentement-2026-11'
 export const RGPD_TEXT = "J'accepte que mes coordonnées soient utilisées pour ce jeu. Traitées et utilisées par Flowin, mes données ne sont ni vendues ni échangées, en respect avec la loi RGPD."
 
 /* ── Shared Form Component helper ── */
-export const SOURCES = ['📸 Instagram', '🔵 Facebook', '📋 Affiche / Flyer', '📣 Bouche à oreille', '🌐 Autre']
+export const SOURCES = ['Instagram', 'Facebook', 'Affiche / Flyer', 'Bouche à oreille', 'Autre']
 export const SECTEURS = ['Commerce & Négoce', 'Point de vente indépendant', 'Restaurateur', 'Association / Événementiel', 'Municipalité / Office de tourisme', 'Centre commercial', 'Entreprise / RH', 'Organisateur de salon']
 export const AGE_OPTIONS = [
   { val: '', label: "Tranche d'âge" },

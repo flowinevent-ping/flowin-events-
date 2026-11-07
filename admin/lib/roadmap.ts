@@ -24,7 +24,7 @@ export const MAJ = '01/11/2026'
 
 export const LIBELLE_ETAT: Record<EtatItem, string> = {
   ok: '✓ Fait',
-  hold: '⏸ En attente',
+  hold: 'En attente',
   todo: '○ À faire',
 }
 
@@ -138,7 +138,7 @@ export const BLOCS: BlocRoadmap[] = [
       { etat: 'todo', titre: 'Parcours pro : distinguer clairement "créer un événement" / "créer un super event"', detail: 'Romain (21/10) : à l’arrivée sur la plateforme, pas de distinguo visuel net. NB : l’écran de choix (NouvelleOperation.tsx, étape 0) a déjà été retravaillé le 18/09 sur ce point exact (3 cartes "Créer une animation" / "Rejoindre un super event" / "Créer un super event", couleur dédiée). À vérifier avec Romain si le problème porte sur cet écran précis (régression/pas vu la dernière version) ou sur un autre point d’entrée, avant de retoucher.' },
       { etat: 'todo', titre: 'Parcours d’inscription (pro) : simplifier l’ergonomie', detail: 'Romain (21/10) : "commence à être bien" mais pas encore ultra efficace -- écran(s) précis à cadrer avec lui.' },
       { etat: 'todo', titre: 'Visualisation des statistiques : moderniser', detail: 'Romain (21/10) : évolution en cours mais trop lente, veut quelque chose de plus actuel et de meilleure qualité -- périmètre exact (quelle page stats) à cadrer.' },
-      { etat: 'todo', titre: 'Spin roulette : ergonomie de jeu pas conforme à l’intention', detail: 'Romain (21/10) : ne ressemble pas à l’ergonomie de jeu voulue. ⚠️ Garde-fou existant : SpinClient.tsx est NO-TOUCH, la mécanique passe uniquement par `cfg` en base -- à cadrer avec Romain si le besoin est un réglage visuel dans ce cadre, ou une refonte du composant qui demande de lever explicitement ce garde-fou.' },
+      { etat: 'todo', titre: 'Spin roulette : ergonomie de jeu pas conforme à l’intention', detail: 'Romain (21/10) : ne ressemble pas à l’ergonomie de jeu voulue. Garde-fou existant : SpinClient.tsx est NO-TOUCH, la mécanique passe uniquement par `cfg` en base -- à cadrer avec Romain si le besoin est un réglage visuel dans ce cadre, ou une refonte du composant qui demande de lever explicitement ce garde-fou.' },
       { etat: 'ok', titre: 'Espace pro : sections terminées (01/11)', detail: 'Inventaire des 32 écrans pro (390 et 1440 px) : participants d’un super event avec droits Super Admin / pro, vocabulaire « animation », erreurs en français, états vides, lien compte pro ↔ commandes et factures, pré-remplissage du bon de commande. Reste : voir HANDOFF (décisions de Romain). SQL 01 à 10 toujours non appliqués : ordre dans sql/README-ORDRE.md.' },
       { etat: 'todo', titre: 'Envoi multiple côté pro (parité avec l’admin)', detail: 'Romain (21/10) : la sélection multiple livrée côté SA (21/10, cf. "Automatisation des envois") n’existe pas côté espace pro -- à cadrer : le pro doit-il relancer ses propres gagnants lui-même, ou ça reste un geste SA ?' },
     ],

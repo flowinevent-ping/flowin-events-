@@ -1,4 +1,5 @@
 import { libelleDateFr, type MotifIndisponible } from '@/lib/etatAnimation'
+import { Ico } from '@/lib/proicons'
 
 /**
  * Message propre quand un QR mene a une animation qui n'existe pas, est terminee
@@ -19,7 +20,7 @@ export default function AnimationIndisponible({ motif, nom, debut }: { motif: Mo
   return (
     <div role="status" data-indisponible={motif} style={{ minHeight: '100dvh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px 16px', background: '#F4F6F9', fontFamily: 'system-ui, -apple-system, Segoe UI, Roboto, sans-serif', color: '#1B3A5C', overflow: 'auto' }}>
       <div style={{ maxWidth: 380, width: '100%', background: '#fff', borderRadius: 24, padding: '32px 24px', textAlign: 'center', boxShadow: '0 10px 30px rgba(27,58,92,.10)' }}>
-        <div aria-hidden style={{ fontSize: 44, marginBottom: 8 }}>{motif === 'avenir' ? '⏳' : motif === 'terminee' ? '🏁' : motif === 'desactive' ? '⛔' : '🔎'}</div>
+        <div aria-hidden style={{ marginBottom: 8, color: '#1B3A5C', opacity: .7 }}><Ico k={motif === 'avenir' ? 'clock' : motif === 'terminee' ? 'check' : motif === 'desactive' ? 'close' : 'scan'} size={44} /></div>
         {nom ? <div style={{ fontSize: 13, fontWeight: 700, opacity: .65, marginBottom: 6 }}>{nom}</div> : null}
         <h1 style={{ fontSize: 22, lineHeight: 1.2, margin: '0 0 10px', fontWeight: 800 }}>{t.titre}</h1>
         <p style={{ fontSize: 15, lineHeight: 1.5, margin: 0, opacity: .8 }}>{t.texte}</p>

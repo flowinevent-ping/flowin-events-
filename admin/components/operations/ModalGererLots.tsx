@@ -40,6 +40,7 @@ import { lienGmailTo, lienWhatsApp } from '@/lib/messaging'
 import { useMailGagnant } from '@/lib/mailGagnant'
 import { ACCENT_SUPER, ACCENT_ANIM } from '@/lib/charte'
 import { BASE_CANONIQUE } from '@/lib/qrPermalien'
+import { Ico } from '@/lib/proicons'
 import { useFermetureOverlay } from '@/lib/useFermetureOverlay'
 
 const BRD = 'var(--sa-border, #E2E8F0)'
@@ -182,8 +183,8 @@ export function PanneauGagnants({ billets, opNom, proContact }: {
     <div>
       <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 8 }}>
         <span style={badgeStyle('gris')}>{billets.length} gagnant{billets.length > 1 ? 's' : ''}</span>
-        {nonRetires.length > 0 && <span style={badgeStyle('ambre')}>⏳ {nonRetires.length} à relancer</span>}
-        {retires.length > 0 && <span style={badgeStyle('vert')}>✅ {retires.length} utilisé{retires.length > 1 ? 's' : ''}</span>}
+        {nonRetires.length > 0 && <span style={badgeStyle('ambre')}><Ico k="clock" size={12} style={{ marginRight: 5 }} />{nonRetires.length} à relancer</span>}
+        {retires.length > 0 && <span style={badgeStyle('vert')}><Ico k="check" size={12} style={{ marginRight: 5 }} />{retires.length} utilisé{retires.length > 1 ? 's' : ''}</span>}
       </div>
 
       <div style={{ maxHeight: 180, overflowY: 'auto', border: `1px solid ${BRD}`, borderRadius: 8 }}>
@@ -192,7 +193,7 @@ export function PanneauGagnants({ billets, opNom, proContact }: {
             <input type="checkbox" checked={!!selection[g.id]} onChange={() => basculer(g.id)} />
             <span style={{ flex: 1, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
               <b>{g.joueurNom ?? 'Joueur'}</b>
-              <span style={{ color: MUT }}> — {g.etat === 'retire' ? '✅ utilisé' : g.etat === 'confirme' ? '📞 confirmé, à retirer' : '⏳ à confirmer'}</span>
+              <span style={{ color: MUT }}> — {g.etat === 'retire' ? 'utilisé' : g.etat === 'confirme' ? 'confirmé, à retirer' : 'à confirmer'}</span>
             </span>
             {g.retireAt && <span style={{ color: MUT, fontSize: 11 }}>{new Date(g.retireAt).toLocaleDateString('fr-FR')}</span>}
           </label>
@@ -204,13 +205,13 @@ export function PanneauGagnants({ billets, opNom, proContact }: {
           style={{ border: `1px solid ${BRD}`, background: '#fff', borderRadius: 8, padding: '5px 10px', fontSize: 11.5, fontWeight: 700, cursor: 'pointer' }}
           disabled={!nonRetires.length}
           onClick={() => { const d = texteParDefaut('relance', opNom); selectionnerGroupe(nonRetires, d.objet, d.texte) }}>
-          📣 Relancer les non utilisés ({nonRetires.length})
+          <Ico k="bell" size={12} style={{ marginRight: 5 }} />Relancer les non utilisés ({nonRetires.length})
         </button>
         <button
           style={{ border: `1px solid ${BRD}`, background: '#fff', borderRadius: 8, padding: '5px 10px', fontSize: 11.5, fontWeight: 700, cursor: 'pointer' }}
           disabled={!retires.length}
           onClick={() => { const d = texteParDefaut('merci', opNom); selectionnerGroupe(retires, d.objet, d.texte) }}>
-          🙏 Remercier ceux qui ont utilisé ({retires.length})
+          <Ico k="star" size={12} style={{ marginRight: 5 }} />Remercier ceux qui ont utilisé ({retires.length})
         </button>
         {selectionnes.length > 0 && (
           <button style={{ border: 'none', background: 'none', color: MUT, fontSize: 11.5, cursor: 'pointer', textDecoration: 'underline' }}
@@ -222,9 +223,9 @@ export function PanneauGagnants({ billets, opNom, proContact }: {
         <div style={{ border: `1px solid ${BRD}`, borderRadius: 10, padding: 10, marginTop: 8, background: SUBT }}>
           <div style={{ display: 'flex', gap: 8, marginBottom: 8 }}>
             <button type="button" onClick={() => setCanal('email')}
-              style={{ border: `1px solid ${BRD}`, background: canal === 'email' ? ACC : '#fff', color: canal === 'email' ? '#fff' : '#0F172A', borderRadius: 8, padding: '5px 10px', fontSize: 12, fontWeight: 700, cursor: 'pointer' }}>✉️ Email</button>
+              style={{ border: `1px solid ${BRD}`, background: canal === 'email' ? ACC : '#fff', color: canal === 'email' ? '#fff' : '#0F172A', borderRadius: 8, padding: '5px 10px', fontSize: 12, fontWeight: 700, cursor: 'pointer' }}><Ico k="mail" size={12} style={{ marginRight: 5 }} />Email</button>
             <button type="button" onClick={() => setCanal('whatsapp')}
-              style={{ border: `1px solid ${BRD}`, background: canal === 'whatsapp' ? ACC : '#fff', color: canal === 'whatsapp' ? '#fff' : '#0F172A', borderRadius: 8, padding: '5px 10px', fontSize: 12, fontWeight: 700, cursor: 'pointer' }}>💬 WhatsApp</button>
+              style={{ border: `1px solid ${BRD}`, background: canal === 'whatsapp' ? ACC : '#fff', color: canal === 'whatsapp' ? '#fff' : '#0F172A', borderRadius: 8, padding: '5px 10px', fontSize: 12, fontWeight: 700, cursor: 'pointer' }}><Ico k="phone" size={12} style={{ marginRight: 5 }} />WhatsApp</button>
           </div>
           {canal === 'email' && (
             <input value={objet} onChange={e => setObjet(e.target.value)} placeholder="Objet"
@@ -257,7 +258,7 @@ export function PanneauGagnants({ billets, opNom, proContact }: {
                 <a key={g.id} href={href} target="_blank" rel="noopener noreferrer"
                   onClick={() => { if (g.etat !== 'retire') marquerRelance(g.id) }}
                   style={{ display: 'flex', justifyContent: 'space-between', border: `1px solid ${BRD}`, background: '#fff', borderRadius: 8, padding: '5px 9px', fontSize: 12, textDecoration: 'none', color: '#0F172A' }}>
-                  <span>{canal === 'email' ? '✉️' : '💬'} {g.joueurNom ?? 'Joueur'}</span>
+                  <span><Ico k={canal === 'email' ? 'mail' : 'phone'} size={12} style={{ marginRight: 5 }} />{g.joueurNom ?? 'Joueur'}</span>
                   <span style={{ color: MUT }}>{canal === 'email' ? g.joueurEmail : g.joueurTel}</span>
                 </a>
               )

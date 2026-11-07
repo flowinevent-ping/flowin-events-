@@ -161,7 +161,7 @@ export default function Page() {
     if (!r.ok) { setRetour({ ok: false, texte: r.erreur ?? 'Échec de la création.' }); return }
     setRetour({
       ok: true,
-      texte: `Créé — ${r.fait.join(', ')}.${r.erreur ? ' ⚠ ' + r.erreur : ''}`,
+      texte: `Créé — ${r.fait.join(', ')}.${r.erreur ? ' Attention : ' + r.erreur : ''}`,
     })
     setTimeout(() => router.push('/dashboard/super-events'), 1500)
   }

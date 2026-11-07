@@ -122,7 +122,7 @@ export default function QuizmasterClient({ ev, lots, partenaires, banques, evId 
         </div>
       )}
 
-      {screen==='vote'&&q&&(<div className="screen"><div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:12}}><div style={{fontSize:12,fontWeight:700,color:'rgba(255,255,255,.45)'}}>Q{qIdx+1}/{questions.length}</div><div style={{fontSize:12,fontWeight:700,color:'rgba(255,255,255,.45)'}}>Score : {score}</div></div><div style={{fontSize:19,fontWeight:800,lineHeight:1.4,marginBottom:24,textAlign:'center'}}>{q.texte}</div>{q.options.map((opt,i)=>{let cls='opt';if(selected!==null){if(i===selected&&i===q.bonne)cls='opt correct';else if(i===selected)cls='opt wrong';else if(i===q.bonne)cls='opt reveal'}const letters=['🅰️','🅱️','🅾️','🆇'];return <button key={i} className={cls} onClick={()=>handleVote(i)} disabled={selected!==null}>{letters[i]||['A','B','C','D'][i]} {opt}</button>})}</div>)}
+      {screen==='vote'&&q&&(<div className="screen"><div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:12}}><div style={{fontSize:12,fontWeight:700,color:'rgba(255,255,255,.45)'}}>Q{qIdx+1}/{questions.length}</div><div style={{fontSize:12,fontWeight:700,color:'rgba(255,255,255,.45)'}}>Score : {score}</div></div><div style={{fontSize:19,fontWeight:800,lineHeight:1.4,marginBottom:24,textAlign:'center'}}>{q.texte}</div>{q.options.map((opt,i)=>{let cls='opt';if(selected!==null){if(i===selected&&i===q.bonne)cls='opt correct';else if(i===selected)cls='opt wrong';else if(i===q.bonne)cls='opt reveal'}const letters=['A','B','C','D'];return <button key={i} className={cls} onClick={()=>handleVote(i)} disabled={selected!==null}>{letters[i]||['A','B','C','D'][i]} {opt}</button>})}</div>)}
 
       {screen==='form'&&!getJoueurLocal()&&(
         <div className="screen">
@@ -136,7 +136,7 @@ export default function QuizmasterClient({ ev, lots, partenaires, banques, evId 
         </div>
       )}
 
-      {(screen==='ticket'||screen==='already')&&(<div className="screen" style={{justifyContent:'center',textAlign:'center'}}><div style={{display:'inline-flex',marginBottom:12}}><Ico k={screen==='ticket'?'sparkle':'check'} size={48} /></div><div style={{fontSize:22,fontWeight:900,marginBottom:20}}>{screen==='ticket'?`Score : ${score}/${questions.length}`:'Déjà joué !'}</div><div className="card" style={{borderTop:`4px solid ${c}`}}><div style={{ display: 'inline-flex', marginBottom: 8 }}><Ico k="ticket" size={34} /></div><div className="ticket-code">{screen==='ticket'?ticket:existingTicket}</div>{tirageText&&<div style={{fontSize:11,color:'rgba(255,255,255,.45)'}}>🗓️ {tirageText}</div>}</div><ParcoursOutro superEventId={ev?.super_event_id} gain={gain} /></div>)}
+      {(screen==='ticket'||screen==='already')&&(<div className="screen" style={{justifyContent:'center',textAlign:'center'}}><div style={{display:'inline-flex',marginBottom:12}}><Ico k={screen==='ticket'?'sparkle':'check'} size={48} /></div><div style={{fontSize:22,fontWeight:900,marginBottom:20}}>{screen==='ticket'?`Score : ${score}/${questions.length}`:'Déjà joué !'}</div><div className="card" style={{borderTop:`4px solid ${c}`}}><div style={{ display: 'inline-flex', marginBottom: 8 }}><Ico k="ticket" size={34} /></div><div className="ticket-code">{screen==='ticket'?ticket:existingTicket}</div>{tirageText&&<div style={{fontSize:11,color:'rgba(255,255,255,.45)'}}>{tirageText}</div>}</div><ParcoursOutro superEventId={ev?.super_event_id} gain={gain} /></div>)}
     </div>
   )
 }
