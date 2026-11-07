@@ -45,7 +45,7 @@ export default function SponsorClient({ se, lots }: { se: SE; lots: Lot[] }) {
         image_url: f.logo.trim() || null, notes: f.message.trim() || null,
         super_event_id: se.id, montant_sponsoring: montant, statut_paiement: 'en_attente',
         type: 'National', actif: false, visible: false,
-      }, { onConflict: 'id' })
+      }, { onConflict: 'id', ignoreDuplicates: true }) /* securite 07/11 : anon = INSERT seul (pas d'ecrasement d'une fiche existante) */
       if (error) { setErr("Une erreur est survenue. Réessayez."); setSubmitting(false); return }
       setDone(true)
     } catch {

@@ -48,7 +48,7 @@ export default function NdsClient({ cfg }: { cfg: Cfg }) {
         en_avant: false,
         ts: now,
         created_at: now,
-      }, { onConflict: 'id' })
+      }, { onConflict: 'id', ignoreDuplicates: true }) /* securite 07/11 : anon = INSERT seul (pas d'ecrasement d'une fiche existante) */
       setSent(true)
     } catch { /* best-effort */ }
     setSending(false)
