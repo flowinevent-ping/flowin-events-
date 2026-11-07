@@ -98,18 +98,18 @@ export default async function FicheJoueurProPage({ params, searchParams }: { par
           <div style={{ height: 14 }} />
           {titre(`Lots gagnés (${tirages.length})`)}
           {tirages.length === 0 && <div style={{ fontSize: 13, ...MUTED }}>Aucun lot gagné.</div>}
-          {tirages.map(t => (
+          {tirages.map(t => { const remis = t.statut !== 'annule' && !!t.retire_at; return (
             <div key={t.id} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '7px 0', borderBottom: `1px solid ${C.bordure}` }}>
               <div style={{ flex: 1 }}>
                 <div style={{ fontWeight: 700, fontSize: 13 }}>{t.lot_nom ?? 'Lot'}</div>
                 <div style={{ fontSize: 11, ...MUTED }}>{t.created_at ? new Date(t.created_at).toLocaleDateString('fr-FR') : '—'}</div>
               </div>
               <span style={{ fontSize: 10.5, fontWeight: 800, borderRadius: 99, padding: '3px 9px',
-                background: t.retire_at ? 'rgba(21,128,61,.1)' : 'rgba(180,83,9,.1)', color: t.retire_at ? '#15803D' : '#B45309' }}>
-                {t.retire_at ? 'Remis' : 'À remettre'}
+                background: remis ? 'rgba(21,128,61,.1)' : 'rgba(180,83,9,.1)', color: remis ? '#15803D' : '#B45309' }}>
+                {remis ? 'Remis' : 'À remettre'}
               </span>
             </div>
-          ))}
+          ) })}
         </div>
       </div>
     </ProShell>

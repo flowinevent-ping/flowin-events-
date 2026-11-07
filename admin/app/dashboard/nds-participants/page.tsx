@@ -209,7 +209,7 @@ export default function Page() {
            "encore en attente" d'un coup d'oeil (Romain, 19/09 : "visuel clair
            et evident"). Meme code couleur que la ChipEtat de /dashboard/nds-lots
            (orange = a appeler, vert = confirme, bleu = retire). */
-        const etat = gs.some(g => g.retire_at) ? 'retire' : gs.some(g => g.notifie_at) ? 'confirme' : 'a_confirmer'
+        const etat = gs.some(g => g.statut !== 'annule' && g.retire_at) ? 'retire' : gs.some(g => g.notifie_at) ? 'confirme' : 'a_confirmer'
         const classe = etat === 'retire' ? 'purple' : etat === 'confirme' ? 'live' : 'warn'
         const libelle = etat === 'retire' ? 'Utilisé' : etat === 'confirme' ? 'Confirmé' : 'En attente'
         return (

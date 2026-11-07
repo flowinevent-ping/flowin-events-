@@ -291,6 +291,7 @@ export async function fetchJoueurTirages(joueurId: string): Promise<TirageRow[]>
     .from('tirages')
     .select('id,lot_nom,lot_valeur,partenaire_id,super_event_id,event_id,ticket_code,retrait_token,retire_at,notifie_at,relance_envoyee_at,statut,created_at')
     .eq('joueur_id', joueurId)
+    .neq('statut', 'annule')
     .order('created_at', { ascending: false })
   if (error) { console.error('[fetchJoueurTirages]', error.message); return [] }
   return (data ?? []) as TirageRow[]
@@ -344,7 +345,8 @@ export async function fetchEventSuperEventStats(eventId: string): Promise<{ tick
   if (!partenaireId || !ev?.super_event_id) return { tickets: tk.count ?? 0, gains: 0, gainsUtilises: 0 }
   const { data: tirages } = await supabase.from('tirages').select('statut')
     .eq('partenaire_id', partenaireId).eq('super_event_id', ev.super_event_id)
-  const rows = (tirages ?? []) as { statut: string | null }[]
+  /* Les tirages annules ne sont ni des gains ni des lots remis. */
+  const rows = ((tirages ?? []) as { statut: string | null }[]).filter(g => g.statut !== 'annule')
   return {
     tickets: tk.count ?? 0,
     gains: rows.length,

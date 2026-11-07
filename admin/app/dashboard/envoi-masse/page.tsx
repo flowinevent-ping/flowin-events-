@@ -28,6 +28,8 @@ import { Ico } from '@/lib/proicons'
    gagnants, pas une variante). */
 type EtatGagnant = 'a_confirmer' | 'confirme' | 'retire'
 function etatDe(t: GagnantRow): EtatGagnant {
+  /* fetchGagnants exclut deja les annules ; garde-fou si la source change. */
+  if (t.statut === 'annule') return 'a_confirmer'
   if (t.retire_at) return 'retire'
   if (t.notifie_at) return 'confirme'
   return 'a_confirmer'
