@@ -94,6 +94,11 @@ export const POLICE_PRO = '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sa
  * teinte recalculee localement (« applique ces choses sur la totalite de
  * l'environnement », 18/09).
  */
-/* 01/11 : univers comics des maquettes Super event (rouge #E2231A, jaune #FFD23F) — remplace l'orange. */
-export const ACCENT_SUPER = '#C41D15'
-export const ACCENT_ANIM = CHARTE_PRO.accentFonce
+/* 07/11 (decision du commanditaire, audit coherence graphique) : couleur de
+   CATEGORIE super event = ORANGE #C2410C (degrade #FF8A14), animation/event =
+   BLEU #3B5CC4. Le rouge/jaune « comics » (--fl-super-rouge, --fl-super-jaune)
+   reste l univers d illustration des maquettes joueur, pas la couleur de
+   categorie. */
+export const ACCENT_SUPER = '#C2410C'
+export const ACCENT_SUPER_2 = '#FF8A14'
+export const ACCENT_ANIM = CHARTE_PRO.bleu

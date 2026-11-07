@@ -54,7 +54,12 @@
   /* --- Scene de jeu du quiz (seul fond sombre autorise) ------------------ */
   --fl-stage-1:#1B3A5C; --fl-stage-2:#284C86; --fl-stage-3:#3B5CC4; --fl-stage-kicker:#A9C0FF;
 
-  /* --- Univers comics « Super event » ----------------------------------- */
+  /* --- Couleurs de CATEGORIE (source : lib/charte.ts) ------------------- */
+  /* Super event = orange, animation/event = bleu (decision du 07/11).      */
+  --fl-cat-super:#C2410C; --fl-cat-super-2:#FF8A14; --fl-cat-anim:#3B5CC4;
+
+  /* --- Univers comics « Super event » (illustration joueur uniquement, --- */
+  /* --- jamais pour distinguer la categorie : voir --fl-cat-super) -------- */
   --fl-super-jaune:#FFD23F;
   --fl-super-rouge:#E2231A;
   --fl-super-rouge-ink:#C41D15;

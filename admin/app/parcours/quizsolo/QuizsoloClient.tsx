@@ -106,7 +106,7 @@ export default function QuizsoloClient({ ev, lots, partenaires, banques, evId }:
     setErrors(errs);if(Object.keys(errs).length)return
     setSubmitting(true)
     const tc=generateTicket('QS')
-    const res=await writeJoueur({email:form.email,prenom:form.prenom,nom:form.nom,tel:form.tel,code_postal:form.cp,genre:form.genre,age_tranche:form.age,decouverte:form.source.replace(/^[^ ]+ /,'')||undefined,score_moy:`${score}/${questions.length}`,events:[evId],ticket_code:tc,source:'quizsolo',prefix:'QS',optin:consentAnim,optin_version:CONSENTEMENT_VERSION})
+    const res=await writeJoueur({email:form.email,prenom:form.prenom,nom:form.nom,tel:form.tel,code_postal:form.cp,genre:form.genre,age_tranche:form.age,decouverte:form.source.replace(/^[^A-Za-zÀ-ÿ]+/,'')||undefined,score_moy:`${score}/${questions.length}`,events:[evId],ticket_code:tc,source:'quizsolo',prefix:'QS',optin:consentAnim,optin_version:CONSENTEMENT_VERSION})
     setGain(res.gain ?? null)
     setSubmitting(false)
     if(res.digitalRefuse){setScreen('refusdigital');return}

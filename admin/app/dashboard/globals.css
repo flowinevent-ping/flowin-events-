@@ -298,10 +298,10 @@ a:hover{text-decoration:underline}
      muted    #64748B
    La TEINTE suit la convention deja etablie la-bas, portee par --parc/--parc2
    (jamais une couleur fixe, pour ne pas casser les 3 parcours qui partagent ce
-   bloc) : bleu #2746A6 = pro, orange #C2410C = super event, bleu #7A4FE0 =
-   l accent Flowin.
+   bloc) : bleu #2746A6 = creation de pro, orange #C2410C = super event,
+   bleu #3B5CC4 = animation/event (lib/charte.ts ACCENT_SUPER / ACCENT_ANIM).
    ═══════════════════════════════════════════════════════════════════════════ */
-.sa-parc{--parc:#7A4FE0;--parc2:#3B82F6}
+.sa-parc{--parc:#3B5CC4;--parc2:#5B7BE0}
 .sa-parc.t-super{--parc:#C2410C;--parc2:#FF8A14}
 .sa-parc.t-pro{--parc:#2746A6;--parc2:#3B7DE0}
 

@@ -11,7 +11,7 @@ export async function fetchLotsRetiresRecents(joursRecents = 3, partenaireId?: s
   const seuil = Date.now() - joursRecents * 24 * 60 * 60 * 1000
   const tous = await fetchGagnants()
   return tous
-    .filter(t => !!t.retire_at && new Date(t.retire_at).getTime() >= seuil)
+    .filter(t => t.statut !== 'annule' && !!t.retire_at && new Date(t.retire_at).getTime() >= seuil)
     .filter(t => !partenaireId || t.partenaire_id === partenaireId)
     .sort((a, b) => new Date(b.retire_at as string).getTime() - new Date(a.retire_at as string).getTime())
 }

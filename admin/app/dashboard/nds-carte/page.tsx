@@ -166,6 +166,10 @@ export default function Page() {
         marqueurs.current.push(m)
       })
 
+      /* Le conteneur a pu changer de taille (passage en une colonne sur mobile,
+         rotation) : Leaflet doit la relire avant de cadrer, sinon les marqueurs
+         sont centres sur l ancienne largeur. */
+      carte.current.invalidateSize()
       if (places.length) {
         const bornes = L.latLngBounds(places.map(p => [p.latitude as number, p.longitude as number] as [number, number]))
         carte.current.fitBounds(bornes, { padding: [40, 40], maxZoom: 16 })
@@ -220,7 +224,9 @@ export default function Page() {
         <div style={{ fontSize: 11.5, fontWeight: 700, marginBottom: 8, color: '#2f7d4f' }}>{message}</div>
       )}
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0,1fr) 280px', gap: 14, alignItems: 'start' }}>
+      <style>{`.nds-carte-grille{display:grid;grid-template-columns:minmax(0,1fr) 280px;gap:14px;align-items:start}
+@media (max-width:760px){.nds-carte-grille{grid-template-columns:minmax(0,1fr)}.nds-carte-grille>div:first-child{height:420px!important}}`}</style>
+      <div className="nds-carte-grille">
         <div
           ref={conteneur}
           style={{ height: 540, borderRadius: 14, overflow: 'hidden', border: '1px solid var(--sa-border)', position: 'relative', zIndex: 0 }}

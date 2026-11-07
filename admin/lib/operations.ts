@@ -165,7 +165,7 @@ export interface GagnantOperation {
   ticketCode: string | null
   retraitToken: string | null
   /** a_confirmer : tire, pas encore appele (SA) · confirme : appele · retire : lot remis. */
-  etat: 'a_confirmer' | 'confirme' | 'retire'
+  etat: EtatTirage
   date: string | null
   /** Referentiel 10 : date et heure de remise du lot (validation en caisse). */
   retireAt: string | null
@@ -195,7 +195,7 @@ export async function marquerRelance(tirageId: number): Promise<void> {
   if (error) console.error('[marquerRelance]', error.message)
 }
 
-export type EtatTirage = 'a_confirmer' | 'confirme' | 'retire'
+export type EtatTirage = 'a_confirmer' | 'confirme' | 'retire' | 'annule'
 
 /** Source UNIQUE de l etat a 3 valeurs d un tirage -- ne jamais recalculer
  *  ailleurs (audit UX du 20/10 : au moins 2 ecrans divergeaient, l un d eux,
@@ -204,7 +204,10 @@ export type EtatTirage = 'a_confirmer' | 'confirme' | 'retire'
  *  Un gain d event autonome (tirage du pro, gain immediat) n attend pas
  *  d appel du SA : il est confirme d emblee. Seul le super event passe par
  *  « a confirmer » (tirage pilote par le SA). */
-export function etatTirage(t: { retire_at?: string | null; notifie_at?: string | null; super_event_id?: string | null }): EtatTirage {
+export function etatTirage(t: { statut?: string | null; retire_at?: string | null; notifie_at?: string | null; super_event_id?: string | null }): EtatTirage {
+  /* Un tirage annule n est jamais « remis », meme si retire_at a ete renseigne
+     avant l annulation : on teste le statut AVANT retire_at. */
+  if (t.statut === 'annule') return 'annule'
   if (t.retire_at) return 'retire'
   if (t.notifie_at || !t.super_event_id) return 'confirme'
   return 'a_confirmer'
@@ -217,7 +220,7 @@ export function etatTirage(t: { retire_at?: string | null; notifie_at?: string |
  *  veut dire « billet scanne, lot remis en boutique ». « Utilisé » ne porte
  *  pas cette double lecture. */
 export const LIBELLE_ETAT_TIRAGE: Record<EtatTirage, string> = {
-  a_confirmer: 'À appeler', confirme: 'Confirmé', retire: 'Utilisé',
+  a_confirmer: 'À appeler', confirme: 'Confirmé', retire: 'Utilisé', annule: 'Annulé',
 }
 
 export interface ContratOperation {
@@ -388,7 +391,7 @@ export async function fetchOperationsPro(proId: string): Promise<OperationsPro> 
     lotValeur: num(t.lot_valeur),
     ticketCode: (t.ticket_code as string) ?? null,
     retraitToken: (t.retrait_token as string) ?? null,
-    etat: etatTirage({ retire_at: t.retire_at as string | null, notifie_at: t.notifie_at as string | null, super_event_id: t.super_event_id as string | null }),
+    etat: etatTirage({ statut: (t.statut as string | null) ?? null, retire_at: t.retire_at as string | null, notifie_at: t.notifie_at as string | null, super_event_id: t.super_event_id as string | null }),
     date: t.created_at ? String(t.created_at).slice(0, 10) : null,
     retireAt: (t.retire_at as string) ?? null,
     relanceEnvoyeeAt: (t.relance_envoyee_at as string) ?? null,

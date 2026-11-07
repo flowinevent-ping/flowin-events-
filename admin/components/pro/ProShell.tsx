@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
+import { useFermetureOverlay } from '@/lib/useFermetureOverlay'
 import { supabase } from '@/lib/supabase'
 import AccesBloque from './AccesBloque'
 import { lireDroitsPro, peutOuvrirNouvelle, DROITS_DEFAUT, type DroitsPro } from '@/lib/droitsPro'
@@ -79,6 +80,7 @@ export default function ProShell({ proName, proId, active, children }: { proName
   const q = proId ? `?pro=${encodeURIComponent(proId)}` : ''
   const actif = RANGEMENT[active] ?? active
   const [open, setOpen] = useState(false)
+  useFermetureOverlay(open, () => setOpen(false))
   const page = NAV.find(n => n.key === actif)
   /* Droits donnes par le Super Admin (sql/06-droits-pro.sql) : une entree de menu
      dont le droit est retire disparait. Colonne absente : tout reste visible. */

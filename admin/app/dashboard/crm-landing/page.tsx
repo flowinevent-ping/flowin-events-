@@ -119,7 +119,7 @@ export default function Page() {
       {charge && <div className="sa-muted" style={{ fontSize: 13 }}>Chargement…</div>}
 
       {!charge && !filtres.length && (
-        <EmptyState icon="📥" title="Aucun contact" desc="Aucun contact ne correspond à cette sélection." />
+        <EmptyState icon="download" title="Aucun contact" desc="Aucun contact ne correspond à cette sélection." />
       )}
 
       {!charge && filtres.length > 0 && (

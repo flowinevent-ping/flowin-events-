@@ -7,6 +7,7 @@ import EventDrawer from './EventDrawer'
 import PartenaireDrawer from './PartenaireDrawer'
 import ProDrawer from './ProDrawer'
 import SuperEventDrawer from './SuperEventDrawer'
+import { useFermetureOverlay } from '@/lib/useFermetureOverlay'
 
 const LARGEUR_MIN = 420
 const LARGEUR_DEFAUT = 980
@@ -62,6 +63,8 @@ function usePoigneeRedimension() {
 export default function Drawer() {
   const { drawer, closeDrawer, drawerCanGoBack, goBackDrawer } = useDashboard()
   const { largeur, demarrer } = usePoigneeRedimension()
+  /* Echap + Retour ferment le tiroir ; defilement de la page bloque derriere. */
+  useFermetureOverlay(drawer.open, closeDrawer, true)
 
   if (!drawer.open) return null
 
@@ -79,7 +82,7 @@ export default function Drawer() {
   return (
     <>
       <div className="sa-drawer-bd" onClick={closeDrawer} />
-      <div className="sa-drawer wide" style={{ position: 'relative', width: `min(${largeur}px, 96vw)` }}>
+      <div className="sa-drawer wide" style={{ width: `min(${largeur}px, 96vw)` }}>
         <div className="sa-drawer-resize" onPointerDown={demarrer} title="Glisser pour redimensionner" />
         {drawerCanGoBack && (
           <button

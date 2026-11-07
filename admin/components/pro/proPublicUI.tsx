@@ -69,7 +69,7 @@ export function Field({ label, children }: { label: string; children: React.Reac
   )
 }
 
-export function SuccessScreen({ emoji, title, children }: { emoji: string; title: string; children: React.ReactNode }) {
+export function SuccessScreen({ emoji, title, children }: { emoji?: string; title: string; children: React.ReactNode }) {
   return (
     <div style={wrap}>
       <div style={heroStyle}>

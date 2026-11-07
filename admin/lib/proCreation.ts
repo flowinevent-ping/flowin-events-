@@ -87,13 +87,13 @@ export function categorieAvecPrecision(categorie: string, precision: string): st
 /* Les deux profils du parcours pro, avec leurs propres mots. */
 export const PROFILS_PRO = [
   {
-    id: 'commerce', icone: '🏪', titre: 'Commerce · point de vente',
+    id: 'commerce', icone: 'shop', titre: 'Commerce · point de vente',
     sous: 'Une station de jeu chez vous : les joueurs viennent flasher sur place.',
     sousSA: 'Il tient une station de jeu chez lui : les joueurs viennent flasher sur place.',
     badges: ['Station', 'Trafic en boutique', 'Fichier client'],
   },
   {
-    id: 'annonceur', icone: '📣', titre: 'Annonceur · sponsor',
+    id: 'annonceur', icone: 'bell', titre: 'Annonceur · sponsor',
     sous: 'Vous communiquez sur l’animation sans tenir de station.',
     sousSA: 'Il communique sur l’animation sans tenir de station.',
     badges: ['Audience locale', 'Impact', 'Choix de l’animation'],
@@ -190,13 +190,13 @@ const EMAIL_OK = (v: string) => /.+@.+\..+/.test(v.trim())
 
 export const ETAPES_FICHE_PRO: EtapeFichePro[] = [
   {
-    id: 'profil', icone: '🧭', titre: 'De quel pro s’agit-il ?',
+    id: 'profil', icone: 'users', titre: 'De quel pro s’agit-il ?',
     sous: 'Les deux profils ne demandent pas les mêmes informations.',
     vignettes: true, champs: [],
     bloque: f => (f.profil ? undefined : 'Choisissez un profil pour continuer.'),
   },
   {
-    id: 'identite', icone: '🏢', titre: 'L’identité',
+    id: 'identite', icone: 'building', titre: 'L’identité',
     sous: 'Le nom que verront les joueurs, et le secteur qui sert aux regroupements.',
     champs: [
       { cle: 'nom', label: 'Nom de l’établissement *', type: 'texte', placeholder: 'Ex. Domaine de la Bergerie' },
@@ -209,7 +209,7 @@ export const ETAPES_FICHE_PRO: EtapeFichePro[] = [
     bloque: f => (f.nom.trim().length > 1 ? undefined : 'Donnez un nom à l’établissement pour continuer.'),
   },
   {
-    id: 'lieu', icone: '📍', titre: 'Où il se trouve',
+    id: 'lieu', icone: 'pin', titre: 'Où il se trouve',
     sous: 'L’adresse place la station sur la carte de l’opération.',
     champs: [
       { cle: 'adresse', label: 'Adresse', type: 'texte', placeholder: 'Ex. 12 place du Grand Jardin', saufProfil: 'annonceur' },
@@ -220,7 +220,7 @@ export const ETAPES_FICHE_PRO: EtapeFichePro[] = [
     bloque: () => undefined,
   },
   {
-    id: 'contact', icone: '👤', titre: 'Qui le représente',
+    id: 'contact', icone: 'user', titre: 'Qui le représente',
     sous: 'La personne que l’on appelle, et l’adresse qui reçoit les accès.',
     champs: [
       { cle: 'contact', label: 'Nom du contact', type: 'texte', placeholder: 'Prénom Nom', groupe: 'ct' },
@@ -243,7 +243,7 @@ export const ETAPES_FICHE_PRO: EtapeFichePro[] = [
     },
   },
   {
-    id: 'recap', icone: '✅', titre: 'Récapitulatif',
+    id: 'recap', icone: 'check', titre: 'Récapitulatif',
     sous: 'Rien n’est écrit avant validation.',
     champs: [],
     bloque: () => undefined,

@@ -223,7 +223,7 @@ export async function enregistrer(
        liste `super_events.events` ne le contenait pas — ecart invisible. On ne
        transforme pas ca en echec (l event existe vraiment), on le DIT. */
     if (error || !data) {
-      fait.push('⚠ rattachement au super event à faire à la main')
+      fait.push('attention : rattachement au super event à faire à la main')
     }
     if (!error && data) {
       const actuels: string[] = (data as { events: string[] | null }).events ?? []

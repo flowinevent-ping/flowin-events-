@@ -113,7 +113,7 @@ export default function Page() {
       <SectionHeader>Cockpit</SectionHeader>
 
       {!events.length ? (
-        <EmptyState icon="🎯" title="Aucune animation" desc="Aucune animation n'est enregistrée." />
+        <EmptyState icon="game" title="Aucune animation" desc="Aucune animation n'est enregistrée." />
       ) : (
         <div className="sa-kanban">
           {colonne('Live maintenant', 'bell', live,

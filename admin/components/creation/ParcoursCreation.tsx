@@ -192,6 +192,10 @@ export function BlocAide() {
   )
 }
 
+/** Delai annonce apres une demande de rattachement -- le MEME partout
+ *  (RejoindreClient, ecran final, encart coordonnees). */
+const DELAI_VALIDATION = 'sous 24–48 h'
+
 export default function ParcoursCreation({ mode = 'pro', pro, banques, supers, packs, typeInitial, seInitial, prefill, prosCatalogue = [], onChangerPro, droits = DROITS_DEFAUT, reprise = false }: {
   mode?: ModeParcours
   /** Droits donnes par le Super Admin (sql/06-droits-pro.sql). Sans effet en mode SA. */
@@ -331,6 +335,9 @@ export default function ParcoursCreation({ mode = 'pro', pro, banques, supers, p
   const [dDescription, setDDescription] = useState('')
 
   const [envoi, setEnvoi] = useState<'' | 'envoi' | 'echec'>('')
+  /* Le motif de blocage de l ecran final ne s affiche qu apres un clic. */
+  const [tenteFin, setTenteFin] = useState(false)
+  const [tenteEtape, setTenteEtape] = useState<Record<string, boolean>>({})
   const [erreur, setErreur] = useState('')
   const [fait, setFait] = useState<{ eventId: string | null; superId: string | null; info?: string } | null>(null)
 
@@ -668,12 +675,13 @@ export default function ParcoursCreation({ mode = 'pro', pro, banques, supers, p
   const q = `?pro=${encodeURIComponent(p.id)}`
   const btnSuivant = (n: number) => {
     const b = bloque[etape]
+    const vu = !!b && !!tenteEtape[String(etape)]
     return (
       <div style={{ marginTop: 22 }}>
-        {b && <div style={{ fontSize: 12.5, color: '#B45309', fontWeight: 700, marginBottom: 10, textAlign: 'right' }}>{b}</div>}
+        {vu && <div style={{ fontSize: 12.5, color: '#B45309', fontWeight: 700, marginBottom: 10, textAlign: 'right' }}>{b}</div>}
         <div style={{ display: 'flex', justifyContent: 'space-between', gap: 10 }}>
           <button style={BTN2} onClick={precedent}>← Précédent</button>
-          <button style={{ ...BTN, opacity: b ? 0.45 : 1, cursor: b ? 'not-allowed' : 'pointer' }} disabled={!!b} onClick={() => aller(n)}>Suivant →</button>
+          <button style={{ ...BTN, opacity: vu ? 0.45 : 1 }} onClick={() => { if (b) { setTenteEtape(t => ({ ...t, [String(etape)]: true })); return } aller(n) }}>Suivant →</button>
         </div>
       </div>
     )
@@ -711,9 +719,12 @@ export default function ParcoursCreation({ mode = 'pro', pro, banques, supers, p
     const titreFin = rejoindre ? (sa ? 'Station créée' : 'Demande envoyée') : estSuper ? 'Super event créé' : 'Animation créée'
     const sousTitreFin = rejoindre
       ? (sa ? `${nomCommerce.trim() || p.nom || 'Le pro'} est rattaché à ${se?.nom ?? 'l’opération'} : sa station est sur la carte.`
-        : `Flowin valide votre participation à ${se?.nom ?? 'l’opération'} : votre station apparaîtra alors sur la carte.`)
+        : `Flowin valide votre participation à ${se?.nom ?? 'l’opération'} ${DELAI_VALIDATION} : votre station apparaîtra alors sur la carte.`)
       : estSuper ? `${participants.length} pro${participants.length > 1 ? 's' : ''} participant${participants.length > 1 ? 's' : ''}, ${lotsNommes.reduce((n, l) => n + Math.max(1, Number(l.quantite) || 1), 0)} lot(s) au grand tirage.`
-      : sa ? `Animation créée pour ${p.nom ?? 'le pro'}.` : 'En attente de validation par Flowin avant mise en ligne.'
+      /* lib/pro.ts creerAnimation : l event est enregistre et jouable tout de
+         suite ; seule la DIFFUSION demandee (QR imprime, reseaux) attend Flowin
+         (cfg.diffusion_demandee.statut = 'en_attente_sa'). */
+      : sa ? `Animation créée pour ${p.nom ?? 'le pro'}.` : 'Votre animation est enregistrée et jouable dès maintenant. La diffusion demandée (QR imprimé, réseaux) est préparée par Flowin.'
     return (
       <div style={{ maxWidth: 820 }}>
         <style dangerouslySetInnerHTML={{ __html: PC_CSS }} />
@@ -733,7 +744,7 @@ export default function ParcoursCreation({ mode = 'pro', pro, banques, supers, p
             )}
             {rejoindre && (
               <div style={{ border: `1.5px solid ${C.bordure}`, borderRadius: 18, padding: '6px 16px', marginBottom: 16, background: '#fff' }}>
-                {[['Super event', se?.nom ?? '—'], ['Jeu', libelleModule(moduleActif || GABARIT_MODULE)], ['Statut', sa ? 'Station créée' : 'En attente de validation']].map(([k, v]) => (
+                {[['Super event', se?.nom ?? '—'], ['Jeu', libelleModule(moduleActif || GABARIT_MODULE)], ['Statut', sa ? 'Station créée' : `En attente de validation (${DELAI_VALIDATION})`]].map(([k, v]) => (
                   <div key={k} style={{ display: 'flex', justifyContent: 'space-between', gap: 12, padding: '11px 0', borderTop: k === 'Événement' ? 'none' : `1px solid ${C.bordure}` }}>
                     <span style={{ ...MUTED, fontSize: 13 }}>{k}</span><b style={{ fontSize: 14 }}>{v}</b>
                   </div>
@@ -1320,7 +1331,7 @@ export default function ParcoursCreation({ mode = 'pro', pro, banques, supers, p
                 <div data-compte-requis data-coordonnees role="region" aria-label="Vos coordonnées" style={{ border: `2px solid ${ACCENT_SUPER}`, borderRadius: 16, padding: '14px 16px', marginTop: 16, background: '#FFF7ED' }}>
                   <div style={{ fontSize: 15, fontWeight: 800 }}>Dernière étape : vos coordonnées</div>
                   <div style={{ fontSize: 13, lineHeight: 1.55, marginTop: 4, marginBottom: 12 }}>
-                    Flowin vous rappelle pour valider votre participation. Vos coordonnées créent aussi votre <b>espace pro gratuit</b> pour suivre la demande. Rien n’est enregistré avant « Envoyer ma demande à Flowin ».
+                    Flowin vous rappelle {DELAI_VALIDATION} pour valider votre participation. Vos coordonnées créent aussi votre <b>espace pro gratuit</b> pour suivre la demande. Rien n’est enregistré avant « Envoyer ma demande à Flowin ».
                   </div>
                   <Champ label="Nom de la structure *"><input data-co="nom" style={CHAMP} value={coNomEff} onChange={e => setCoNom(e.target.value)} autoComplete="organization" /></Champ>
                   <Champ label="Secteur *">
@@ -1345,10 +1356,11 @@ export default function ParcoursCreation({ mode = 'pro', pro, banques, supers, p
               {rejoindre && visiteur && proSession && (
                 <div role="status" style={{ fontSize: 13, color: '#15803D', fontWeight: 700, marginTop: 14 }}>Connecté : {proSession.nom ?? 'votre compte pro'}. Votre demande partira de ce compte.</div>
               )}
-              {bloque[FIN] && <div style={{ fontSize: 12.5, color: '#B45309', fontWeight: 700, marginTop: 12, textAlign: 'right' }}>{bloque[FIN]}</div>}
+              {/* Comme PremiereFois (drapeau `tente`) : pas d erreur avant toute tentative. */}
+              {bloque[FIN] && tenteFin && <div style={{ fontSize: 12.5, color: '#B45309', fontWeight: 700, marginTop: 12, textAlign: 'right' }}>{bloque[FIN]}</div>}
               <div style={{ display: 'flex', justifyContent: 'space-between', gap: 10, marginTop: 20 }}>
                 <button style={BTN2} onClick={precedent}>← Précédent</button>
-                <button style={{ ...BTN, opacity: envoi === 'envoi' || bloque[FIN] ? 0.5 : 1 }} disabled={envoi === 'envoi' || !!bloque[FIN]} onClick={envoyer}>
+                <button style={{ ...BTN, opacity: envoi === 'envoi' || (bloque[FIN] && tenteFin) ? 0.5 : 1 }} disabled={envoi === 'envoi'} onClick={() => { if (bloque[FIN]) { setTenteFin(true); return } envoyer() }}>
                   {envoi === 'envoi' ? 'Enregistrement…'
                     : rejoindre ? (sa ? 'Rattacher au super event' : 'Envoyer ma demande à Flowin')
                     : estSuper ? 'Créer le super event'

@@ -109,7 +109,7 @@ export default function Page() {
       </div>
 
       {!filtres.length ? (
-        <EmptyState icon="🎨" title="Aucun partenaire" desc="Aucun partenaire ne correspond à cette sélection." />
+        <EmptyState icon="sparkle" title="Aucun partenaire" desc="Aucun partenaire ne correspond à cette sélection." />
       ) : (
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(250px,1fr))', gap: 11 }}>
           {filtres.map(p => (

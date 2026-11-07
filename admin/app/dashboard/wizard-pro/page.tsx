@@ -26,11 +26,66 @@ import { PageHeader } from '@/components/dashboard/DashboardUI'
 import { Parcours, VignetteChoix, type EtapeParcours } from '@/components/dashboard/Parcours'
 import { useDashboard } from '@/contexts/DashboardContext'
 import { upsertPro } from '@/lib/dashboard'
+import { Ico } from '@/lib/proicons'
 import {
   ETAPES_FICHE_PRO, PROFILS_PRO, etapesPour, ficheProVide, identifiantPro,
   lignePro, recapPro, slugPro,
   type ChampPro, type FichePro, type ProfilPro,
 } from '@/lib/proCreation'
+
+/* Un champ, rendu avec les primitives du dashboard. La DEFINITION vient de
+   lib/proCreation — ce composant ne fait que la dessiner. Declare HORS de la
+   page : declare dedans, il etait recree a chaque frappe et l input perdait
+   le focus apres chaque caractere. */
+type PropsChamp = { f: FichePro; maj: (c: Partial<FichePro>) => void; id: string }
+
+function Champ({ c, f, maj, id }: PropsChamp & { c: ChampPro }) {
+  const v = (f[c.cle] as string) ?? ''
+  const set = (x: string) => maj({ [c.cle]: x } as Partial<FichePro>)
+  const aide = c.cle === 'identifiant'
+    ? <>Déduit du nom : <code className="sa-code">{id || 'pro-…'}</code>. {c.aide}</>
+    : c.aide
+  return (
+    <label style={{ display: 'block' }}>
+      <span className="sa-lbl">{c.label}</span>
+      {c.type === 'liste' ? (
+        <select className="sa-input" value={v} onChange={e => set(e.target.value)}>
+          <option value="">— Choisir —</option>
+          {(c.options ?? []).map(o => <option key={o} value={o}>{o}</option>)}
+        </select>
+      ) : c.type === 'zone' ? (
+        <textarea className="sa-input" rows={3} value={v} onChange={e => set(e.target.value)} placeholder={c.placeholder} />
+      ) : (
+        <input
+          className="sa-input"
+          type={c.type === 'email' ? 'email' : c.type === 'tel' ? 'tel' : 'text'}
+          value={v} onChange={e => set(e.target.value)}
+          placeholder={c.cle === 'identifiant' ? (slugPro(f.nom) || 'pro-…') : c.placeholder}
+        />
+      )}
+      {aide && <span className="sa-aide">{aide}</span>}
+    </label>
+  )
+}
+
+/* Les champs d une etape, les groupes cote a cote. */
+function Champs({ champs, ...p }: PropsChamp & { champs: ChampPro[] }) {
+  const blocs: ChampPro[][] = []
+  champs.forEach(c => {
+    const dernier = blocs[blocs.length - 1]
+    if (c.groupe && dernier && dernier[0].groupe === c.groupe) dernier.push(c)
+    else blocs.push([c])
+  })
+  return (
+    <div style={{ display: 'grid', gap: 12, maxWidth: 600 }}>
+      {blocs.map((b, i) => b.length === 1
+        ? <Champ key={i} c={b[0]} {...p} />
+        : <div key={i} style={{ display: 'grid', gridTemplateColumns: `repeat(${b.length},1fr)`, gap: 12 }}>
+            {b.map(c => <Champ key={c.cle} c={c} {...p} />)}
+          </div>)}
+    </div>
+  )
+}
 
 export default function Page() {
   const router = useRouter()
@@ -61,56 +116,6 @@ export default function Page() {
       : { ok: false, texte: 'L’enregistrement a échoué. Rien n’a été écrit.' })
   }
 
-  /* Un champ, rendu avec les primitives du dashboard. La DEFINITION vient de
-     lib/proCreation — ce composant ne fait que la dessiner. */
-  function Champ({ c }: { c: ChampPro }) {
-    const v = (f[c.cle] as string) ?? ''
-    const set = (x: string) => maj({ [c.cle]: x } as Partial<FichePro>)
-    const aide = c.cle === 'identifiant'
-      ? <>Déduit du nom : <code className="sa-code">{id || 'pro-…'}</code>. {c.aide}</>
-      : c.aide
-    return (
-      <label style={{ display: 'block' }}>
-        <span className="sa-lbl">{c.label}</span>
-        {c.type === 'liste' ? (
-          <select className="sa-input" value={v} onChange={e => set(e.target.value)}>
-            <option value="">— Choisir —</option>
-            {(c.options ?? []).map(o => <option key={o} value={o}>{o}</option>)}
-          </select>
-        ) : c.type === 'zone' ? (
-          <textarea className="sa-input" rows={3} value={v} onChange={e => set(e.target.value)} placeholder={c.placeholder} />
-        ) : (
-          <input
-            className="sa-input"
-            type={c.type === 'email' ? 'email' : c.type === 'tel' ? 'tel' : 'text'}
-            value={v} onChange={e => set(e.target.value)}
-            placeholder={c.cle === 'identifiant' ? (slugPro(f.nom) || 'pro-…') : c.placeholder}
-          />
-        )}
-        {aide && <span className="sa-aide">{aide}</span>}
-      </label>
-    )
-  }
-
-  /* Les champs d une etape, les groupes cote a cote. */
-  function Champs({ champs }: { champs: ChampPro[] }) {
-    const blocs: ChampPro[][] = []
-    champs.forEach(c => {
-      const dernier = blocs[blocs.length - 1]
-      if (c.groupe && dernier && dernier[0].groupe === c.groupe) dernier.push(c)
-      else blocs.push([c])
-    })
-    return (
-      <div style={{ display: 'grid', gap: 12, maxWidth: 600 }}>
-        {blocs.map((b, i) => b.length === 1
-          ? <Champ key={i} c={b[0]} />
-          : <div key={i} style={{ display: 'grid', gridTemplateColumns: `repeat(${b.length},1fr)`, gap: 12 }}>
-              {b.map(c => <Champ key={c.cle} c={c} />)}
-            </div>)}
-      </div>
-    )
-  }
-
   const etapes: EtapeParcours[] = etapesPour('sa', f.profil).map(e => {
     const bloqueBase = e.bloque(f, 'sa')
     const bloque = e.id === 'identite' && !bloqueBase && idPris
@@ -123,7 +128,7 @@ export default function Page() {
         <div className="sa-choix-grille">
           {PROFILS_PRO.map(p => (
             <VignetteChoix
-              key={p.id} titre={p.titre} sous={p.sousSA} icone={p.icone}
+              key={p.id} titre={p.titre} sous={p.sousSA} icone={<Ico k={p.icone} size={22} />}
               badges={[...p.badges]} actif={f.profil === p.id}
               onClick={() => maj({ profil: p.id as ProfilPro })}
             />
@@ -172,7 +177,7 @@ export default function Page() {
     } else {
       contenu = (
         <>
-          <Champs champs={e.champs} />
+          <Champs champs={e.champs} f={f} maj={maj} id={id} />
           {e.id === 'identite' && nomPris && (
             <div className="sa-alert warn" style={{ fontSize: 12, marginTop: 12, maxWidth: 600 }}>
               Un pro porte déjà ce nom. Ce n’est pas interdit — deux enseignes peuvent
@@ -183,7 +188,7 @@ export default function Page() {
       )
     }
 
-    return { id: e.id, icone: e.icone, titre: e.titre, sous: e.sous, bloque, contenu }
+    return { id: e.id, icone: <Ico k={e.icone} size={20} />, titre: e.titre, sous: e.sous, bloque, contenu }
   })
 
   return (

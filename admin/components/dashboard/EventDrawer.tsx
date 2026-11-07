@@ -13,7 +13,7 @@ import Diffusion from './Diffusion'
 import ReglesDiffusion from './ReglesDiffusion'
 import ParcoursMobil from '@/components/pro/ParcoursMobil'
 import type { FlowinEvent, FlowinJoueur, FlowinPartenaire } from '@/lib/types'
-import { Ico } from '@/lib/proicons'
+import { Ico, IcoModule } from '@/lib/proicons'
 import { BASE_CANONIQUE } from '@/lib/qrPermalien'
 
 function fmt(d?: string | null) {
@@ -459,7 +459,7 @@ export default function EventDrawer() {
             )}
             {ev.module === 'quizmaster' && customCount > 0 && (
               <div className="sa-muted" style={{ fontSize: 11, marginTop: 4, marginBottom: 10 }}>
-                ℹ️ {customCount} question{customCount > 1 ? 's' : ''} personnalisée{customCount > 1 ? 's' : ''} en base mais ignorée{customCount > 1 ? 's' : ''} : Quiz Master ne lit que les banques.
+                {customCount} question{customCount > 1 ? 's' : ''} personnalisée{customCount > 1 ? 's' : ''} en base mais ignorée{customCount > 1 ? 's' : ''} : Quiz Master ne lit que les banques.
               </div>
             )}
 
@@ -486,7 +486,7 @@ export default function EventDrawer() {
                   <div style={{ width: 64, height: 64, flexShrink: 0, borderRadius: 14, border: '2px dashed var(--sa-border)', background: 'var(--sa-subtle)', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
                     {it.image || it.logo
                       ? <img src={it.image || it.logo} alt="" style={{ width: '100%', height: '100%', objectFit: it.image ? 'cover' : 'contain', padding: it.image ? 0 : 6 }} onError={() => setManches(manches.map((x, j) => j === i ? { ...x, image: undefined, logo: undefined } : x))} />
-                      : <span style={{ fontSize: 22 }}>{it.emoji || '🎤'}</span>
+                      : (it.emoji ? <span style={{ fontSize: 22 }}>{it.emoji}</span> : <IcoModule module="quizmaster" size={24} />)
                     }
                   </div>
                   <div style={{ flex: 1 }}>
@@ -504,7 +504,7 @@ export default function EventDrawer() {
                     </div>
                     <div style={{ display: 'flex', gap: 8, marginBottom: 6 }}>
                       <input
-                        className="sa-input" value={it.emoji ?? ''} placeholder="🎤"
+                        className="sa-input" value={it.emoji ?? ''} placeholder="—"
                         onChange={e => setManches(manches.map((x, j) => j === i ? { ...x, emoji: e.target.value } : x))}
                         style={{ width: 48, textAlign: 'center', flexShrink: 0, padding: '9px 4px' }}
                       />
@@ -532,7 +532,7 @@ export default function EventDrawer() {
             {uploadErreurManche && <div className="sa-aide" style={{ color: '#c0392b', marginBottom: 10 }}>{uploadErreurManche}</div>}
             <button
               className="sa-btn sm" style={{ marginTop: 4 }} disabled={manches.length >= 10}
-              onClick={() => setManches([...manches, { id: 'vm-' + Math.random().toString(36).slice(2, 8), nom: '', emoji: '🎤' }])}
+              onClick={() => setManches([...manches, { id: 'vm-' + Math.random().toString(36).slice(2, 8), nom: '', emoji: '' }])}
             >
               + Ajouter une manche{manches.length >= 10 ? ' (max 10)' : ''}
             </button>

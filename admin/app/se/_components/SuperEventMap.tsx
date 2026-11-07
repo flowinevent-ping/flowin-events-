@@ -148,5 +148,5 @@ export default function SuperEventMap({ lieux, mode = 'vitrine', height = 340, s
     }
   }, [JSON.stringify(lieux), mode, showPosition, editable])
 
-  return <div ref={ref} style={{ width: '100%', height, borderRadius: 12, overflow: 'hidden', zIndex: 0 }} />
+  return <div ref={ref} style={{ width: '100%', height, borderRadius: 12, overflow: 'hidden', zIndex: 0, fontFamily: '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif' }} />
 }

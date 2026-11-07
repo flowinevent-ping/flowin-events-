@@ -227,7 +227,7 @@ export default function SpinClient({ ev, lots, partenaires, evId }: Props) {
     const res = await writeJoueur({
       email:form.email, prenom:form.prenom, nom:form.nom, tel:form.tel, code_postal:form.cp,
       genre:form.genre || undefined, age_tranche: isBtob ? undefined : (form.age || undefined),
-      decouverte:form.source.replace(/^[^ ]+ /,'')||undefined,
+      decouverte:form.source.replace(/^[^A-Za-zÀ-ÿ]+/,'')||undefined,
       enseigne: isBtob ? (form.enseigne || undefined) : undefined,
       secteur: isBtob ? (form.secteur || undefined) : undefined,
       client_type: isBtob ? 'btob' : undefined,

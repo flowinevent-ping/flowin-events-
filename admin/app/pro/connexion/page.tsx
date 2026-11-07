@@ -60,14 +60,14 @@ export default function ConnexionProPage() {
 
   if (etat === 'attente') {
     return (
-      <SuccessScreen emoji="⏳" title="En attente de validation">
+      <SuccessScreen title="En attente de validation">
         <div style={{ fontSize: 15.5, lineHeight: 1.6, color: '#374151' }}>Votre demande est bien enregistrée. L&apos;équipe Flowin doit la valider avant que vous puissiez accéder à votre espace.</div>
       </SuccessScreen>
     )
   }
   if (etat === 'refuse') {
     return (
-      <SuccessScreen emoji="✋" title="Demande non validée">
+      <SuccessScreen title="Demande non validée">
         <div style={{ fontSize: 15.5, lineHeight: 1.6, color: '#374151' }}>Contactez l&apos;équipe Flowin pour plus d&apos;informations.</div>
       </SuccessScreen>
     )

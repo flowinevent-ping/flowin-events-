@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabase'
 import SuperEventMap, { Lieu } from '../_components/SuperEventMap'
 import { Ico, IcoModule } from '@/lib/proicons'
+import { ACCENT_SUPER } from '@/lib/charte'
 
 type SE = { id: string; nom: string; description?: string | null; date_d?: string | null; date_f?: string | null; social?: { insta?: string; fb?: string; site?: string } | null }
 type Lot = { id: string; rang: number | null; valeur: number | null; libelle?: string | null }
@@ -130,7 +131,9 @@ export default function SuperEventClient({ se, lots, lieux, sponsors, autres = [
   }
 
   const identified = !!joueur
-  const mapLieux = identified ? lieux.map((l) => ({ ...l, joue: played.has(l.id) })) : lieux
+  /* Pastilles a la couleur de categorie super event (orange), plus le violet
+     #7C2D92 herite des donnees. */
+  const mapLieux = lieux.map((l) => ({ ...l, couleur: ACCENT_SUPER, joue: identified ? played.has(l.id) : l.joue }))
   const playedCount = lieux.filter((l) => played.has(l.id)).length
   const fu = selected ? modUI(selected.module) : null
   const dist = (selected && userPos && typeof selected.lat === 'number' && typeof selected.lng === 'number')

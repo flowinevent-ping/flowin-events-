@@ -227,7 +227,7 @@ export default function RejoindreClient({ se }: { se: SE }) {
                   Merci <strong>{f.prenom}</strong> ! La demande de <strong>{f.commerce}</strong> pour l&apos;opération <strong>{se.nom}</strong> est enregistrée.
                 </div>
                 <div style={{ background: 'rgba(194,65,12,.07)', borderRadius: 12, padding: '15px 16px', margin: '18px 0', fontSize: 14, lineHeight: 1.6, color: CHARTE.texte }}>
-                  Nous validons votre commerce sous 24–48h. Votre <strong>QR à afficher en boutique</strong> et votre <strong>tableau de bord</strong> seront activés à ce moment-là.
+                  Nous validons votre commerce sous 24–48 h. Votre <strong>QR à afficher en boutique</strong> et votre <strong>tableau de bord</strong> seront activés à ce moment-là.
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '14px 16px', border: `1px solid ${CHARTE.bordure}`, borderRadius: 12 }}>
                   <span style={{ fontSize: 13.5, color: CHARTE.attenue }}>{packChoisi ? packChoisi.nom : 'Participation'}</span>
@@ -277,7 +277,7 @@ export default function RejoindreClient({ se }: { se: SE }) {
               <div style={{ fontSize: 20, fontWeight: 800, marginBottom: 8 }}>Rejoindre en 4 étapes</div>
               <div style={{ fontSize: 13.5, color: CHARTE.attenue, lineHeight: 1.6, marginBottom: 22 }}>
                 Votre commerce, votre contact, votre lot pour le tirage — moins de deux minutes,
-                validé par l&apos;équipe Flowin sous 24–48h.
+                validé par l&apos;équipe Flowin sous 24–48 h.
               </div>
               <button className="rj-btn" style={{ width: '100%' }} onClick={() => aller('commerce')}>
                 Commencer <Ico k="chevronRight" size={16} />
@@ -409,7 +409,7 @@ export default function RejoindreClient({ se }: { se: SE }) {
               </button>
             </div>
             <div style={{ fontSize: 12, color: CHARTE.attenue, textAlign: 'center', marginTop: 10, lineHeight: 1.5 }}>
-              Sans engagement. Validation sous 24–48h. Données jamais cédées.
+              Sans engagement. Validation sous 24–48 h. Données jamais cédées.
             </div>
           </>)}
 

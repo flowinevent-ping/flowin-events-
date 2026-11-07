@@ -71,7 +71,7 @@ export default function Page() {
 
         {packs === null && <div className="sa-muted" style={{ fontSize: 13 }}>Chargement…</div>}
         {packs !== null && packs.length === 0 && (
-          <EmptyState icon="🎟️" title="Aucun pack" desc="Le catalogue de packs de participation est vide." />
+          <EmptyState icon="ticket" title="Aucun pack" desc="Le catalogue de packs de participation est vide." />
         )}
 
         {packs !== null && packs.map(pack => {
