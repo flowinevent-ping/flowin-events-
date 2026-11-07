@@ -79,6 +79,8 @@ export function Parcours({
   const e = etapes[i]
   const dernier = i === etapes.length - 1
   const bloque = e?.bloque
+  const [tente, setTente] = useState<Record<string, boolean>>({})
+  const tenter = () => { const k = e?.id ?? ''; setTente(t => ({ ...t, [k]: true })) }
 
   const aller = (n: number) => {
     const cible = Math.max(0, Math.min(etapes.length - 1, n))
@@ -128,11 +130,12 @@ export function Parcours({
           ← Précédent
         </button>
         <span className="sa-parc-compte">Étape {i + 1} sur {etapes.length}</span>
-        {bloque
-          ? <span className="sa-parc-bloque">{bloque}</span>
-          : dernier
-            ? <button className="sa-btn primary" onClick={onTerminer} disabled={occupe}>{occupe ? '…' : libelleFin}</button>
-            : <button className="sa-btn primary" onClick={() => aller(i + 1)}>Suivant →</button>}
+        {/* Le motif du blocage ne s affiche qu apres une tentative (meme principe
+            que le drapeau `tente` de PremiereFois) : pas d erreur avant toute saisie. */}
+        {bloque && tente[e?.id ?? ''] && <span className="sa-parc-bloque">{bloque}</span>}
+        {dernier
+          ? <button className="sa-btn primary" onClick={() => bloque ? tenter() : onTerminer()} disabled={occupe}>{occupe ? '…' : libelleFin}</button>
+          : <button className="sa-btn primary" onClick={() => bloque ? tenter() : aller(i + 1)}>Suivant →</button>}
       </div>
     </div>
   )
