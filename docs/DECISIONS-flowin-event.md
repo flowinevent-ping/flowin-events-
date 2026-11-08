@@ -86,3 +86,40 @@ que sur instruction explicite de Romain.
 - Archiver les pages internes exposées publiquement.
 - Visite guidée Flowin (`/visite-guidee/`) : démo cliquable, outil commercial, accessible
   depuis le dashboard SA (menu Comm & outils).
+
+## Objectif de la refonte (08/11/2026)
+
+- Mesure du succès : la **conversion**, c'est-à-dire l'envie de s'inscrire après navigation.
+  Chaque écran, chaque support est jugé sur ce critère.
+
+## Cahier des charges design de Flowin Animation (08/11/2026)
+
+- Flowin Animation doit avoir **l'effet d'un jeu** : animation, innovation, simplicité, mouvement.
+- **Aux couleurs du commerçant** (et non aux seules couleurs Flowin) : comme sa propre carte de
+  fidélité, mais un outil vraiment interactif où le client a de **vrais privilèges** et une
+  interaction avec son commerce.
+- But : créer l'**attractivité**, accrocheuse au premier coup d'œil.
+- Le cadrage (`docs/CADRAGE-refonte-flowin-event.md`) doit être corrigé en conséquence : la palette
+  Flowin reste celle de la marque et des écrans pro/admin ; le jeu côté joueur prend les couleurs du
+  commerçant.
+
+## Constat de Romain sur la présentation Super Event (08/11/2026)
+
+- Pas assez probante ni simple à comprendre au premier coup d'œil ; trop d'images ; couleurs et
+  tailles d'images pas optimales ; navigation peu actuelle ; manque possible d'animation et de
+  dynamique. À traiter par un audit design / ergonomie / architecture avant toute nouvelle production.
+
+## Campagne d'inscription gratuite des commerces (08/11/2026, à intégrer à la réflexion)
+
+- Une campagne d'inscription **gratuite** est envisagée : le commerce s'inscrit sur Flowin et
+  attend le prochain événement ou la prochaine animation.
+- But : rassembler les commerces autour d'actions de communication **locales et hyper locales**.
+- Le commerce s'enregistre (coordonnées, SIRET), **accepte d'être contacté** et est contacté au
+  prochain événement. Aucun frein à l'inscription : pas de paiement, pas de refus.
+- Une fois les informations validées : la fiche remplit le **CRM** et le commerce est inscrit
+  sur la **carte des partenaires Flowin**, même s'il ne prend pas d'animation (prix ou autre).
+- Variante à étudier : saisir les coordonnées du commerce directement dans l'application
+  (par l'équipe ou un prospecteur), puis validation.
+- **Demande portée par les clients** : sur la carte, un client peut envoyer un email ou une
+  demande au commerce pour qu'il adhère à Flowin (ou rejoigne une animation). La demande d'adhésion
+  vient aussi des clients.
