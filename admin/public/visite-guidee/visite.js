@@ -242,7 +242,11 @@
     return '<div class="hd"><span class="ib ghost"></span><div class="t"><span class="logo">Flow<b>in</b> Event</span></div>' +
       '<button class="ib" data-act="theme" aria-label="Changer de thème">' + ic(isDark() ? 'sun' : 'moon') + '</button></div>' +
       '<div class="kick">Animer · Booster · Fidéliser</div>' +
-      '<h1>Faites jouer vos clients.</h1><p class="sub">Des jeux simples, en boutique ou dans un événement. Qui êtes-vous ?</p>' +
+      '<h1>Faites jouer vos clients.</h1><p class="sub">Ils flashent, ils jouent, ils reviennent chercher leur lot chez vous.</p>' +
+      '<div class="cycle" aria-hidden="true"><span class="st"><span class="pic">' + ic('qr') + '</span>Ils flashent</span><span class="ar">' + ic('chev') + '</span>' +
+      '<span class="st"><span class="pic">' + ic('play') + '</span>Ils jouent</span><span class="ar">' + ic('chev') + '</span>' +
+      '<span class="st"><span class="pic">' + ic('gift') + '</span>Ils reviennent</span></div>' +
+      '<p class="small" style="margin:0 0 4px;font-weight:800">Qui êtes-vous ?</p>' +
       '<button class="door pro" data-go="p-promesse"><span class="pic">' + ic('store', 'l') + '</span><span class="grow"><b>Je suis commerçant</b><span>Flowin Animation : le jeu dans mon commerce</span></span>' + ic('chev') + '</button>' +
       '<button class="door org" data-go="o-accueil"><span class="pic">' + ic('flag', 'l') + '</span><span class="grow"><b>J\'organise un événement</b><span>Flowin Super Event : un seul jeu pour tous vos partenaires</span></span>' + ic('chev') + '</button>' +
       '<button class="door jou" data-go="j-accueil"><span class="pic">' + ic('play', 'l') + '</span><span class="grow"><b>Je joue</b><span>Essayer le Quiz + bonus d\'un partenaire</span></span>' + ic('chev') + '</button>' +
