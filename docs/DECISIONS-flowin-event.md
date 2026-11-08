@@ -1,0 +1,88 @@
+# Décisions Flowin Event — à lire par chaque session et chaque agent
+
+Ce qui est écrit ici est tranché par Romain. On ne le redemande jamais. On ajoute
+une ligne datée quand une nouvelle décision est prise ; on ne modifie une ligne
+que sur instruction explicite de Romain.
+
+## Méthode de travail (retour d'expérience Flowin Révision, 08/11/2026)
+
+1. Cadrage d'abord, sur une page (`docs/CADRAGE-refonte-flowin-event.md`) : public,
+   ton, palette, tailles minimales (police ≥ 13 px, zones tactiles ≥ 44 px), boutons,
+   cartes, états. Ce sont des variables appliquées partout, jamais écran par écran.
+2. Un seul écran fini à 10/10 d'abord, validé par Romain sur son téléphone. On ne
+   reproduit sur les autres écrans qu'après son feu vert.
+3. La maquette validée est la source unique. Le style de l'app en découle ; on ne
+   corrige pas la cosmétique à la main écran par écran.
+4. Les décisions vivent dans ce fichier, pas dans la conversation.
+5. « Fait » exige des preuves : captures avant/après des vraies pages à 360, 390 et
+   430 px avec de vraies données, et rejeu des captures envoyées par Romain.
+6. Un parcours de bout en bout à la fois, prouvé avant de passer au suivant.
+7. Peu d'agents en parallèle, tests ciblés à chaque changement, contrôle complet
+   seulement avant une livraison.
+8. Les confirmations externes (modifications de la base de production, qui exigent
+   un clic de Romain) sont regroupées et annoncées à l'avance : Romain reste devant
+   l'application à ce moment-là.
+9. Indicateurs commerciaux définis avant de coder, puis mesurés.
+10. Ne jamais recréer une maquette ou un support de zéro : on modifie l'existant.
+    Deux tours de retours maximum par support, regroupés. Retours au format
+    « écran n° + une phrase ».
+
+## Marque et produits (08/11/2026)
+
+- Marque : **Flowin Event**.
+- Produit 1 : **Flowin Animation** — le jeu dans son commerce (« créer une animation »).
+- Produit 2 : **Flowin Super Event** — participer à un super event (le commerce
+  devient **station jeu**), ou en créer un (organisateur).
+- Une association de commerçants peut être organisatrice.
+- Noms à ne plus utiliser : « Flowin GAMIFICATION », « FLOWIN.EVENTS », « Super event Flowin ».
+
+## Message (08/11/2026)
+
+- Slogan : **Animer · Booster · Fidéliser**.
+- Promesse super event : **« Un événement. Tous ses partenaires. Un seul jeu. »**
+- Organisateur : les partenaires **diffusent** l'événement, en boutique et en ligne
+  (physique et digital). Les partenaires **ne financent pas** l'événement : ne jamais
+  l'écrire.
+- Chiffres autorisés à publier : **56 % des participants souhaitent garder le contact** ;
+  **plus de 70 lots distribués dans les commerces locaux** (à mettre en forme lisible).
+
+## Prix (08/11/2026)
+
+- Organisateur : **pas de prix public**, sur étude. On vend le suivi (où les gens ont
+  joué, contacts, base de données). Le prix sert à négocier l'intégration à l'événement.
+- Grille commerce et partenaires : proposition à faire par Claude, à valider par Romain.
+
+## Boutons d'action (08/11/2026)
+
+- Organisateur : prise de rendez-vous par **WhatsApp ou email**. Pas d'agenda en ligne.
+
+## QR code (08/11/2026)
+
+- Chaque animation a un QR à imprimer et un QR digital à diffuser.
+- On peut créer un QR digital supplémentaire par support (Facebook, TikTok…) pour
+  suivre d'où viennent les joueurs.
+
+## Parcours (08/11/2026)
+
+- Le pro crée et voit son jeu avant de payer ; le paiement arrive à la publication.
+- L'écran final de la création est le QR prêt à imprimer ; bouton « Mon QR » sur
+  chaque animation.
+- Super event : formules partenaire proposées en 2ᵉ écran ; choix « digital » ou
+  « kit imprimé » dans la création d'animation (deux choix distincts).
+
+## Interface (07/11/2026)
+
+- Pas d'emoji dans l'interface : pictogrammes uniquement.
+- Couleur super event : orange #C2410C / #FF8A14. Couleur animation : bleu #3B5CC4.
+- Formulaires : genre Homme / Femme / vide uniquement.
+- Jamais de données inventées (téléphone, email, SIRET, adresse) : placeholder
+  `[… à compléter]`.
+
+## Supports (08/11/2026)
+
+- Plaquette commerce : réduite à 6 écrans (proposition à faire).
+- Vidéos : produire les 3 vidéos (commerçant, partenaire, organisateur) ; modèle de
+  vidéo joueur générique ; nettoyage des doublons.
+- Archiver les pages internes exposées publiquement.
+- Visite guidée Flowin (`/visite-guidee/`) : démo cliquable, outil commercial, accessible
+  depuis le dashboard SA (menu Comm & outils).
