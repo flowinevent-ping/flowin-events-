@@ -127,7 +127,7 @@ que sur instruction explicite de Romain.
 ## Positionnement produit (08/11/2026, corrigé par Romain)
 
 - **Flowin Animation** est un outil commercial, pas un simple jeu :
-  1. **Acquérir un CRM**, ou réveiller un fichier clients existant souvent dormant faute d'animation.
+  1. **Acquérir un CRM** et **animer votre fichier client / votre clientèle**.
   2. **Distribution automatisée des lots** qui fait **revenir le client** en boutique : retrait du lot
      avec validation, dates de validité, calées sur les meilleures périodes pour activer le commerce.
   3. **Attirer du trafic** dans le commerce et chez les partenaires Flowin alentour.
@@ -144,3 +144,13 @@ que sur instruction explicite de Romain.
 - **Direction artistique** : pas de pari sur la photo (difficile à obtenir). On mise sur une
   **animation de qualité** et la **vidéo interactive**, à mi-chemin entre présentation produit et
   tuto. Messages : simplicité, bénéfice, immédiateté, plug and play — **« Vous testez, vous essayez. »**
+
+## Vocabulaire et règle de production (08/11/2026)
+
+- Formulations à employer : **« animer votre fichier client »**, **« animer votre clientèle »**,
+  **« capter les passants / les flux de passage »**.
+- Formulations interdites : « réveiller un fichier qui dort », « fichier dormant », tout terme
+  qui dévalorise le fichier du commerçant.
+- **On ne repart jamais de zéro.** Le matériel existant (visite guidée, plaquettes, storyboards v16,
+  vidéos, maquettes) est la base : on l'améliore jusqu'à une qualité professionnelle en appliquant
+  ce fichier, le cadrage et les audits (`docs/audit-2026-11-07/`, `docs/audit-2026-11-08/`).
