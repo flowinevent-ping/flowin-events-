@@ -1,3 +1,5 @@
+> **Note du 08/11/2026 (Romain)** : le défaut « arguments distinctifs absents » est retiré. Ces points sont une compréhension interne, pas des textes à insérer ; les lots (quiz, bonus, tombolas) figurent déjà dans les supports. Ne pas en tenir compte.
+
 # Audit sévère conversion — supports Flowin Event (08/11/2026)
 
 Critère unique : envie de s'inscrire (ou de prendre rendez-vous) après navigation, mesurée au

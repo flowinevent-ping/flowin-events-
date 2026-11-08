@@ -154,3 +154,13 @@ que sur instruction explicite de Romain.
 - **On ne repart jamais de zéro.** Le matériel existant (visite guidée, plaquettes, storyboards v16,
   vidéos, maquettes) est la base : on l'améliore jusqu'à une qualité professionnelle en appliquant
   ce fichier, le cadrage et les audits (`docs/audit-2026-11-07/`, `docs/audit-2026-11-08/`).
+
+## Statut du positionnement (08/11/2026, précision de Romain)
+
+- Les sections « Positionnement produit » et « Direction artistique » ci-dessus sont la
+  **compréhension interne** du produit, issue de nos échanges. Ce ne sont **pas des textes ni des
+  slogans à insérer** dans les supports, et leur absence mot pour mot n'est pas un défaut.
+- « Vous testez, vous essayez » est une intention de ton pour les vidéos, pas un argument à afficher.
+- Les lots à gagner (quiz, bonus, tombolas) sont déjà présents dans les supports.
+- Sponsors et présence au côté des partenaires officiels : déjà réalisé sur Nuits du Sud 2026 ;
+  ne pas en faire un argument nouveau à ajouter.
