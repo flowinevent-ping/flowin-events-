@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex">
+<title>Visite guidée Flowin</title>
+<meta name="description" content="Démo cliquable de Flowin : parcours commerçant, organisateur et joueur. Données fictives.">
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="visite.css">
+</head>
+<body>
+<div class="stage">
+  <aside class="side" aria-label="Aller directement à un écran">
+    <div class="side-hd">
+      <div class="logo">Flow<b>in</b></div>
+      <p>Visite guidée · démo sans compte, aucune donnée enregistrée.</p>
+    </div>
+    <h2>Aller directement à un écran</h2>
+    <nav id="side-list"></nav>
+  </aside>
+  <div class="phone" id="phone">
+    <div class="demo-band" role="note">Démo · données fictives</div>
+    <div class="app" id="app" aria-live="polite"></div>
+    <div class="tabs" id="tabs" hidden></div>
+    <div class="sheet-wrap" id="sheet" hidden>
+      <div class="sheet-bg" data-close></div>
+      <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="sheet-t">
+        <div class="sheet-hd"><h3 id="sheet-t"></h3><button class="ib" data-close aria-label="Fermer"><svg class="i"><use href="#i-x"/></svg></button></div>
+        <div class="sheet-bd" id="sheet-bd"></div>
+      </div>
+    </div>
+    <div class="toast" id="toast" role="status" hidden></div>
+  </div>
+</div>
+<script src="visite.js"></script>
+</body>
+</html>
