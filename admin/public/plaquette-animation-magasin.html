@@ -494,36 +494,14 @@
   @media (min-width:760px){ .why{grid-template-columns:repeat(2,minmax(0,1fr))} }
   @media (min-width:900px){ .ben6{grid-template-columns:repeat(3,minmax(0,1fr))} .chips4{grid-template-columns:repeat(4,minmax(0,1fr))} .temps4:not(.t3){grid-template-columns:repeat(4,minmax(0,1fr))} .t3{grid-template-columns:repeat(3,minmax(0,1fr))} }
 [data-garantie][hidden]{display:none!important}
-  /* Refonte 08/11/2026 : 6 écrans, bouton unique « Je crée mon jeu », contact WhatsApp / email, passerelle super event */
-  .eyebrow{font-size:13px}
-  .small{font-size:13px}
-  .qrl{display:flex;gap:10px;align-items:flex-start;text-align:left;margin:10px auto 0;max-width:520px;font-size:15px;line-height:1.35;color:var(--ink)}
-  .qrl .ic{flex:none;width:26px;height:26px;color:var(--blue)}
-  .stat2{display:flex;flex-direction:column;align-items:center;margin:14px auto 0;max-width:420px;background:#fff;border:1px solid var(--line);border-radius:18px;padding:10px 16px}
-  .stat2 i{font-style:normal;font-size:16px;font-weight:900;color:var(--ink)}
-  .stat2 b{font-size:clamp(56px,16vw,88px);font-weight:900;letter-spacing:-.05em;line-height:.95;color:var(--blue)}
-  .stat2 span{font-size:clamp(17px,3vw,20px);font-weight:900;letter-spacing:-.02em;line-height:1.2}
-  .gar1{margin-top:6px}
-  .go1{width:100%;max-width:440px;min-height:50px;font-size:17px;margin-top:14px}
-  .go1n{font-size:14px;color:var(--muted);font-weight:700;margin-top:8px}
-  .lk3{display:inline-block;margin-top:8px;min-height:44px;border:none;background:none;color:var(--blue);font:inherit;font-weight:800;font-size:15px;text-decoration:underline;cursor:pointer}
-  .pass{display:flex;align-items:center;gap:12px;margin:8px auto 0;max-width:440px;background:#FFF4EC;border:1.5px solid #FF8A14;border-radius:16px;padding:10px 14px;text-decoration:none;color:var(--ink);text-align:left;min-height:44px}
-  .pass .ic{flex:none;width:26px;height:26px;color:#C2410C}
-  .pass b{display:block;font-size:15px}
-  .pass span{font-size:14px;line-height:1.3}
-  .pass .da{margin-left:auto;font-weight:900;color:#C2410C}
-  .rdvc{display:flex;flex-direction:column;gap:12px;padding:18px;max-width:420px;margin:18px auto 0}
-  .rdvc .btn{min-height:50px;font-size:17px;width:100%}
-  .rdvc .btn .ic{width:22px;height:22px}
-  .rdvp{font-size:14px;color:var(--muted);font-weight:700}
-  @media (max-height:760px){ .stat .fill,.stat .stroke{font-size:clamp(72px,20vw,120px)} .stat2{padding:6px 12px;margin-top:8px} .stat2 b{font-size:52px} }
 </style>
 </head>
 <body>
 
 <div class="menu">
   <span class="lg" id="brand">Flow<em>in</em></span>
-  <a class="h cmd js-inscr" id="topCta" href="/pro/premiere-fois">Je cr&eacute;e mon jeu</a>
+  <a class="h sign js-inscr" href="/pro/inscription">Je m&rsquo;inscris</a>
+  <a class="h cmd" id="topCta" href="#rappel">&Ecirc;tre contact&eacute;</a>
   <button class="burger" id="burger" type="button" aria-label="Menu"><span></span><span></span><span></span></button>
 </div>
 <div class="prog" id="prog"></div>
@@ -533,9 +511,9 @@
   <button class="dx" id="dClose" type="button" aria-label="Fermer">&times;</button>
   <div class="dlg">Flow<em>in</em></div>
   <div id="dLinks"></div>
-  <a class="dse" href="/plaquette-super-event.html"><b>Vous organisez un &eacute;v&eacute;nement ?</b><span>Flowin Super Event, pour les organisateurs</span></a>
-  <a class="cta js-inscr" href="/pro/premiere-fois">Je cr&eacute;e mon jeu</a>
-  <a class="cta2" href="#rappel" id="dCta">&Ecirc;tre contact&eacute; (WhatsApp ou email)</a>
+  <a class="dse" href="/plaquette-super-event.html"><b>Vous organisez un &eacute;v&eacute;nement ?</b><span>Plaquette Super event, pour les organisateurs</span></a>
+  <a class="cta js-inscr" href="/pro/inscription">Je m&rsquo;inscris</a>
+  <a class="cta2" href="#rappel" id="dCta">&Ecirc;tre contact&eacute;</a>
 </aside>
 
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
@@ -582,7 +560,7 @@
     <svg class="blob" style="left:-50px;bottom:20px;width:170px;height:170px" viewBox="-90 -90 180 180" data-blob="#E2D8FA,9" aria-hidden="true"></svg>
     <div class="in home">
       <div class="logo">Flow<em>in</em></div>
-      <p class="claim">Flowin Animation<br><span>Animer &middot; Booster &middot; Fid&eacute;liser</span></p>
+      <p class="claim">Flowin, <span>animation Plug &amp; Play</span></p>
       <ul class="hb4">
         <li><svg class="ic"><use href="#i-client"/></svg><b>Constituez votre fichier client</b><small>Chaque joueur qui y consent devient un contact.</small></li>
         <li><svg class="ic"><use href="#i-jeu"/></svg><b>Animez votre fichier client</b><small>Jeux et lots, avec leur accord.</small></li>
@@ -597,11 +575,27 @@
     </div>
   </section>
 
-  <!-- 2. DÉMO JOUABLE : votre métier -->
+  <!-- 2. RELANCER SES CLIENTS -->
+  <section class="pg bg-paper" id="pourquoi" data-titre="Pourquoi Flowin">
+    <div class="in wide">
+      <div class="eyebrow">Flowin Animation</div>
+      <h2>L&rsquo;animation commerciale <em>par le jeu</em>.</h2>
+      <p class="lede big">Un jeu &agrave; votre image, personnalisable : quiz, roue ou tombola.</p>
+      <div class="why">
+        <div class="card wy"><svg class="ic"><use href="#i-client"/></svg><div><b>Constituez votre fichier client</b><small>Chaque joueur qui y consent devient un contact. Restaurateurs : Flowin vous en donne un.</small></div></div>
+        <div class="card wy"><svg class="ic"><use href="#i-jeu"/></svg><div><b>Animez votre fichier client</b><small>Jeux et lots pour garder le lien, avec leur accord</small></div></div>
+        <div class="card wy"><svg class="ic"><use href="#i-qr"/></svg><div><b>Captez le flux passant</b><small>Un QR code en caisse : ceux qui passent jouent</small></div></div>
+        <div class="card wy"><svg class="ic"><use href="#i-vitrine"/></svg><div><b>Ramenez du trafic</b><small>Des lots &agrave; retirer chez vous : ils reviennent</small></div></div>
+      </div>
+      <p class="sans"><b>Et aussi :</b> mesure de vos actions, marque renforc&eacute;e. Seuls les joueurs qui ont dit oui sont contact&eacute;s. <b>Sans gestion</b> de votre part.</p>
+    </div>
+  </section>
+
+  <!-- 3. LES JEUX -->
   <section class="pg bg-paper" id="jeux" data-titre="Les jeux">
     <div class="in">
-      <div class="eyebrow">D&eacute;mo jouable : votre m&eacute;tier</div>
-      <h2>Jouez <em>votre jeu</em>.</h2>
+      <div class="eyebrow">Quiz, roue, tombola : au choix</div>
+      <h2>Vous la <em>param&eacute;trez</em>.</h2>
       <div class="tabs" data-tabs="g">
         <button class="tab on" type="button" data-t="g-marque">Quiz</button>
         <button class="tab" type="button" data-t="g-roue">Roue</button>
@@ -665,11 +659,38 @@
     </div>
   </section>
 
-  <!-- 3. VOS SUPPORTS DE COMMUNICATION : vitrine, caisse, réseaux ; un QR par support -->
+  <!-- 2. LE RÉSEAU -->
+  <section class="pg bg-white" id="reseau" data-titre="Le r&eacute;seau">
+    <div class="in">
+      <div class="eyebrow">Le r&eacute;seau Flowin</div>
+      <h2>Flowin <em>f&eacute;d&egrave;re</em> le commerce de proximit&eacute;.</h2>
+      <div class="card map"><svg viewBox="0 0 360 220" role="img" aria-label="Un client fait le tour des commerces Flowin de la ville et joue chez chacun">
+        <rect width="360" height="220" rx="14" fill="#F4F6F9"/>
+        <path d="M0 62 H360 M0 160 H360 M92 0 V220 M212 0 V220 M302 0 V220" stroke="#fff" stroke-width="15"/>
+        <rect x="106" y="77" width="92" height="68" rx="10" fill="#EEE8FC"/><text x="152" y="115" text-anchor="middle" font-family="-apple-system,Segoe UI,Roboto,sans-serif" font-weight="800" font-size="10" fill="#5B34C2">Place du march&eacute;</text>
+        <path id="trajet" d="M52 40 L152 40 L152 62 L257 62 L257 125 L326 125 L326 186 L172 186 L172 160 L52 160 Z" fill="none" stroke="#7A4FE0" stroke-width="2" stroke-dasharray="6 6" opacity=".7"/>
+        <g font-family="-apple-system,Segoe UI,Roboto,sans-serif" font-weight="800" font-size="9.5" fill="#1B3A5C" text-anchor="middle">
+          <g transform="translate(52 40)"><circle r="13" fill="#3B5CC4"/><path d="M-6 -2 L-4 -6 H4 L6 -2 V6 H-6Z" fill="none" stroke="#fff" stroke-width="1.6"/><text y="26">Boulangerie</text><g transform="translate(18 -14)"><rect x="-15" y="-8" width="30" height="15" rx="7.5" fill="#7A4FE0"/><text y="3" fill="#fff" font-size="8.5">joue</text></g></g>
+          <g transform="translate(152 40)"><circle r="13" fill="#3B5CC4"/><path d="M-6 -2 L-4 -6 H4 L6 -2 V6 H-6Z" fill="none" stroke="#fff" stroke-width="1.6"/><text y="26">Caf&eacute;</text><g transform="translate(18 -14)"><rect x="-17" y="-8" width="34" height="15" rx="7.5" fill="#E0368C"/><text y="3" fill="#fff" font-size="8.5">gagne</text></g></g>
+          <g transform="translate(257 62)"><circle r="13" fill="#3B5CC4"/><path d="M-6 -2 L-4 -6 H4 L6 -2 V6 H-6Z" fill="none" stroke="#fff" stroke-width="1.6"/><text y="-19">Fleuriste</text><g transform="translate(20 14)"><rect x="-15" y="-8" width="30" height="15" rx="7.5" fill="#7A4FE0"/><text y="3" fill="#fff" font-size="8.5">joue</text></g></g>
+          <g transform="translate(326 125)"><circle r="13" fill="#3B5CC4"/><path d="M-6 -2 L-4 -6 H4 L6 -2 V6 H-6Z" fill="none" stroke="#fff" stroke-width="1.6"/><text y="-19">Librairie</text></g>
+          <g transform="translate(172 186)"><circle r="13" fill="#3B5CC4"/><path d="M-6 -2 L-4 -6 H4 L6 -2 V6 H-6Z" fill="none" stroke="#fff" stroke-width="1.6"/><text x="0" y="27" text-anchor="middle">Opticien</text><g transform="translate(-22 -12)"><rect x="-15" y="-8" width="30" height="15" rx="7.5" fill="#7A4FE0"/><text y="3" fill="#fff" font-size="8.5">joue</text></g></g>
+          <g transform="translate(52 160)"><circle r="13" fill="#3B5CC4"/><path d="M-6 -2 L-4 -6 H4 L6 -2 V6 H-6Z" fill="none" stroke="#fff" stroke-width="1.6"/><text y="26">Fromagerie</text><g transform="translate(22 -12)"><rect x="-17" y="-8" width="34" height="15" rx="7.5" fill="#E0368C"/><text y="3" fill="#fff" font-size="8.5">gagne</text></g></g>
+        </g>
+        <g>
+          <g transform="translate(-11 -26)"><circle cx="11" cy="13" r="13" fill="#fff" stroke="#7A4FE0" stroke-width="2"/><circle cx="11" cy="7.5" r="3.2" fill="#1B3A5C"/><path d="M5 20.5a6 6 0 0 1 12 0z" fill="#1B3A5C"/></g>
+          <animateMotion dur="12s" repeatCount="indefinite"><mpath href="#trajet" xlink:href="#trajet" xmlns:xlink="http://www.w3.org/1999/xlink"/></animateMotion>
+        </g>
+      </svg></div>
+      <div class="cap"><svg class="ic"><use href="#i-client"/></svg>Quand vous participez, vous rejoignez un r&eacute;seau : tout le monde a cette animation.</div>
+    </div>
+  </section>
+
+  <!-- 4. VOTRE ANIMATION : supports en situation -->
   <section class="pg bg-blueL" id="animation" data-titre="Votre animation">
     <div class="in">
-      <div class="eyebrow">Vitrine, caisse, r&eacute;seaux</div>
-      <h2>Vos supports de <em>communication</em>.</h2>
+      <div class="eyebrow">Votre animation</div>
+      <h2>Vos supports, <em>en situation</em>.</h2>
       <div class="lgtoggle"><button type="button" class="on" id="lgOn">Voir avec un logo</button><button type="button" id="lgOff">Voir vierge</button></div>
       <div class="card viewer logo-on" id="viewer">
         <div class="vstage" id="vstage"></div>
@@ -679,23 +700,90 @@
         <div class="vbar"><i id="vBar"></i></div>
       </div>
       <div class="vthumbs" id="vThumbs"></div>
-      <p class="qrl"><svg class="ic"><use href="#i-qr"/></svg><span><b>Un QR &agrave; imprimer, un QR digital &agrave; partager.</b> Et un QR par support (Facebook, TikTok&hellip;) : vous savez d&rsquo;o&ugrave; viennent vos joueurs.</span></p>
     </div>
   </section>
 
 
-  <!-- 4. PREUVE : chiffres autorisés (docs/DECISIONS-flowin-event.md) -->
+  <!-- 5. TRAÇABILITÉ ET MESURE -->
+  <section class="pg bg-white" id="tracking" data-titre="Mesure">
+    <div class="in">
+      <div class="eyebrow">Mesure</div>
+      <h2>Mesurez <em>le retour</em> de chaque campagne.</h2>
+      <p class="lede big">Une campagne digitale, sur vos r&eacute;seaux, dans vos campagnes, en boutique : Flowin vous permet de quantifier le retour. On mesure, on vous remet un rapport de mesure.</p>
+      <div class="tabs" data-tabs="t">
+        <button class="tab on" type="button" data-t="t-mesure">On mesure</button>
+        <button class="tab" type="button" data-t="t-rapport">Votre rapport</button>
+      </div>
+      <div class="tp on" id="t-mesure">
+        <div class="card eqbox">
+          <div class="eq">
+            <div class="eqc"><div class="eqb" data-n="9"></div><b>R&eacute;seaux</b></div>
+            <div class="eqc"><div class="eqb" data-n="6"></div><b>Publications</b></div>
+            <div class="eqc"><div class="eqb" data-n="7"></div><b>Campagnes</b></div>
+            <div class="eqc"><div class="eqb" data-n="8"></div><b>Vitrine</b></div>
+            <div class="eqc"><div class="eqb" data-n="5"></div><b>Caisse</b></div>
+          </div>
+          <p class="eqtxt">On sait aussi capter et mesurer sur vos supports.</p>
+          <p class="small" style="margin-top:4px">Illustration</p>
+        </div>
+      </div>
+      <div class="tp" id="t-rapport">
+        <p class="eqtxt" style="margin-top:12px">Un vrai reporting de vos actions commerciales et campagnes.</p>
+        <div class="card rep">
+          <div class="rh">Rapport par campagne<span>Valeurs d&rsquo;illustration</span></div>
+          <table><thead><tr><th>Campagne</th><th>Flashs</th><th>Joueurs</th><th>Contacts</th><th>Lots retir&eacute;s</th></tr></thead>
+          <tbody>
+            <tr><td>Affiche vitrine</td><td>420</td><td>236</td><td>131</td><td>48<span class="bar" style="width:34px"></span></td></tr>
+            <tr><td>Post Instagram</td><td>310</td><td>174</td><td>97</td><td>29<span class="bar" style="width:21px"></span></td></tr>
+            <tr><td>Emailing clients</td><td>188</td><td>142</td><td>88</td><td>35<span class="bar" style="width:25px"></span></td></tr>
+            <tr><td>Flyer march&eacute;</td><td>96</td><td>61</td><td>30</td><td>12<span class="bar" style="width:9px"></span></td></tr>
+          </tbody></table>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 6. CHIFFRES -->
   <section class="pg bg-paper" id="chiffres" data-titre="Chiffres">
     <div class="in">
       <div class="eyebrow">Sur le terrain</div>
       <div class="stat"><span class="band"></span><span class="fill">56%</span><span class="stroke">56%</span></div>
       <p class="stat-txt">56 % des participants souhaitent <span style="color:var(--fuchsia)">garder le contact</span>.</p>
-      <div class="stat2"><i>Plus de</i><b>70</b><span>lots distribu&eacute;s dans les commerces locaux</span></div>
       <p class="small">Source : bilan Nuits du Sud 2026</p>
+      <div class="btns"><a class="btn js-inscr" href="/pro/premiere-fois">Je m&rsquo;inscris</a><button class="btn line" type="button" data-go="rappel">&Ecirc;tre contact&eacute;</button></div>
     </div>
   </section>
 
-  <!-- 5. OFFRES (ancre #offres : QR de fin des vidéos) : configurateur en 3 étapes -->
+  <!-- 7. SUPER EVENT et PARTENAIRES, côté commerce : deux blocs séparés -->
+  <section class="pg bg-paper" id="superevent" data-titre="Super event et partenaires">
+    <div class="in">
+      <div class="eyebrow">Plus de passage, plus de visibilit&eacute;</div>
+      <div class="blks">
+        <div class="card blk">
+          <svg class="sel" role="img" aria-label="Super event" viewBox="0 0 437.4 92.6"><use href="#fl-super-event"/></svg>
+          <h3>Soyez partenaire d&rsquo;un &eacute;v&eacute;nement</h3>
+          <ul>
+            <li><b>Apparaissez</b> pendant l&rsquo;&eacute;v&eacute;nement.</li>
+            <li><b>Faites gagner des lots</b> li&eacute;s &agrave; l&rsquo;&eacute;v&eacute;nement.</li>
+            <li><b>Relayez</b> sa communication sur vos r&eacute;seaux.</li>
+          </ul>
+          <a class="btn" href="/pro/rejoindre">Rejoindre un Super event</a>
+        </div>
+        <div class="card blk">
+          <div class="bic"><svg class="ic"><use href="#i-star"/></svg></div>
+          <h3>Devenez station-jeu</h3>
+          <ul>
+            <li><b>Augmentez votre trafic</b> : les festivaliers jouent chez vous.</li>
+            <li><b>Soyez mis &agrave; l&rsquo;honneur</b> pour les lots distribu&eacute;s.</li>
+            <li><b>Faites revenir vos clients</b> : bons de remise &agrave; gagner chez vous.</li>
+          </ul>
+          <button class="btn line" type="button" id="partBtn">&Ecirc;tre contact&eacute;</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 8. OFFRES (ancre #offres : QR de fin des vidéos) : configurateur en 3 étapes -->
   <section class="pg bg-white" id="offres" data-titre="Offres">
     <div class="in wide">
       <div class="eyebrow">Les offres</div>
@@ -704,11 +792,10 @@
         <div>
           <div class="stl"><span>1</span>Formule <em>au choix</em></div>
           <div class="duo">
-            <button class="pick" type="button" data-formule="annuelle"><span class="badge">Le plus avantageux</span><span class="ck"></span><b>Annuelle</b><span class="pp">990 &euro;<small> HT / an</small></span><span class="pd"><b>330 &euro; HT &eacute;conomis&eacute;s</b><span data-garantie hidden> &middot; garantie</span></span><span class="eng">Engagement 12 mois</span></button>
+            <button class="pick" type="button" data-formule="annuelle"><span class="badge">Le plus avantageux</span><span class="ck"></span><b>Annuelle</b><span class="pp">990 &euro;<small> HT / an</small></span><span class="pd"><b>330 &euro; HT &eacute;conomis&eacute;s</b> &middot; garantie</span><span class="eng">Engagement 12 mois</span></button>
             <button class="pick" type="button" data-formule="mensuelle"><span class="ck"></span><b>Mensuelle</b><span class="pp">110 &euro;<small> HT / mois</small></span><span class="pd">Puis mois par mois</span><span class="eng">Engagement 3 mois minimum</span></button>
           </div>
           <p class="eco">12 &times; 110 &euro; = 1&nbsp;320 &euro; HT par an en mensuel, contre 990 &euro; HT en annuel : <b>330 &euro; HT d&rsquo;&eacute;conomie</b>.</p>
-          <p class="eco gar1" data-garantie hidden><b>Garantie :</b> en formule annuelle, si le nombre de clients venus retirer leur lot n&rsquo;atteint pas l&rsquo;objectif calcul&eacute; sur votre panier moyen, Flowin vous rembourse la diff&eacute;rence.</p>
           <div class="stl"><span>2</span>Supports <em>au choix</em></div>
           <div class="duo">
             <button class="pick" type="button" data-kit="digital"><span class="ck"></span><b>Kit digital</b>
@@ -778,10 +865,10 @@
     </div>
   </section>
 
-  <!-- 6. JE CRÉE MON JEU : bouton unique ; contact en lien secondaire ; passerelle super event -->
+  <!-- 10. COMMANDER -->
   <section class="pg bg-white" id="commander" data-titre="Commander">
     <div class="in">
-      <div class="eyebrow">Pr&ecirc;t en quelques minutes</div>
+      <div class="eyebrow">Plug &amp; Play</div>
       <h2>On lance <em>votre animation</em> ?</h2>
       <div class="card choisie">
         <div class="chh"><span class="chb">Offre choisie</span><button class="chm" type="button" data-go="offres">Changer d&rsquo;offre</button></div>
@@ -790,30 +877,40 @@
         <div class="chp"><span>&Agrave; payer &agrave; la commande</span><b id="endTTC"></b></div>
         <div class="chg" id="endGar"></div>
       </div>
-      <a class="btn go1 js-inscr" href="/pro/premiere-fois">Je cr&eacute;e mon jeu</a>
-      <p class="go1n">Vous voyez votre jeu avant de payer : le paiement arrive &agrave; la publication.</p>
-      <button class="lk3" type="button" data-go="rappel">&Ecirc;tre contact&eacute; par WhatsApp ou email</button>
-      <a class="pass" href="/rejoindre"><svg class="ic"><use href="#i-mega"/></svg><span><b>Un &eacute;v&eacute;nement pr&egrave;s de chez vous&nbsp;?</b>Rejoignez-le et devenez station jeu.</span><span class="da">&rarr;</span></a>
+      <div class="choix3">
+        <a class="cc main" id="endOrder" href="/bon-commande-animation.html"><span class="cci"><svg class="ic"><use href="#i-flyer"/></svg></span><span><b>Je commande</b><small>Bon de commande, signature &eacute;lectronique et paiement.</small></span><span class="fl2">&rarr;</span></a>
+        <a class="cc js-inscr" href="/pro/inscription"><span class="cci b"><svg class="ic"><use href="#i-contact"/></svg></span><span><b>Je cr&eacute;e mon compte</b><small>J&rsquo;ouvre mon espace pro et je pr&eacute;pare mon animation.</small></span><span class="fl2">&rarr;</span></a>
+        <button class="cc" type="button" data-go="rappel"><span class="cci l"><svg class="ic"><use href="#i-phone"/></svg></span><span><b>&Ecirc;tre contact&eacute;</b><small>Un conseiller vous rappelle au cr&eacute;neau de votre choix.</small></span><span class="fl2">&rarr;</span></button>
+      </div>
       <div class="plus"><span data-garantie hidden><svg class="ic"><use href="#i-libre"/></svg>Satisfait ou rembours&eacute;</span><span><svg class="ic"><use href="#i-ok"/></svg>Signature &eacute;lectronique</span><span><svg class="ic"><use href="#i-ok"/></svg>Virement ou pr&eacute;l&egrave;vement SEPA</span></div>
     </div>
   </section>
 
-  <!-- Être contacté : WhatsApp ou email pré-rempli (aucun envoi serveur) -->
+  <!-- 11. ÊTRE RAPPELÉ -->
   <section class="sheet" id="rappel" aria-label="&Ecirc;tre contact&eacute;">
     <button class="sx" type="button" data-close="1" aria-label="Fermer">&times;</button>
     <div class="in">
       <div class="eyebrow">Prise de rendez-vous</div>
       <h2>Soyons <em>en contact</em>.</h2>
-      <div class="card rdvc">
-        <a class="btn" id="rdvWa" href="https://wa.me/" target="_blank" rel="noopener"><svg class="ic"><use href="#i-phone"/></svg>Par WhatsApp</a>
-        <a class="btn line" id="rdvMail" href="mailto:"><svg class="ic"><use href="#i-mail"/></svg>Par email</a>
-        <p class="rdvp">Message pr&eacute;-rempli, vous l&rsquo;envoyez vous-m&ecirc;me.</p>
-      </div>
+      <form class="card form" id="fRappel" novalidate>
+        <div class="hp" aria-hidden="true"><label for="r_site">Site web</label><input id="r_site" name="site_web" tabindex="-1" autocomplete="off"></div>
+        <div data-r="prenom"><label for="r_prenom">Pr&eacute;nom <i>*</i></label><input id="r_prenom" autocomplete="given-name"></div>
+        <div data-r="nom"><label for="r_nom">Nom <i>*</i></label><input id="r_nom" autocomplete="family-name"></div>
+        <div data-r="entreprise"><label for="r_entreprise">Entreprise <i>*</i></label><input id="r_entreprise" autocomplete="organization"></div>
+        <div data-r="ville"><label for="r_ville">Ville <i>*</i></label><input id="r_ville" autocomplete="address-level2"></div>
+        <div data-r="tel"><label for="r_tel">T&eacute;l&eacute;phone <i>*</i></label><input id="r_tel" type="tel" inputmode="tel" autocomplete="tel"></div>
+        <div data-r="email"><label for="r_email">Email <i>*</i></label><input id="r_email" type="email" inputmode="email" autocomplete="email"></div>
+        <div class="full" data-r="creneau"><label for="r_creneau">Cr&eacute;neau pr&eacute;f&eacute;r&eacute;</label><select id="r_creneau"><option value="">Indiff&eacute;rent</option><option>Matin (9h-12h)</option><option>Midi (12h-14h)</option><option>Apr&egrave;s-midi (14h-17h)</option><option>Fin de journ&eacute;e (17h-19h)</option></select></div>
+        <div class="full"><label for="r_message">Message</label><textarea id="r_message" maxlength="1000"></textarea></div>
+        <label class="chk full" id="r_consentRow" style="margin-top:0"><input type="checkbox" id="r_consent"><span>J&rsquo;accepte que Flowin me recontacte au sujet de ma demande. <i style="font-style:normal;color:var(--violet)">*</i></span></label>
+        <div class="full" style="display:flex;align-items:center;gap:12px;flex-wrap:wrap"><button class="btn" type="submit" id="r_send">Demander un rappel</button><span class="fmsg" id="r_msg"></span></div>
+      </form>
+      <div class="card merci" id="r_merci"><svg class="ic"><use href="#i-ok"/></svg><h2 style="font-size:24px">Merci, c&rsquo;est not&eacute; !</h2><p class="lede">Nous vous rappelons au cr&eacute;neau indiqu&eacute;.</p></div>
     </div>
   </section>
 </div>
 
-<div class="nav"><button id="prev" type="button">&larr; Pr&eacute;c&eacute;dent</button><span class="cnt" id="pgn">1 / 6</span><button class="next" id="next" type="button">Suivant &rarr;</button></div>
+<div class="nav"><button id="prev" type="button">&larr; Pr&eacute;c&eacute;dent</button><span class="cnt" id="pgn">1 / 11</span><button class="next" id="next" type="button">Suivant &rarr;</button></div>
 
 <script src="/flowin-config.js"></script>
 <script>
@@ -821,10 +918,10 @@
   'use strict';
   var PRIX = { annuelle: 990, mensuelle: 110, kitPhysique: 149, optQuiz: 180, optBonus: 180 };
   var FLUX = { '15+': 'Plus de 15 clients par jour', '50+': 'Plus de 50 clients par jour', '100+': 'Plus de 100 clients par jour' };
-  /* Être contacté : WhatsApp ou email pré-rempli. Coordonnées Flowin à renseigner ici (jamais inventées) :
-     WHATSAPP au format international sans + ni espace, EMAIL l'adresse de contact. Vides : l'application demande le destinataire. */
-  var RDV = { WHATSAPP: '', EMAIL: '' }; /* [à compléter] */
+  var SUPA = 'https://ywcqtupgoxfzkddqkztk.supabase.co';
+  var KEY = 'sb_publishable_yQcGyoh4UdlUCwA96RKSwg_3jMJVVb1'; /* clé publishable : publique par design */
   var LS = 'flowin_am_certif';
+  var T0 = new Date().getTime();
   function $(id){ return document.getElementById(id); }
   function qs(n){ var m = new RegExp('[?&]' + n + '=([^&]+)').exec(location.search); return m ? decodeURIComponent(m[1].replace(/\+/g, ' ')) : null; }
   function grp(s){ var o = '', c = 0; for (var i = s.length - 1; i >= 0; i--) { o = s.charAt(i) + o; c++; if (c % 3 === 0 && i > 0) o = ' ' + o; } return o; }
@@ -872,13 +969,8 @@
   function drawer(on){ $('drawer').className = 'drawer' + (on ? ' on' : ''); $('dim').className = 'dim' + (on ? ' on' : ''); }
   function sheetOpen(){ return $('rappel').className.indexOf(' on') >= 0; }
   function closeSheet(){ $('rappel').className = 'sheet'; }
-  function rdvLiens(){
-    var c = qs('commercial') || qs('vendeur') || '';
-    var txt = 'Bonjour, je souhaite \u00eatre contact\u00e9 au sujet de Flowin Animation pour mon commerce.' + (c ? ' (Contact : ' + c + ')' : '');
-    $('rdvWa').href = 'https://wa.me/' + RDV.WHATSAPP.replace(/[^0-9]/g, '') + '?text=' + encodeURIComponent(txt);
-    $('rdvMail').href = 'mailto:' + RDV.EMAIL + '?subject=' + encodeURIComponent('Flowin Animation : \u00eatre contact\u00e9') + '&body=' + encodeURIComponent(txt + '\n\nCommerce : \nVille : \nT\u00e9l\u00e9phone : ');
-  }
-  function openSheet(){ rdvLiens(); $('rappel').className = 'sheet on'; $('rappel').scrollTop = 0; }
+  var rappelIntent = '';
+  function openSheet(intent, msg){ rappelIntent = intent || ''; $('rappel').className = 'sheet on'; $('rappel').scrollTop = 0; if (msg && !trim($('r_message').value)) $('r_message').value = msg; }
   function show(i, noHash){
     if (i < 0 || i >= pages.length) return;
     closeSheet();
@@ -907,6 +999,8 @@
   $('brand').addEventListener('click', function(){ show(0); });
   $('prev').addEventListener('click', function(){ show(cur - 1); });
   $('next').addEventListener('click', function(){ show(cur + 1); });
+  $('topCta').addEventListener('click', function(e){ e.preventDefault(); openSheet(); });
+  $('partBtn').addEventListener('click', function(){ openSheet('partenaire', 'Je souhaite appara\u00eetre dans Flowin comme partenaire.'); });
   var gos = document.querySelectorAll('[data-go]');
   for (var gi = 0; gi < gos.length; gi++) gos[gi].addEventListener('click', function(){ go(this.getAttribute('data-go')); });
   document.addEventListener('keydown', function(e){
@@ -1210,7 +1304,7 @@
     $('endGar').innerHTML = !GAR ? '' : st.formule === 'mensuelle' ? 'Garantie satisfait ou remboursé : réservée à la formule annuelle.' :
       (certif ? 'Avec la garantie satisfait ou remboursé, fiche découverte certifiée.' : 'Garantie satisfait ou remboursé : <button type="button" id="endGarGo">Je veux bénéficier du satisfait ou remboursé</button>');
     var gg = $('endGarGo'); if (gg) gg.onclick = function(){ go('garantie'); };
-    $('gOrder').href = lien(true);
+    $('endOrder').href = lien(!!certif); $('gOrder').href = lien(true);
     /* « Ma premiere fois » emporte la selection (formule, kit, options, garantie certifiee) jusqu'au bon de commande. */
     if (inscrEnLigne) majInscr();
     if (certif) {
@@ -1264,6 +1358,38 @@
     verrouiller();
   });
   if (certif && certif.panier && certif.flux && certif.le && certif.nom) verrouiller(); else certif = null;
+
+  /* ---------- Formulaire de rappel ---------- */
+  var REQ = ['prenom', 'nom', 'entreprise', 'ville', 'tel', 'email'];
+  function errField(name, on){ var e = document.querySelector('[data-r="' + name + '"]'); if (e) e.className = e.className.replace(/ ?err/g, '') + (on ? ' err' : ''); }
+  $('fRappel').addEventListener('submit', function(e){
+    e.preventDefault();
+    var msg = $('r_msg'), ok = true, data = {};
+    for (var i = 0; i < REQ.length; i++) { data[REQ[i]] = trim($('r_' + REQ[i]).value); }
+    for (var k = 0; k < REQ.length; k++) { var v = data[REQ[k]], good = v.length > 1;
+      if (REQ[k] === 'email') good = /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(v);
+      if (REQ[k] === 'tel') good = v.replace(/[^0-9+]/g, '').length >= 8;
+      errField(REQ[k], !good); if (!good) ok = false; }
+    var consent = $('r_consent').checked;
+    $('r_consentRow').style.color = consent ? '' : (ok ? 'var(--ko)' : '');
+    if (!ok || !consent) { msg.className = 'fmsg err'; msg.textContent = !ok ? 'Complétez les champs en rouge.' : 'Cochez la case d’accord pour être recontacté.'; if (!consent) $('r_consentRow').style.color = 'var(--ko)'; return; }
+    data.creneau = $('r_creneau').value; data.message = trim($('r_message').value).slice(0, 1000);
+    data.consentement = true; data.site_web = $('r_site').value; data.duree_ms = new Date().getTime() - T0;
+    data.origine = 'plaquette-animation-magasin' + (rappelIntent ? ' / ' + rappelIntent : ''); if (commercial) data.commercial = commercial;
+    if (data.site_web) { $('fRappel').style.display = 'none'; $('r_merci').className = 'card merci on'; return; } /* champ piège rempli : on ne transmet pas */
+    var btn = $('r_send'); btn.disabled = true; msg.className = 'fmsg'; msg.textContent = 'Envoi…';
+    function echec(){
+      btn.disabled = false; msg.className = 'fmsg err';
+      msg.innerHTML = 'L’envoi n’a pas abouti. Réessayez dans un instant.';
+    }
+    if (!window.fetch) { echec(); return; }
+    fetch(SUPA + '/functions/v1/notify-rappel', { method: 'POST', headers: { 'Content-Type': 'application/json', 'apikey': KEY, 'Authorization': 'Bearer ' + KEY }, body: JSON.stringify(data) })
+      .then(function(r){ if (!r.ok) throw new Error('http ' + r.status); return r.json(); })
+      .then(function(j){ if (!j || !j.ok) throw new Error('ko'); $('fRappel').style.display = 'none'; $('r_merci').className = 'card merci on'; })
+      .catch(echec);
+  });
+  var inputs = document.querySelectorAll('#fRappel [data-r] input');
+  for (var ii = 0; ii < inputs.length; ii++) inputs[ii].addEventListener('input', function(){ var p = this.parentNode; p.className = p.className.replace(/ ?err/g, ''); });
 
   render();
   var h0 = (location.hash || '').replace('#', ''), start = 0;

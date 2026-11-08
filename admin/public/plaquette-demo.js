@@ -69,8 +69,6 @@
     var rec = el('button', { type: 'button', id: 'fdReset' }, 'Recommencer la démo');
     panel.appendChild(lab); panel.appendChild(note); panel.appendChild(rec);
     document.body.appendChild(pill); document.body.appendChild(panel);
-    /* Etiquette « Demo » masquee pour le prospect (elle faisait « maquette ») : visible seulement avec ?demo=1 ou si le mode demo est actif. */
-    if (!demo && !/[?&]demo=1(&|$)/.test(location.search)) pill.style.display = 'none';
     function maj() { pill.className = 'fd-pill' + (demo ? ' on' : ''); pill.textContent = demo ? 'Démo : rien enregistré' : 'Démo'; }
     maj();
     pill.addEventListener('click', function () { var o = panel.className.indexOf('open') < 0; panel.className = 'fd-panel' + (o ? ' open' : ''); pill.setAttribute('aria-expanded', o ? 'true' : 'false'); });
@@ -84,7 +82,7 @@
     /* « Effacer » + « Retour » sur chaque ecran avec formulaire. */
     var ecrans = document.querySelectorAll('.pg, .sheet');
     for (var i = 0; i < ecrans.length; i++) (function (sc) {
-      var aForm = sc.querySelector('input, select, textarea');
+      var aForm = sc.querySelector('input, select, textarea') || sc.id === 'commander';
       if (!aForm || sc.querySelector('.fd-bar')) return;
       var bar = el('div', { 'class': 'fd-bar' });
       var ret = el('button', { type: 'button', 'data-demo': 'retour' }, '← Retour');
