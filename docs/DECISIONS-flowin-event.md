@@ -170,3 +170,19 @@ que sur instruction explicite de Romain.
 - Pas de grands aplats de couleurs vives juxtaposés (effet « mauvais PowerPoint »). Cartes blanches,
   texte encre ; la couleur de catégorie (bleu Animation, orange Super Event) seulement sur le
   pictogramme, une puce ou le bouton d'action.
+
+## Parcours commerçant à finaliser et règle d'exécution (08/11/2026, recadrage de Romain)
+
+- **Interdit** : faire jouer ou « tester le jeu » aux commerçants dans les supports ou la démo. Ce
+  n'a jamais été demandé. Ne rien inventer hors des consignes.
+- **Parcours à finaliser (Flowin Animation)** : choix du persona → inscription → validation
+  (apparition sur la future carte des partenaires, Animation et Super Event — à ne pas produire
+  maintenant) → jusqu'à l'animation → découverte du dashboard : créer son animation, puis les
+  rapports (nombre de personnes venues, sexe, constitution du CRM, tous les paramètres du jeu) →
+  **publier l'animation = moment du paiement**.
+- **Paiement** : pas d'intégration définitive. Virement SEPA avec le RIB de l'entreprise
+  (`[RIB à compléter]`) ; le mode de paiement définitif viendra plus tard.
+- **Même finalisation pour « intégrer un super event »**, sur la base de ce qui est déjà fait. On ne
+  reproduit pas tout : on termine l'existant.
+- **Règle d'exécution** : audit d'abord → Claude propose → Romain valide → Claude exécute.
+  Aucune production avant validation.
