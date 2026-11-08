@@ -189,7 +189,7 @@ que sur instruction explicite de Romain.
 
 ## Verdict qualité et direction visuelle (08/11/2026, Romain)
 
-- Qualité actuelle des supports : **4/10**. Le fond (prix, parcours, présentation) est bon ; la forme non.
+- Précision de Romain : sa critique portait sur les **couleurs**. Le contenu et la mise en page des derniers documents sont de bien meilleure qualité et se gardent (modifier pour fusion et mise à jour, ne pas reconstruire).
 - Le **violet** comme couleur principale n'est **pas** la couleur de Flowin. Référence couleurs :
   la **landing page** (`/landing`) — encre #1B3A5C, turquoise #00B4A0, bleu #3B5CC4, orange, ambre
   sur les chiffres. Fond blanc.
@@ -199,3 +199,9 @@ que sur instruction explicite de Romain.
 - Charte Super Event : bien mais **trop décalée** ; garder quelque chose de propre.
 - Proposition de règles (charte de la landing, 5 tailles de police, logo à gauche, 40 mots max par
   écran, style BD limité au logo Super Event) : dans `docs/audit-2026-11-08/visuel/`, **à valider**.
+
+## Parcours immersif (08/11/2026, Romain)
+
+- Pas d'emoji, pictogrammes uniquement. Parcours immersif pour la souscription et la création
+  d'animation (choix du jeu, mise en place, QR…). Plaquettes cliquables et navigables.
+- Ne rien construire de trop lourd à mettre en place ; on modifie l'existant (fusion et mise à jour).

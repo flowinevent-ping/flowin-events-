@@ -33,7 +33,7 @@ jamais réglées écran par écran. Source technique : `admin/public/flowin-toke
 |---|---|
 | Texte, titres | `--fl-encre` #1B3A5C |
 | Fond de page | `--fl-papier` #F4F6F9 ; cartes blanches |
-| Bouton principal, sélection | `--fl-violet` #7A4FE0 (texte violet lisible #5B34C2) |
+| Bouton principal, sélection | turquoise #00B4A0 (texte turquoise lisible #00806F), comme la landing ; le violet n'est plus utilisé |
 | Flowin Animation (catégorie) | bleu #3B5CC4 |
 | Flowin Super Event (catégorie) | orange #C2410C / #FF8A14 |
 | Succès / erreur | #0B7A4F / #C62F2F, jamais décoratifs |
@@ -46,7 +46,7 @@ jamais réglées écran par écran. Source technique : `admin/public/flowin-toke
 - Zones tactiles ≥ 44 px ; bouton principal 50 px de haut, pleine largeur sur mobile.
 
 ## Composants (une seule version de chacun)
-- **Bouton principal** : violet plein, pilule, 50 px. **Secondaire** : fond gris clair. **Lien** : texte, sans fond.
+- **Bouton principal** : turquoise plein, pilule, 50 px. **Secondaire** : fond gris clair. **Lien** : texte, sans fond.
 - États : normal, appuyé (assombri), désactivé (opacité .45), chargement (texte « … »).
 - **Carte** : blanche, rayon 18 px, bordure #DCE3EC, ombre `--fl-ombre` seulement sur la carte qui compte.
 - **Puce de statut** : pilule, fond clair de la couleur du statut.
