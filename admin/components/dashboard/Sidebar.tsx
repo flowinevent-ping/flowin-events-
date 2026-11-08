@@ -16,6 +16,7 @@ interface NavItem {
    *  action en attente plutot qu un simple total. */
   alerte?: number
   external?: boolean
+  nouvelOnglet?: boolean
 }
 
 /**
@@ -210,6 +211,7 @@ export default function Sidebar() {
       items: [
         { id: 'envoi-masse', label: 'Envoi en masse', href: '/dashboard/envoi-masse' },
         { id: 'landing-page', label: 'Landing pages & outils commerciaux', href: '/dashboard/landing-page' },
+        { id: 'visite-guidee', label: 'Visite guidée Flowin', href: '/visite-guidee/', nouvelOnglet: true },
         { id: 'nds-bon-commande', label: 'Bons de commande & factures', href: '/dashboard/nds-bon-commande' },
         { id: 'commandes-animation', label: 'Commandes Animation', href: '/admin-commandes-animation.html', external: true },
         { id: 'facture-nds', label: 'Générer une facture', href: '/facture-nds.html', external: true },
@@ -298,7 +300,7 @@ export default function Sidebar() {
               <button
                 key={item.id}
                 className={`sa-sb-item${isActive(item.href) ? ' active' : ''}`}
-                onClick={() => { if (item.external) { window.location.href = item.href } else { router.push(item.href) } }}
+                onClick={() => { if (item.nouvelOnglet) { window.open(item.href, '_blank', 'noopener') } else if (item.external) { window.location.href = item.href } else { router.push(item.href) } }}
               >
                 <span className="sa-sb-icon"><SbIcon id={item.id} /></span>
                 <span className="sa-sb-label">{item.label}</span>
