@@ -48,6 +48,7 @@ button,input,select,textarea{font-family:inherit;font-size:16px;color:inherit}
 .app.tabbed{bottom:68px}
 .scr{position:absolute;inset:0;overflow-y:auto;overflow-x:hidden;display:flex;flex-direction:column;padding:0 18px 24px;scrollbar-width:none}
 .scr::-webkit-scrollbar{display:none}
+.scr>*{flex-shrink:0}
 .scr.in{animation:in .22s ease-out}.scr.in-back{animation:inb .22s ease-out}
 @keyframes in{from{opacity:0;transform:translateX(24px)}to{opacity:1;transform:none}}
 @keyframes inb{from{opacity:0;transform:translateX(-24px)}to{opacity:1;transform:none}}
@@ -220,3 +221,15 @@ textarea.in{padding:12px 14px;min-height:80px}
 .qrs-n{text-align:right;min-width:52px}.qrs-n b{display:block;font-size:20px;font-variant-numeric:tabular-nums}.qrs-n span{font-size:13px;color:var(--texte2)}
 .anim{box-shadow:none}
 .anim .anim-qr{width:100%;margin-top:12px}
+
+/* Chiffres publiés, jauge des lots, prix des formules */
+.chiffres{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.chiffre{margin:8px 0;box-shadow:none;text-align:center;padding:12px}
+.chiffre b{display:block;font-size:28px;font-weight:900;letter-spacing:-.02em;color:var(--violet-t);font-variant-numeric:tabular-nums;line-height:1.1}
+.chiffre span{display:block;font-size:13px;color:var(--texte2);line-height:1.35;margin-top:4px}
+.jauge{position:relative;height:10px;border-radius:9px;background:var(--trait);overflow:hidden}
+.jauge i{position:absolute;left:0;top:0;bottom:0;border-radius:9px}
+.jauge .g{background:var(--orange-v)}.jauge .r{background:var(--ok)}
+.jauge-t{display:block;font-size:14px;margin-top:6px;font-variant-numeric:tabular-nums}
+.prix{font-size:26px;font-weight:900;margin:8px 0 2px;color:var(--orange);font-variant-numeric:tabular-nums}
+:root[data-theme="dark"] .prix{color:var(--orange-v)}

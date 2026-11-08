@@ -1,4 +1,4 @@
-/* Visite guidée Flowin : démo cliquable, 100 % locale.
+/* Visite guidée Flowin Event : démo cliquable, 100 % locale.
    Aucune écriture en base, aucun appel réseau. Toutes les données sont fictives. */
 (function () {
   'use strict';
@@ -157,10 +157,14 @@
   ];
 
   var FORMULES_SE = [
-    { id: 'sd', nom: 'Sponsor digital', ic: 'phone', d: 'Votre commerce est visible dans l\'application du jeu seulement.' },
-    { id: 'pdp', nom: 'Partenaire digital + physique', ic: 'store', d: 'Visible dans l\'application et sur place au festival, avec votre station.' },
-    { id: 'pp', nom: 'Partenaire premium', ic: 'star', d: 'Cité sur tous les supports de l\'événement et du jeu.' }
+    { id: 'sd', nom: 'Sponsor digital', px: '500 € HT', ic: 'phone', d: 'Votre commerce est visible dans le jeu, en ligne.',
+      inc: ['Diffusé : logo et lien dans l\'application du jeu', 'Diffusé : cité dans les publications en ligne de l\'événement', 'Imprimé : rien, 100 % digital'] },
+    { id: 'pdp', nom: 'Partenaire digital + sur place', px: '1 331 € HT', ic: 'store', d: 'Votre commerce devient une station jeu de l\'événement.',
+      inc: ['Diffusé : tout le Sponsor digital', 'Diffusé : votre station jeu sur la carte du jeu', 'Imprimé : affiche et chevalet avec le QR de votre station'] },
+    { id: 'pp', nom: 'Partenaire premium tous supports', px: '3 331 € HT', ic: 'star', d: 'Votre marque sur tous les supports de l\'événement.',
+      inc: ['Diffusé : tout le Partenaire digital + sur place', 'Diffusé : questions du jeu à votre marque', 'Imprimé : votre logo sur tous les supports imprimés de l\'événement'] }
   ];
+  var PRIX_SE_NOTE = 'Prix proposés, ajustables par événement.';
 
   function initState() {
     return {
@@ -178,7 +182,7 @@
       ],
       dDeb: '2027-03-01', dFin: '2027-03-31',
       publie: false,
-      qrPrint: 58, qrWeb: 41,
+      qrPrint: 58, qrWeb: 41, paie: 'mois',
       sup: [
         { n: 'Facebook', ic: 'users', sc: 38 }, { n: 'Instagram', ic: 'camera', sc: 26 }, { n: 'TikTok', ic: 'music', sc: 19 },
         { n: 'Site internet', ic: 'globe', sc: 12 }, { n: 'Email', ic: 'mail', sc: 7 }
@@ -192,9 +196,9 @@
       ],
       org: { nom: 'Festival Exemple', deb: '2027-07-09', fin: '2027-07-18', px: 45, py: 50, jeu: 'quiz', f: { sd: true, pdp: true, pp: false } },
       demandes: [
-        { n: 'Boutique Exemple', f: 'Partenaire digital + physique', s: 'att' },
+        { n: 'Boutique Exemple', f: 'Partenaire digital + sur place', s: 'att' },
         { n: 'Café Exemple', f: 'Sponsor digital', s: 'att' },
-        { n: 'Librairie Exemple', f: 'Partenaire premium', s: 'ok' }
+        { n: 'Librairie Exemple', f: 'Partenaire premium tous supports', s: 'ok' }
       ],
       qi: 0, rep: null, score: 0, bi: 0, bonusRep: {},
       j: { prenom: '', email: '', genre: '', cp: '', ok: false }
@@ -235,46 +239,47 @@
   function def(id, g, label, r, o) { SCREENS[id] = { g: g, label: label, r: r, tabs: o && o.tabs }; ORDER.push(id); }
 
   def('accueil', 'c', 'Accueil à 3 portes', function () {
-    return '<div class="hd"><span class="ib ghost"></span><div class="t"><span class="logo">Flow<b>in</b></span></div>' +
+    return '<div class="hd"><span class="ib ghost"></span><div class="t"><span class="logo">Flow<b>in</b> Event</span></div>' +
       '<button class="ib" data-act="theme" aria-label="Changer de thème">' + ic(isDark() ? 'sun' : 'moon') + '</button></div>' +
-      '<h1>Faites jouer vos clients.</h1><p class="sub">Des jeux simples, en boutique ou dans un festival. Qui êtes-vous ?</p>' +
-      '<button class="door pro" data-go="p-promesse"><span class="pic">' + ic('store', 'l') + '</span><span class="grow"><b>Je suis commerçant</b><span>Créer une animation dans mon commerce</span></span>' + ic('chev') + '</button>' +
-      '<button class="door org" data-go="o-accueil"><span class="pic">' + ic('flag', 'l') + '</span><span class="grow"><b>J\'organise un événement</b><span>Lancer un super event avec les commerces</span></span>' + ic('chev') + '</button>' +
+      '<div class="kick">Animer · Booster · Fidéliser</div>' +
+      '<h1>Faites jouer vos clients.</h1><p class="sub">Des jeux simples, en boutique ou dans un événement. Qui êtes-vous ?</p>' +
+      '<button class="door pro" data-go="p-promesse"><span class="pic">' + ic('store', 'l') + '</span><span class="grow"><b>Je suis commerçant</b><span>Flowin Animation : le jeu dans mon commerce</span></span>' + ic('chev') + '</button>' +
+      '<button class="door org" data-go="o-accueil"><span class="pic">' + ic('flag', 'l') + '</span><span class="grow"><b>J\'organise un événement</b><span>Flowin Super Event : un seul jeu pour tous vos partenaires</span></span>' + ic('chev') + '</button>' +
       '<button class="door jou" data-go="j-accueil"><span class="pic">' + ic('play', 'l') + '</span><span class="grow"><b>Je joue</b><span>Essayer le Quiz + bonus d\'un partenaire</span></span>' + ic('chev') + '</button>' +
       '<p class="small center" style="margin-top:auto;padding-top:16px">Visite guidée sans compte. Rien n\'est enregistré.</p>';
   });
 
   /* ===== PRO : première fois ===== */
-  def('p-promesse', 'p', 'Promesse', function () {
-    return hd('Espace commerçant', { k: 'Bienvenue' }) +
-      '<div class="hero-pro"><div class="kick" style="color:#fff;opacity:.8">En 5 minutes</div><h1>Votre premier jeu, prêt aujourd\'hui.</h1>' +
+  def('p-promesse', 'p', '1. Promesse', function () {
+    return hd('Flowin Animation', { k: 'Étape 1 sur 8', p: 12 }) +
+      '<div class="hero-pro"><div class="kick" style="color:#fff;opacity:.8">Animer · Booster · Fidéliser</div><h1>Votre premier jeu, prêt aujourd\'hui.</h1>' +
       '<p class="sub">Vos clients scannent, jouent, gagnent. Vous les retrouvez.</p></div>' +
+      chiffres() +
       '<ul class="list card">' +
-      '<li><span class="pic ok">' + ic('check') + '</span>Sans engagement, sans matériel</li>' +
-      '<li><span class="pic ok">' + ic('check') + '</span>L\'assistant écrit les questions</li>' +
-      '<li><span class="pic ok">' + ic('check') + '</span>Vous remettez les lots en scannant un QR</li></ul>' +
-      foot(btn('Créer mon espace', 'data-go="p-vous"') + '<div class="center"><button class="lnk" data-go="p-dash">J\'ai déjà un compte</button></div>');
+      '<li><span class="pic ok">' + ic('eye') + '</span>Vous créez et voyez votre jeu avant de payer</li>' +
+      '<li><span class="pic ok">' + ic('spark') + '</span>L\'assistant écrit les questions</li>' +
+      '<li><span class="pic ok">' + ic('qr') + '</span>Votre QR est prêt à imprimer à la fin</li></ul>' +
+      foot(btn('Je crée mon jeu', 'data-go="p-etab"') + '<div class="center"><button class="lnk" data-go="p-dash">J\'ai déjà un compte</button></div>');
   });
-  def('p-vous', 'p', 'Inscription : vous', function () {
-    return hd('Vous', { k: 'Étape 1 sur 3', p: 33 }) + '<h1>Faisons connaissance</h1>' +
-      field('Prénom', 'pro.prenom', S.pro.prenom) + field('Nom', 'pro.nom', S.pro.nom) +
-      field('Email professionnel', 'pro.email', S.pro.email, 'email') + field('Téléphone', 'pro.tel', S.pro.tel, 'tel') +
-      foot(btn('Continuer', 'data-go="p-etab"'));
-  });
-  def('p-etab', 'p', 'Inscription : établissement (SIRET)', function () {
+  function chiffres() {
+    return '<div class="chiffres"><div class="card chiffre"><b>56 %</b><span>des participants souhaitent garder le contact</span></div>' +
+      '<div class="card chiffre"><b>Plus de 70</b><span>lots distribués dans les commerces locaux</span></div></div>';
+  }
+  def('p-etab', 'p', '2. Établissement (SIRET)', function () {
     var e = S.etab;
-    var bt = e.searching ? '<button class="btn" disabled><span class="spinner"></span>Recherche…</button>' : btn('Rechercher', 'data-act="siret"', '', 'search');
-    return hd('Votre établissement', { k: 'Étape 2 sur 3', p: 66 }) + '<h1>Votre SIRET suffit</h1>' +
+    var bt = e.searching ? '<button class="btn" disabled><span class="spinner"></span>Recherche…</button>' : btn('Rechercher', 'data-act="siret"', e.found ? 'line' : '', 'search');
+    return hd('Votre établissement', { k: 'Étape 2 sur 8', p: 25 }) + '<h1>Votre SIRET suffit</h1>' +
       '<p class="sub">Nous retrouvons votre commerce et remplissons le reste.</p>' +
       '<label class="f"><span>Numéro SIRET (14 chiffres)</span><input class="in" inputmode="numeric" data-bind="etab.siret" value="' + esc(e.siret) + '" placeholder="Tapez votre SIRET"></label>' + bt +
       (e.found ? '<div class="card" style="margin-top:14px"><div class="row"><span class="chip ok">' + ic('check', 's') + 'Trouvé</span><span class="small">Vérifiez, modifiez si besoin.</span></div>' +
         '<label class="f"><span>Nom du commerce</span><input class="in filled" data-bind="etab.nom" value="' + esc(e.nom) + '"></label>' +
         '<label class="f"><span>Adresse</span><input class="in filled" data-bind="etab.adr" value="' + esc(e.adr) + '"></label>' +
         '<label class="f"><span>Secteur</span><input class="in filled" data-bind="etab.sect" value="' + esc(e.sect) + '"></label></div>' : '<p class="small">Démo : tapez n\'importe quel numéro, ou laissez vide.</p>') +
-      foot(btn('Continuer', 'data-go="p-mdp"' + (e.found ? '' : ' disabled')));
+      foot(btn('Continuer', 'data-go="p-compte"' + (e.found ? '' : ' disabled')));
   });
-  def('p-mdp', 'p', 'Inscription : mot de passe', function () {
-    return hd('Sécurité', { k: 'Étape 3 sur 3', p: 100 }) + '<h1>Choisissez un mot de passe</h1>' +
+  def('p-compte', 'p', '3. Email et mot de passe', function () {
+    return hd('Votre compte', { k: 'Étape 3 sur 8', p: 37 }) + '<h1>Votre accès</h1>' +
+      field('Email professionnel', 'pro.email', S.pro.email, 'email') +
       '<label class="f"><span>Mot de passe</span><input class="in" type="password" data-bind="mdp" value="' + esc(S.mdp) + '" placeholder="8 caractères minimum"></label>' +
       '<div id="mdp-check">' + mdpCheck() + '</div>' +
       foot(btn('Créer mon espace', 'data-act="creer-compte"', '', 'lock'));
@@ -285,11 +290,6 @@
     return '<ul class="list">' + l(m.length >= 8, '8 caractères minimum') + l(/[0-9]/.test(m), 'Au moins un chiffre') + l(/[A-Z]/.test(m), 'Au moins une majuscule') + '</ul>' +
       '<p class="small">Démo : vous pouvez continuer même sans mot de passe.</p>';
   }
-  def('p-bienvenue', 'p', 'Bienvenue', function () {
-    return hd('Bienvenue', { noBack: true }) + '<div class="big-ok">' + ic('check') + '</div>' +
-      '<h1 class="center">Bienvenue, ' + esc(S.pro.prenom) + '</h1><p class="sub center">L\'espace de ' + esc(S.etab.nom || 'Boutique Exemple') + ' est prêt.</p>' +
-      foot(btn('Découvrir mon tableau de bord', 'data-go="p-dash"'));
-  });
 
   /* ===== PRO : espace ===== */
   function stepsDone() { var n = 0; for (var i = 0; i < 3; i++) { if (S.steps[i]) { n++; } } return n; }
@@ -322,80 +322,80 @@
       tap('flag', 'orange', 'Participer à un super event', 'Festivals et événements près de chez vous', 'data-go="p-se-carte"');
   }, { tabs: 'pro' });
 
-  def('p-jeu', 'p', 'Animation : choix du jeu', function () {
+  function questionsBloc() {
+    var h = '';
+    if (S.gen === 'loading') { h = '<div class="card center"><p class="sub" style="margin:8px 0">L\'assistant prépare 3 questions…</p></div>'; }
+    if (S.gen === 'done') {
+      for (var i = 0; i < S.qs.length; i++) {
+        var q = S.qs[i];
+        h += '<div class="qitem' + (q.v ? ' ok' : '') + '"><b>' + (i + 1) + '. ' + esc(q.q) + '</b><div class="small">' + esc(q.r.join(' · ')) + '</div>' +
+          '<div class="small" style="color:var(--ok);font-weight:700;margin-top:4px">Bonne réponse : ' + esc(q.r[q.ok]) + '</div>' +
+          '<div class="acts"><button class="mini' + (q.v ? ' on' : '') + '" data-act="q-ok" data-v="' + i + '">' + ic('check', 's') + (q.v ? 'Gardée' : 'Garder') + '</button>' +
+          '<button class="mini" data-act="q-regen" data-v="' + i + '">' + ic('refresh', 's') + 'Régénérer</button>' +
+          '<button class="mini" data-sheet="q-edit" data-v="' + i + '">' + ic('edit', 's') + 'Modifier</button></div></div>';
+      }
+    }
+    return '<div class="card"><div class="form-tag">Vos questions</div>' +
+      '<label class="f"><span>Thème de votre quiz</span><input class="in" data-bind="theme_q" value="' + esc(S.theme_q) + '" placeholder="ex. sécurité routière"></label>' +
+      btn(S.gen === 'done' ? 'Tout régénérer' : 'Générer 3 questions', 'data-act="gen"' + (S.gen === 'loading' ? ' disabled' : ''), 'line', 'spark') + h + '</div>';
+  }
+  def('p-jeu', 'p', '4. Jeu et questions', function () {
     var h = '';
     for (var i = 0; i < JEUX.length; i++) {
       var j = JEUX[i];
       h += '<div class="card tap' + (S.jeu === j.id ? ' sel' : '') + '" style="cursor:default"><button class="tap" style="border:0;background:none;padding:0;flex:1;min-width:0" data-act="jeu" data-v="' + j.id + '">' +
         '<span class="pic bleu">' + ic(j.ic) + '</span><span class="grow"><b>' + j.nom + '</b><span>' + j.d + '</span></span></button>' +
         '<button class="ib" data-sheet="apercu" data-v="' + j.id + '" aria-label="Aperçu ' + j.nom + '">' + ic('eye') + '</button></div>';
+      if (S.jeu === 'quiz' && j.id === 'quiz') { h += questionsBloc(); }
     }
-    return hd('Nouvelle animation', { k: 'Étape 1 sur 6', p: 16 }) + '<h1>Quel jeu ?</h1><p class="sub">Un clic suffit. L\'œil montre un aperçu.</p>' + h +
-      foot(btn('Continuer avec ' + jeuById(S.jeu).nom, 'data-go="p-formule"'));
+    return hd('Nouvelle animation', { k: 'Étape 4 sur 8', p: 50 }) + '<h1>Quel jeu ?</h1><p class="sub">Un clic suffit. L\'œil montre un aperçu.</p>' + h +
+      foot(btn('Continuer', 'data-act="jeu-next"'));
   });
-  def('p-formule', 'p', 'Animation : formule', function () {
+  function lotCard(l, i) {
+    var gg = l.hist.length, rr = 0, hi = '';
+    for (var k = 0; k < l.hist.length; k++) {
+      var g = l.hist[k]; if (g.r) { rr++; }
+      hi += '<li><span class="grow"><b>' + esc(g.n) + '</b><br><span class="small">Gagné le ' + g.g + (g.r ? ' · remis le ' + g.r : ' · pas encore remis') + '</span></span>' +
+        (g.r ? '<span class="chip ok">Remis</span>' : '<span class="chip orange">À remettre</span>') + '</li>';
+    }
+    var pg = l.qte ? Math.round(gg / l.qte * 100) : 0, pr = l.qte ? Math.round(rr / l.qte * 100) : 0;
+    return '<div class="card lotcard"><div class="lh">' + lotLogo(l) + '<span class="grow"><b style="font-size:16.5px">' + esc(l.titre) + '</b><br>' +
+      '<span class="small">' + esc(l.cond) + '</span></span>' +
+      '<button class="ib" data-sheet="lot-stock" data-v="' + i + '" aria-label="Actions de stock">' + ic('more') + '</button></div>' +
+      '<div class="lb"><div class="jauge" aria-hidden="true"><i class="g" style="width:' + pg + '%"></i><i class="r" style="width:' + pr + '%"></i></div>' +
+      '<b class="jauge-t">' + l.qte + ' à gagner · ' + gg + ' gagné' + (gg > 1 ? 's' : '') + ' · ' + rr + ' remis</b></div>' +
+      '<div class="hist"><div class="form-tag">Gagnants</div>' + (hi ? '<ul class="list">' + hi + '</ul>' : '<p class="small" style="margin:6px 0 0">Pas encore de gagnant.</p>') + '</div></div>';
+  }
+  def('p-lots', 'p', '5. Lots', function () {
+    var h = '';
+    for (var i = 0; i < S.lots.length; i++) { h += lotCard(S.lots[i], i); }
+    return hd('Nouvelle animation', { k: 'Étape 5 sur 8', p: 62 }) + '<h1>Vos lots</h1><p class="sub">Ce que vos clients peuvent gagner.</p>' + h +
+      btn('Ajouter un lot', 'data-sheet="lot-add"', 'line', 'plus') + foot(btn('Continuer', 'data-go="p-formule"'));
+  });
+  def('p-formule', 'p', '6. Digital ou kit imprimé', function () {
     function f(id, t, ic1, items) {
       var l = ''; for (var i = 0; i < items.length; i++) { l += '<li>' + ic('check', 's') + items[i] + '</li>'; }
       return '<button class="card' + (S.formule === id ? ' sel' : '') + '" style="width:100%;text-align:left;cursor:pointer;display:block" data-act="formule" data-v="' + id + '">' +
-        '<div class="row"><span class="pic">' + ic(ic1) + '</span><b class="grow" style="font-size:17px">' + t + '</b>' + (S.formule === id ? '<span class="chip violet">Choisie</span>' : '') + '</div>' +
-        '<ul class="list" style="margin-top:8px">' + l + '</ul><p class="small" style="margin:6px 0 0">Tarif : sur devis</p></button>';
+        '<div class="row"><span class="pic">' + ic(ic1) + '</span><b class="grow" style="font-size:17px">' + t + '</b>' + (S.formule === id ? '<span class="chip violet">Choisi</span>' : '') + '</div>' +
+        '<ul class="list" style="margin-top:8px">' + l + '</ul></button>';
     }
-    return hd('Nouvelle animation', { k: 'Étape 2 sur 6', p: 33 }) + '<h1>Quelle formule ?</h1>' +
-      f('digital', 'Digital', 'phone', ['QR code à imprimer vous-même', 'Lien à partager sur vos réseaux', 'Suivi des scans et des gagnants']) +
-      f('kit', 'Kit physique + digital', 'box', ['Tout le digital', 'Affiches et chevalet de comptoir', 'Tickets gagnants livrés chez vous']) +
-      foot(btn('Continuer', 'data-go="p-questions"'));
+    return hd('Nouvelle animation', { k: 'Étape 6 sur 8', p: 75 }) + '<h1>Vos supports</h1>' +
+      f('digital', '100 % digital', 'phone', ['Vous téléchargez et imprimez vos QR', 'Lien à partager sur vos réseaux', 'Suivi des scans et des gagnants']) +
+      f('kit', 'Kit imprimé livré par Flowin Event', 'box', ['Tout le digital', 'Affiche et chevalet de comptoir avec votre QR', 'Livré dans votre commerce']) +
+      foot(btn('Voir l\'aperçu', 'data-go="p-apercu"'));
   });
-  def('p-questions', 'p', 'Animation : questions par l\'assistant', function () {
-    var h = '';
-    if (S.gen === 'loading') { h = '<div class="card center"><p class="sub" style="margin:8px 0">L\'assistant prépare 5 questions…</p></div>'; }
-    if (S.gen === 'done') {
-      for (var i = 0; i < S.qs.length; i++) {
-        var q = S.qs[i];
-        h += '<div class="qitem' + (q.v ? ' ok' : '') + '"><b>' + (i + 1) + '. ' + esc(q.q) + '</b><div class="small">' + esc(q.r.join(' · ')) + '</div>' +
-          '<div class="small" style="color:var(--ok);font-weight:700;margin-top:4px">Bonne réponse : ' + esc(q.r[q.ok]) + '</div>' +
-          '<div class="acts"><button class="mini' + (q.v ? ' on' : '') + '" data-act="q-ok" data-v="' + i + '">' + ic('check', 's') + (q.v ? 'Validée' : 'Valider') + '</button>' +
-          '<button class="mini" data-sheet="q-edit" data-v="' + i + '">' + ic('edit', 's') + 'Modifier</button>' +
-          '<button class="mini" data-act="q-regen" data-v="' + i + '">' + ic('refresh', 's') + 'Autre question</button></div></div>';
-      }
-    }
-    var nv = 0; for (var k = 0; k < S.qs.length; k++) { if (S.qs[k].v) { nv++; } }
-    return hd('Nouvelle animation', { k: 'Étape 3 sur 6', p: 50 }) + '<h1>Vos questions</h1><p class="sub">Donnez un thème, l\'assistant écrit pour vous.</p>' +
-      '<label class="f"><span>Thème</span><input class="in" data-bind="theme_q" value="' + esc(S.theme_q) + '" placeholder="ex. sécurité routière"></label>' +
-      btn(S.gen === 'done' ? 'Tout régénérer' : 'Générer', 'data-act="gen"' + (S.gen === 'loading' ? ' disabled' : ''), S.gen === 'done' ? 'line' : '', 'spark') + h +
-      (S.gen === 'done' ? foot(btn(nv === S.qs.length ? 'Continuer' : 'Tout valider et continuer', 'data-act="q-all"')) : '');
-  });
-  def('p-lots', 'p', 'Animation : lots', function () {
-    var h = '';
-    for (var i = 0; i < S.lots.length; i++) {
-      var l = S.lots[i], hi = '';
-      for (var k = 0; k < l.hist.length; k++) {
-        var g = l.hist[k];
-        hi += '<li><span class="grow"><b>' + esc(g.n) + '</b><br><span class="small">Gagné le ' + g.g + (g.r ? ' · remis le ' + g.r : '') + '</span></span>' +
-          (g.r ? '<span class="chip ok">Remis</span>' : '<span class="chip orange">À remettre</span>') + '</li>';
-      }
-      h += '<div class="card lotcard"><div class="lh">' + lotLogo(l) + '<span class="grow"><b style="font-size:16.5px">' + esc(l.titre) + '</b><br>' +
-        '<span class="chip ' + (l.mode === 'instant' ? 'violet' : 'bleu') + '" style="margin-top:6px">' + (l.mode === 'instant' ? 'Gagné tout de suite' : 'Tirage au sort') + '</span></span>' +
-        '<span class="kpi" style="padding:6px 10px"><b>' + l.qte + '</b><span>à distribuer</span></span></div>' +
-        '<div class="lb"><span class="small">Conditions : ' + esc(l.cond) + '</span></div>' +
-        '<div class="hist"><div class="form-tag">Gagnants</div>' + (hi ? '<ul class="list">' + hi + '</ul>' : '<p class="small" style="margin:6px 0 0">Pas encore de gagnant.</p>') + '</div></div>';
-    }
-    return hd('Nouvelle animation', { k: 'Étape 4 sur 6', p: 66 }) + '<h1>Vos lots</h1><p class="sub">Ce que vos clients peuvent gagner.</p>' + h +
-      btn('Ajouter un lot', 'data-sheet="lot-add"', 'line', 'plus') + foot(btn('Continuer', 'data-go="p-dates"'));
-  });
-  def('p-dates', 'p', 'Animation : dates', function () {
-    return hd('Nouvelle animation', { k: 'Étape 5 sur 6', p: 83 }) + '<h1>Quand ?</h1>' +
-      field('Début', 'dDeb', S.dDeb, 'date') + field('Fin', 'dFin', S.dFin, 'date') +
-      '<p class="small">Vous pourrez prolonger à tout moment.</p>' + foot(btn('Voir le récapitulatif', 'data-go="p-recap"'));
-  });
-  def('p-recap', 'p', 'Animation : récapitulatif', function () {
+  def('p-apercu', 'p', '7. Aperçu et publication', function () {
     function r(t, v, go) { return '<li><span class="grow"><span class="small">' + t + '</span><br><b>' + esc(v) + '</b></span><button class="lnk" data-go="' + go + '">Modifier</button></li>'; }
-    var nq = S.qs.length || 5;
-    return hd('Récapitulatif', { k: 'Étape 6 sur 6', p: 100 }) + '<h1>Tout est prêt</h1><ul class="list card">' +
-      r('Jeu', jeuById(S.jeu).nom, 'p-jeu') + r('Formule', S.formule === 'kit' ? 'Kit physique + digital' : 'Digital', 'p-formule') +
-      r('Questions', nq + ' questions · ' + S.theme_q, 'p-questions') + r('Lots', S.lots.length + ' lots', 'p-lots') +
-      r('Dates', 'Du ' + fmtD(S.dDeb) + ' au ' + fmtD(S.dFin), 'p-dates') + '</ul>' + foot(btn('Publier mon animation', 'data-act="publier"', '', 'send'));
+    var nq = S.qs.length || 3, nom = S.etab.nom || 'Boutique Exemple';
+    return hd('Aperçu', { k: 'Étape 7 sur 8', p: 87 }) + '<h1>Votre jeu, vu par vos clients</h1>' +
+      '<div class="jeu"><div class="jhero"><div class="row">' + logoBoutique() + '<div><div class="kick">' + esc(jeuById(S.jeu).nom) + '</div><b style="font-size:18px">' + esc(nom) + '</b></div></div>' +
+      '<p style="margin:12px 0 0;font-weight:700">Joue et gagne : ' + esc(S.lots[0] ? S.lots[0].titre : 'un lot') + '.</p></div></div>' +
+      '<ul class="list card">' + r('Jeu', jeuById(S.jeu).nom + (S.jeu === 'quiz' ? ' · ' + nq + ' questions' : ''), 'p-jeu') + r('Lots', S.lots.length + ' lots', 'p-lots') +
+      r('Supports', S.formule === 'kit' ? 'Kit imprimé livré par Flowin Event' : '100 % digital', 'p-formule') +
+      '<li><span class="grow"><span class="small">Dates</span><br><b>Du ' + fmtD(S.dDeb) + ' au ' + fmtD(S.dFin) + '</b></span></li></ul>' +
+      foot('<p class="small center" style="margin:0 0 2px">Le paiement arrive seulement maintenant, à la publication.</p>' + btn('Publier', 'data-sheet="payer"', '', 'send'));
   });
-  def('p-qr', 'p', 'Votre QR est prêt', function () {
+  def('p-qr', 'p', '8. Votre QR est prêt', function () {
     var h = '';
     for (var i = 0; i < S.sup.length; i++) {
       var u = S.sup[i];
@@ -404,7 +404,7 @@
     }
     S.steps[1] = true;
     return hd('Mon QR', { k: jeuById(S.jeu).nom }) + '<div class="qrs">' +
-      '<div class="kick">Animation en ligne</div><h1>Votre QR est prêt</h1>' +
+      '<div class="kick">Étape 8 sur 8 · animation en ligne</div><h1>Votre QR est prêt</h1>' +
       '<div class="card qrs-print"><div class="qrs-art">' + qr('anim-print', 200) + '</div>' +
       '<div class="qrs-lab">' + ic('print', 's') + '<span><b>QR à imprimer</b> · vitrine et caisse</span></div>' +
       '<p class="small qrs-c">' + S.qrPrint + ' scans (exemple)</p></div>' +
@@ -422,61 +422,57 @@
   });
 
   /* ===== PRO : super event ===== */
-  def('p-se-carte', 'p', 'Super event : carte', function () {
+  def('p-se-carte', 'p', 'Super event 1. Choisir l\'événement', function () {
     var p = '';
     for (var i = 0; i < EVENTS.length; i++) { var e = EVENTS[i]; p += pin(e.x, e.y, 'orange', 'data-act="se" data-v="' + e.id + '"', e.nom, S.se === e.id); }
     var l = '';
-    for (var k = 0; k < EVENTS.length; k++) { var ev = EVENTS[k]; l += tap('flag', 'orange', ev.nom, ev.lieu + ' · ' + ev.per, 'data-act="se" data-v="' + ev.id + '"'); }
-    return hd('Super events', { k: 'Je souhaite participer' }) + '<div class="map">' + mapBg() + p + '</div>' +
+    for (var k = 0; k < EVENTS.length; k++) { var ev = EVENTS[k]; l += tap('flag', 'orange', ev.nom, ev.lieu + ' · ' + ev.per + ' · ' + ev.st + ' stations jeu', 'data-act="se" data-v="' + ev.id + '"'); }
+    return hd('Flowin Super Event', { k: 'Étape 1 sur 3', p: 33 }) + '<h1>Quel événement ?</h1><p class="sub">Un événement. Tous ses partenaires. Un seul jeu.</p>' +
+      '<div class="map">' + mapBg() + p + '</div>' +
       '<div class="legend"><span><i style="background:var(--orange-v)"></i>Super event</span></div>' + l +
       '<button class="btn line" data-go="p-se-demande">' + ic('plus') + 'Demander la création d\'un super event</button>';
   });
-  def('p-se-event', 'p', 'Super event : fiche événement', function () {
-    var e = seById(S.se || 'fe');
-    return hd(e.nom, { k: 'Super event' }) +
-      '<div class="preview" style="background:linear-gradient(135deg,#C2410C,#FF8A14)"><div class="kick" style="color:#fff">Super event</div>' +
-      '<h1 style="color:#fff">' + e.nom + '</h1><p style="margin:0;font-weight:700">' + e.lieu + ' · ' + e.per + '</p></div>' +
-      '<div class="kpis"><div class="kpi"><b>' + e.st + '</b><span>stations</span></div><div class="kpi"><b>Quiz</b><span>jeu commun</span></div><div class="kpi"><b>3</b><span>formules</span></div></div>' +
-      '<p class="sub">Les joueurs parcourent le festival de station en station. Votre commerce devient une étape.</p>' +
-      foot(btn('Choisir ma formule', 'data-go="p-se-formule"', 'orange'));
-  });
-  def('p-se-formule', 'p', 'Super event : formule de participation', function () {
-    var h = '';
+  def('p-se-formule', 'p', 'Super event 2. Formule partenaire', function () {
+    var h = '', e = seById(S.se || 'fe');
     for (var i = 0; i < FORMULES_SE.length; i++) {
-      var f = FORMULES_SE[i];
+      var f = FORMULES_SE[i], l = '';
+      for (var k = 0; k < f.inc.length; k++) { l += '<li>' + ic('check', 's') + esc(f.inc[k]) + '</li>'; }
       h += '<button class="card' + (S.seF === f.id ? ' sel' : '') + '" style="width:100%;text-align:left;cursor:pointer;display:block" data-act="seF" data-v="' + f.id + '">' +
         '<div class="row"><span class="pic orange">' + ic(f.ic) + '</span><b class="grow" style="font-size:16.5px">' + f.nom + '</b></div>' +
-        '<p class="small" style="margin:8px 0 4px">' + f.d + '</p><span class="small"><b>Tarif communiqué par l\'organisateur</b></span></button>';
+        '<p class="prix">' + f.px + '</p><p class="small" style="margin:0 0 4px">' + f.d + '</p><ul class="list">' + l + '</ul></button>';
     }
-    return hd('Votre formule', { k: seById(S.se || 'fe').nom }) + '<h1>Comment participer ?</h1>' + h +
+    return hd(e.nom, { k: 'Étape 2 sur 3', p: 66 }) + '<h1>Votre formule partenaire</h1>' +
+      '<p class="small" style="margin:0">' + e.lieu + ' · ' + e.per + '. Votre commerce devient une station jeu.</p>' + h +
+      '<p class="small center">' + PRIX_SE_NOTE + '</p>' +
       foot(btn('Voir le récapitulatif', 'data-go="p-se-recap"' + (S.seF ? '' : ' disabled'), 'orange'));
   });
-  def('p-se-recap', 'p', 'Super event : récapitulatif', function () {
+  def('p-se-recap', 'p', 'Super event 3. Récapitulatif', function () {
     var e = seById(S.se || 'fe'), f = fById(S.seF || 'pdp');
-    return hd('Récapitulatif', { k: 'Super event' }) + '<h1>Votre demande</h1><ul class="list card">' +
+    return hd('Récapitulatif', { k: 'Étape 3 sur 3', p: 100 }) + '<h1>Votre demande</h1><ul class="list card">' +
       '<li><span class="grow"><span class="small">Événement</span><br><b>' + e.nom + '</b></span></li>' +
       '<li><span class="grow"><span class="small">Formule</span><br><b>' + f.nom + '</b></span><button class="lnk" data-back>Modifier</button></li>' +
       '<li><span class="grow"><span class="small">Commerce</span><br><b>' + esc(S.etab.nom || 'Boutique Exemple') + '</b></span></li>' +
-      '<li><span class="grow"><span class="small">Tarif</span><br><b>Communiqué par l\'organisateur</b></span></li></ul>' +
-      foot(btn('Envoyer ma demande', 'data-act="se-send"', 'orange', 'send'));
+      '<li><span class="grow"><span class="small">Prix proposé</span><br><b>' + f.px + '</b></span></li></ul>' +
+      '<p class="small">' + PRIX_SE_NOTE + ' L\'organisateur confirme le prix avec vous.</p>' +
+      foot(btn('Je rejoins ' + e.nom, 'data-act="se-send"', 'orange', 'send'));
   });
   def('p-se-envoye', 'p', 'Super event : demande envoyée', function () {
     function st(n, t) { return '<div class="check-step"><span class="dot">' + n + '</span><span>' + t + '</span></div>'; }
     return hd('Demande envoyée', { noBack: true }) + '<div class="big-ok">' + ic('send') + '</div><h1 class="center">Demande envoyée</h1>' +
       '<div class="card"><b>Et après ?</b>' + st(1, 'L\'organisateur valide sous 24 à 48 h.') + st(2, 'Vous recevez un email de confirmation.') +
-      st(3, 'Votre commerce apparaît sur la carte du festival.') + st(4, 'Vous recevez le QR de votre station.') + '</div>' +
+      st(3, 'Votre station jeu apparaît sur la carte de l\'événement.') + st(4, 'Vous recevez le QR de votre station jeu.') + '</div>' +
       foot(btn('Suivre mes festivals', 'data-go="p-festivals"') + btn('Retour au tableau de bord', 'data-go="p-dash"', 'line'));
   });
   def('p-se-demande', 'p', 'Super event : demander une création', function () {
-    return hd('Nouveau super event', { k: 'Demande à Flowin' }) + '<h1>Une idée d\'événement ?</h1><p class="sub">Flowin vous rappelle pour en parler.</p>' +
+    return hd('Nouveau super event', { k: 'Demande à Flowin Event' }) + '<h1>Une idée d\'événement ?</h1><p class="sub">Flowin Event vous rappelle pour en parler.</p>' +
       field('Nom de l\'événement', 'x1', '', 'text', 'ex. Fête du quartier') + field('Ville', 'x2', '', 'text', 'ex. Ville Exemple') +
       field('Période', 'x3', '', 'text', 'ex. printemps') +
       '<label class="f"><span>Message</span><textarea class="in" placeholder="Quelques mots sur votre projet"></textarea></label>' +
-      foot(btn('Envoyer à Flowin', 'data-act="se-dem"', 'orange', 'send'));
+      foot(btn('Envoyer à Flowin Event', 'data-act="se-dem"', 'orange', 'send'));
   });
   def('p-se-demande-ok', 'p', 'Super event : demande reçue', function () {
     return hd('Merci', { noBack: true }) + '<div class="big-ok">' + ic('check') + '</div><h1 class="center">Demande reçue</h1>' +
-      '<p class="sub center">L\'équipe Flowin vous recontacte pour construire l\'événement avec vous.</p>' + foot(btn('Retour au tableau de bord', 'data-go="p-dash"'));
+      '<p class="sub center">L\'équipe Flowin Event vous recontacte pour construire l\'événement avec vous.</p>' + foot(btn('Retour au tableau de bord', 'data-go="p-dash"'));
   });
 
   /* ===== PRO : visibilité ===== */
@@ -485,8 +481,8 @@
     function sg(id, l) { return '<button class="' + (t === id ? 'on' : '') + '" data-act="vis" data-v="' + id + '">' + l + '</button>'; }
     if (t === 'festival') {
       body = '<div class="map">' + mapBg() + pin(30, 40, 'orange', 'data-sheet="station"', 'Station') + pin(55, 30, 'orange', 'data-sheet="station"', 'Station') +
-        pin(48, 62, 'violet', 'data-sheet="station"', 'Votre station', true) + pin(72, 55, 'orange', 'data-sheet="station"', 'Station') + '</div>' +
-        '<div class="legend"><span><i style="background:var(--violet)"></i>Votre station</span><span><i style="background:var(--orange-v)"></i>Autres stations</span></div>' +
+        pin(48, 62, 'violet', 'data-sheet="station"', 'Votre station jeu', true) + pin(72, 55, 'orange', 'data-sheet="station"', 'Station') + '</div>' +
+        '<div class="legend"><span><i style="background:var(--violet)"></i>Votre station jeu</span><span><i style="background:var(--orange-v)"></i>Autres stations jeu</span></div>' +
         '<p class="small">Carte du Festival Exemple vue par les joueurs.</p>';
     } else if (t === 'ville') {
       body = '<div class="map">' + mapBg() + pin(40, 45, 'bleu', 'data-sheet="station"', 'Votre jeu en boutique', true) + pin(66, 34, 'bleu', 'data-demo="Autre commerce de la ville."', 'Jeu en boutique') +
@@ -544,15 +540,20 @@
 
   /* ===== ORGANISATEUR ===== */
   def('o-accueil', 'o', 'Promesse organisateur', function () {
-    return hd('Organisateur', { k: 'Super event' }) +
-      '<div class="preview" style="background:linear-gradient(135deg,#C2410C,#FF8A14)"><img src="../flowin-super-event-logo.svg" alt="Super event" width="220" style="max-width:100%;display:block;margin:4px 0 10px" onerror="this.style.display=\'none\'">' +
-      '<h1 style="color:#fff">Tout le festival joue.</h1><p style="margin:0;font-weight:700">Un jeu commun, les commerces deviennent des stations.</p></div>' +
-      '<ul class="list card"><li><span class="pic orange">' + ic('cal') + '</span>Dates, lieu, jeu commun</li>' +
-      '<li><span class="pic orange">' + ic('users') + '</span>Les commerces s\'inscrivent seuls</li><li><span class="pic orange">' + ic('check') + '</span>Vous validez chaque demande</li></ul>' +
-      foot(btn('Créer mon super event', 'data-go="o-infos"', 'orange') + '<div class="center"><button class="lnk" data-go="o-tableau">Voir un super event en cours</button></div>');
+    return hd('Organisateur', { k: 'Flowin Super Event' }) +
+      '<div class="preview" style="background:linear-gradient(135deg,#C2410C,#FF8A14)"><img src="../flowin-super-event-logo.svg" alt="Flowin Super Event" width="220" style="max-width:100%;display:block;margin:4px 0 10px" onerror="this.style.display=\'none\'">' +
+      '<h1 style="color:#fff">Un événement. Tous ses partenaires. Un seul jeu.</h1><p style="margin:0;font-weight:700">Vos partenaires diffusent votre événement, en boutique et en ligne.</p></div>' +
+      '<p class="small" style="margin:0 0 4px">Pour une mairie, un comité des fêtes ou une association de commerçants.</p>' +
+      '<div class="card"><div class="form-tag">Ce que nous mesurons pour vous</div><ul class="list" style="margin-top:6px">' +
+      '<li><span class="pic orange">' + ic('map') + '</span>Où les gens ont joué, station par station</li>' +
+      '<li><span class="pic orange">' + ic('users') + '</span>Combien ont joué, jour par jour</li>' +
+      '<li><span class="pic orange">' + ic('mail') + '</span>Les contacts recueillis, avec leur accord</li></ul></div>' +
+      '<div class="card chiffre"><b>56 %</b><span>des participants souhaitent garder le contact</span></div>' +
+      '<p class="small center">Tarif : sur étude, selon votre événement.</p>' +
+      foot(btn('Prendre rendez-vous', 'data-sheet="rdv"', 'orange', 'cal') + '<div class="center"><button class="lnk" data-go="o-tableau">Voir un super event en cours</button></div>');
   });
   def('o-infos', 'o', 'Super event : nom et dates', function () {
-    return hd('Nouveau super event', { k: 'Étape 1 sur 4', p: 25 }) + '<h1>Votre événement</h1>' +
+    return hd('Nouveau super event', { k: 'Étape 1 sur 4', p: 25 }) + '<h1>Votre événement</h1><p class="sub">Construit avec vous après le rendez-vous.</p>' +
       field('Nom', 'org.nom', S.org.nom) + field('Début', 'org.deb', S.org.deb, 'date') + field('Fin', 'org.fin', S.org.fin, 'date') +
       foot(btn('Continuer', 'data-go="o-lieu"', 'orange'));
   });
@@ -573,9 +574,9 @@
     var h = '';
     for (var i = 0; i < FORMULES_SE.length; i++) {
       var f = FORMULES_SE[i], on = S.org.f[f.id];
-      h += '<label class="card check" style="display:flex"><input type="checkbox" data-act="of" data-v="' + f.id + '"' + (on ? ' checked' : '') + '><span><b>' + f.nom + '</b><br><span class="small">' + f.d + '</span><br><span class="small">Tarif : sur devis, fixé par vous</span></span></label>';
+      h += '<label class="card check" style="display:flex"><input type="checkbox" data-act="of" data-v="' + f.id + '"' + (on ? ' checked' : '') + '><span><b>' + f.nom + '</b><br><span class="small">' + f.d + '</span><br><span class="small">' + f.px + ' · ' + PRIX_SE_NOTE.toLowerCase() + '</span></span></label>';
     }
-    return hd('Nouveau super event', { k: 'Étape 4 sur 4', p: 100 }) + '<h1>Formules pour les commerces</h1>' + h + foot(btn('Publier et inviter les commerces', 'data-go="o-invite"', 'orange', 'send'));
+    return hd('Nouveau super event', { k: 'Étape 4 sur 4', p: 100 }) + '<h1>Formules pour vos partenaires</h1>' + h + foot(btn('Publier et inviter les commerces', 'data-go="o-invite"', 'orange', 'send'));
   });
   def('o-invite', 'o', 'Invitation des commerces', function () {
     return hd('Inviter les commerces', { k: S.org.nom }) + '<div class="card center">' + qr('invite-' + S.org.nom, 170) +
@@ -589,11 +590,14 @@
   def('o-tableau', 'o', 'Tableau de bord organisateur', function () {
     var att = 0, ok = 0;
     for (var i = 0; i < S.demandes.length; i++) { if (S.demandes[i].s === 'att') { att++; } if (S.demandes[i].s === 'ok') { ok++; } }
-    return hd(S.org.nom, { noBack: true, k: 'Super event' }) +
-      '<div class="kpis"><div class="kpi"><b>' + ok + '</b><span>stations</span></div><div class="kpi"><b>' + att + '</b><span>à valider</span></div><div class="kpi"><b>' + jeuById(S.org.jeu).nom.split(' ')[0] + '</b><span>jeu commun</span></div></div>' +
-      tap('inbox', 'orange', 'Demandes à valider', att + ' en attente', 'data-go="o-demandes"') +
-      tap('map', 'orange', 'Carte des stations', ok + ' stations', 'data-go="o-carte"') +
-      tap('qr', 'orange', 'Lien et QR d\'invitation', 'À envoyer aux commerces', 'data-go="o-invite"');
+    var ou = [['Librairie Exemple', 212], ['Place centrale (exemple)', 168], ['Café Exemple', 94]], l = '';
+    for (var k = 0; k < ou.length; k++) { l += '<li><span class="pic orange">' + ic('map') + '</span><span class="grow">' + ou[k][0] + '</span><b>' + ou[k][1] + '</b></li>'; }
+    return hd(S.org.nom, { noBack: true, k: 'Flowin Super Event' }) +
+      '<div class="kpis"><div class="kpi"><b>474</b><span>joueurs</span></div><div class="kpi"><b>265</b><span>contacts</span></div><div class="kpi"><b>' + ok + '</b><span>stations jeu</span></div></div>' +
+      '<div class="card"><div class="form-tag">Où les gens ont joué (exemple)</div><ul class="list" style="margin-top:4px">' + l + '</ul></div>' +
+      tap('inbox', 'orange', 'Demandes des partenaires', att + ' en attente', 'data-go="o-demandes"') +
+      tap('map', 'orange', 'Carte des stations jeu', ok + ' stations jeu', 'data-go="o-carte"') +
+      tap('qr', 'orange', 'Lien et QR d\'invitation', 'À envoyer à vos partenaires', 'data-go="o-invite"');
   }, { tabs: 'org' });
   def('o-demandes', 'o', 'Demandes à valider', function () {
     var h = '';
@@ -702,8 +706,28 @@
         '<label class="f"><span>Nom du support</span><input class="in" id="qa-n" placeholder="ex. Flyer du marché"></label>' +
         '<div class="row wrap" style="gap:6px">' + h + '</div>' + btn('Créer ce QR', 'data-act="qr-add"', '', 'plus') };
     },
+    'lot-stock': function (v) {
+      var l = S.lots[+v] || S.lots[0];
+      return { t: 'Stock : ' + l.titre, h: '<p class="sub">' + l.qte + ' à gagner au total.</p>' +
+        btn('Réapprovisionner', 'data-act="stock" data-v="' + v + '" data-s="1"', 'line', 'plus') +
+        btn('Retirer (perte ou casse)', 'data-act="stock" data-v="' + v + '" data-s="-1"', 'line', 'x') };
+    },
+    payer: function () {
+      var m = S.paie === 'mois';
+      return { t: 'Publier votre animation', h: '<p class="sub">Votre jeu est prêt. Choisissez votre abonnement Flowin Animation.</p>' +
+        '<div class="opts">' +
+        '<button class="opt' + (m ? ' on' : '') + '" data-act="paie" data-v="mois">' + ic('cal') + '<span class="grow">Au mois</span><b>110 € HT / mois</b></button>' +
+        '<button class="opt' + (m ? '' : ' on') + '" data-act="paie" data-v="an">' + ic('star') + '<span class="grow">À l\'année</span><b>990 € HT / an</b></button></div>' +
+        (S.formule === 'kit' ? '<p class="small">Kit imprimé : prix communiqué avec votre commande [prix du kit à compléter].</p>' : '') +
+        '<p class="small">Démo : aucun paiement réel.</p>' + btn('Payer et publier', 'data-act="publier"', '', 'lock') };
+    },
+    rdv: function () {
+      return { t: 'Prendre rendez-vous', h: '<p class="sub">Parlons de votre événement. Choisissez comment nous joindre.</p>' +
+        btn('Par WhatsApp', 'data-demo="WhatsApp s\'ouvrirait vers [numéro WhatsApp à compléter]."', 'orange', 'chat') +
+        btn('Par email', 'data-demo="Un email s\'ouvrirait vers [adresse email à compléter]."', 'line', 'mail') };
+    },
     station: function () {
-      return { t: 'Votre station', h: '<div class="row">' + logoBoutique() + '<div><b>' + esc(S.etab.nom || 'Boutique Exemple') + '</b><br><span class="small">Station du jeu</span></div></div>' +
+      return { t: 'Votre station jeu', h: '<div class="row">' + logoBoutique() + '<div><b>' + esc(S.etab.nom || 'Boutique Exemple') + '</b><br><span class="small">Station jeu</span></div></div>' +
         '<p class="sub">Les joueurs viennent scanner votre QR de station et découvrent votre commerce.</p>' + btn('Fermer', 'data-close', 'line') };
     },
     etab: function () {
@@ -779,15 +803,15 @@
         if (cur === 'p-etab') { refresh(); }
       }, 900);
     },
-    'creer-compte': function () { hist = []; render('p-bienvenue', 'in'); },
+    'creer-compte': function () { hist = ['p-dash']; render('p-jeu', 'in'); toast('Votre espace est créé. Créez votre jeu.'); },
     jeu: function (el) { S.jeu = el.getAttribute('data-v'); refresh(); },
     'jeu-close': function (el) { S.jeu = el.getAttribute('data-v'); closeSheet(); if (cur === 'p-jeu') { refresh(); } else { go('p-jeu'); } },
     formule: function (el) { S.formule = el.getAttribute('data-v'); refresh(); },
     gen: function () {
       S.gen = 'loading'; refresh();
       setTimeout(function () {
-        S.qs = pickQuestions(5); S.gen = 'done';
-        if (cur === 'p-questions') { refresh(); }
+        S.qs = pickQuestions(3); S.gen = 'done';
+        if (cur === 'p-jeu') { refresh(); }
         if (!/route|routi|conduite|permis/i.test(S.theme_q)) { toast('Démo : l\'assistant propose ici des questions de sécurité routière.'); }
       }, 1100);
     },
@@ -799,7 +823,16 @@
       for (var i = 0; i < q.r.length; i++) { q.r[i] = document.getElementById('qe-r' + i).value; }
       q.v = true; closeSheet(); refresh();
     },
-    'q-all': function () { for (var i = 0; i < S.qs.length; i++) { S.qs[i].v = true; } go('p-lots'); },
+    'jeu-next': function () {
+      if (S.jeu === 'quiz' && S.gen !== 'done') { toast('Générez d\'abord vos questions.'); return; }
+      for (var i = 0; i < S.qs.length; i++) { S.qs[i].v = true; }
+      go('p-lots');
+    },
+    paie: function (el) { S.paie = el.getAttribute('data-v'); closeSheet(); openSheet('payer'); },
+    stock: function (el) {
+      var l = S.lots[+el.getAttribute('data-v')], d = +el.getAttribute('data-s');
+      l.qte = Math.max(l.hist.length, l.qte + d); closeSheet(); refresh(); toast(d > 0 ? 'Un lot ajouté au stock.' : 'Un lot retiré du stock.');
+    },
     'lot-save': function () {
       var t = document.getElementById('la-t').value || 'Nouveau lot';
       var c = document.getElementById('la-c').value || '[conditions à compléter]';
@@ -822,7 +855,7 @@
       try { if (navigator.clipboard) { navigator.clipboard.writeText(u).then(null, function () { }); } } catch (e) { }
       toast('Lien copié (démo).');
     },
-    se: function (el) { S.se = el.getAttribute('data-v'); go('p-se-event'); },
+    se: function (el) { S.se = el.getAttribute('data-v'); go('p-se-formule'); },
     seF: function (el) { S.seF = el.getAttribute('data-v'); refresh(); },
     'se-send': function () { S.seEnvoye = true; S.steps[2] = true; render('p-se-envoye', 'in'); hist.push('p-dash'); },
     'se-dem': function () { S.seDemande = true; go('p-se-demande-ok'); },
@@ -903,8 +936,7 @@
     ev.preventDefault(); closeSheet();
     var id = a.getAttribute('data-jump');
     if (id === 'p-etab' && !S.etab.found) { /* laisse l'effet de pré-remplissage à montrer */ }
-    if (id === 'p-questions' && S.gen === 'idle') { /* idem : bouton Générer */ }
-    if (id === 'p-se-event' && !S.se) { S.se = 'fe'; }
+    if (id === 'p-se-formule' && !S.se) { S.se = 'fe'; }
     if (id === 'j-quiz') { S.rep = null; }
     go(id);
   });
