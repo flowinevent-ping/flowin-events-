@@ -2,6 +2,10 @@
 
 À lire en ouvrant une nouvelle session, après `CLAUDE.md` et `docs/DECISIONS-flowin-event.md`.
 
+**Règle de continuité (Romain, 08/11/2026)** : Romain reste dans la même conversation et ne gère
+aucune passation. C'est Claude qui tient ce fichier à jour à chaque étape et qui, si besoin, ouvre
+lui-même une autre session en lui donnant ce fichier comme point de départ.
+
 ## Où on en est
 - **En ligne** : migration de sécurité (écritures réservées à l'admin, PIN obligatoire au retrait),
   connexion obligatoire au dashboard admin, corrections d'affichage (tiroirs, « Créer un pro »,
@@ -23,7 +27,7 @@
    crée une banque au simple affichage.
 
 ## Ordre de travail recommandé (session suivante)
-1. **Corriger le cadrage** selon le cahier des charges design (effet jeu, couleurs du commerçant,
+1. ~~Corriger le cadrage~~ (fait le 08/11 : positionnement, vocabulaire, couleurs du commerçant). Précédemment : corriger le cadrage selon le cahier des charges design (effet jeu, couleurs du commerçant,
    carte de fidélité interactive, privilèges, attractivité) et l'objectif de conversion.
 2. **Audit critique design / ergonomie / architecture** (un agent, sévère), mesuré à ce cahier et à
    la conversion, sur : Visite guidée, plaquette Super Event, plaquette commerce, jeu côté joueur.

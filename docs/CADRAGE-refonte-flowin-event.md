@@ -4,6 +4,22 @@ Une page, validée une fois par Romain. Ce sont des **variables appliquées part
 jamais réglées écran par écran. Source technique : `admin/public/flowin-tokens.css`
 (ne pas inventer d'autre valeur). Décisions de fond : `docs/DECISIONS-flowin-event.md`.
 
+## Positionnement (détail dans DECISIONS)
+- **Flowin Animation** : acquérir un CRM et animer votre fichier client ; lots qui font revenir le
+  client (validation, dates de validité, périodes choisies) ; capter les passants ; mesurer chaque
+  campagne par un QR digital par support ; centraliser les campagnes de jeu.
+- **Flowin Super Event** : visibilité des sponsors du développement local (même sans lots), accès des
+  petits commerces, présence aux côtés des partenaires officiels. Exemple : Nuits du Sud, Vence.
+- Chaque écran vend un **résultat**, le jeu est le moyen.
+
+## Direction artistique
+- Pas de photo comme base : **animation de qualité** et **vidéo interactive** (entre présentation
+  et tuto). Messages : simplicité, bénéfice, immédiateté, plug and play, « Vous testez, vous essayez ».
+- Visuel central : le cycle animé QR → partie → contact → lot retiré en boutique.
+- Palette ci-dessous = marque et écrans pro/admin. **Le jeu côté joueur prend les couleurs du
+  commerçant** (logo, couleur principale) : comme sa carte de fidélité, mais interactive, avec de
+  vrais privilèges.
+
 ## Publics et ton
 | Public | Ton | Bouton d'action unique |
 |---|---|---|
