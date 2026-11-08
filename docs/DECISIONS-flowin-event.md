@@ -123,3 +123,24 @@ que sur instruction explicite de Romain.
 - **Demande portée par les clients** : sur la carte, un client peut envoyer un email ou une
   demande au commerce pour qu'il adhère à Flowin (ou rejoigne une animation). La demande d'adhésion
   vient aussi des clients.
+
+## Positionnement produit (08/11/2026, corrigé par Romain)
+
+- **Flowin Animation** est un outil commercial, pas un simple jeu :
+  1. **Acquérir un CRM**, ou réveiller un fichier clients existant souvent dormant faute d'animation.
+  2. **Distribution automatisée des lots** qui fait **revenir le client** en boutique : retrait du lot
+     avec validation, dates de validité, calées sur les meilleures périodes pour activer le commerce.
+  3. **Attirer du trafic** dans le commerce et chez les partenaires Flowin alentour.
+  4. **Outil de tracking** : chaque support a son QR digital, toutes les campagnes de communication
+     sont quantifiées.
+  5. **Centraliser** toutes les campagnes de jeu du commerce.
+- **Flowin Super Event** permet :
+  1. aux sponsors sans lots à offrir (ex. assurance) d'être visibles comme **sponsors du
+     développement local** auprès des festivaliers ;
+  2. aux petits commerces de rejoindre des événements habituellement hors de portée (levier,
+     pas forcément argument affiché) ;
+  3. aux concurrents des partenaires officiels d'être présents.
+  - Exemple de référence : **Nuits du Sud, Vence**.
+- **Direction artistique** : pas de pari sur la photo (difficile à obtenir). On mise sur une
+  **animation de qualité** et la **vidéo interactive**, à mi-chemin entre présentation produit et
+  tuto. Messages : simplicité, bénéfice, immédiateté, plug and play — **« Vous testez, vous essayez. »**
