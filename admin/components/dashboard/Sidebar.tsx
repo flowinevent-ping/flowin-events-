@@ -1,4 +1,5 @@
 'use client'
+import { deconnecterSA } from '@/lib/saSession'
 
 import { useEffect, useState } from 'react'
 import { usePathname, useRouter } from 'next/navigation'
@@ -323,6 +324,11 @@ export default function Sidebar() {
           <div className="sa-sb-username">Romain</div>
           <div className="sa-sb-userrole">Super Admin</div>
         </div>
+        <button type="button" className="sa-sb-logout" title="Se déconnecter" aria-label="Se déconnecter"
+          onClick={() => { deconnecterSA(); window.location.reload() }}
+          style={{ marginLeft: 'auto', border: '1px solid rgba(255,255,255,.18)', background: 'transparent', color: 'inherit', borderRadius: 8, padding: '6px 10px', fontSize: 12, fontWeight: 700, cursor: 'pointer', minHeight: 36 }}>
+          Déconnexion
+        </button>
       </div>
     </div>
     </>

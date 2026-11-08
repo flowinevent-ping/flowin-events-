@@ -58,25 +58,9 @@ export default function GardeSA({ children }: { children: React.ReactNode }) {
     await verifier()
   }
 
-  function seDeconnecter() {
-    deconnecterSA()
-    setEtat('connexion')
-  }
-
-  if (etat === 'ok') {
-    return (
-      <>
-        {children}
-        <button
-          type="button"
-          onClick={seDeconnecter}
-          style={{ position: 'fixed', right: 14, bottom: 14, zIndex: 9999, padding: '8px 14px', borderRadius: 10, border: '1px solid #d9dde6', background: '#fff', color: '#141a26', fontSize: 13, fontWeight: 700, cursor: 'pointer', boxShadow: '0 2px 8px rgba(0,0,0,.08)' }}
-        >
-          Se déconnecter
-        </button>
-      </>
-    )
-  }
+  /* Déconnexion : bouton dans le bloc utilisateur du menu (Sidebar), pas un
+     bouton flottant qui recouvrait « Suivant » et le pied des tiroirs. */
+  if (etat === 'ok') return <>{children}</>
 
   const champ: React.CSSProperties = { width: '100%', boxSizing: 'border-box', padding: '12px 13px', borderRadius: 11, border: '1.5px solid #d9dde6', fontSize: 15, fontFamily: 'inherit', marginBottom: 12 }
   return (
@@ -85,6 +69,7 @@ export default function GardeSA({ children }: { children: React.ReactNode }) {
         <div style={{ color: '#5a6071' }}>Vérification de la session…</div>
       ) : (
         <form onSubmit={seConnecter} style={{ width: '100%', maxWidth: 380, background: '#fff', borderRadius: 16, padding: '26px 22px', border: '1px solid #e4e7ee' }}>
+          <div style={{ fontSize: 24, fontWeight: 900, letterSpacing: '-.02em', color: '#1B3A5C', marginBottom: 14 }}>Flow<span style={{ color: '#3B5CC4' }}>in</span></div>
           <div style={{ fontSize: 20, fontWeight: 800, marginBottom: 4 }}>Dashboard Flowin</div>
           <div style={{ fontSize: 13.5, color: '#5a6071', marginBottom: 18 }}>Connexion Super Admin requise.</div>
           <input type="email" autoComplete="username" placeholder="Email" value={email} onChange={e => setEmail(e.target.value)} style={champ} required />
