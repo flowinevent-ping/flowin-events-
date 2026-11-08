@@ -145,9 +145,9 @@
 
   var JEUX = [
     { id: 'quiz', nom: 'Quiz + bonus', ic: 'trophy', d: 'Des questions, puis un petit sondage. Idéal pour faire connaître votre métier.', col: '#3B5CC4' },
-    { id: 'roue', nom: 'Roue', ic: 'wheel', d: 'Le joueur tourne la roue et découvre son lot tout de suite.', col: '#7A4FE0' },
+    { id: 'roue', nom: 'Roue', ic: 'wheel', d: 'Le joueur tourne la roue et découvre son lot tout de suite.', col: '#00B4A0' },
     { id: 'vote', nom: 'Vote', ic: 'vote', d: 'Vos clients votent pour leur produit préféré.', col: '#1B3A5C' },
-    { id: 'tombola', nom: 'Tombola', ic: 'ticket', d: 'Chaque participant reçoit un ticket, tirage au sort à la fin.', col: '#5B34C2' }
+    { id: 'tombola', nom: 'Tombola', ic: 'ticket', d: 'Chaque participant reçoit un ticket, tirage au sort à la fin.', col: '#00806F' }
   ];
 
   var EVENTS = [
@@ -239,7 +239,7 @@
   function def(id, g, label, r, o) { SCREENS[id] = { g: g, label: label, r: r, tabs: o && o.tabs }; ORDER.push(id); }
 
   def('accueil', 'c', 'Accueil à 3 portes', function () {
-    return '<div class="hd"><span class="ib ghost"></span><div class="t"><span class="logo">Flow<b>in</b> Event</span></div>' +
+    return '<div class="hd"><div class="t" style="text-align:left"><span class="logo">Flow<b>in</b> Event</span></div>' +
       '<button class="ib" data-act="theme" aria-label="Changer de thème">' + ic(isDark() ? 'sun' : 'moon') + '</button></div>' +
       '<div class="kick">Animer · Booster · Fidéliser</div>' +
       '<h1>Faites jouer vos clients.</h1><p class="sub">Des jeux simples, en boutique ou dans un événement. Qui êtes-vous ?</p>' +
@@ -291,6 +291,16 @@
       '<p class="small">Démo : vous pouvez continuer même sans mot de passe.</p>';
   }
 
+  def('p-valid', 'p', '3 bis. Compte en validation', function () {
+    function st(n, t) { return '<div class="check-step"><span class="dot">' + n + '</span><span>' + t + '</span></div>'; }
+    return hd('Votre compte', { noBack: true, k: 'Étape 3 sur 8', p: 40 }) + '<div class="big-ok">' + ic('check') + '</div>' +
+      '<h1 class="center">Votre espace est créé</h1><p class="sub center">Votre compte est en cours de validation.</p>' +
+      '<div class="card"><b>Et après ?</b>' + st(1, 'Nous vérifions votre SIRET et vos coordonnées.') + st(2, 'Vous recevez un email de confirmation.') +
+      st(3, 'Votre commerce rejoint les partenaires Flowin Event.') + '</div>' +
+      '<p class="small center">En attendant, vous pouvez déjà créer votre animation.</p>' +
+      foot(btn('Créer mon animation', 'data-act="valid-go"', '', 'plus') + btn('Voir mon tableau de bord', 'data-act="valid-dash"', 'line', 'home'));
+  });
+
   /* ===== PRO : espace ===== */
   function stepsDone() { var n = 0; for (var i = 0; i < 3; i++) { if (S.steps[i]) { n++; } } return n; }
   function animCards() {
@@ -313,11 +323,12 @@
     return hd('Accueil', { noBack: true, k: S.etab.nom || 'Boutique Exemple' }) +
       '<div class="hero-pro"><div class="kick" style="color:#fff;opacity:.8">Bonjour ' + esc(S.pro.prenom) + '</div>' +
       '<h1>' + (S.publie ? 'Votre animation est en ligne.' : 'Prêt à faire jouer vos clients ?') + '</h1>' +
-      '<button class="btn" style="background:#fff;color:#5B34C2" data-go="p-jeu">' + ic('plus') + (S.publie ? 'Créer une autre animation' : 'Créer ma première animation') + '</button></div>' +
+      '<button class="btn" style="background:#fff;color:#1B3A5C" data-go="p-jeu">' + ic('plus') + (S.publie ? 'Créer une autre animation' : 'Créer ma première animation') + '</button></div>' +
       '<div class="card"><div class="row"><b class="grow">Pour démarrer</b><span class="chip violet">' + n + ' sur 3</span></div>' +
       '<div class="prog" style="margin:10px 0 4px"><i style="width:' + Math.round(n / 3 * 100) + '%"></i></div>' +
       st(0, 'Créer votre animation', 'p-jeu') + st(1, 'Afficher votre QR code', 'p-qr') + st(2, 'Rejoindre un super event', 'p-se-carte') + '</div>' +
       '<h2 class="h">Mes animations</h2>' + animCards() +
+      tap('chart', 'bleu', 'Rapports', 'Personnes venues, contacts, hommes et femmes, réponses', 'data-go="p-rapports"') +
       tap('eye', 'bleu', 'Où mon commerce apparaît', 'Carte, page du jeu, billet gagnant', 'data-go="p-visible"') +
       tap('flag', 'orange', 'Participer à un super event', 'Festivals et événements près de chez vous', 'data-go="p-se-carte"');
   }, { tabs: 'pro' });
@@ -384,6 +395,17 @@
       f('kit', 'Kit imprimé livré par Flowin Event', 'box', ['Tout le digital', 'Affiche et chevalet de comptoir avec votre QR', 'Livré dans votre commerce']) +
       foot(btn('Voir l\'aperçu', 'data-go="p-apercu"'));
   });
+  def('p-rapports', 'p', 'Rapports', function () {
+    function b(t, v) { return '<div class="row"><span class="grow">' + t + '</span><b>' + v + ' %</b></div><div class="rap-bar"><i style="width:' + v + '%"></i></div>'; }
+    return hd('Rapports', { k: 'Roue de printemps (exemple)' }) + '<h1>Ce que votre animation a produit</h1>' +
+      '<div class="rap-k"><div class="card"><b>412</b><span class="small">personnes venues jouer</span></div><div class="card"><b>268</b><span class="small">contacts dans votre fichier client</span></div>' +
+      '<div class="card"><b>37</b><span class="small">lots remis en boutique</span></div><div class="card"><b>41 ans</b><span class="small">âge moyen</span></div></div>' +
+      '<div class="card"><b>Qui a joué</b>' + b('Femmes', 58) + b('Hommes', 39) + '<span class="small">Non renseigné : 3 %</span></div>' +
+      '<div class="card"><b>D\'où ils viennent</b>' + b('QR vitrine', 46) + b('QR Facebook', 31) + b('QR caisse', 23) + '</div>' +
+      '<div class="card"><b>Réponses au jeu</b><p class="small" style="margin:6px 0 0">« Comment nous avez-vous connus ? » : bouche à oreille 44 %, réseaux 35 %, passage 21 %.</p></div>' +
+      '<p class="small center">Chiffres d\'exemple.</p>' +
+      foot(btn('Exporter mon fichier client', 'data-demo="Le fichier client se téléchargerait au format tableur."', 'line', 'down'));
+  }, { tabs: 'pro' });
   def('p-apercu', 'p', '7. Aperçu et publication', function () {
     function r(t, v, go) { return '<li><span class="grow"><span class="small">' + t + '</span><br><b>' + esc(v) + '</b></span><button class="lnk" data-go="' + go + '">Modifier</button></li>'; }
     var nq = S.qs.length || 3, nom = S.etab.nom || 'Boutique Exemple';
@@ -460,7 +482,7 @@
     function st(n, t) { return '<div class="check-step"><span class="dot">' + n + '</span><span>' + t + '</span></div>'; }
     return hd('Demande envoyée', { noBack: true }) + '<div class="big-ok">' + ic('send') + '</div><h1 class="center">Demande envoyée</h1>' +
       '<div class="card"><b>Et après ?</b>' + st(1, 'L\'organisateur valide sous 24 à 48 h.') + st(2, 'Vous recevez un email de confirmation.') +
-      st(3, 'Votre station jeu apparaît sur la carte de l\'événement.') + st(4, 'Vous recevez le QR de votre station jeu.') + '</div>' +
+      st(3, 'Vous réglez par virement (coordonnées dans l\'email).') + st(4, 'Votre station jeu apparaît sur la carte et vous recevez son QR.') + '</div>' +
       foot(btn('Suivre mes festivals', 'data-go="p-festivals"') + btn('Retour au tableau de bord', 'data-go="p-dash"', 'line'));
   });
   def('p-se-demande', 'p', 'Super event : demander une création', function () {
@@ -719,7 +741,9 @@
         '<button class="opt' + (m ? ' on' : '') + '" data-act="paie" data-v="mois">' + ic('cal') + '<span class="grow">Au mois</span><b>110 € HT / mois</b></button>' +
         '<button class="opt' + (m ? '' : ' on') + '" data-act="paie" data-v="an">' + ic('star') + '<span class="grow">À l\'année</span><b>990 € HT / an</b></button></div>' +
         (S.formule === 'kit' ? '<p class="small">Kit imprimé : prix communiqué avec votre commande [prix du kit à compléter].</p>' : '') +
-        '<p class="small">Démo : aucun paiement réel.</p>' + btn('Payer et publier', 'data-act="publier"', '', 'lock') };
+        '<div class="card" style="margin:10px 0"><b>Règlement par virement</b><p class="small" style="margin:4px 0">Bénéficiaire : BAITA EURL</p>' +
+        '<div class="rib">IBAN [à compléter]</div><div class="rib">BIC [à compléter]</div><p class="small" style="margin:4px 0 0">Référence : ANIM-' + (S.paie === 'mois' ? 'M' : 'A') + '-[n°]. Votre animation passe en ligne à réception.</p></div>' +
+        '<p class="small">Démo : aucun paiement réel.</p>' + btn('J\'ai fait le virement, publier', 'data-act="publier"', '', 'send') };
     },
     rdv: function () {
       return { t: 'Prendre rendez-vous', h: '<p class="sub">Parlons de votre événement. Choisissez comment nous joindre.</p>' +
@@ -803,7 +827,7 @@
         if (cur === 'p-etab') { refresh(); }
       }, 900);
     },
-    'creer-compte': function () { hist = ['p-dash']; render('p-jeu', 'in'); toast('Votre espace est créé. Créez votre jeu.'); },
+    'creer-compte': function () { hist = []; render('p-valid', 'in'); },
     jeu: function (el) { S.jeu = el.getAttribute('data-v'); refresh(); },
     'jeu-close': function (el) { S.jeu = el.getAttribute('data-v'); closeSheet(); if (cur === 'p-jeu') { refresh(); } else { go('p-jeu'); } },
     formule: function (el) { S.formule = el.getAttribute('data-v'); refresh(); },
@@ -857,6 +881,8 @@
     },
     se: function (el) { S.se = el.getAttribute('data-v'); go('p-se-formule'); },
     seF: function (el) { S.seF = el.getAttribute('data-v'); refresh(); },
+    'valid-go': function () { hist = ['p-dash']; render('p-jeu', 'in'); },
+    'valid-dash': function () { hist = []; render('p-dash', 'in'); },
     'se-send': function () { S.seEnvoye = true; S.steps[2] = true; render('p-se-envoye', 'in'); hist.push('p-dash'); },
     'se-dem': function () { S.seDemande = true; go('p-se-demande-ok'); },
     vis: function (el) { S.visTab = el.getAttribute('data-v'); refresh(); },
