@@ -303,14 +303,38 @@
   .p3 .ic{width:40px;height:40px;color:#3B5CC4;flex:none}
   .bul3.big.b2 div{font-size:19px}
   @media (max-height:780px){ .fl2 .nd .ic{width:28px;height:28px} .fl2 p{margin-top:4px} .fl2 .fr{margin-top:5px} .gw{margin-top:7px;gap:4px} .gw div{padding:3px 8px} .flow2{gap:7px;margin-top:8px} .fl2{padding:6px 8px 8px} }
+  /* Refonte 08/11/2026 : parcours festivalier, gains, mesure, preuve en gros chiffres, rendez-vous WhatsApp / email */
+  .eyebrow{font-size:13px}
+  .st4{grid-template-columns:1fr}
+  .t4 .pic.ip{width:56px;height:56px;display:flex;align-items:center;justify-content:center;background:#FFF3C4;border:2px solid #1B2F5C;border-radius:12px}
+  .t4 .pic.ip .ic{width:30px;height:30px;color:#1B2F5C}
+  .st4 .t4{padding:6px 12px 6px 8px}
+  .st4 .t4 .d{font-size:15px}
+  .sv.sv-s{width:min(100%,max(210px,calc((100vh - 560px) * var(--ar,1.2))))}
+  .gw.g2 div{background:#fff;padding:8px 12px}
+  .gw.g2 b{display:block;font-size:17px;color:#3B5CC4}
+  .gw.g2 span{display:block;font-size:15px;font-weight:700}
+  .ben6.m4{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .pbig div{flex-direction:column;gap:4px;padding:14px 12px}
+  .pbig b{font-size:64px}
+  .pbig span{text-align:center;font-size:18px}
+  .pbig .pre{font-style:normal;font-size:18px;font-weight:900;color:#1B2F5C;margin-bottom:-6px}
+  .rdvb{width:100%;max-width:420px;min-height:50px;border-radius:100px}
+  .rdvn{margin-top:10px;font-size:15px;font-weight:700;color:#44557F}
+  .rdvc{display:flex;flex-direction:column;gap:12px;padding:18px;max-width:420px;margin:18px auto 0}
+  .rdvc .btn{min-height:50px;font-size:17px;width:100%}
+  .rdvc .btn .ic{width:22px;height:22px}
+  .rdvp{font-size:14px;color:#44557F;font-weight:700}
+  @media (min-width:900px){ .st4{grid-template-columns:repeat(4,minmax(0,1fr))} .ben6.m4{grid-template-columns:repeat(4,minmax(0,1fr))} .pbig b{font-size:88px} }
+  @media (max-height:760px){ .pbig b{font-size:52px} .pbig div{padding:10px} .st4 .t4 .d{font-size:14.5px} }
 </style>
 </head>
 <body>
 
 <div class="menu">
   <span class="lg" id="brand">Flow<em>in</em></span>
-  <span class="aud2">Organisateurs &amp; institutions</span>
-  <a class="h cmd" id="topCta" href="#rappel">&Ecirc;tre contact&eacute;</a>
+  <span class="aud2">Organisateurs &amp; associations</span>
+  <a class="h cmd" id="topCta" href="#rappel">Prendre rendez-vous</a>
   <button class="burger" id="burger" type="button" aria-label="Menu"><span></span><span></span><span></span></button>
 </div>
 <div class="prog" id="prog"></div>
@@ -320,7 +344,7 @@
   <button class="dx" id="dClose" type="button" aria-label="Fermer">&times;</button>
   <div class="dlg">Flow<em>in</em></div>
   <div id="dLinks"></div>
-  <a class="cta" href="#rappel" id="dCta">&Ecirc;tre contact&eacute;</a>
+  <a class="cta" href="#rappel" id="dCta">Prendre rendez-vous</a>
   <a class="cta2" href="/plaquette-animation-magasin.html">Vous &ecirc;tes commer&ccedil;ant ?</a>
 </aside>
 
@@ -362,59 +386,58 @@
 
 <div class="stage" id="stage">
 
-  <!-- 1. ACCROCHE -->
-  <section class="pg pg-super on" id="hero" data-titre="Un &eacute;v&eacute;nement, ses partenaires">
+  <!-- 1. PROMESSE -->
+  <section class="pg pg-super on" id="hero" data-titre="Un &eacute;v&eacute;nement, un seul jeu">
     <div class="in sev">
-      <div class="herohead"><div class="logo fl">Flow<em>in</em></div><div class="aud">Organisateurs &amp; institutions</div></div>
-      <svg class="sel" role="img" aria-label="Super event" viewBox="0 0 437.4 92.6"><use href="#fl-super-event"/></svg>
-      <h2>Animez vos <em>futurs participants</em>.</h2>
+      <div class="herohead"><div class="logo fl">Flow<em>in</em></div><div class="aud">Organisateurs &amp; associations</div></div>
+      <svg class="sel" role="img" aria-label="Flowin Super Event" viewBox="0 0 437.4 92.6"><use href="#fl-super-event"/></svg>
+      <h2>Un &eacute;v&eacute;nement. Tous ses partenaires. <em>Un seul jeu.</em></h2>
       <div class="sv" style="--ar:1.18" data-v="1"></div>
-      <p class="cp">Un jeu au th&egrave;me de votre &eacute;v&eacute;nement, avec tous ses partenaires.</p>
+      <p class="cp">Un seul jeu dans tous les commerces de votre territoire : vos partenaires diffusent votre &eacute;v&eacute;nement, en boutique et en ligne.</p>
     </div>
   </section>
 
-  <!-- 2. ANIMER : AVANT, PENDANT, APRÈS -->
-  <section class="pg pg-super" id="temps" data-titre="Animer, communiquer, faire participer">
+  <!-- 2. LE PARCOURS D'UN FESTIVALIER : scène vécue -->
+  <section class="pg pg-super" id="parcours" data-titre="Le parcours d&rsquo;un festivalier">
+    <div class="in sev">
+      <div class="se-eye">Une sc&egrave;ne vraie</div>
+      <h2>Il joue chez le boulanger, <em>il revient chercher son lot</em>.</h2>
+      <div class="temps4 st4">
+        <div class="t4"><div class="pic ip"><svg class="ic"><use href="#i-pain"/></svg></div><div><span class="nb">1</span><b>Il ach&egrave;te son pain</b><span class="d">En caisse, le macaron du festival : il flashe le QR.</span></div></div>
+        <div class="t4"><div class="pic ip"><svg class="ic"><use href="#i-quiz"/></svg></div><div><span class="nb">2</span><b>Il r&eacute;pond au quiz</b><span class="d">Trois questions sur votre &eacute;v&eacute;nement, une minute.</span></div></div>
+        <div class="t4"><div class="pic ip"><svg class="ic"><use href="#i-gift"/></svg></div><div><span class="nb">3</span><b>Il gagne un lot</b><span class="d">&Agrave; retirer chez le boulanger, plus un ticket pour le grand tirage.</span></div></div>
+        <div class="t4"><div class="pic ip"><svg class="ic"><use href="#i-vitrine"/></svg></div><div><span class="nb">4</span><b>Il revient en boutique</b><span class="d">Et joue chez les autres partenaires jusqu&rsquo;au festival.</span></div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 3. CE QUE GAGNENT L'ORGANISATEUR ET LES COMMERCES -->
+  <section class="pg pg-super" id="gains" data-titre="Ce que chacun y gagne">
+    <div class="in sev">
+      <div class="se-eye">Gagnant-gagnant</div>
+      <h2>Vos partenaires <em>diffusent votre &eacute;v&eacute;nement</em>.</h2>
+      <div class="sv sv-s" style="--ar:1.2" data-v="9"></div>
+      <div class="gw g2">
+        <div><b>Vous, l&rsquo;organisateur</b><span>Votre &eacute;v&eacute;nement en vitrine, en caisse et sur les r&eacute;seaux de chaque partenaire. Des contacts de participants, avec leur accord.</span></div>
+        <div><b>Vos commerces partenaires</b><span>Du passage en boutique, la visibilit&eacute; de l&rsquo;&eacute;v&eacute;nement, des clients qui reviennent chercher leur lot.</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 4. AVANT, PENDANT, APRÈS -->
+  <section class="pg pg-super" id="temps" data-titre="Avant, pendant, apr&egrave;s">
     <div class="in sev">
       <div class="se-eye">Animer, communiquer, faire participer</div>
       <h2>Avant, pendant, <em>apr&egrave;s</em>.</h2>
       <div class="temps4 t3">
-        <div class="t4"><div class="pic" data-s3="2"></div><div><span class="nb">1</span><b>Avant</b><span class="d">Communiquez sur le quiz et les lots &agrave; gagner, dans les stations-jeux de vos partenaires.</span></div></div>
-        <div class="t4"><div class="pic" data-s3="3"></div><div><span class="nb">2</span><b>Pendant</b><span class="d">Des stations-jeux au c&oelig;ur de votre &eacute;v&eacute;nement et chez vos partenaires : tout le monde participe.</span></div></div>
-        <div class="t4"><div class="pic" data-s3="4"></div><div><span class="nb">3</span><b>Apr&egrave;s</b><span class="d">Communiquez sur les lots distribu&eacute;s et remerciez vos partenaires.</span></div></div>
+        <div class="t4"><div class="pic" data-s3="2"></div><div><span class="nb">1</span><b>Avant</b><span class="d">Le quiz et les lots &agrave; gagner annoncent votre &eacute;v&eacute;nement chez tous vos partenaires.</span></div></div>
+        <div class="t4"><div class="pic" data-s3="3"></div><div><span class="nb">2</span><b>Pendant</b><span class="d">Des stations jeu sur le site et chez vos partenaires : tout le monde participe.</span></div></div>
+        <div class="t4"><div class="pic" data-s3="4"></div><div><span class="nb">3</span><b>Apr&egrave;s</b><span class="d">Grand tirage, lots distribu&eacute;s, partenaires remerci&eacute;s : le lien continue.</span></div></div>
       </div>
     </div>
   </section>
 
-  <!-- 3. RÉSEAU QUI DIFFUSE : schéma en 2 temps, gagnant-gagnant -->
-  <section class="pg pg-super" id="carte" data-titre="Un r&eacute;seau qui diffuse">
-    <div class="in sev">
-      <div class="se-eye">Gagnant-gagnant</div>
-      <h2>Un r&eacute;seau qui <em>diffuse votre &eacute;v&eacute;nement</em>.</h2>
-      <div class="flow2">
-        <div class="fl2">
-          <span class="fh"><i>1</i>Avant l&rsquo;&eacute;v&eacute;nement</span>
-          <div class="fr">
-            <div class="nd"><svg class="ic"><use href="#i-event"/></svg><b>Festival</b></div><span class="ar">&rarr;</span>
-            <div class="nd"><svg class="ic"><use href="#i-vitrine"/></svg><b>Stations-jeux</b></div><span class="ar">&rarr;</span>
-            <div class="nd"><svg class="ic"><use href="#i-contact"/></svg><b>Public</b></div>
-          </div>
-          <p>Le festival diffuse son quiz et ses lots &agrave; gagner via les commerces partenaires.</p>
-        </div>
-        <div class="fl2">
-          <span class="fh"><i>2</i>Pendant l&rsquo;&eacute;v&eacute;nement</span>
-          <div class="fr">
-            <div class="nd"><svg class="ic"><use href="#i-contact"/></svg><b>Participants</b></div><span class="ar">&harr;</span>
-            <div class="nd"><svg class="ic"><use href="#i-gift"/></svg><b>Lots des commer&ccedil;ants</b></div>
-          </div>
-          <p>Ils continuent de jouer pour gagner les lots des commer&ccedil;ants.</p>
-        </div>
-      </div>
-      <div class="gw"><div><b>Vous</b> : un r&eacute;seau de diffusion chez les commerces.</div><div><b>Eux</b> : la visibilit&eacute; et le passage de l&rsquo;&eacute;v&eacute;nement.</div></div>
-    </div>
-  </section>
-
-  <!-- 4. QUIZ ET SONDAGES PERSONNALISABLES -->
+  <!-- 5. QUIZ ET SONDAGES PERSONNALISABLES -->
   <section class="pg pg-super" id="quiz" data-titre="Quiz et sondages">
     <div class="in sev">
       <div class="se-eye">Quiz et sondages &agrave; votre image</div>
@@ -424,98 +447,66 @@
         <div class="b6 c-rd"><div class="bi"><svg class="ic"><use href="#i-star"/></svg></div><b>Marque</b><span>Vos couleurs</span></div>
         <div class="b6 c-ye"><div class="bi"><svg class="ic"><use href="#i-quiz"/></svg></div><b>Int&eacute;r&ecirc;t</b><span>Envie de venir</span></div>
         <div class="b6 c-vi"><div class="bi"><svg class="ic"><use href="#i-libre"/></svg></div><b>RSE</b><span>Sondage &eacute;cologie</span></div>
-        <div class="b6 c-wh"><div class="bi"><svg class="ic"><use href="#i-ok"/></svg></div><b>S&eacute;curit&eacute;</b><span>Sondage violence</span></div>
+        <div class="b6 c-wh"><div class="bi"><svg class="ic"><use href="#i-ok"/></svg></div><b>S&eacute;curit&eacute;</b><span>Sondage pr&eacute;vention</span></div>
         <div class="b6 c-sk"><div class="bi"><svg class="ic"><use href="#i-carte"/></svg></div><b>Mobilit&eacute;</b><span>Sondage transports</span></div>
       </div>
     </div>
   </section>
 
-  <!-- 5. COMMUNAUTÉ -->
-  <section class="pg pg-super" id="communaute" data-titre="Une communaut&eacute;">
+  <!-- 6. CE QUE L'ON MESURE POUR VOUS -->
+  <section class="pg pg-super" id="mesure" data-titre="Ce que l&rsquo;on mesure pour vous">
     <div class="in sev">
-      <div class="se-eye">Communaut&eacute;</div>
-      <h2>&Agrave; chaque &eacute;v&eacute;nement, <em>votre communaut&eacute; grandit</em>.</h2>
-      <div class="bul3 big b2">
-        <div><svg class="ic"><use href="#i-contact"/></svg>Vous gardez le contact avec vos participants (avec leur accord).</div>
-        <div><svg class="ic"><use href="#i-jeu"/></svg>Un jeu qui s&rsquo;installe &agrave; chaque &eacute;v&eacute;nement : une solution plug and play, simple &agrave; int&eacute;grer.</div>
+      <div class="se-eye">Le suivi</div>
+      <h2>Ce que l&rsquo;on <em>mesure pour vous</em>.</h2>
+      <div class="ben6 m4">
+        <div class="b6 c-bl"><div class="bi"><svg class="ic"><use href="#i-carte"/></svg></div><b>O&ugrave; ils ont jou&eacute;</b><span>Station par station</span></div>
+        <div class="b6 c-rd"><div class="bi"><svg class="ic"><use href="#i-rapport"/></svg></div><b>Combien</b><span>Participants et parties</span></div>
+        <div class="b6 c-ye"><div class="bi"><svg class="ic"><use href="#i-contact"/></svg></div><b>Contacts recueillis</b><span>Avec leur accord</span></div>
+        <div class="b6 c-vi"><div class="bi"><svg class="ic"><use href="#i-mail"/></svg></div><b>Votre base de donn&eacute;es</b><span>Pour la prochaine &eacute;dition</span></div>
       </div>
+      <p class="cp">Un rapport clair &agrave; la fin de l&rsquo;&eacute;v&eacute;nement : vous savez qui a jou&eacute;, o&ugrave;, et comment le recontacter.</p>
     </div>
   </section>
 
-  <!-- 6. TICKETS ET TIRAGE AU SORT -->
-  <section class="pg pg-super" id="tickets" data-titre="Tickets et tirage au sort">
+  <!-- 7. PREUVE NUITS DU SUD + RENDEZ-VOUS (chiffres autorisés, docs/DECISIONS-flowin-event.md) -->
+  <section class="pg pg-super" id="rdv" data-titre="Nuits du Sud 2026, prendre rendez-vous">
     <div class="in sev">
-      <div class="se-eye">La r&egrave;gle du jeu</div>
-      <h2>&Agrave; chaque station, <em>un quiz</em>.</h2>
-      <div class="bul3 big">
-        <div><svg class="ic"><use href="#i-quiz"/></svg>Chaque bonne r&eacute;ponse fait cumuler des tickets.</div>
-        <div><svg class="ic"><use href="#i-trophee"/></svg>Tirage au sort &agrave; la fin de l&rsquo;&eacute;v&eacute;nement.</div>
+      <div class="se-eye">Nuits du Sud 2026</div>
+      <h2>D&eacute;j&agrave; <em>fait</em>, &agrave; Vence.</h2>
+      <div class="p3 p2 pbig">
+        <div><b>56&nbsp;%</b><span>des participants souhaitent garder le contact</span></div>
+        <div><i class="pre">Plus de</i><b>70</b><span>lots distribu&eacute;s dans les commerces locaux</span></div>
       </div>
-      <p class="cp">Les participants gagnent des lots pour l&rsquo;&eacute;v&eacute;nement, puis, pendant et apr&egrave;s, des lots dans les commerces partenaires.</p>
-    </div>
-  </section>
-
-  <!-- 7. NUITS DU SUD 2026 EN CHIFFRES : valeurs données par Romain (bilan NDS 2026), à changer dans CHIFFRES_NDS (script en bas de page) -->
-  <section class="pg pg-super" id="chiffres" data-titre="En chiffres">
-    <div class="in sev">
-      <div class="se-eye">Le bilan</div>
-      <h2>Nuits du Sud 2026 <em>en chiffres</em>.</h2>
-      <div class="p3 p2">
-        <div><b data-nds="contact"></b><span>des participants souhaitent garder le contact</span></div>
-        <div><b data-nds="lots"></b><span>lots distribu&eacute;s</span></div>
-      </div>
-      <p class="cp">Un jeu qui valorise le tissu et le d&eacute;veloppement local.</p>
       <p class="srcl">Source : bilan Nuits du Sud 2026.</p>
+      <div class="btns cbtns"><button class="cbtn rdvb" type="button" id="cta">Prendre rendez-vous</button></div>
+      <p class="rdvn">Par WhatsApp ou par email, au choix. Tarif sur &eacute;tude de votre &eacute;v&eacute;nement.</p>
     </div>
   </section>
 
-  <!-- 8. SOLUTION PLUG & PLAY + CTA -->
-  <section class="pg pg-super" id="cle" data-titre="Solution Plug &amp; Play">
-    <div class="in sev">
-      <div class="se-eye">Solution Plug &amp; Play</div>
-      <h2>Solution <em>Plug &amp; Play</em>.</h2>
-      <div class="sv" style="--ar:2.4;max-width:520px" data-v="8"></div>
-      <div class="bul3">
-        <div><svg class="ic"><use href="#i-ok"/></svg>Aucune gestion de votre c&ocirc;t&eacute;.</div>
-        <div><svg class="ic"><use href="#i-qr"/></svg>Kits partenaires pr&ecirc;ts &agrave; poser.</div>
-        <div><svg class="ic"><use href="#i-cal"/></svg>Pr&ecirc;t en quelques minutes.</div>
-      </div>
-      <div class="btns cbtns"><button class="cbtn" type="button" id="cta">Parlons de votre prochain &eacute;v&eacute;nement</button></div>
-    </div>
-  </section>
-
-
-  <section class="sheet" id="rappel" aria-label="&Ecirc;tre contact&eacute;">
+  <!-- Prise de rendez-vous : WhatsApp ou email pré-rempli (aucun envoi serveur) -->
+  <section class="sheet" id="rappel" aria-label="Prendre rendez-vous">
     <button class="sx" type="button" data-close="1" aria-label="Fermer">&times;</button>
     <div class="in">
-      <div class="eyebrow">Prise de rendez-vous</div>
+      <div class="eyebrow">Prendre rendez-vous</div>
       <h2>Parlons de votre <em>prochain &eacute;v&eacute;nement</em>.</h2>
-      <form class="card form" id="fRappel" novalidate>
-        <div class="hp" aria-hidden="true"><label for="r_site">Site web</label><input id="r_site" name="site_web" tabindex="-1" autocomplete="off"></div>
-        <div data-r="prenom"><label for="r_prenom">Pr&eacute;nom <i>*</i></label><input id="r_prenom" autocomplete="given-name"></div>
-        <div data-r="nom"><label for="r_nom">Nom <i>*</i></label><input id="r_nom" autocomplete="family-name"></div>
-        <div data-r="entreprise"><label for="r_entreprise">Organisation <i>*</i></label><input id="r_entreprise" autocomplete="organization"></div>
-        <div data-r="ville"><label for="r_ville">Ville <i>*</i></label><input id="r_ville" autocomplete="address-level2"></div>
-        <div data-r="tel"><label for="r_tel">T&eacute;l&eacute;phone <i>*</i></label><input id="r_tel" type="tel" inputmode="tel" autocomplete="tel"></div>
-        <div data-r="email"><label for="r_email">Email <i>*</i></label><input id="r_email" type="email" inputmode="email" autocomplete="email"></div>
-        <div class="full" data-r="creneau"><label for="r_creneau">Cr&eacute;neau pr&eacute;f&eacute;r&eacute;</label><select id="r_creneau"><option value="">Indiff&eacute;rent</option><option>Matin (9h-12h)</option><option>Midi (12h-14h)</option><option>Apr&egrave;s-midi (14h-17h)</option><option>Fin de journ&eacute;e (17h-19h)</option></select></div>
-        <div class="full"><label for="r_message">Message</label><textarea id="r_message" maxlength="1000"></textarea></div>
-        <label class="chk full" id="r_consentRow" style="margin-top:0"><input type="checkbox" id="r_consent"><span>J&rsquo;accepte que Flowin me recontacte au sujet de ma demande. <i style="font-style:normal;color:var(--violet)">*</i></span></label>
-        <div class="full" style="display:flex;align-items:center;gap:12px;flex-wrap:wrap"><button class="btn" type="submit" id="r_send">Demander un rappel</button><span class="fmsg" id="r_msg"></span></div>
-      </form>
-      <div class="card merci" id="r_merci"><svg class="ic"><use href="#i-ok"/></svg><h2 style="font-size:24px">Merci, c&rsquo;est not&eacute; !</h2><p class="lede">Nous vous rappelons au cr&eacute;neau indiqu&eacute;.</p></div>
+      <div class="card rdvc">
+        <a class="btn rdv-wa" id="rdvWa" href="https://wa.me/" target="_blank" rel="noopener"><svg class="ic"><use href="#i-phone"/></svg>Par WhatsApp</a>
+        <a class="btn line rdv-ml" id="rdvMail" href="mailto:"><svg class="ic"><use href="#i-mail"/></svg>Par email</a>
+        <p class="rdvp" id="rdvPh">Message pr&eacute;-rempli, vous l&rsquo;envoyez vous-m&ecirc;me.</p>
+      </div>
     </div>
   </section>
 </div>
 
-<div class="nav" id="nav"><button id="prev" type="button">&larr; Pr&eacute;c&eacute;dent</button><span class="cnt" id="pgn">1 / 8</span><button class="next" id="next" type="button">Suivant &rarr;</button></div>
+<div class="nav" id="nav"><button id="prev" type="button">&larr; Pr&eacute;c&eacute;dent</button><span class="cnt" id="pgn">1 / 7</span><button class="next" id="next" type="button">Suivant &rarr;</button></div>
 
 <script>
 (function(){
   'use strict';
-  var SUPA = 'https://ywcqtupgoxfzkddqkztk.supabase.co';
-  var KEY = 'sb_publishable_yQcGyoh4UdlUCwA96RKSwg_3jMJVVb1'; /* clé publishable : publique par design */
-  var T0 = new Date().getTime();
+  /* Prise de rendez-vous : WhatsApp ou email pré-rempli (décision de Romain, 08/11/2026).
+     Coordonnées Flowin à renseigner ici (jamais inventées) : WHATSAPP au format international sans + ni espace,
+     EMAIL l'adresse de rendez-vous. Tant qu'elles sont vides, WhatsApp et la messagerie demandent le destinataire. */
+  var RDV = { WHATSAPP: '', EMAIL: '' }; /* [à compléter] */
   function $(id){ return document.getElementById(id); }
   function qs(n){ var m = new RegExp('[?&]' + n + '=([^&]+)').exec(location.search); return m ? decodeURIComponent(m[1].replace(/\+/g, ' ')) : null; }
   function n1(x){ return (+x).toFixed(1); }
@@ -530,10 +521,12 @@
   function drawer(on){ $('drawer').className = 'drawer' + (on ? ' on' : ''); $('dim').className = 'dim' + (on ? ' on' : ''); }
   function sheetOpen(){ return $('rappel').className.indexOf(' on') >= 0; }
   function closeSheet(){ $('rappel').className = 'sheet'; }
-  function openSheet(){
-    $('rappel').className = 'sheet on'; $('rappel').scrollTop = 0;
-    if (!trim($('r_message').value)) $('r_message').value = 'Je souhaite parler de mon prochain \u00e9v\u00e9nement.';
+  function rdvLiens(){
+    var txt = 'Bonjour, je souhaite prendre rendez-vous pour parler de mon prochain \u00e9v\u00e9nement avec Flowin Super Event.' + (commercial ? ' (Contact : ' + commercial + ')' : '');
+    $('rdvWa').href = 'https://wa.me/' + RDV.WHATSAPP.replace(/[^0-9]/g, '') + '?text=' + encodeURIComponent(txt);
+    $('rdvMail').href = 'mailto:' + RDV.EMAIL + '?subject=' + encodeURIComponent('Rendez-vous Flowin Super Event') + '&body=' + encodeURIComponent(txt + '\n\nOrganisation : \nVille : \nDates de l\u2019\u00e9v\u00e9nement : \nT\u00e9l\u00e9phone : ');
   }
+  function openSheet(){ rdvLiens(); $('rappel').className = 'sheet on'; $('rappel').scrollTop = 0; }
   function show(i, noHash){
     if (i < 0 || i >= pages.length) return;
     closeSheet();
@@ -577,9 +570,6 @@
   $('stage').addEventListener('scroll', function(){ if (this.scrollLeft || this.scrollTop) { this.scrollLeft = 0; this.scrollTop = 0; } });
 
   /* ---------- Super event : illustrations BD (SVG générés, mêmes briques sur toutes les slides) ---------- */
-  /* Chiffres Nuits du Sud 2026 (donnés par Romain, bilan NDS 2026) : seul endroit à modifier */
-  var CHIFFRES_NDS = { contact: '56 %', lots: 'Plus de 70' };
-  (function(){ var e = document.querySelectorAll('[data-nds]'); for (var i = 0; i < e.length; i++) e[i].textContent = CHIFFRES_NDS[e[i].getAttribute('data-nds')] || ''; })();
   var SK = '#1B2F5C', SR = '#1B2F5C', SA = '#E2231A', SY = '#FFD23F', SC = '#FFF3C4', SBL = '#3B5CC4', SBP = '#A9BCEC', SBG = '#FFFDF5';
   function sTxt(x, y, s, size, o){
     o = o || {}; size = size === 17 ? 19 : (size === 16 ? 18 : size);
@@ -803,17 +793,6 @@
     return sSvg('360 304', g, 'Grand tirage : tickets numérotés, ticket gagnant et podium des partenaires les plus participatifs');
   }
 
-  /* 8. Le kit partenaire */
-  function se8(){
-    var g = '';
-    g += '<rect x="70" y="70" width="220" height="70" rx="6" fill="' + SK + '" transform="translate(4 4)"/><rect x="70" y="70" width="220" height="70" rx="6" fill="' + SY + '" stroke="' + SK + '" stroke-width="3"/><rect x="70" y="70" width="220" height="16" fill="#E8B800" stroke="' + SK + '" stroke-width="3"/>';
-    g += '<g transform="rotate(-8 112 52)"><rect x="92" y="6" width="50" height="68" rx="3" fill="#fff" stroke="' + SK + '" stroke-width="2.4"/><rect x="92" y="6" width="50" height="14" fill="' + SR + '" stroke="' + SK + '" stroke-width="2.4"/><use href="#qrc" x="102" y="26" width="30" height="30"/></g>';
-    g += sMac(190, 46, 22) + sMac(226, 34, 16);
-    g += '<g transform="rotate(10 262 44)"><path d="M240 70 L250 14 L284 14 L294 70z" fill="#fff" stroke="' + SK + '" stroke-width="2.4" stroke-linejoin="round"/><rect x="254" y="22" width="26" height="14" fill="' + SR + '" stroke="' + SK + '" stroke-width="2"/>' + sStar(267, 52, 8, SY) + '</g>';
-    g += sRibbon(180, 100, 214, 34, 'PLUG & PLAY', 20, SK, SY);
-    return sSvg('360 150', g, 'Solution Plug & Play : kit partenaire avec macarons, affiche et QR code');
-  }
-
   /* 10. Communication mutualisée : en local, puis sur une zone plus étendue */
   function seZone(){
     var g = '', i, loc = [[118, 118], [242, 118], [112, 188], [248, 188]], far = [[50, 70], [310, 70], [34, 160], [326, 160], [70, 250], [290, 250], [180, 28]];
@@ -826,44 +805,12 @@
     return sSvg('360 300', g, 'La communication de l\u2019\u00e9v\u00e9nement mutualis\u00e9e : en local, puis sur une zone plus \u00e9tendue, via les partenaires et le jeu');
   }
 
-  var SEV = { 1: se1, 4: seRap, 6: seCarte, 7: se7, 8: se8, 9: seDiff, 10: seZone }, svs = document.querySelectorAll('[data-v]'), sj;
+  var SEV = { 1: se1, 4: seRap, 6: seCarte, 7: se7, 9: seDiff, 10: seZone }, svs = document.querySelectorAll('[data-v]'), sj;
   for (sj = 0; sj < svs.length; sj++) { var sk2 = +svs[sj].getAttribute('data-v'); if (SEV[sk2]) svs[sj].innerHTML = SEV[sk2](); }
   (function(){
     var h3 = document.querySelectorAll('[data-s3]'), q;
     for (q = 0; q < h3.length; q++) h3[q].innerHTML = se3(+h3[q].getAttribute('data-s3'));
   })();
-
-  /* ---------- Formulaire de rappel ---------- */
-  var REQ = ['prenom', 'nom', 'entreprise', 'ville', 'tel', 'email'];
-  function errField(name, on){ var e = document.querySelector('[data-r="' + name + '"]'); if (e) e.className = e.className.replace(/ ?err/g, '') + (on ? ' err' : ''); }
-  $('fRappel').addEventListener('submit', function(e){
-    e.preventDefault();
-    var msg = $('r_msg'), ok = true, data = {};
-    for (var i = 0; i < REQ.length; i++) { data[REQ[i]] = trim($('r_' + REQ[i]).value); }
-    for (var k = 0; k < REQ.length; k++) { var v = data[REQ[k]], good = v.length > 1;
-      if (REQ[k] === 'email') good = /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(v);
-      if (REQ[k] === 'tel') good = v.replace(/[^0-9+]/g, '').length >= 8;
-      errField(REQ[k], !good); if (!good) ok = false; }
-    var consent = $('r_consent').checked;
-    $('r_consentRow').style.color = consent ? '' : (ok ? 'var(--ko)' : '');
-    if (!ok || !consent) { msg.className = 'fmsg err'; msg.textContent = !ok ? 'Complétez les champs en rouge.' : 'Cochez la case d’accord pour être recontacté.'; if (!consent) $('r_consentRow').style.color = 'var(--ko)'; return; }
-    data.creneau = $('r_creneau').value; data.message = trim($('r_message').value).slice(0, 1000);
-    data.consentement = true; data.site_web = $('r_site').value; data.duree_ms = new Date().getTime() - T0;
-    data.origine = 'plaquette-super-event'; if (commercial) data.commercial = commercial;
-    if (data.site_web) { $('fRappel').style.display = 'none'; $('r_merci').className = 'card merci on'; return; } /* champ piège rempli : on ne transmet pas */
-    var btn = $('r_send'); btn.disabled = true; msg.className = 'fmsg'; msg.textContent = 'Envoi…';
-    function echec(){
-      btn.disabled = false; msg.className = 'fmsg err';
-      msg.innerHTML = 'L’envoi n’a pas abouti. Réessayez dans un instant.';
-    }
-    if (!window.fetch) { echec(); return; }
-    fetch(SUPA + '/functions/v1/notify-rappel', { method: 'POST', headers: { 'Content-Type': 'application/json', 'apikey': KEY, 'Authorization': 'Bearer ' + KEY }, body: JSON.stringify(data) })
-      .then(function(r){ if (!r.ok) throw new Error('http ' + r.status); return r.json(); })
-      .then(function(j){ if (!j || !j.ok) throw new Error('ko'); $('fRappel').style.display = 'none'; $('r_merci').className = 'card merci on'; })
-      .catch(echec);
-  });
-  var inputs = document.querySelectorAll('#fRappel [data-r] input');
-  for (var ii = 0; ii < inputs.length; ii++) inputs[ii].addEventListener('input', function(){ var p = this.parentNode; p.className = p.className.replace(/ ?err/g, ''); });
 
   var h0 = (location.hash || '').replace('#', ''), start = 0;
   for (var hk = 0; hk < pages.length; hk++) if (pages[hk].id === h0) start = hk;
