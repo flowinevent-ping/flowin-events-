@@ -196,3 +196,27 @@ textarea.in{padding:12px 14px;min-height:80px}
 @keyframes spin{to{transform:rotate(360deg)}}
 .preview{border-radius:18px;padding:14px;color:#fff;margin:10px 0}
 .form-tag{font-size:12px;font-weight:800;color:var(--texte2);text-transform:uppercase;letter-spacing:.1em}
+
+/* Écran « Votre QR est prêt » (cadrage : bouton principal 50 px, secondaires gris clair) */
+.btn.sec{background:var(--papier);color:var(--texte);border:1.5px solid var(--trait)}
+.qrs .btn{min-height:50px;font-size:16px}
+.qrs h1{font-size:26px}
+.qrs-print{text-align:center;padding:18px 16px 14px}
+.qrs-art{display:inline-block;animation:qrin .45s ease-out}
+.qrs-art .qrbox{padding:12px;border:1.5px solid var(--trait)}
+@keyframes qrin{from{opacity:0;transform:scale(.9)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){.qrs-art{animation:none}}
+.qrs-lab{display:flex;align-items:center;justify-content:center;gap:8px;margin-top:10px;font-size:15px}
+.qrs-c{margin:4px 0 0}
+.qrs-sec{display:grid;gap:8px;margin-top:2px}
+.qrs-sec .btn{margin-top:0}
+.qrs-web{margin-top:14px;box-shadow:none}
+.qrs-web .qrbox{padding:6px;border:1px solid var(--trait)}
+.qrs-web b{font-size:16px}
+.qrs-list{padding:4px 14px;box-shadow:none}
+.qrs-row{display:flex;align-items:center;gap:12px;width:100%;min-height:64px;background:none;border:0;border-top:1px solid var(--trait);padding:8px 0;text-align:left;cursor:pointer;color:inherit}
+.qrs-row:first-child{border-top:0}
+.qrs-row .grow b{display:block;font-size:16px}.qrs-row .grow span{font-size:13.5px;color:var(--texte2)}
+.qrs-n{text-align:right;min-width:52px}.qrs-n b{display:block;font-size:20px;font-variant-numeric:tabular-nums}.qrs-n span{font-size:13px;color:var(--texte2)}
+.anim{box-shadow:none}
+.anim .anim-qr{width:100%;margin-top:12px}

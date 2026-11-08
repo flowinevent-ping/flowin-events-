@@ -48,6 +48,10 @@
     box: '<path d="M3 7l9-4 9 4v10l-9 4-9-4z"/><path d="M3 7l9 4 9-4M12 11v10"/>',
     phone: '<rect x="6" y="2" width="12" height="20" rx="3"/><path d="M11 18h2"/>',
     star: '<path d="M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1-4.4-4.3 6.1-.9z"/>',
+    more: '<circle cx="5" cy="12" r="1.4"/><circle cx="12" cy="12" r="1.4"/><circle cx="19" cy="12" r="1.4"/>',
+    globe: '<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 010 18M12 3a14 14 0 000 18"/>',
+    camera: '<rect x="3" y="5" width="18" height="15" rx="4"/><circle cx="12" cy="12.5" r="3.5"/><path d="M17 8.5h.01"/>',
+    music: '<path d="M9 18V5l11-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="17" cy="16" r="3"/>',
     car: '<path d="M5 16v-5l2-5h10l2 5v5M3 16h18v3H3z"/><circle cx="7.5" cy="13" r="1"/><circle cx="16.5" cy="13" r="1"/>'
   };
   (function sprite() {
@@ -174,6 +178,11 @@
       ],
       dDeb: '2027-03-01', dFin: '2027-03-31',
       publie: false,
+      qrPrint: 58, qrWeb: 41,
+      sup: [
+        { n: 'Facebook', ic: 'users', sc: 38 }, { n: 'Instagram', ic: 'camera', sc: 26 }, { n: 'TikTok', ic: 'music', sc: 19 },
+        { n: 'Site internet', ic: 'globe', sc: 12 }, { n: 'Email', ic: 'mail', sc: 7 }
+      ],
       se: null, seF: null, seEnvoye: false, seDemande: false,
       visTab: 'festival', gTab: 'a',
       gagnants: [
@@ -284,6 +293,17 @@
 
   /* ===== PRO : espace ===== */
   function stepsDone() { var n = 0; for (var i = 0; i < 3; i++) { if (S.steps[i]) { n++; } } return n; }
+  function animCards() {
+    var a = [];
+    if (S.publie) { a.push(['trophy', 'Quiz ' + S.theme_q, 'Du ' + fmtD(S.dDeb) + ' au ' + fmtD(S.dFin)]); }
+    a.push(['wheel', 'Roue de printemps (exemple)', 'Du 01/04 au 30/04']);
+    var h = '';
+    for (var i = 0; i < a.length; i++) {
+      h += '<div class="card anim"><div class="row"><span class="pic bleu">' + ic(a[i][0]) + '</span><span class="grow"><b>' + esc(a[i][1]) + '</b><br><span class="small">' + a[i][2] + '</span></span>' +
+        '<span class="chip ok">En ligne</span></div><button class="btn sm sec anim-qr" data-go="p-qr">' + ic('qr') + 'Mon QR</button></div>';
+    }
+    return h;
+  }
   def('p-dash', 'p', 'Tableau de bord', function () {
     var n = stepsDone();
     function st(i, t, go) {
@@ -297,6 +317,7 @@
       '<div class="card"><div class="row"><b class="grow">Pour démarrer</b><span class="chip violet">' + n + ' sur 3</span></div>' +
       '<div class="prog" style="margin:10px 0 4px"><i style="width:' + Math.round(n / 3 * 100) + '%"></i></div>' +
       st(0, 'Créer votre animation', 'p-jeu') + st(1, 'Afficher votre QR code', 'p-qr') + st(2, 'Rejoindre un super event', 'p-se-carte') + '</div>' +
+      '<h2 class="h">Mes animations</h2>' + animCards() +
       tap('eye', 'bleu', 'Où mon commerce apparaît', 'Carte, page du jeu, billet gagnant', 'data-go="p-visible"') +
       tap('flag', 'orange', 'Participer à un super event', 'Festivals et événements près de chez vous', 'data-go="p-se-carte"');
   }, { tabs: 'pro' });
@@ -374,27 +395,30 @@
       r('Questions', nq + ' questions · ' + S.theme_q, 'p-questions') + r('Lots', S.lots.length + ' lots', 'p-lots') +
       r('Dates', 'Du ' + fmtD(S.dDeb) + ' au ' + fmtD(S.dFin), 'p-dates') + '</ul>' + foot(btn('Publier mon animation', 'data-act="publier"', '', 'send'));
   });
-  def('p-publie', 'p', 'Animation publiée', function () {
-    return hd('En ligne', { noBack: true }) + '<div class="big-ok">' + ic('check') + '</div><h1 class="center">C\'est en ligne !</h1>' +
-      '<p class="sub center">Affichez votre QR code : vos clients peuvent jouer dès maintenant.</p>' +
-      foot(btn('Afficher mon QR code', 'data-go="p-qr"', '', 'qr') + btn('Retour au tableau de bord', 'data-go="p-dash"', 'line'));
-  });
-  def('p-qr', 'p', 'QR code et diffusion', function () {
-    var sup = [['vitrine', 'Vitrine', 'store', 42], ['caisse', 'Caisse', 'ticket', 27], ['reseaux', 'Réseaux sociaux', 'chat', 64]], h = '';
-    for (var i = 0; i < sup.length; i++) {
-      h += '<button class="card tap" data-sheet="qr-sup" data-v="' + sup[i][0] + '"><span class="pic">' + ic(sup[i][2]) + '</span><span class="grow"><b>' + sup[i][1] + '</b><span>QR dédié</span></span>' +
-        '<span class="kpi" style="padding:6px 10px"><b>' + sup[i][3] + '</b><span>scans</span></span></button>';
+  def('p-qr', 'p', 'Votre QR est prêt', function () {
+    var h = '';
+    for (var i = 0; i < S.sup.length; i++) {
+      var u = S.sup[i];
+      h += '<button class="qrs-row" data-sheet="qr-sup" data-v="' + i + '"><span class="pic">' + ic(u.ic) + '</span><span class="grow"><b>' + esc(u.n) + '</b><span>QR digital dédié</span></span>' +
+        '<span class="qrs-n"><b>' + u.sc + '</b><span>scans</span></span>' + ic('chev', 's') + '</button>';
     }
     S.steps[1] = true;
-    return hd('Diffusion', { k: jeuById(S.jeu).nom }) +
-      '<div class="card center">' + qr('anim-demo', 180) + '<p class="small" style="margin:10px 0 0;word-break:break-all">flowin-events.vercel.app/jouer?ev=demo&amp;src=qr</p>' +
-      '<p class="small" style="margin:2px 0 0">Lien de suivi : chaque scan est compté.</p></div>' +
-      '<div class="opts two">' +
-      '<button class="opt" data-act="dl-png">' + ic('down') + 'QR (PNG)</button>' +
-      '<button class="opt" data-demo="L\'affiche A4 s\'ouvrirait pour impression.">' + ic('print') + 'Affiche A4</button>' +
-      '<button class="opt" data-act="copier">' + ic('copy') + 'Copier le lien</button>' +
-      '<button class="opt" data-demo="WhatsApp s\'ouvrirait avec le lien prêt à envoyer.">' + ic('chat') + 'WhatsApp</button></div>' +
-      '<h2 class="h">Un QR par support</h2><p class="small" style="margin:0">Pour savoir d\'où viennent vos joueurs.</p>' + h;
+    return hd('Mon QR', { k: jeuById(S.jeu).nom }) + '<div class="qrs">' +
+      '<div class="kick">Animation en ligne</div><h1>Votre QR est prêt</h1>' +
+      '<div class="card qrs-print"><div class="qrs-art">' + qr('anim-print', 200) + '</div>' +
+      '<div class="qrs-lab">' + ic('print', 's') + '<span><b>QR à imprimer</b> · vitrine et caisse</span></div>' +
+      '<p class="small qrs-c">' + S.qrPrint + ' scans (exemple)</p></div>' +
+      btn('Imprimer l\'affiche A4', 'data-act="qr-print"', '', 'print') +
+      '<div class="qrs-sec">' +
+      '<button class="btn sec" data-act="dl-png">' + ic('down') + 'Télécharger (PNG)</button>' +
+      '<button class="btn sec" data-act="copier">' + ic('copy') + 'Copier le lien</button>' +
+      '<button class="btn sec" data-act="qr-wa">' + ic('chat') + 'Partager sur WhatsApp</button></div>' +
+      '<div class="card qrs-web"><div class="row">' + qr('anim-web', 84) + '<span class="grow"><b>QR digital à diffuser</b><br>' +
+      '<span class="small">Réseaux, site, email. ' + S.qrWeb + ' scans (exemple).</span></span></div></div>' +
+      '<h2 class="h">QR par support</h2><p class="small" style="margin:0 0 6px">Un QR par support : vous voyez d\'où viennent vos joueurs.</p>' +
+      '<div class="card qrs-list">' + h + '</div>' +
+      btn('Ajouter un support', 'data-sheet="qr-add"', 'sec', 'plus') +
+      '<div class="center"><button class="lnk" data-go="p-dash">Aller au tableau de bord</button></div></div>';
   });
 
   /* ===== PRO : super event ===== */
@@ -485,8 +509,7 @@
 
   def('p-animations', 'p', 'Mes animations', function () {
     return hd('Mes animations', { noBack: true }) +
-      (S.publie ? tap('trophy', 'bleu', 'Quiz ' + S.theme_q, 'En ligne · du ' + fmtD(S.dDeb) + ' au ' + fmtD(S.dFin), 'data-go="p-qr"', '<span class="chip ok">En ligne</span>') : '') +
-      tap('wheel', 'bleu', 'Roue de printemps', 'Brouillon', 'data-demo="Ce brouillon est un exemple."', '<span class="chip">Brouillon</span>') +
+      animCards() +
       btn('Créer une animation', 'data-go="p-jeu"', '', 'plus');
   }, { tabs: 'pro' });
   def('p-festivals', 'p', 'Mes festivals', function () {
@@ -666,9 +689,18 @@
         '<p class="small">Le logo de votre commerce est ajouté automatiquement.</p>' + btn('Ajouter ce lot', 'data-act="lot-save"') };
     },
     'qr-sup': function (v) {
-      var n = { vitrine: 'Vitrine', caisse: 'Caisse', reseaux: 'Réseaux sociaux' }[v] || v;
-      return { t: 'QR ' + n, h: '<div class="center">' + qr('sup-' + v, 180) + '<p class="small" style="word-break:break-all">flowin-events.vercel.app/jouer?ev=demo&amp;src=' + esc(v) + '</p></div>' +
-        btn('Télécharger le QR (PNG)', 'data-act="dl-png"', '', 'down') + btn('Copier le lien', 'data-act="copier"', 'line', 'copy') };
+      var u = S.sup[+v] || S.sup[0];
+      var slug = u.n.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+      return { t: 'QR ' + u.n, h: '<div class="center">' + qr('sup-' + slug, 180) + '<p class="small" style="word-break:break-all">flowin-events.vercel.app/jouer?ev=demo&amp;src=' + esc(slug) + '</p>' +
+        '<p class="small"><b>' + u.sc + ' scans</b> depuis ce support</p></div>' +
+        btn('Télécharger (PNG)', 'data-act="dl-png"', '', 'down') + btn('Copier le lien', 'data-act="copier"', 'sec', 'copy') };
+    },
+    'qr-add': function () {
+      var sug = ['Flyer', 'Google', 'Newsletter', 'LinkedIn', 'SMS'], h = '';
+      for (var i = 0; i < sug.length; i++) { h += '<button class="mini" data-act="qr-sug" data-v="' + sug[i] + '">' + sug[i] + '</button>'; }
+      return { t: 'Ajouter un support', h: '<p class="sub">Un nouveau QR digital, avec son propre compteur de scans.</p>' +
+        '<label class="f"><span>Nom du support</span><input class="in" id="qa-n" placeholder="ex. Flyer du marché"></label>' +
+        '<div class="row wrap" style="gap:6px">' + h + '</div>' + btn('Créer ce QR', 'data-act="qr-add"', '', 'plus') };
     },
     station: function () {
       return { t: 'Votre station', h: '<div class="row">' + logoBoutique() + '<div><b>' + esc(S.etab.nom || 'Boutique Exemple') + '</b><br><span class="small">Station du jeu</span></div></div>' +
@@ -776,7 +808,14 @@
       S.lots.push({ titre: t, logo: 'be', cond: c, qte: q, mode: m ? m.value : 'instant', hist: [] });
       closeSheet(); refresh(); toast('Lot ajouté.');
     },
-    publier: function () { S.publie = true; S.steps[0] = true; hist = []; render('p-publie', 'in'); },
+    publier: function () { S.publie = true; S.steps[0] = true; closeSheet(); hist = ['p-dash']; render('p-qr', 'in'); },
+    'qr-print': function () { toast('Démo : l\'affiche A4 s\'ouvrirait, prête à imprimer.'); },
+    'qr-wa': function () { toast('Démo : WhatsApp s\'ouvrirait avec le lien du jeu.'); },
+    'qr-sug': function (el) { var f = document.getElementById('qa-n'); if (f) { f.value = el.getAttribute('data-v'); } },
+    'qr-add': function () {
+      var f = document.getElementById('qa-n'), n = f && f.value ? f.value : 'Nouveau support';
+      S.sup.push({ n: n, ic: 'qr', sc: 0 }); closeSheet(); refresh(); toast('QR « ' + n + ' » créé.');
+    },
     'dl-png': function () { toast('Démo : le QR serait téléchargé en PNG.'); },
     copier: function () {
       var u = 'https://flowin-events.vercel.app/visite-guidee/';
