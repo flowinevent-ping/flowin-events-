@@ -4,7 +4,7 @@
 /* Rapport d'audit : colonne de lecture + planches de captures réelles, propositions en maquettes téléphone */
 :root{
   --bg:#F4F6F9;--carte:#FFFFFF;--fg:#1B3A5C;--fg2:#56677D;--trait:#DCE3EC;
-  --violet:#7A4FE0;--violet-t:#5B34C2;--violet-c:#EEE8FC;--bleu:#3B5CC4;--bleu-c:#E3E9F8;--orange:#C2410C;--orange-c:#FFEDDC;
+  --violet:#00B4A0;--violet-t:#00806F;--turq:#00B4A0;--ambre:#F59E0B;--violet-c:#EEE8FC;--bleu:#3B5CC4;--bleu-c:#E3E9F8;--orange:#C2410C;--orange-c:#FFEDDC;
   --ok:#0B7A4F;--ok-c:#DDF3E9;--ko:#C62F2F;--ko-c:#FBE3E3;--warn:#9A5B00;--warn-c:#FFF1D6;
   --police:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
 }
@@ -66,9 +66,9 @@ td.n{font-weight:900;font-variant-numeric:tabular-nums;white-space:nowrap}
 .tel .s{color:#56677D;font-size:13px}
 .tel .kp{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .tel .bar{height:10px;border-radius:99px;background:#E3E9F8;overflow:hidden}.tel .bar i{display:block;height:100%;background:#3B5CC4}
-.tel .btn{margin-top:auto;height:46px;border-radius:99px;background:#7A4FE0;color:#fff;font-weight:800;display:flex;align-items:center;justify-content:center;font-size:15px}
+.tel .btn{margin-top:auto;height:46px;border-radius:99px;background:#00B4A0;color:#fff;font-weight:800;display:flex;align-items:center;justify-content:center;font-size:15px}
 .tel .ph{font-family:ui-monospace,Menlo,monospace;font-size:13px;background:#F4F6F9;border:1px dashed #CBD5E2;border-radius:8px;padding:6px 8px}
-.tel .step{display:flex;gap:8px;align-items:flex-start}.tel .step b{flex:none;width:22px;height:22px;border-radius:50%;background:#EEE8FC;color:#5B34C2;display:grid;place-items:center;font-size:13px}
+.tel .step{display:flex;gap:8px;align-items:flex-start}.tel .step b{flex:none;width:22px;height:22px;border-radius:50%;background:#DDF5F1;color:#00806F;display:grid;place-items:center;font-size:13px}
 .tel .ok{color:#0B7A4F;font-weight:800}
 .dec{border:1px solid var(--trait);border-radius:14px;padding:14px;display:flex;flex-direction:column;gap:6px}
 </style>
@@ -78,11 +78,50 @@ td.n{font-weight:900;font-variant-numeric:tabular-nums;white-space:nowrap}
   <span class="eyebrow">Flowin Event · 08/11/2026</span>
   <h1>Audit des supports existants</h1>
   <p class="lead">Visite guidée, plaquettes Animation et Super Event, vidéos. Pour chacun : où il en est sur 10, ce qui fonctionne et se garde, ce qui manque pour atteindre 10, et la proposition graphique. Rien n'est refait de zéro : on complète ce qui existe. Rien ne sera exécuté avant votre validation.</p>
-  <nav class="toc"><a href="#synthese">Synthèse</a><a href="#parcours">Parcours commerçant</a><a href="#plaq-anim">Plaquette Animation</a><a href="#plaq-se">Plaquette Super Event</a><a href="#videos">Vidéos</a><a href="#propositions">Propositions graphiques</a><a href="#valider">À valider</a></nav>
+  <nav class="toc"><a href="#reaudit">Ré-audit design</a><a href="#synthese">Synthèse</a><a href="#parcours">Parcours commerçant</a><a href="#plaq-anim">Plaquette Animation</a><a href="#plaq-se">Plaquette Super Event</a><a href="#videos">Vidéos</a><a href="#propositions">Propositions graphiques</a><a href="#valider">À valider</a></nav>
 </header>
 
+<section class="sec" id="reaudit">
+  <div class="tete">
+    <div><span class="eyebrow">Design · ergonomie · fluidité</span><h2>Ré-audit : la qualité réelle est à 4 sur 10</h2></div>
+    <div class="echelle"><div class="note">4<small> / 10</small></div><div class="barre"><i style="width:40%;background:var(--ko)"></i><b style="left:100%"></b></div><div class="leg">Le premier passage notait le contenu (7/10). La forme tire l'ensemble vers le bas.</div></div>
+  </div>
+  <p class="lead">Votre verdict est juste, et les mesures le confirment. Le fond (prix, parcours, arguments) est bon et se garde. La forme ne fait ni outil, ni propre.</p>
+  <div class="tw"><table>
+    <tr><th>Constat</th><th>Mesure sur les pages actuelles</th><th>Règle proposée</th></tr>
+    <tr><td>Couleurs qui ne sont pas celles de Flowin</td><td>Bouton principal violet partout ; la landing utilise encre et turquoise</td><td>Revenir à la charte de la landing (ci-dessous) ; le violet disparaît</td></tr>
+    <tr><td>Tailles de police incohérentes</td><td>Plaquette Animation : 19 tailles différentes, de 8 à 94 px. Plaquette Super Event : 14 tailles. Visite : 7 à 9 tailles par écran, dont 11 px</td><td>5 tailles seulement : 13 · 15 · 18 · 24 · 32 px</td></tr>
+    <tr><td>Logo mal placé</td><td>Centré dans la visite, en petit dans une barre sombre sur les plaquettes, « Flowin » seul</td><td>« Flowin Event » toujours en haut à gauche, même taille, sur fond blanc</td></tr>
+    <tr><td>Trop d'informations</td><td>Plaquette Super Event : environ 60 mots et 6 tuiles de couleur sur l'écran RSE / quiz ; jusqu'à 115 mots sur un écran de la visite</td><td>40 mots maximum par écran ; 3 cartes maximum ; le détail va dans un volet « En savoir plus »</td></tr>
+    <tr><td>Super Event trop décalé</td><td>Police BD (Bangers), bordures noires épaisses, jaune et rouge sur tous les écrans</td><td>Le style BD reste sur le logo Super Event seulement ; le reste suit la charte outil</td></tr>
+    <tr><td>Décalages de mise en page</td><td>Marges et rayons différents d'un écran à l'autre, cartes de hauteurs inégales</td><td>Une grille : marge 16 px, rayon 14 px, écart 12 px entre cartes</td></tr>
+  </table></div>
+  <h3>Charte de référence : la landing page</h3>
+  <div class="cols">
+    <div class="planche fit"><img src="img/landing-haut.jpg" width="390" alt="Haut de la landing page Flowin : encre, turquoise, orange"></div>
+    <div style="display:flex;flex-direction:column;gap:12px">
+      <p>Les couleurs relevées sur la landing en ligne, adaptées en version claire « outil » :</p>
+      <div class="tw"><table>
+        <tr><th>Rôle</th><th>Couleur</th></tr>
+        <tr><td>Fond</td><td><span class="puce" style="background:#fff;color:#1B3A5C;border:1px solid #DCE3EC">Blanc</span> et gris très clair #F4F6F9</td></tr>
+        <tr><td>Texte, titres, logo</td><td><span class="puce" style="background:#1B3A5C;color:#fff">Encre #1B3A5C</span></td></tr>
+        <tr><td>Bouton principal, sélection</td><td><span class="puce" style="background:#00B4A0;color:#fff">Turquoise #00B4A0</span></td></tr>
+        <tr><td>Flowin Animation</td><td><span class="puce" style="background:#3B5CC4;color:#fff">Bleu #3B5CC4</span></td></tr>
+        <tr><td>Flowin Super Event</td><td><span class="puce" style="background:#C2410C;color:#fff">Orange #C2410C</span></td></tr>
+        <tr><td>Chiffres clés</td><td><span class="puce" style="background:#F59E0B;color:#1B3A5C">Ambre #F59E0B</span>, sur les chiffres uniquement</td></tr>
+      </table></div>
+      <p class="cap">Le turquoise sur fond blanc est trop clair pour un texte de 13 px : en texte, on utilise une version foncée (#00806F). Le bouton plein reste #00B4A0 avec texte blanc en gras.</p>
+    </div>
+  </div>
+  <div class="paliers">
+    <div class="palier"><span class="n">4 → 6</span><p>Appliquer la charte de la landing et les 5 tailles de police à la visite et aux deux plaquettes.</p></div>
+    <div class="palier"><span class="n">6 → 8</span><p>Logo à gauche partout, grille commune, 40 mots maximum par écran (le reste en volet).</p></div>
+    <div class="palier"><span class="n">8 → 10</span><p>Super Event : style BD limité au logo ; ajout des 3 écrans du parcours ; contrôle à 360, 390 et 430 px.</p></div>
+  </div>
+</section>
+
 <section class="sec" id="synthese">
-  <h2>Synthèse</h2>
+  <h2>Premier passage : notes du contenu</h2><p class="cap">Ces notes jugeaient le contenu. Le ré-audit ci-dessus juge la forme ; c'est lui qui compte.</p>
   <div class="tw"><table>
     <tr><th>Support</th><th>Note</th><th>Ce qui manque pour 10</th></tr>
     <tr><td>Parcours commerçant (visite guidée)</td><td class="n">7/10</td><td>3 écrans de votre parcours : validation du compte, rapports du dashboard, paiement par virement à la publication</td></tr>
@@ -216,7 +255,7 @@ td.n{font-weight:900;font-variant-numeric:tabular-nums;white-space:nowrap}
 
 <section class="sec" id="propositions">
   <div><span class="eyebrow">À ajouter à la visite guidée, dans son style actuel</span><h2>Propositions graphiques</h2></div>
-  <p class="lead">Les trois écrans qui manquent au parcours commerçant. Ils reprennent les composants existants de la visite (en-tête d'étape, cartes blanches, bouton violet). Les mêmes écrans servent ensuite de plans pour la vidéo commerçant (côté tuto).</p>
+  <p class="lead">Les trois écrans qui manquent au parcours commerçant, déjà dans la charte de la landing (blanc, encre, bouton turquoise, 5 tailles de police). Les mêmes écrans servent ensuite de plans pour la vidéo commerçant (côté tuto).</p>
   <div class="maqs">
     <div class="maq">
       <div class="tel">
@@ -258,6 +297,7 @@ td.n{font-weight:900;font-variant-numeric:tabular-nums;white-space:nowrap}
   <h2>À valider</h2>
   <p class="lead">Répondez par numéro : « ok », « non » ou une phrase. Je n'exécute que ce qui est validé, sur les fichiers existants.</p>
   <div class="cols">
+    <div class="dec"><span class="puce p0">P0</span><b>0. Charte</b><span class="cap">Adopter la charte de la landing (encre, turquoise, blanc), 5 tailles de police, logo à gauche, 40 mots maximum par écran, style BD limité au logo Super Event.</span></div>
     <div class="dec"><span class="puce p0">P0</span><b>1. Parcours : ajouter les 3 écrans</b><span class="cap">Validation, rapports, publier et régler par virement (maquettes ci-dessus), dans la visite guidée.</span></div>
     <div class="dec"><span class="puce p0">P0</span><b>2. RIB et coordonnées</b><span class="cap">IBAN / BIC à fournir ; WhatsApp 06 16 35 49 36 et info@opconsult.co : à publier ou non ?</span></div>
     <div class="dec"><span class="puce p1">P1</span><b>3. Plaquettes : corrections listées</b><span class="cap">Nom « Flowin Event », un seul bouton à l'écran 1, virement, écran 5 Super Event en cartes blanches, tailles.</span></div>

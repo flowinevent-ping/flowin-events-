@@ -186,3 +186,16 @@ que sur instruction explicite de Romain.
   reproduit pas tout : on termine l'existant.
 - **Règle d'exécution** : audit d'abord → Claude propose → Romain valide → Claude exécute.
   Aucune production avant validation.
+
+## Verdict qualité et direction visuelle (08/11/2026, Romain)
+
+- Qualité actuelle des supports : **4/10**. Le fond (prix, parcours, présentation) est bon ; la forme non.
+- Le **violet** comme couleur principale n'est **pas** la couleur de Flowin. Référence couleurs :
+  la **landing page** (`/landing`) — encre #1B3A5C, turquoise #00B4A0, bleu #3B5CC4, orange, ambre
+  sur les chiffres. Fond blanc.
+- Ça doit **faire outil, propre et organisé**. Logo bien placé, mise en page alignée, tailles de
+  police cohérentes.
+- **Trop d'infos tue l'info** (ex. écran RSE / quiz de la plaquette Super Event : fouillis).
+- Charte Super Event : bien mais **trop décalée** ; garder quelque chose de propre.
+- Proposition de règles (charte de la landing, 5 tailles de police, logo à gauche, 40 mots max par
+  écran, style BD limité au logo Super Event) : dans `docs/audit-2026-11-08/visuel/`, **à valider**.
