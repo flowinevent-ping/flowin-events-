@@ -1,0 +1,268 @@
+<title>Audit des supports Flowin Event</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>
+/* Rapport d'audit : colonne de lecture + planches de captures réelles, propositions en maquettes téléphone */
+:root{
+  --bg:#F4F6F9;--carte:#FFFFFF;--fg:#1B3A5C;--fg2:#56677D;--trait:#DCE3EC;
+  --violet:#7A4FE0;--violet-t:#5B34C2;--violet-c:#EEE8FC;--bleu:#3B5CC4;--bleu-c:#E3E9F8;--orange:#C2410C;--orange-c:#FFEDDC;
+  --ok:#0B7A4F;--ok-c:#DDF3E9;--ko:#C62F2F;--ko-c:#FBE3E3;--warn:#9A5B00;--warn-c:#FFF1D6;
+  --police:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0E1B30;--carte:#16263F;--fg:#EAF0F8;--fg2:#A9B6C8;--trait:#2A3D5C;--violet-c:#2D2156;--violet-t:#B9A2F5;--bleu-c:#1F3160;--orange-c:#3A2414;--ok-c:#12352A;--ko-c:#3A1A1E;--warn-c:#3A2C12;--ok:#4CC995;--ko:#F07A7A;--warn:#E8B14C;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#0E1B30;--carte:#16263F;--fg:#EAF0F8;--fg2:#A9B6C8;--trait:#2A3D5C;--violet-c:#2D2156;--violet-t:#B9A2F5;--bleu-c:#1F3160;--orange-c:#3A2414;--ok-c:#12352A;--ko-c:#3A1A1E;--warn-c:#3A2C12;--ok:#4CC995;--ko:#F07A7A;--warn:#E8B14C;color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--fg);font-family:var(--police);font-size:15px;line-height:1.5;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:24px 64px}
+.w{max-width:1080px;margin:0 auto;display:flex;flex-direction:column;gap:28px}
+h1{font-size:30px;font-weight:900;letter-spacing:-.02em;margin:0;text-wrap:balance}
+h2{font-size:22px;font-weight:900;margin:0;text-wrap:balance}
+h3{font-size:16px;font-weight:800;margin:0}
+p{margin:0}
+.lead{color:var(--fg2);max-width:65ch}
+.eyebrow{font-size:13px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--violet-t)}
+nav.toc{display:flex;flex-wrap:wrap;gap:8px}
+nav.toc a{font-size:14px;font-weight:700;color:var(--fg);text-decoration:none;padding:8px 14px;border:1px solid var(--trait);border-radius:99px;background:var(--carte)}
+.sec{background:var(--carte);border:1px solid var(--trait);border-radius:18px;padding:22px;display:flex;flex-direction:column;gap:18px}
+.tete{display:flex;flex-wrap:wrap;gap:16px;justify-content:space-between;align-items:flex-start}
+.tete>div{min-width:0}
+/* échelle /10 */
+.echelle{min-width:260px;flex:0 1 340px}
+.barre{position:relative;height:12px;border-radius:99px;background:var(--trait);margin:8px 0 4px}
+.barre i{position:absolute;inset:0 auto 0 0;border-radius:99px;background:var(--violet)}
+.barre b{position:absolute;top:-5px;width:3px;height:22px;background:var(--ok);border-radius:2px}
+.note{font-size:28px;font-weight:900;font-variant-numeric:tabular-nums}
+.note small{font-size:15px;color:var(--fg2);font-weight:700}
+.leg{font-size:13px;color:var(--fg2)}
+.cols{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px}
+.cols>div{min-width:0}
+ul.l{margin:6px 0 0;padding:0;list-style:none;display:flex;flex-direction:column;gap:8px}
+ul.l li{padding-left:22px;position:relative}
+ul.l li::before{content:"";position:absolute;left:4px;top:8px;width:9px;height:9px;border-radius:50%}
+.ok li::before{background:var(--ok)}.ko li::before{background:var(--ko)}
+.paliers{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px}
+.palier{border:1px solid var(--trait);border-radius:14px;padding:12px;display:flex;flex-direction:column;gap:4px}
+.palier .n{font-weight:900;font-size:18px;font-variant-numeric:tabular-nums}
+.palier p{font-size:14px;color:var(--fg2)}
+.planche{overflow-x:auto;border-radius:12px;border:1px solid var(--trait);background:var(--bg)}
+.planche img{display:block;max-width:none;height:auto}
+.planche.fit img{max-width:100%}
+.cap{font-size:13px;color:var(--fg2)}
+.puce{display:inline-block;font-size:13px;font-weight:800;padding:3px 10px;border-radius:99px}
+.p0{background:var(--ko-c);color:var(--ko)}.p1{background:var(--warn-c);color:var(--warn)}.p2{background:var(--bleu-c);color:var(--bleu)}
+table{border-collapse:collapse;width:100%;font-size:14px}
+.tw{overflow-x:auto}
+th,td{text-align:left;padding:10px;border-bottom:1px solid var(--trait);vertical-align:top}
+th{font-size:13px;color:var(--fg2);text-transform:uppercase;letter-spacing:.06em}
+td.n{font-weight:900;font-variant-numeric:tabular-nums;white-space:nowrap}
+/* maquettes proposées */
+.maqs{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:18px}
+.maq{display:flex;flex-direction:column;gap:8px;min-width:0}
+.tel{border:8px solid #1B2433;border-radius:30px;background:#F4F6F9;color:#1B3A5C;padding:14px 12px;min-height:500px;display:flex;flex-direction:column;gap:10px;font-size:13px}
+.tel .hd{text-align:center;font-size:13px;color:#56677D;font-weight:800;text-transform:uppercase;letter-spacing:.08em}
+.tel h4{font-size:20px;font-weight:900;margin:0;color:#1B3A5C}
+.tel .c{background:#fff;border:1px solid #DCE3EC;border-radius:14px;padding:12px;display:flex;flex-direction:column;gap:6px}
+.tel .row{display:flex;justify-content:space-between;gap:8px}
+.tel .k{font-size:24px;font-weight:900;font-variant-numeric:tabular-nums;color:#1B3A5C}
+.tel .s{color:#56677D;font-size:13px}
+.tel .kp{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.tel .bar{height:10px;border-radius:99px;background:#E3E9F8;overflow:hidden}.tel .bar i{display:block;height:100%;background:#3B5CC4}
+.tel .btn{margin-top:auto;height:46px;border-radius:99px;background:#7A4FE0;color:#fff;font-weight:800;display:flex;align-items:center;justify-content:center;font-size:15px}
+.tel .ph{font-family:ui-monospace,Menlo,monospace;font-size:13px;background:#F4F6F9;border:1px dashed #CBD5E2;border-radius:8px;padding:6px 8px}
+.tel .step{display:flex;gap:8px;align-items:flex-start}.tel .step b{flex:none;width:22px;height:22px;border-radius:50%;background:#EEE8FC;color:#5B34C2;display:grid;place-items:center;font-size:13px}
+.tel .ok{color:#0B7A4F;font-weight:800}
+.dec{border:1px solid var(--trait);border-radius:14px;padding:14px;display:flex;flex-direction:column;gap:6px}
+</style>
+
+<div class="w">
+<header style="display:flex;flex-direction:column;gap:10px">
+  <span class="eyebrow">Flowin Event · 08/11/2026</span>
+  <h1>Audit des supports existants</h1>
+  <p class="lead">Visite guidée, plaquettes Animation et Super Event, vidéos. Pour chacun : où il en est sur 10, ce qui fonctionne et se garde, ce qui manque pour atteindre 10, et la proposition graphique. Rien n'est refait de zéro : on complète ce qui existe. Rien ne sera exécuté avant votre validation.</p>
+  <nav class="toc"><a href="#synthese">Synthèse</a><a href="#parcours">Parcours commerçant</a><a href="#plaq-anim">Plaquette Animation</a><a href="#plaq-se">Plaquette Super Event</a><a href="#videos">Vidéos</a><a href="#propositions">Propositions graphiques</a><a href="#valider">À valider</a></nav>
+</header>
+
+<section class="sec" id="synthese">
+  <h2>Synthèse</h2>
+  <div class="tw"><table>
+    <tr><th>Support</th><th>Note</th><th>Ce qui manque pour 10</th></tr>
+    <tr><td>Parcours commerçant (visite guidée)</td><td class="n">7/10</td><td>3 écrans de votre parcours : validation du compte, rapports du dashboard, paiement par virement à la publication</td></tr>
+    <tr><td>Plaquette Animation</td><td class="n">7/10</td><td>Nom « Flowin Event » dans la barre, un seul bouton à l'écran 1, « prélèvement SEPA » à remplacer par virement, textes trop petits</td></tr>
+    <tr><td>Plaquette Super Event</td><td class="n">7/10</td><td>Écran 5 en aplats de 6 couleurs, nom dans la barre, bouton rendez-vous trop petit en haut</td></tr>
+    <tr><td>Vidéo commerçant</td><td class="n">6,5/10</td><td>Plans vides ou en double, écrans de téléphone illisibles, pas de plan dashboard / rapport / publication</td></tr>
+    <tr><td>Vidéo organisateur</td><td class="n">7/10</td><td>Plan en double, coordonnées à confirmer</td></tr>
+    <tr><td>Vidéo partenaire</td><td class="n">6,5/10</td><td>Plan en double, écrans de téléphone illisibles</td></tr>
+    <tr><td>Vidéo joueur</td><td class="n">5/10</td><td>Plan « Ton lot » vide, QR non rempli, fond violet plein en fin</td></tr>
+  </table></div>
+  <p class="cap">Base de l'audit : captures réelles des pages en ligne à 390 px, et une image toutes les 4 secondes pour les vidéos. Un plan qui paraît vide peut être un fondu en cours : chaque cas est à revoir image par image avant correction.</p>
+</section>
+
+<section class="sec" id="parcours">
+  <div class="tete">
+    <div><span class="eyebrow">Visite guidée · 17 écrans commerçant</span><h2>Parcours commerçant</h2></div>
+    <div class="echelle"><div class="note">7<small> / 10</small></div><div class="barre"><i style="width:70%"></i><b style="left:100%"></b></div><div class="leg">Trait vert : 10/10 visé</div></div>
+  </div>
+  <div class="planche"><img src="img/sheet-visite1.jpg" width="1350" alt="Écrans 1 à 10 : accueil, promesse, SIRET, compte, tableau de bord, jeu, lots, supports, aperçu, QR"></div>
+  <div class="planche"><img src="img/sheet-visite2.jpg" width="1080" alt="Mes animations, gagnants, profil, super event : choix, formule, récapitulatif, demande envoyée"></div>
+  <div class="cols">
+    <div><h3>Ce qui fonctionne, à garder</h3><ul class="l ok">
+      <li>Étapes numérotées 1 sur 8, une action par écran, bouton violet pleine largeur.</li>
+      <li>SIRET seul pour remplir l'établissement : rapide, sans frein.</li>
+      <li>Lots avec suivi (à gagner, gagnés, remis) et date de validité.</li>
+      <li>Aperçu avant paiement, puis « Votre QR est prêt » avec QR à imprimer et QR digital.</li>
+      <li>Super event en 3 étapes, formules et prix clairs (500 / 1 331 € HT).</li>
+    </ul></div>
+    <div><h3>Ce qui manque par rapport à votre parcours</h3><ul class="l ko">
+      <li>Pas d'étape de validation : « Créer mon espace » mène directement au tableau de bord.</li>
+      <li>Le tableau de bord ne montre aucun rapport : personnes venues, hommes / femmes, contacts du fichier client, réponses au jeu.</li>
+      <li>« Publier » mène au QR sans aucune étape de paiement, alors que l'écran 7 annonce « le paiement arrive à la publication ».</li>
+      <li>Super event : « Je rejoins » envoie la demande sans indiquer comment payer.</li>
+      <li>Accueil : trois aplats de couleurs vives (bleu, orange, violet).</li>
+    </ul></div>
+  </div>
+  <div class="paliers">
+    <div class="palier"><span class="n">7 → 8</span><p>Ajouter l'écran « Compte en cours de validation ».</p></div>
+    <div class="palier"><span class="n">8 → 9</span><p>Ajouter l'écran « Rapports » dans le tableau de bord.</p></div>
+    <div class="palier"><span class="n">9 → 10</span><p>Ajouter « Publier et régler par virement » ; même règlement sur le récapitulatif super event ; accueil en cartes blanches.</p></div>
+  </div>
+</section>
+
+<section class="sec" id="plaq-anim">
+  <div class="tete">
+    <div><span class="eyebrow">6 écrans · /validation/plaquette-animation-magasin.html</span><h2>Plaquette Flowin Animation</h2></div>
+    <div class="echelle"><div class="note">7<small> / 10</small></div><div class="barre"><i style="width:70%"></i><b style="left:100%"></b></div><div class="leg">Trait vert : 10/10 visé</div></div>
+  </div>
+  <div class="planche"><img src="img/sheet-plaq-anim.jpg" width="1620" alt="Les 6 écrans de la plaquette Animation"></div>
+  <div class="cols">
+    <div><h3>Ce qui fonctionne, à garder</h3><ul class="l ok">
+      <li>Les bons arguments dès l'écran 1 : constituez et animez votre fichier client, captez le flux passant, ramenez du trafic.</li>
+      <li>Démo de jeu par métier (boulanger, boucher, restaurateur).</li>
+      <li>Supports : un QR à imprimer, un QR digital par support.</li>
+      <li>56 % et plus de 70 lots en gros chiffres lisibles.</li>
+      <li>Formule composable avec récapitulatif HT / TVA / TTC.</li>
+    </ul></div>
+    <div><h3>À améliorer</h3><ul class="l ko">
+      <li>Barre du haut : « Flowin » au lieu de « Flowin Event ».</li>
+      <li>Écran 1 : deux grands boutons, dont l'organisateur en jaune vif ; il sort du persona commerçant.</li>
+      <li>Écran 6 : « Virement ou prélèvement SEPA » ; votre consigne est le virement sur RIB.</li>
+      <li>Textes de cartes et de mentions sous 13 px (écrans 1, 5, 6).</li>
+      <li>Aucun renvoi vers le parcours : inscription, validation, tableau de bord.</li>
+    </ul></div>
+  </div>
+  <div class="paliers">
+    <div class="palier"><span class="n">7 → 8</span><p>« Flowin Event » dans la barre ; textes à 13 px minimum.</p></div>
+    <div class="palier"><span class="n">8 → 9</span><p>Écran 1 : un seul bouton « Je crée mon jeu » ; l'organisateur passe en lien discret.</p></div>
+    <div class="palier"><span class="n">9 → 10</span><p>Écran 6 : « Règlement par virement à la publication » ; lien « Voir le parcours » vers la visite.</p></div>
+  </div>
+</section>
+
+<section class="sec" id="plaq-se">
+  <div class="tete">
+    <div><span class="eyebrow">7 écrans · /validation/plaquette-super-event.html</span><h2>Plaquette Flowin Super Event</h2></div>
+    <div class="echelle"><div class="note">7<small> / 10</small></div><div class="barre"><i style="width:70%"></i><b style="left:100%"></b></div><div class="leg">Trait vert : 10/10 visé</div></div>
+  </div>
+  <div class="planche"><img src="img/sheet-plaq-se.jpg" width="1890" alt="Les 7 écrans de la plaquette Super Event"></div>
+  <div class="cols">
+    <div><h3>Ce qui fonctionne, à garder</h3><ul class="l ok">
+      <li>Univers BD cohérent avec Nuits du Sud, logo Super Event fort.</li>
+      <li>Promesse claire : un événement, tous ses partenaires, un seul jeu.</li>
+      <li>Parcours d'un festivalier en 4 étapes illustrées, facile à suivre.</li>
+      <li>« Vos partenaires diffusent votre événement » : le bon message.</li>
+      <li>Écran mesure (où, combien, contacts, base) puis preuve Nuits du Sud.</li>
+    </ul></div>
+    <div><h3>À améliorer</h3><ul class="l ko">
+      <li>Écran 5 (quiz et sondages) : 6 tuiles en aplats bleu, rouge, jaune, violet côte à côte.</li>
+      <li>Barre du haut : « Flowin » au lieu de « Flowin Event ».</li>
+      <li>Bouton « Prendre rendez-vous » de la barre : environ 11 px de texte, 31 px de haut.</li>
+      <li>Écrans 2 à 4 denses : beaucoup de texte sous chaque illustration.</li>
+      <li>Coordonnées WhatsApp et email vides (en attente de votre réponse).</li>
+    </ul></div>
+  </div>
+  <div class="paliers">
+    <div class="palier"><span class="n">7 → 8</span><p>Écran 5 en cartes blanches, couleur seulement sur le pictogramme.</p></div>
+    <div class="palier"><span class="n">8 → 9</span><p>« Flowin Event » et bouton rendez-vous à 44 px de haut.</p></div>
+    <div class="palier"><span class="n">9 → 10</span><p>Une phrase de moins par carte aux écrans 2 à 4 ; coordonnées remplies.</p></div>
+  </div>
+</section>
+
+<section class="sec" id="videos">
+  <div class="tete">
+    <div><span class="eyebrow">4 vidéos verticales · une image toutes les 4 s</span><h2>Vidéos</h2></div>
+  </div>
+  <h3>Commerçant · 38 s · 6,5/10</h3>
+  <div class="planche"><img src="img/sheet-vid-commercant.jpg" width="1100" alt="Plans de la vidéo commerçant"></div>
+  <div class="cols">
+    <div><ul class="l ok"><li>Progression claire : animer, booster, fidéliser, puis 3 bénéfices et les supports.</li><li>Plan « QR digital par support » avec graphique : excellent, à garder.</li><li>Fin sur QR « Je crée mon jeu ».</li></ul></div>
+    <div><ul class="l ko"><li>28 s et 36 s : plans quasi vides (titre seul), probablement des fondus trop longs.</li><li>Écrans de téléphone illisibles sur mobile (texte minuscule).</li><li>Aucun plan tableau de bord, rapport ou publication : le côté tuto manque.</li></ul></div>
+  </div>
+  <h3>Organisateur · 47 s · 7/10</h3>
+  <div class="planche"><img src="img/sheet-vid-organisateur.jpg" width="1100" alt="Plans de la vidéo organisateur"></div>
+  <div class="cols">
+    <div><ul class="l ok"><li>Ouverture forte sur la foule, promesse lisible.</li><li>Logos des partenaires Nuits du Sud : la preuve.</li><li>« Vous savez tout » : où, combien, contacts.</li></ul></div>
+    <div><ul class="l ko"><li>4 s et 8 s : même plan deux fois ; idem pour la fin rendez-vous.</li><li>06 16 35 49 36 et info@opconsult.co affichés : à confirmer.</li></ul></div>
+  </div>
+  <h3>Partenaire · 32 s · 6,5/10</h3>
+  <div class="planche"><img src="img/sheet-vid-partenaire.jpg" width="1100" alt="Plans de la vidéo partenaire"></div>
+  <div class="cols">
+    <div><ul class="l ok"><li>« Votre commerce devient station jeu » avec logos réels.</li><li>3 bénéfices nets : trafic, visibilité, client qui revient.</li></ul></div>
+    <div><ul class="l ko"><li>12 s et 16 s : même plan deux fois.</li><li>Écran de téléphone illisible ; carte « Du trafic » avec tuiles vides.</li></ul></div>
+  </div>
+  <h3>Joueur · 22 s · 5/10</h3>
+  <div class="planche"><img src="img/sheet-vid-joueur.jpg" width="1100" alt="Plans de la vidéo joueur"></div>
+  <div class="cols">
+    <div><ul class="l ok"><li>Flashe, joue, gagne : rythme simple, compréhensible en 3 s.</li></ul></div>
+    <div><ul class="l ko"><li>12 s : « Ton lot » sans le lot.</li><li>Fin : cadre « QR de l'animation » non rempli, fond violet plein.</li></ul></div>
+  </div>
+</section>
+
+<section class="sec" id="propositions">
+  <div><span class="eyebrow">À ajouter à la visite guidée, dans son style actuel</span><h2>Propositions graphiques</h2></div>
+  <p class="lead">Les trois écrans qui manquent au parcours commerçant. Ils reprennent les composants existants de la visite (en-tête d'étape, cartes blanches, bouton violet). Les mêmes écrans servent ensuite de plans pour la vidéo commerçant (côté tuto).</p>
+  <div class="maqs">
+    <div class="maq">
+      <div class="tel">
+        <div class="hd">Étape 3 sur 8 · Validation</div>
+        <h4>Votre compte est en cours de validation</h4>
+        <div class="c"><div class="step"><b>1</b><span>Nous vérifions votre SIRET et vos coordonnées.</span></div><div class="step"><b>2</b><span>Vous recevez un email de confirmation.</span></div><div class="step"><b>3</b><span>Votre commerce apparaît parmi les partenaires Flowin.</span></div></div>
+        <div class="c"><span class="s">En attendant, vous pouvez déjà</span><b>Créer et voir votre animation</b></div>
+        <div class="btn">Continuer</div>
+      </div>
+      <p class="cap">S'insère après « Votre accès ». La carte des partenaires est seulement annoncée, pas produite.</p>
+    </div>
+    <div class="maq">
+      <div class="tel">
+        <div class="hd">Tableau de bord · Rapports</div>
+        <h4>Roue de printemps</h4>
+        <div class="kp"><div class="c"><span class="k">412</span><span class="s">personnes venues</span></div><div class="c"><span class="k">268</span><span class="s">contacts ajoutés au fichier</span></div></div>
+        <div class="c"><div class="row"><b>Femmes</b><span>58 %</span></div><div class="bar"><i style="width:58%"></i></div><div class="row"><b>Hommes</b><span>39 %</span></div><div class="bar"><i style="width:39%"></i></div><span class="s">Non renseigné 3 %</span></div>
+        <div class="c"><div class="row"><b>D'où ils viennent</b></div><div class="row"><span>Vitrine</span><b>46 %</b></div><div class="row"><span>Facebook</span><b>31 %</b></div><div class="row"><span>Caisse</span><b>23 %</b></div></div>
+        <div class="c"><div class="row"><b>Réponses au jeu</b><span class="s">voir le détail</span></div></div>
+        <span class="s">Chiffres d'exemple</span>
+      </div>
+      <p class="cap">Nouvel onglet du tableau de bord : venues, sexe, constitution du fichier client, sources par QR, réponses au jeu.</p>
+    </div>
+    <div class="maq">
+      <div class="tel">
+        <div class="hd">Étape 8 sur 8 · Publier</div>
+        <h4>Publiez votre animation</h4>
+        <div class="c"><div class="row"><span>Formule annuelle</span><b>990 € HT</b></div><div class="row"><span>TVA 20 %</span><span>198 €</span></div><div class="row"><b>À régler</b><b>1 188 € TTC</b></div></div>
+        <div class="c"><b>Règlement par virement</b><span class="s">Bénéficiaire : BAITA EURL</span><span class="ph">IBAN [à compléter]</span><span class="ph">BIC [à compléter]</span><span class="s">Référence à indiquer : ANIM-[n°]</span></div>
+        <span class="s">Votre animation est mise en ligne dès réception du virement.</span>
+        <div class="btn">J'ai fait le virement</div>
+      </div>
+      <p class="cap">Remplace le passage direct « Publier → QR ». Même bloc sur le récapitulatif super event.</p>
+    </div>
+  </div>
+</section>
+
+<section class="sec" id="valider">
+  <h2>À valider</h2>
+  <p class="lead">Répondez par numéro : « ok », « non » ou une phrase. Je n'exécute que ce qui est validé, sur les fichiers existants.</p>
+  <div class="cols">
+    <div class="dec"><span class="puce p0">P0</span><b>1. Parcours : ajouter les 3 écrans</b><span class="cap">Validation, rapports, publier et régler par virement (maquettes ci-dessus), dans la visite guidée.</span></div>
+    <div class="dec"><span class="puce p0">P0</span><b>2. RIB et coordonnées</b><span class="cap">IBAN / BIC à fournir ; WhatsApp 06 16 35 49 36 et info@opconsult.co : à publier ou non ?</span></div>
+    <div class="dec"><span class="puce p1">P1</span><b>3. Plaquettes : corrections listées</b><span class="cap">Nom « Flowin Event », un seul bouton à l'écran 1, virement, écran 5 Super Event en cartes blanches, tailles.</span></div>
+    <div class="dec"><span class="puce p1">P1</span><b>4. Vidéos : nettoyage</b><span class="cap">Supprimer les plans vides ou doublés, agrandir les écrans de téléphone, compléter « Ton lot » et le QR de fin.</span></div>
+    <div class="dec"><span class="puce p2">P2</span><b>5. Vidéo commerçant : plans tuto</b><span class="cap">Ajouter les 3 nouveaux écrans comme plans (après validation du point 1).</span></div>
+  </div>
+</section>
+</div>
