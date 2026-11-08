@@ -164,3 +164,9 @@ que sur instruction explicite de Romain.
 - Les lots à gagner (quiz, bonus, tombolas) sont déjà présents dans les supports.
 - Sponsors et présence au côté des partenaires officiels : déjà réalisé sur Nuits du Sud 2026 ;
   ne pas en faire un argument nouveau à ajouter.
+
+## Couleurs à l'écran (08/11/2026, retour de Romain)
+
+- Pas de grands aplats de couleurs vives juxtaposés (effet « mauvais PowerPoint »). Cartes blanches,
+  texte encre ; la couleur de catégorie (bleu Animation, orange Super Event) seulement sur le
+  pictogramme, une puce ou le bouton d'action.

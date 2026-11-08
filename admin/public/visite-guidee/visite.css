@@ -138,10 +138,10 @@ textarea.in{padding:12px 14px;min-height:80px}
 .tabs button.on{color:var(--violet-t)}
 
 /* Accueil 3 portes */
-.door{display:flex;align-items:center;gap:14px;width:100%;min-height:92px;padding:16px;margin:8px 0;border-radius:22px;border:0;color:#fff;cursor:pointer;text-align:left}
-.door b{display:block;font-size:19px}.door span{font-size:13.5px;opacity:.9}
-.door .pic{background:rgba(255,255,255,.18);color:#fff}
-.door.pro{background:var(--bleu)}.door.org{background:var(--orange)}.door.jou{background:var(--violet)}
+.door{display:flex;align-items:center;gap:14px;width:100%;min-height:84px;padding:14px 16px;margin:10px 0;border-radius:18px;border:1px solid var(--trait);background:var(--carte);color:var(--texte);cursor:pointer;text-align:left;box-shadow:0 6px 18px rgba(27,58,92,.07);transition:transform .15s}.door:active{transform:scale(.98)}
+.door b{display:block;font-size:18px;color:var(--texte)}.door .grow span{font-size:14px;color:var(--texte2)}
+.door .pic{border-radius:14px}.door>.i:last-child{color:var(--texte2)}
+.door.pro .pic{background:var(--bleu-c);color:var(--bleu)}.door.org .pic{background:var(--orange-c);color:var(--orange)}.door.jou .pic{background:var(--violet-c);color:var(--violet-t)}
 
 /* Jeu côté joueur (habillage master Quiz + bonus) */
 .jeu{--c:#3B5CC4;--c2:#EAEFFB}
@@ -235,11 +235,11 @@ textarea.in{padding:12px 14px;min-height:80px}
 :root[data-theme="dark"] .prix{color:var(--orange-v)}
 
 /* Accueil : cycle animé QR → jeu → lot */
-.cycle{display:flex;align-items:center;justify-content:space-between;gap:6px;margin:6px 0 10px;padding:14px 12px;border-radius:22px;background:var(--bleu-c)}
-.cycle .st{flex:1;display:flex;flex-direction:column;align-items:center;gap:6px;font-size:13px;font-weight:800;color:var(--encre);text-align:center;opacity:.6;transform:scale(.92);animation:cyc 6s infinite}
+.cycle{display:flex;align-items:center;justify-content:space-between;gap:6px;margin:6px 0 10px;padding:14px 12px;border-radius:22px;background:transparent;border:1px dashed var(--trait)}
+.cycle .st{flex:1;display:flex;flex-direction:column;align-items:center;gap:6px;font-size:13px;font-weight:800;color:var(--texte);text-align:center;opacity:.6;transform:scale(.92);animation:cyc 6s infinite}
 :root[data-theme="dark"] .cycle .st{color:#fff}
-.cycle .st .pic{width:48px;height:48px;border-radius:16px;background:var(--bleu);color:#fff;display:flex;align-items:center;justify-content:center}
+.cycle .st .pic{width:48px;height:48px;border-radius:16px;background:var(--violet-c);color:var(--violet-t);display:flex;align-items:center;justify-content:center}
 .cycle .st:nth-child(3){animation-delay:2s}.cycle .st:nth-child(5){animation-delay:4s}
-.cycle .ar{color:var(--bleu);opacity:.6}
+.cycle .ar{color:var(--texte2);opacity:.5}
 @keyframes cyc{0%,8%{opacity:.6;transform:scale(.92)}14%,30%{opacity:1;transform:scale(1.06)}38%,100%{opacity:.6;transform:scale(.92)}}
 @media (prefers-reduced-motion:reduce){.cycle .st{animation:none;opacity:1;transform:none}}
