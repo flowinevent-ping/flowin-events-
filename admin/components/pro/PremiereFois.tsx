@@ -140,6 +140,13 @@ export default function PremiereFois() {
     const nb = new URLSearchParams(sel).get('boutiques')
     if (nb && /^\d{1,3}$/.test(nb)) setF(x => ({ ...x, nbPointsVente: x.nbPointsVente || nb }))
     setSrc(capturerSource())
+    // Pré-remplissage depuis les plaquettes (« Être recontacté » / « Je crée mon jeu ») : ?prenom=&email=&tel=
+    try {
+      const q = new URLSearchParams(window.location.search)
+      const pp = (q.get('prenom') || '').slice(0, 60), pe = (q.get('email') || '').slice(0, 120), pt = (q.get('tel') || '').slice(0, 30)
+      if (pp) setPerso(x => ({ ...x, prenom: x.prenom || pp }))
+      if (pe || pt) setF(x => ({ ...x, email: x.email || pe, tel: x.tel || pt }))
+    } catch { /* rien */ }
     setPret(true)
   }, [])
 

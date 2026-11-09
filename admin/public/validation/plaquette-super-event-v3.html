@@ -471,7 +471,7 @@
             <div class="full"><label for="fMail">Email</label><input id="fMail" type="email" autocomplete="email" placeholder="[&hellip; &agrave; compl&eacute;ter]"></div>
           </form>
           <button class="btn" type="button" id="fGo">&Ecirc;tre recontact&eacute;</button>
-          <p class="okm" id="fOk">Maquette&nbsp;: rien n&rsquo;est envoy&eacute;.</p>
+          <p class="okm" id="fOk"></p>
         </div>
         <div class="card cv bl">
           <h3><i class="no">2</i>&Ecirc;tre pr&eacute;venu du prochain super event</h3>
@@ -567,7 +567,27 @@
   $('topCta').addEventListener('click', function(e){ e.preventDefault(); go('action'); });
   $('cta').addEventListener('click', function(){ openSheet('org'); });
   $('ctaCom').addEventListener('click', function(){ openSheet('com'); });
-  $('fGo').addEventListener('click', function(){ $('fOk').className = 'okm on'; });
+  (function(){
+    var SB='https://ywcqtupgoxfzkddqkztk.supabase.co', K='sb_publishable_yQcGyoh4UdlUCwA96RKSwg_3jMJVVb1';
+    function v(id){ var e=document.getElementById(id); return e ? e.value.replace(/^\s+|\s+$/g,'') : ''; }
+    function majLiens(){ var a=document.querySelectorAll('a[href*="/pro/premiere-fois"]'), i, u;
+      for(i=0;i<a.length;i++){ try { u=new URL(a[i].href, location.href);
+        u.searchParams.delete('prenom'); u.searchParams.delete('email'); u.searchParams.delete('tel');
+        if(v('fPrenom')) u.searchParams.set('prenom', v('fPrenom')); if(v('fMail')) u.searchParams.set('email', v('fMail')); if(v('fTel')) u.searchParams.set('tel', v('fTel'));
+        a[i].href=u.toString(); } catch(e){} } }
+    ['fPrenom','fMail','fTel'].forEach(function(id){ var e=document.getElementById(id); if(e) e.addEventListener('input', majLiens); });
+    var ok=document.getElementById('fOk'), go=document.getElementById('fGo');
+    if(go) go.addEventListener('click', function(){
+      var p=v('fPrenom'), m=v('fMail').toLowerCase(), t=v('fTel');
+      if(!p || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(m)){ ok.textContent='Indiquez votre prénom et un email valide.'; ok.className='okm on'; return; }
+      go.disabled=true; go.textContent='…';
+      fetch(SB+'/rest/v1/rpc/crm_landing_flowin_upsert',{method:'POST',headers:{'apikey':K,'Authorization':'Bearer '+K,'Content-Type':'application/json'},
+        body:JSON.stringify({p_enseigne:p,p_contact_nom:p,p_contact_email:m,p_contact_tel:t||null,p_produit:'Plaquette Flowin Super Event V3'})})
+      .then(function(r){ ok.textContent = r.ok ? 'Merci, nous vous recontactons très vite.' : 'Envoi impossible pour le moment. Réessayez.'; })
+      .catch(function(){ ok.textContent='Envoi impossible pour le moment. Réessayez.'; })
+      .then(function(){ ok.className='okm on'; go.disabled=false; go.textContent='Être recontacté'; majLiens(); });
+    });
+  })();
   var chs = document.querySelectorAll('[data-aud]');
   for (var ci = 0; ci < chs.length; ci++) chs[ci].addEventListener('click', function(){ var a = this.getAttribute('data-aud'); setAud(a); go(a === 'com' ? 'commerce' : 'organisateur'); });
   /* Formules : une carte à la fois, points cliquables */

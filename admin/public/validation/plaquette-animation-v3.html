@@ -792,14 +792,14 @@
             <div><label class="sr" for="fTel">T&eacute;l&eacute;phone</label><input id="fTel" type="tel" inputmode="tel" autocomplete="tel" placeholder="[T&eacute;l&eacute;phone]"></div>
             <div class="full"><span><label class="sr" for="fMail">Email</label><input id="fMail" type="email" autocomplete="email" placeholder="[Email]"></span><button class="btn" type="button" id="fGo">Me recontacter</button></div>
           </form>
-          <div class="row2"><p class="ok" id="fOk">Maquette : rien n&rsquo;est envoy&eacute;.</p><button class="lk" type="button" data-go="rappel">Ou par WhatsApp / email</button></div>
+          <div class="row2"><p class="ok" id="fOk"></p><button class="lk" type="button" data-go="rappel">Ou par WhatsApp / email</button></div>
         </div>
       </div>
       <div class="vis acts">
         <div class="act sec">
           <div class="ah"><i class="no">2</i><span><b>&Ecirc;tre sur la carte, &ecirc;tre pr&eacute;venu du prochain super event</b></span></div>
           <button class="btn line" type="button" id="cartGo" style="width:100%">Je veux &ecirc;tre pr&eacute;venu</button>
-          <p class="ok" id="cartOk">Maquette : rien n&rsquo;est envoy&eacute;.</p>
+          <p class="ok" id="cartOk"></p>
         </div>
         <div class="act ter">
           <div class="ah"><i class="no">3</i><span><b>Je cr&eacute;e mon jeu</b></span></div>
@@ -1094,7 +1094,27 @@
     mark(0);
   })();
   /* ---------- V3 : conversion (maquette : aucun envoi réel) ---------- */
-  $('fGo').addEventListener('click', function(){ $('fOk').className = 'ok on'; });
+  (function(){
+    var SB='https://ywcqtupgoxfzkddqkztk.supabase.co', K='sb_publishable_yQcGyoh4UdlUCwA96RKSwg_3jMJVVb1';
+    function v(id){ var e=document.getElementById(id); return e ? e.value.replace(/^\s+|\s+$/g,'') : ''; }
+    function majLiens(){ var a=document.querySelectorAll('a[href*="/pro/premiere-fois"]'), i, u;
+      for(i=0;i<a.length;i++){ try { u=new URL(a[i].href, location.href);
+        u.searchParams.delete('prenom'); u.searchParams.delete('email'); u.searchParams.delete('tel');
+        if(v('fPrenom')) u.searchParams.set('prenom', v('fPrenom')); if(v('fMail')) u.searchParams.set('email', v('fMail')); if(v('fTel')) u.searchParams.set('tel', v('fTel'));
+        a[i].href=u.toString(); } catch(e){} } }
+    ['fPrenom','fMail','fTel'].forEach(function(id){ var e=document.getElementById(id); if(e) e.addEventListener('input', majLiens); });
+    var ok=document.getElementById('fOk'), go=document.getElementById('fGo');
+    if(go) go.addEventListener('click', function(){
+      var p=v('fPrenom'), m=v('fMail').toLowerCase(), t=v('fTel');
+      if(!p || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(m)){ ok.textContent='Indiquez votre prénom et un email valide.'; ok.className='ok on'; return; }
+      go.disabled=true; go.textContent='…';
+      fetch(SB+'/rest/v1/rpc/crm_landing_flowin_upsert',{method:'POST',headers:{'apikey':K,'Authorization':'Bearer '+K,'Content-Type':'application/json'},
+        body:JSON.stringify({p_enseigne:p,p_contact_nom:p,p_contact_email:m,p_contact_tel:t||null,p_produit:'Plaquette Flowin Animation V3'})})
+      .then(function(r){ ok.textContent = r.ok ? 'Merci, nous vous recontactons très vite.' : 'Envoi impossible pour le moment. Réessayez.'; })
+      .catch(function(){ ok.textContent='Envoi impossible pour le moment. Réessayez.'; })
+      .then(function(){ ok.className='ok on'; go.disabled=false; go.textContent='Être recontacté'; majLiens(); });
+    });
+  })();
   $('cartGo').addEventListener('click', function(){ $('cartOk').className = 'ok on'; });
   /* Lien de souscription : URL de production + canal d'origine (?src=) conservé */
   (function(){
