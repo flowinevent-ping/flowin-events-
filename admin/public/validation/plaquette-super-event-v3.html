@@ -1,0 +1,755 @@
+<!doctype html>
+<html lang="fr">
+<head><meta name="robots" content="noindex">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Flowin Super Event</title>
+<meta name="description" content="Flowin Super Event : un événement, tous ses partenaires, un seul jeu. Pour les organisateurs et pour les commerces.">
+<style>
+  /* V3 (09/11/2026) : charte propre « outil ». Toutes les couleurs ici, nulle part ailleurs.
+     Style BD (Bangers, jaune / rouge) réservé au logo Super Event. Cartes blanches, bordures fines, pas d'ombre décalée. */
+  :root{
+    --fond:#FFFFFF; --papier:#F6F8FB; --encre:#1B3A5C; --texte2:#4A5F78; --trait:#DCE3EC;
+    --orange:#C2410C; --orange-vif:#FF8A14; --orange-clair:#FFF1E6; --bleu:#3B5CC4; --bleu-clair:#EEF2FC;
+    --f13:13px; --f15:15px; --f18:18px; --f24:24px; --f32:32px;
+    --r:16px; --top:56px; --bot:64px;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{height:100%;overflow:hidden}
+  body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;color:var(--encre);background:var(--fond);-webkit-font-smoothing:antialiased;line-height:1.4;font-size:var(--f15)}
+  button{font-family:inherit}
+  .ic{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round;display:block;flex:none}
+
+  /* En-tête : logo Flowin Event à gauche */
+  .menu{position:fixed;top:0;left:0;right:0;height:var(--top);z-index:40;display:flex;align-items:center;gap:8px;padding:0 12px 0 16px;background:var(--fond);border-bottom:1px solid var(--trait)}
+  .menu .lg{font-size:var(--f18);font-weight:900;letter-spacing:-.02em;color:var(--encre);cursor:pointer;margin-right:auto;line-height:44px;white-space:nowrap}
+  .menu .lg em,.drawer .dlg em{font-style:normal;color:var(--bleu)}
+  .menu a.cmd{font-size:var(--f13);font-weight:800;color:#fff;background:var(--orange);border-radius:99px;padding:0 14px;min-height:44px;display:inline-flex;align-items:center;text-decoration:none;white-space:nowrap}
+  .burger{display:flex;flex-direction:column;gap:4px;width:44px;height:44px;align-items:center;justify-content:center;border-radius:12px;background:var(--fond);border:1px solid var(--trait);cursor:pointer;flex:none}
+  .burger span{display:block;width:18px;height:2px;border-radius:2px;background:var(--encre)}
+  .prog{position:fixed;top:var(--top);left:0;height:3px;background:var(--orange);z-index:41;transition:width .25s ease}
+  .dim{position:fixed;inset:0;background:rgba(27,58,92,.35);z-index:90;opacity:0;pointer-events:none;transition:opacity .25s}
+  .dim.on{opacity:1;pointer-events:auto}
+  .drawer{position:fixed;top:0;right:0;height:100%;width:84%;max-width:340px;background:var(--fond);border-left:1px solid var(--trait);z-index:100;transform:translateX(100%);transition:transform .25s ease;display:flex;flex-direction:column;padding:12px 18px;overflow-y:auto}
+  .drawer.on{transform:translateX(0)}
+  .drawer .dx{align-self:flex-end;width:44px;height:44px;border-radius:12px;background:var(--fond);border:1px solid var(--trait);color:var(--encre);font-size:22px;cursor:pointer}
+  .drawer .dlg{font-size:var(--f24);font-weight:900;margin:0 2px 8px}
+  .drawer a{display:flex;align-items:center;gap:10px;min-height:44px;font-size:var(--f15);font-weight:700;color:var(--encre);text-decoration:none;border-bottom:1px solid var(--trait)}
+  .drawer a small{font-size:var(--f13);font-weight:800;color:var(--texte2);width:22px}
+  .drawer a.on{color:var(--orange)} .drawer a.on small{color:var(--orange)}
+  .drawer a.cta{margin-top:14px;background:var(--orange);color:#fff;justify-content:center;border-radius:99px;border:none;font-weight:800;min-height:50px}
+  .drawer a.cta2{margin-top:8px;border:1px solid var(--trait);justify-content:center;border-radius:99px;font-weight:800}
+
+  /* Écrans */
+  .stage{position:fixed;top:var(--top);left:0;right:0;bottom:var(--bot);overflow:hidden}
+  @supports (overflow:clip){ .stage{overflow:clip} }
+  .pg{position:absolute;inset:0;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;padding:22px 16px 18px;opacity:0;pointer-events:none;transform:translateX(24px);transition:opacity .22s ease,transform .22s ease;display:flex;flex-direction:column;background:var(--fond)}
+  .pg.on{opacity:1;pointer-events:auto;transform:translateX(0)}
+  .pg.back{transform:translateX(-24px)}
+  .in{max-width:560px;width:100%;margin:auto;position:relative;flex:none}
+  .txt{text-align:left}
+  .eyebrow{font-size:var(--f13);font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--orange);margin-bottom:8px}
+  h1,h2{font-size:var(--f24);font-weight:900;letter-spacing:-.02em;line-height:1.15;text-wrap:balance}
+  h1 em,h2 em{font-style:normal;color:var(--orange)}
+  .lede{font-size:var(--f15);color:var(--texte2);font-weight:600;margin-top:10px;line-height:1.45}
+  .small{font-size:var(--f13);color:var(--texte2);font-weight:600;margin-top:10px}
+  .vis{margin-top:16px;border:1px solid var(--trait);border-radius:var(--r);background:var(--fond);padding:8px;display:flex;justify-content:center}
+  .vis svg{display:block;width:100%;height:auto;max-height:calc(100vh - var(--top) - var(--bot) - var(--vh,330px))}
+  .flw{animation:fl 1.6s linear infinite}
+  @keyframes fl{to{stroke-dashoffset:-20}}
+
+  /* Cartes et boutons (une seule version de chacun) */
+  .card{background:var(--fond);border:1px solid var(--trait);border-radius:var(--r);padding:12px 14px}
+  .grid{display:grid;grid-template-columns:1fr;gap:8px;margin-top:16px}
+  .g2{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .it{display:flex;align-items:center;gap:12px}
+  .pic{width:44px;height:44px;border-radius:12px;background:var(--orange-clair);color:var(--orange);display:flex;align-items:center;justify-content:center;flex:none}
+  .it b,.card b{display:block;font-size:var(--f15);font-weight:800;line-height:1.25}
+  .it span,.card span{display:block;font-size:var(--f13);font-weight:600;color:var(--texte2);line-height:1.35;margin-top:2px}
+  .g2 .card{display:flex;flex-direction:column;gap:8px}
+  .card .pic,.card .nb{display:flex;margin-top:0}
+  .nb{width:28px;height:28px;border-radius:50%;border:1.5px solid var(--orange);color:var(--orange);font-size:var(--f13);font-weight:900;display:flex;align-items:center;justify-content:center;flex:none}
+  .btn{display:flex;align-items:center;justify-content:center;gap:10px;background:var(--orange);color:#fff;border:1px solid var(--orange);cursor:pointer;font-weight:800;font-size:var(--f15);min-height:50px;padding:0 20px;border-radius:99px;text-decoration:none;width:100%;text-align:center;line-height:1.2}
+  .btn.line{background:var(--fond);color:var(--encre);border-color:var(--trait)}
+  .btn .ic{width:22px;height:22px}
+  .lnk{display:inline-flex;align-items:center;min-height:44px;font-size:var(--f15);font-weight:800;color:var(--bleu);text-decoration:underline;text-underline-offset:3px;word-break:break-all}
+
+  /* 1. Promesse et choix du public */
+  .sel{display:block;width:min(230px,62vw);height:auto;margin:0 0 12px}
+  .choix{display:grid;grid-template-columns:1fr;gap:8px;margin-top:16px}
+  .ch{display:flex;align-items:center;gap:12px;min-height:60px;padding:8px 14px;border:1px solid var(--trait);border-radius:var(--r);background:var(--fond);color:var(--encre);font-size:var(--f15);font-weight:800;cursor:pointer;text-align:left;width:100%}
+  .ch .pic{width:40px;height:40px}
+  .ch .go{margin-left:auto;color:var(--orange);font-size:var(--f18);font-weight:900}
+  .ch.bl .pic{background:var(--bleu-clair);color:var(--bleu)}
+  .ch:active{background:var(--papier)}
+
+  /* 2. Verbes organisateur */
+  .verbs{display:flex;flex-wrap:wrap;gap:6px;margin-top:14px}
+  .verbs span{font-size:var(--f13);font-weight:800;color:var(--orange);background:var(--orange-clair);border-radius:99px;padding:6px 12px}
+
+  /* 7. Chiffres clés */
+  .kpi{margin-top:16px;padding:18px 16px;text-align:left}
+  .kpi .num{font-size:64px;font-weight:900;line-height:1;color:var(--orange);letter-spacing:-.03em;font-variant-numeric:tabular-nums}
+  .kpi .lab{display:block;font-size:var(--f18);font-weight:800;line-height:1.3;color:var(--encre);margin-top:8px}
+  .kpi2{margin-top:8px;display:flex;align-items:center;gap:14px}
+  .kpi2 span{font-size:var(--f15)!important;color:var(--encre)!important}
+  .kpi2 .num{font-size:var(--f32);font-weight:900;color:var(--bleu);line-height:1;white-space:nowrap}
+  .kpi2 .num small{display:block;font-size:var(--f13);font-weight:800;color:var(--texte2)}
+
+  /* 9. Formules : une carte à la fois */
+  .car{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;gap:12px;margin-top:16px;scrollbar-width:none;padding:1px}
+  .car::-webkit-scrollbar{display:none}
+  .fo{flex:0 0 88%;scroll-snap-align:start;padding:16px}
+  .fo .tag{font-size:var(--f13);font-weight:800;color:var(--orange);text-transform:uppercase;letter-spacing:.1em}
+  .fo h3{font-size:var(--f18);font-weight:900;margin-top:4px;line-height:1.25}
+  .fo .px{font-size:var(--f32);font-weight:900;color:var(--encre);margin-top:6px;line-height:1.1}
+  .fo .px small{font-size:var(--f15);font-weight:700;color:var(--texte2)}
+  .fo ul{list-style:none;margin-top:10px;display:flex;flex-direction:column;gap:6px}
+  .fo li{display:flex;gap:8px;font-size:var(--f15);font-weight:600;line-height:1.35}
+  .fo li .ic{width:20px;height:20px;color:var(--orange);margin-top:1px}
+  .dots{display:flex;justify-content:center;gap:2px;margin-top:6px}
+  .dots button{width:44px;height:44px;border:0;background:none;cursor:pointer;display:flex;align-items:center;justify-content:center}
+  .dots button i{display:block;width:10px;height:10px;border-radius:50%;background:var(--trait)}
+  .dots button.on i{background:var(--orange);width:24px;border-radius:99px}
+
+  /* 10. Conversion */
+  .conv{display:flex;flex-direction:column;gap:10px;margin-top:16px}
+  .cv{padding:14px;display:flex;flex-direction:column;gap:8px}
+  .cv h3{font-size:var(--f18);font-weight:900;line-height:1.25;display:flex;align-items:center;gap:10px}
+  .cv .pic{width:36px;height:36px}
+  .cv.bl .pic{background:var(--bleu-clair);color:var(--bleu)}
+  .qrr{display:flex;align-items:center;gap:12px;margin-top:4px;padding-top:10px;border-top:1px solid var(--trait)}
+  .qrr svg{width:88px;height:88px;flex:none;border:1px solid var(--trait);border-radius:10px;background:#fff}
+  .qrr b{font-size:var(--f15);font-weight:800;display:block}
+  .aud-com .conv .cv.bl{order:-1}
+  .aud-com .cv.bl{border-color:var(--orange)} .aud-org .cv.or{border-color:var(--orange)}
+
+  /* Navigation basse (conservée) */
+  .nav{position:fixed;left:0;right:0;bottom:0;height:var(--bot);z-index:30;display:flex;align-items:center;justify-content:space-between;gap:10px;padding:0 12px;background:var(--fond);border-top:1px solid var(--trait)}
+  .nav button{min-height:44px;border-radius:99px;border:1px solid var(--trait);background:var(--fond);color:var(--encre);font-weight:800;font-size:var(--f15);padding:0 16px;cursor:pointer;white-space:nowrap}
+  .nav button.next{background:var(--encre);color:#fff;border-color:var(--encre)}
+  .nav button[disabled]{opacity:.35;cursor:default}
+  .nav .cnt{font-size:var(--f13);font-weight:800;color:var(--texte2);display:flex;flex-direction:column;align-items:center;line-height:1.2;white-space:nowrap}
+  .nav .cnt small{font-size:var(--f13);font-weight:800;color:var(--orange);text-transform:uppercase;letter-spacing:.1em}
+
+  /* Volet de contact (WhatsApp / email) */
+  .sheet{display:none;position:absolute;inset:0;z-index:6;overflow-y:auto;padding:22px 16px;background:var(--fond);flex-direction:column}
+  .sheet.on{display:flex}
+  .sx{position:absolute;top:8px;right:10px;width:44px;height:44px;border-radius:50%;border:1px solid var(--trait);background:var(--fond);color:var(--encre);font-size:22px;cursor:pointer;z-index:3}
+  .rdvc{display:flex;flex-direction:column;gap:10px;margin-top:16px;padding:16px}
+  .ph{font-size:var(--f13);color:var(--texte2);font-weight:600}
+
+  /* Ordinateur : 2 colonnes texte + visuel */
+  @media (min-width:1000px){
+    :root{--top:64px;--bot:72px}
+    .menu{padding:0 28px}
+    .pg{padding:32px 48px}
+    .in{max-width:1140px}
+    .in.two{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,6fr);gap:56px;align-items:center}
+    h1,h2{font-size:var(--f32)}
+    .lede{font-size:var(--f18)}
+    .sel{width:300px}
+    .two .vis{margin-top:0;padding:16px}
+    .vis svg{max-height:calc(100vh - var(--top) - var(--bot) - 110px)}
+    .two .grid,.two .conv,.two .car{margin-top:0}
+    .card{padding:16px 18px}
+    .it b,.card b{font-size:var(--f18)} .it span,.card span{font-size:var(--f15)}
+    .kpi{margin-top:0;padding:28px}
+    .kpi .num{font-size:120px}
+    .kpi .lab{font-size:var(--f24)}
+    .kpi2 span{font-size:var(--f15)!important;color:var(--encre)!important}
+  .kpi2 .num{font-size:48px}
+    .fo{padding:24px;flex-basis:100%}
+    .fo .px{font-size:48px}
+    .conv{flex-direction:row;align-items:stretch}
+    .cv{flex:1 1 0;padding:20px}
+    .in.wide{max-width:1140px}
+    .desk{display:block}
+    .mob{display:none}
+  }
+  @media (max-width:999px){ .desk{display:none} }
+  @media (max-width:370px){ .pg{padding:16px 12px 14px} .menu a.cmd{padding:0 10px} .nav button{padding:0 12px} .kpi .num{font-size:56px} }
+  @media (max-height:740px){ .pg{padding-top:14px} .vis{margin-top:10px} .grid{margin-top:10px} }
+  @media (prefers-reduced-motion:reduce){ .pg{transition:none} .flw{animation:none} }
+
+</style>
+</head>
+<body>
+
+<div class="menu">
+  <span class="lg" id="brand">Flow<em>in</em> Event</span>
+  <a class="cmd" id="topCta" href="#action">Nous contacter</a>
+  <button class="burger" id="burger" type="button" aria-label="Menu"><span></span><span></span><span></span></button>
+</div>
+<div class="prog" id="prog"></div>
+
+<div class="dim" id="dim"></div>
+<aside class="drawer" id="drawer" aria-label="Pages">
+  <button class="dx" id="dClose" type="button" aria-label="Fermer">&times;</button>
+  <div class="dlg">Flow<em>in</em> Event</div>
+  <div id="dLinks"></div>
+  <a class="cta" href="#action" id="dCta">Nous contacter</a>
+  <a class="cta2" href="/plaquette-animation-magasin.html">Flowin Animation, le jeu dans ton commerce</a>
+</aside>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="i-vitrine" viewBox="0 0 24 24"><path d="M3.5 9 5 4h14l1.5 5"/><path d="M4.5 9v11h15V9"/><path d="M3.5 9h17"/><path d="M3.5 9a2.1 2.1 0 0 0 4.2 0 2.1 2.1 0 0 0 4.3 0 2.1 2.1 0 0 0 4.3 0 2.1 2.1 0 0 0 4.2 0"/><path d="M10 20v-6h4v6"/></symbol>
+    <symbol id="i-caisse" viewBox="0 0 24 24"><rect x="3.5" y="11" width="17" height="9" rx="2"/><path d="M7 11V5.5h7V11"/><path d="M9.5 8h2"/><path d="M15.5 11V8h4"/><path d="M7.5 15.5h2M11 15.5h2M14.5 15.5h2"/></symbol>
+    <symbol id="i-comptoir" viewBox="0 0 24 24"><path d="M2.5 20h19"/><path d="M4.5 20v-5h15v5"/><path d="M7 12.5a5 5 0 0 1 10 0"/><path d="M5.5 12.5h13"/><path d="M12 6v1.5"/></symbol>
+    <symbol id="i-rayon" viewBox="0 0 24 24"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M4 9h16M4 15h16"/><path d="M7.5 6h3M13 12h3.5M7.5 18h4"/></symbol>
+    <symbol id="i-social" viewBox="0 0 24 24"><rect x="6.5" y="2.5" width="11" height="19" rx="2.8"/><path d="M10.5 18.5h3"/><path d="M12 14s-3-1.8-3-3.9a1.6 1.6 0 0 1 3-.8 1.6 1.6 0 0 1 3 .8C15 12.2 12 14 12 14z"/></symbol>
+    <symbol id="i-mail" viewBox="0 0 24 24"><rect x="2.5" y="5" width="13" height="10" rx="2"/><path d="m2.8 6 6.2 4.6L15.2 6"/><path d="M14 13.5h7.5v5H18l-2 2v-2h-2z"/></symbol>
+    <symbol id="i-flyer" viewBox="0 0 24 24"><path d="M6 3h8.5L19 7.5V21H6z"/><path d="M14.5 3v4.5H19"/><path d="M9 12h7M9 15.5h7M9 9h3"/></symbol>
+    <symbol id="i-event" viewBox="0 0 24 24"><path d="M2.5 20.5h19"/><path d="M4.5 20.5 12 7l7.5 13.5"/><path d="M12 7V3l4 1.5L12 6"/><path d="M10 20.5 12 17l2 3.5"/></symbol>
+    <symbol id="i-qr" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.3"/><rect x="14" y="3" width="7" height="7" rx="1.3"/><rect x="3" y="14" width="7" height="7" rx="1.3"/><path d="M14 14h3v3h-3zM20.5 14v.01M14 20.5h.01M17.5 20.5h3v-3"/></symbol>
+    <symbol id="i-jeu" viewBox="0 0 24 24"><rect x="2.5" y="7" width="19" height="11" rx="5.5"/><path d="M7.5 10.5v4M5.5 12.5h4"/><circle cx="15.5" cy="11.5" r="1"/><circle cx="18" cy="13.8" r="1"/></symbol>
+    <symbol id="i-contact" viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0"/><path d="m16 11.5 2 2 4-4.5"/></symbol>
+    <symbol id="i-rapport" viewBox="0 0 24 24"><path d="M3 20.5h18"/><rect x="4.5" y="11" width="3.5" height="7" rx="1"/><rect x="10.3" y="6" width="3.5" height="12" rx="1"/><rect x="16" y="9" width="3.5" height="9" rx="1"/></symbol>
+    <symbol id="i-client" viewBox="0 0 24 24"><circle cx="12" cy="5" r="2.6"/><path d="M8.5 21l1.5-7-2-1 2-4.5h4l2 4.5-2 1 1.5 7"/></symbol>
+    <symbol id="i-lien" viewBox="0 0 24 24"><path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1"/><path d="M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/></symbol>
+    <symbol id="i-carte" viewBox="0 0 24 24"><path d="M9 4 3.5 6v14L9 18l6 2 5.5-2V4L15 6z"/><path d="M9 4v14M15 6v14"/></symbol>
+    <symbol id="i-libre" viewBox="0 0 24 24"><path d="M12 3 4 6.5v5c0 4.6 3.4 8.4 8 9.5 4.6-1.1 8-4.9 8-9.5v-5z"/><path d="m8.5 12 2.5 2.5 4.5-5"/></symbol>
+    <symbol id="i-cal" viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="15.5" rx="2.5"/><path d="M3.5 10h17M8 3v4M16 3v4"/></symbol>
+    <symbol id="i-phone" viewBox="0 0 24 24"><path d="M6.5 3.5h3l1.5 4.5-2 1.3a12 12 0 0 0 5.7 5.7l1.3-2 4.5 1.5v3a2 2 0 0 1-2 2A16.5 16.5 0 0 1 4.5 5.5a2 2 0 0 1 2-2z"/></symbol>
+    <symbol id="i-trophee" viewBox="0 0 24 24"><path d="M8 4h8v5a4 4 0 0 1-8 0z"/><path d="M8 6H5a3 3 0 0 0 3 4M16 6h3a3 3 0 0 1-3 4"/><path d="M12 13v4M8.5 20.5h7M9.5 17h5"/></symbol>
+    <symbol id="i-ok" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="m8 12.5 2.7 2.7L16.5 9.5"/></symbol>
+    <symbol id="i-cup" viewBox="0 0 24 24"><path d="M5 9h11v5a5 5 0 0 1-5 5h-1a5 5 0 0 1-5-5z"/><path d="M16 10h1.5a2.5 2.5 0 0 1 0 5H16"/><path d="M8 3.5c-.8 1 .8 2 0 3M12 3.5c-.8 1 .8 2 0 3"/></symbol>
+    <symbol id="i-bag" viewBox="0 0 24 24"><path d="M5 8h14l-1 12H6z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/></symbol>
+    <symbol id="i-book" viewBox="0 0 24 24"><rect x="4" y="5" width="4" height="15" rx=".8"/><rect x="9.5" y="3.5" width="4" height="16.5" rx=".8"/><path d="m15.2 7 3.6-1.2 3 13.6-3.6 1z"/></symbol>
+    <symbol id="i-lit" viewBox="0 0 24 24"><path d="M3 19V6M3 15h18v4M21 15v-3a3 3 0 0 0-3-3h-7v6"/><circle cx="7" cy="11.5" r="2"/></symbol>
+    <symbol id="i-mega" viewBox="0 0 24 24"><path d="M3 10v4h3l8 4V6L6 10z"/><path d="M17 9a4 4 0 0 1 0 6M19.5 6.5a7.5 7.5 0 0 1 0 11"/></symbol>
+    <symbol id="i-gift" viewBox="0 0 24 24"><rect x="3.5" y="10" width="17" height="10" rx="1.5"/><path d="M2.5 10h19V7h-19zM12 7v13"/><path d="M12 7c-1-3-5-3.5-5-1.2S11 7 12 7zM12 7c1-3 5-3.5 5-1.2S13 7 12 7z"/></symbol>
+    <symbol id="i-star" viewBox="0 0 24 24"><path d="m12 3 2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1-4.4-4.3 6.1-.9z"/></symbol>
+    <symbol id="i-quiz" viewBox="0 0 24 24"><path d="M4 5h16v11h-9l-4 4v-4H4z"/><path d="M10 9.4a2 2 0 1 1 2.6 1.9c-.5.2-.6.6-.6 1.1"/><path d="M12 14v.01"/></symbol>
+    <symbol id="i-pain" viewBox="0 0 24 24"><path d="M3.5 15a8.5 7 0 0 1 17 0v3a1 1 0 0 1-1 1h-15a1 1 0 0 1-1-1z"/><path d="M8 10.8l1.8 3.6M12 9.8l1.2 4.6M16 10.8l-1.2 3.6"/></symbol>
+    <symbol id="fl-super-event" viewBox="2.4 -78.8 437.4 92.6"><defs><path id="fl-se-s" d="M23.1 0.2Q19.1 0.2 15.1 -1.95Q11.1 -4.1 7.4 -8.8L14.8 -23.3Q15.9 -21.4 18.05 -19.7Q20.2 -18 22.6 -17Q25 -16 26.7 -16Q29.3 -16 31.65 -17.6Q34 -19.2 34 -21.9Q34 -25.4 30.8 -28.3Q27.6 -31.2 23.6 -34Q19.7 -36.8 16.45 -40.35Q13.2 -43.9 13.2 -48.5Q13.2 -53.7 16.2 -58.15Q19.2 -62.6 24 -65.95Q28.8 -69.3 34.25 -71.15Q39.7 -73 44.6 -73Q48.1 -73 51.1 -71.85Q54.1 -70.7 55.9 -68.1Q57.7 -65.5 57.7 -61.1Q57.7 -60.4 57.65 -59.7Q57.6 -59 57.5 -58.3Q57.4 -57.6 57.25 -56.85Q57.1 -56.1 57 -55.3L42.5 -51.1Q42.7 -51.9 42.85 -52.7Q43 -53.5 43 -54.3Q43 -57.3 41.95 -58.65Q40.9 -60 39.2 -60Q38.3 -60 36.6 -59.05Q34.9 -58.1 33.55 -56.45Q32.2 -54.8 32.2 -52.8Q32.2 -49.5 34.95 -47.35Q37.7 -45.2 41.3 -43Q43 -42 45.1 -39.85Q47.2 -37.7 48.75 -34.05Q50.3 -30.4 50.3 -24.7Q50.3 -17.3 46.65 -11.7Q43 -6.1 36.8 -2.95Q30.6 0.2 23.1 0.2ZM70.5 1.8Q67.5 1.8 64.4 0.5Q61.3 -0.8 59.2 -3.5Q57.1 -6.2 57.1 -10.4V-11.2Q57.1 -11.7 57.2 -12Q57.5 -14.6 58.05 -18.8Q58.6 -23 59.4 -27.95Q60.2 -32.9 61.05 -37.8Q61.9 -42.7 62.6 -46.7Q64.1 -54.7 65 -59.6Q65.9 -64.5 66.45 -67.15Q67 -69.8 67.3 -71.1L83.8 -72.7Q82.5 -66.6 81.35 -61.15Q80.2 -55.7 79.2 -50.8L74.6 -28.7Q74 -26.2 73.7 -24.5Q73.3 -22.9 72.85 -20.45Q72.4 -18 72.4 -16Q72.4 -14.4 73.2 -13.35Q74 -12.3 75.2 -12.3Q76.9 -12.3 78 -13.6Q79.1 -14.9 79.8 -16.8Q80.5 -18.7 80.9 -20.65Q81.3 -22.6 81.6 -23.8Q82.6 -28.4 83.45 -32.75Q84.3 -37.1 85.25 -42Q86.2 -46.9 87.4 -53.3Q88.2 -57.7 89.05 -62.25Q89.9 -66.8 90.7 -71.5L105.9 -72.5L102.4 -53.2Q101.7 -49.5 100.85 -44.9Q100 -40.3 99 -35.6Q98 -30.9 97.15 -26.7Q96.3 -22.5 95.6 -19.5Q93.6 -11.3 89.4 -6.65Q85.2 -2 80.15 -0.1Q75.1 1.8 70.5 1.8ZM100.6 0.1Q103.6 -13.4 106.3 -26.3Q107.4 -31.5 108.55 -37.45Q109.7 -43.4 110.9 -49.5Q112.1 -55.6 113.1 -61.05Q114.1 -66.5 114.7 -70.6Q118.7 -71.8 123.35 -72.8Q128 -73.8 131.7 -73.8Q137.7 -73.8 141.2 -71.25Q144.7 -68.7 146.2 -64.4Q147.7 -60.1 147.7 -55Q147.7 -49.4 145.65 -44.25Q143.6 -39.1 140.15 -35Q136.7 -30.9 132.25 -28.5Q127.8 -26.1 123 -26.1H121.9Q121.1 -22.7 120.4 -18.7Q119.7 -14.7 119.2 -11.3Q118.8 -9.3 118.5 -7.3Q118.2 -5.3 117.9 -3.3ZM123.9 -36.6Q126.2 -37.2 128.5 -39.65Q130.8 -42.1 132.3 -45.9Q133.8 -49.7 133.8 -54.2Q133.8 -57.9 132.15 -59.8Q130.5 -61.7 128.5 -61.7Q127.4 -55.1 126.3 -49.2Q125.2 -43.3 123.9 -36.6ZM144.6 0.1 157.7 -71 189.3 -73.7Q188.6 -71.5 188.1 -69.2Q187.6 -67.3 187.15 -65.25Q186.7 -63.2 186.4 -61.6Q185.1 -61.5 182.7 -61.45Q180.3 -61.4 177.8 -61.35Q175.3 -61.3 173.5 -61.3Q171.7 -61.3 171.6 -61.3L168.1 -43.4L173.9 -43.7Q175 -43.8 176.15 -43.8Q177.3 -43.8 178.4 -43.8Q179.5 -43.8 180.4 -43.8Q181.3 -43.8 181.8 -43.9Q181.6 -42.5 181.45 -41.15Q181.3 -39.8 181.1 -38.4L180.2 -32.9Q179.7 -32.8 178.9 -32.8Q178.1 -32.8 177 -32.8Q175.9 -32.7 174.7 -32.7Q173.5 -32.7 172.4 -32.6Q171.1 -32.5 169.7 -32.5Q168.3 -32.5 166.7 -32.4L163.3 -14L177.9 -16.3L176.9 -4.9ZM183.3 0.1 188.5 -25.9Q189.7 -33.1 191.1 -40.7Q192.5 -48.3 193.75 -55.7Q195 -63.1 195.7 -69.6Q201.4 -71.4 208 -72.25Q214.6 -73.1 221.1 -73.1Q228.7 -73.1 231.45 -69.8Q234.2 -66.5 234.2 -60.9Q234.2 -55.8 231.8 -50.65Q229.4 -45.5 225.55 -41.35Q221.7 -37.2 217.1 -34.8Q218.9 -30.8 220.95 -26.05Q223 -21.3 224.8 -17Q225.8 -14.5 226.85 -12Q227.9 -9.5 228.9 -7L213.4 -1.6Q212.4 -5.1 211.5 -8.3Q210.6 -11.5 209.8 -14.6Q208.8 -18.3 207.9 -21.75Q207 -25.2 206.35 -27.9Q205.7 -30.6 205.6 -31.7L204.3 -31.3Q203.7 -28.1 202.85 -23.5Q202 -18.9 201.3 -14.6L199.5 -4.1ZM206.8 -43.3Q208.6 -43.5 211.25 -44.85Q213.9 -46.2 216.55 -48.2Q219.2 -50.2 221 -52.3Q222.8 -54.4 222.8 -56Q222.8 -58 220.45 -58.65Q218.1 -59.3 214.3 -59.3H212.1Q211.5 -59.2 211 -59.2Q210.5 -59.2 210 -59.2Z"/><path id="fl-se-e" d="M256.96 0.08 267.7 -58.22 293.61 -60.43Q293.04 -58.63 292.63 -56.74Q292.22 -55.19 291.85 -53.51Q291.48 -51.82 291.23 -50.51Q290.17 -50.43 288.2 -50.39Q286.23 -50.35 284.18 -50.31Q282.13 -50.27 280.65 -50.27Q279.18 -50.27 279.1 -50.27L276.23 -35.59L280.98 -35.83Q281.88 -35.92 282.83 -35.92Q283.77 -35.92 284.67 -35.92Q285.57 -35.92 286.31 -35.92Q287.05 -35.92 287.46 -36Q287.3 -34.85 287.17 -33.74Q287.05 -32.64 286.89 -31.49L286.15 -26.98Q285.74 -26.9 285.08 -26.9Q284.43 -26.9 283.52 -26.9Q282.62 -26.81 281.64 -26.81Q280.65 -26.81 279.75 -26.73Q278.69 -26.65 277.54 -26.65Q276.39 -26.65 275.08 -26.57L272.29 -11.48L284.26 -13.37L283.44 -4.02ZM293.2 0.74Q293.77 -5 294.27 -10.66Q294.76 -16.32 295.17 -21.81Q296.07 -31.82 296.6 -41.49Q297.14 -51.17 297.3 -59.61Q303.7 -59.61 306.89 -59.9Q310.09 -60.19 310.09 -60.19Q309.68 -55.43 309.27 -51.54Q308.86 -47.64 308.53 -44.61L307.55 -34.69Q307.14 -30.18 306.85 -27.06Q306.57 -23.94 306.32 -21.32Q306.07 -18.7 305.66 -15.58H307.14L316.32 -59.2L320.83 -59.45Q321.9 -59.53 322.97 -59.57Q324.03 -59.61 325.18 -59.7Q326.33 -59.78 327.35 -59.86Q328.38 -59.94 329.28 -60.02Q327.72 -55.19 326.12 -49.2Q324.52 -43.21 322.93 -36.82Q321.33 -30.42 319.69 -24.19Q318.37 -18.94 317.06 -13.49Q315.75 -8.04 314.44 -2.46ZM324.2 0.08 334.94 -58.22 360.85 -60.43Q360.28 -58.63 359.87 -56.74Q359.46 -55.19 359.09 -53.51Q358.72 -51.82 358.47 -50.51Q357.41 -50.43 355.44 -50.39Q353.47 -50.35 351.42 -50.31Q349.37 -50.27 347.89 -50.27Q346.42 -50.27 346.34 -50.27L343.47 -35.59L348.22 -35.83Q349.12 -35.92 350.07 -35.92Q351.01 -35.92 351.91 -35.92Q352.81 -35.92 353.55 -35.92Q354.29 -35.92 354.7 -36Q354.54 -34.85 354.41 -33.74Q354.29 -32.64 354.13 -31.49L353.39 -26.98Q352.98 -26.9 352.32 -26.9Q351.67 -26.9 350.76 -26.9Q349.86 -26.81 348.88 -26.81Q347.89 -26.81 346.99 -26.73Q345.93 -26.65 344.78 -26.65Q343.63 -26.65 342.32 -26.57L339.53 -11.48L351.5 -13.37L350.68 -4.02ZM356.09 0.41Q357.24 -5.41 358.35 -11.03Q359.46 -16.65 360.52 -22.14Q361.67 -28.54 362.86 -35.1Q364.05 -41.66 365.07 -47.89Q366.1 -54.12 366.67 -59.45Q367.98 -59.53 369.21 -59.61Q370.44 -59.7 371.59 -59.78Q372.66 -59.86 373.76 -59.94Q374.87 -60.02 375.94 -60.11L379.87 -60.35Q380.45 -57.24 380.9 -54.2Q381.35 -51.17 381.76 -48.3Q382.09 -46.33 382.54 -43.71Q382.99 -41.08 383.44 -38.34Q383.89 -35.59 384.34 -33.21Q384.79 -30.83 385.12 -29.36Q385.94 -33.7 386.48 -36.53Q387.01 -39.36 387.54 -42.03Q388.07 -44.69 388.81 -48.3L391.35 -60.27L401.36 -61.5Q399.96 -55.35 398.73 -49.53Q397.5 -43.71 396.44 -38.21Q394.39 -28.29 392.83 -19.64Q391.27 -10.99 390.45 -4.51L377.09 -1.39L375.86 -14.02Q375.69 -15.91 375.36 -18.57Q375.04 -21.24 374.71 -24.07Q374.38 -26.9 374.05 -29.23Q373.72 -31.57 373.56 -32.72Q372.74 -27.88 372 -23.33Q371.26 -18.78 370.36 -14.51Q369.79 -11.64 369.25 -8.57Q368.72 -5.49 368.07 -2.38ZM404.23 0.08Q405.13 -4.43 406.07 -8.9Q407.02 -13.37 407.84 -17.71Q410.95 -33.29 412.92 -47.56Q412.02 -47.72 411.03 -47.77Q410.05 -47.81 409.15 -47.72Q407.18 -47.56 405.29 -48.22Q405.38 -48.87 405.38 -49.65Q405.38 -50.43 405.38 -51.25Q405.38 -52.15 405.38 -53.01Q405.38 -53.87 405.46 -54.69Q405.54 -55.6 405.54 -56.62Q405.54 -57.65 405.62 -58.71Q407.75 -58.55 409.89 -58.47Q412.02 -58.38 414.15 -58.38Q420.22 -58.38 425.75 -58.79Q431.29 -59.2 435.96 -59.78L435.06 -55.35L434.32 -51.5Q433.91 -49.36 433.58 -48.13Q432.68 -47.89 431.78 -47.72Q430.88 -47.56 429.98 -47.48Q429.07 -47.4 428.13 -47.23Q427.19 -47.07 426.29 -46.9Q425.06 -40.84 424.28 -36.41Q423.5 -31.98 422.88 -27.92Q422.27 -23.86 421.45 -19.02Q420.05 -10.74 418.99 -2.21Z"/></defs><use href="#fl-se-s" transform="translate(7 7)" fill="#E2231A" stroke="#E2231A" stroke-width="6" stroke-linejoin="round"/><use href="#fl-se-s" transform="translate(3.5 3.5)" fill="#E2231A" stroke="#E2231A" stroke-width="6" stroke-linejoin="round"/><use href="#fl-se-s" fill="none" stroke="#1B3A5C" stroke-width="6" stroke-linejoin="round"/><use href="#fl-se-s" fill="#FFD23F"/><use href="#fl-se-e" transform="rotate(-4 343.47 -28.78)" fill="#1B3A5C"/></symbol>
+    <symbol id="qrc" viewBox="0 0 37 37"><path d="M0 0h1v1h-1zM1 0h1v1h-1zM2 0h1v1h-1zM3 0h1v1h-1zM4 0h1v1h-1zM5 0h1v1h-1zM6 0h1v1h-1zM9 0h1v1h-1zM10 0h1v1h-1zM11 0h1v1h-1zM13 0h1v1h-1zM14 0h1v1h-1zM21 0h1v1h-1zM23 0h1v1h-1zM28 0h1v1h-1zM30 0h1v1h-1zM31 0h1v1h-1zM32 0h1v1h-1zM33 0h1v1h-1zM34 0h1v1h-1zM35 0h1v1h-1zM36 0h1v1h-1zM0 1h1v1h-1zM6 1h1v1h-1zM9 1h1v1h-1zM11 1h1v1h-1zM12 1h1v1h-1zM15 1h1v1h-1zM18 1h1v1h-1zM20 1h1v1h-1zM26 1h1v1h-1zM27 1h1v1h-1zM28 1h1v1h-1zM30 1h1v1h-1zM36 1h1v1h-1zM0 2h1v1h-1zM2 2h1v1h-1zM3 2h1v1h-1zM4 2h1v1h-1zM6 2h1v1h-1zM8 2h1v1h-1zM13 2h1v1h-1zM16 2h1v1h-1zM18 2h1v1h-1zM21 2h1v1h-1zM23 2h1v1h-1zM26 2h1v1h-1zM30 2h1v1h-1zM32 2h1v1h-1zM33 2h1v1h-1zM34 2h1v1h-1zM36 2h1v1h-1zM0 3h1v1h-1zM2 3h1v1h-1zM3 3h1v1h-1zM4 3h1v1h-1zM6 3h1v1h-1zM8 3h1v1h-1zM9 3h1v1h-1zM12 3h1v1h-1zM17 3h1v1h-1zM20 3h1v1h-1zM22 3h1v1h-1zM23 3h1v1h-1zM25 3h1v1h-1zM26 3h1v1h-1zM27 3h1v1h-1zM30 3h1v1h-1zM32 3h1v1h-1zM33 3h1v1h-1zM34 3h1v1h-1zM36 3h1v1h-1zM0 4h1v1h-1zM2 4h1v1h-1zM3 4h1v1h-1zM4 4h1v1h-1zM6 4h1v1h-1zM8 4h1v1h-1zM12 4h1v1h-1zM16 4h1v1h-1zM17 4h1v1h-1zM18 4h1v1h-1zM19 4h1v1h-1zM20 4h1v1h-1zM21 4h1v1h-1zM23 4h1v1h-1zM25 4h1v1h-1zM26 4h1v1h-1zM28 4h1v1h-1zM30 4h1v1h-1zM32 4h1v1h-1zM33 4h1v1h-1zM34 4h1v1h-1zM36 4h1v1h-1zM0 5h1v1h-1zM6 5h1v1h-1zM8 5h1v1h-1zM9 5h1v1h-1zM10 5h1v1h-1zM14 5h1v1h-1zM15 5h1v1h-1zM16 5h1v1h-1zM17 5h1v1h-1zM20 5h1v1h-1zM22 5h1v1h-1zM27 5h1v1h-1zM28 5h1v1h-1zM30 5h1v1h-1zM36 5h1v1h-1zM0 6h1v1h-1zM1 6h1v1h-1zM2 6h1v1h-1zM3 6h1v1h-1zM4 6h1v1h-1zM5 6h1v1h-1zM6 6h1v1h-1zM8 6h1v1h-1zM10 6h1v1h-1zM12 6h1v1h-1zM14 6h1v1h-1zM16 6h1v1h-1zM18 6h1v1h-1zM20 6h1v1h-1zM22 6h1v1h-1zM24 6h1v1h-1zM26 6h1v1h-1zM28 6h1v1h-1zM30 6h1v1h-1zM31 6h1v1h-1zM32 6h1v1h-1zM33 6h1v1h-1zM34 6h1v1h-1zM35 6h1v1h-1zM36 6h1v1h-1zM8 7h1v1h-1zM11 7h1v1h-1zM13 7h1v1h-1zM14 7h1v1h-1zM15 7h1v1h-1zM17 7h1v1h-1zM18 7h1v1h-1zM19 7h1v1h-1zM20 7h1v1h-1zM21 7h1v1h-1zM26 7h1v1h-1zM27 7h1v1h-1zM28 7h1v1h-1zM0 8h1v1h-1zM2 8h1v1h-1zM3 8h1v1h-1zM4 8h1v1h-1zM5 8h1v1h-1zM6 8h1v1h-1zM11 8h1v1h-1zM13 8h1v1h-1zM14 8h1v1h-1zM15 8h1v1h-1zM16 8h1v1h-1zM19 8h1v1h-1zM22 8h1v1h-1zM24 8h1v1h-1zM25 8h1v1h-1zM26 8h1v1h-1zM28 8h1v1h-1zM30 8h1v1h-1zM31 8h1v1h-1zM32 8h1v1h-1zM33 8h1v1h-1zM34 8h1v1h-1zM1 9h1v1h-1zM3 9h1v1h-1zM5 9h1v1h-1zM7 9h1v1h-1zM8 9h1v1h-1zM9 9h1v1h-1zM10 9h1v1h-1zM14 9h1v1h-1zM15 9h1v1h-1zM17 9h1v1h-1zM18 9h1v1h-1zM20 9h1v1h-1zM21 9h1v1h-1zM23 9h1v1h-1zM28 9h1v1h-1zM31 9h1v1h-1zM34 9h1v1h-1zM35 9h1v1h-1zM0 10h1v1h-1zM5 10h1v1h-1zM6 10h1v1h-1zM7 10h1v1h-1zM8 10h1v1h-1zM9 10h1v1h-1zM13 10h1v1h-1zM15 10h1v1h-1zM16 10h1v1h-1zM19 10h1v1h-1zM25 10h1v1h-1zM26 10h1v1h-1zM27 10h1v1h-1zM28 10h1v1h-1zM29 10h1v1h-1zM30 10h1v1h-1zM31 10h1v1h-1zM32 10h1v1h-1zM33 10h1v1h-1zM34 10h1v1h-1zM35 10h1v1h-1zM36 10h1v1h-1zM1 11h1v1h-1zM2 11h1v1h-1zM3 11h1v1h-1zM4 11h1v1h-1zM8 11h1v1h-1zM9 11h1v1h-1zM11 11h1v1h-1zM13 11h1v1h-1zM15 11h1v1h-1zM18 11h1v1h-1zM19 11h1v1h-1zM20 11h1v1h-1zM21 11h1v1h-1zM22 11h1v1h-1zM23 11h1v1h-1zM24 11h1v1h-1zM27 11h1v1h-1zM31 11h1v1h-1zM32 11h1v1h-1zM36 11h1v1h-1zM0 12h1v1h-1zM2 12h1v1h-1zM3 12h1v1h-1zM6 12h1v1h-1zM7 12h1v1h-1zM8 12h1v1h-1zM9 12h1v1h-1zM10 12h1v1h-1zM14 12h1v1h-1zM15 12h1v1h-1zM17 12h1v1h-1zM19 12h1v1h-1zM22 12h1v1h-1zM24 12h1v1h-1zM25 12h1v1h-1zM26 12h1v1h-1zM27 12h1v1h-1zM29 12h1v1h-1zM30 12h1v1h-1zM32 12h1v1h-1zM33 12h1v1h-1zM34 12h1v1h-1zM35 12h1v1h-1zM36 12h1v1h-1zM1 13h1v1h-1zM2 13h1v1h-1zM3 13h1v1h-1zM4 13h1v1h-1zM9 13h1v1h-1zM10 13h1v1h-1zM16 13h1v1h-1zM18 13h1v1h-1zM19 13h1v1h-1zM21 13h1v1h-1zM23 13h1v1h-1zM25 13h1v1h-1zM31 13h1v1h-1zM0 14h1v1h-1zM1 14h1v1h-1zM2 14h1v1h-1zM3 14h1v1h-1zM4 14h1v1h-1zM6 14h1v1h-1zM7 14h1v1h-1zM9 14h1v1h-1zM10 14h1v1h-1zM13 14h1v1h-1zM15 14h1v1h-1zM18 14h1v1h-1zM22 14h1v1h-1zM24 14h1v1h-1zM25 14h1v1h-1zM26 14h1v1h-1zM27 14h1v1h-1zM29 14h1v1h-1zM31 14h1v1h-1zM32 14h1v1h-1zM33 14h1v1h-1zM35 14h1v1h-1zM36 14h1v1h-1zM0 15h1v1h-1zM1 15h1v1h-1zM2 15h1v1h-1zM5 15h1v1h-1zM7 15h1v1h-1zM9 15h1v1h-1zM10 15h1v1h-1zM12 15h1v1h-1zM13 15h1v1h-1zM15 15h1v1h-1zM16 15h1v1h-1zM21 15h1v1h-1zM23 15h1v1h-1zM28 15h1v1h-1zM31 15h1v1h-1zM32 15h1v1h-1zM35 15h1v1h-1zM36 15h1v1h-1zM0 16h1v1h-1zM2 16h1v1h-1zM6 16h1v1h-1zM8 16h1v1h-1zM9 16h1v1h-1zM11 16h1v1h-1zM13 16h1v1h-1zM15 16h1v1h-1zM18 16h1v1h-1zM20 16h1v1h-1zM22 16h1v1h-1zM24 16h1v1h-1zM25 16h1v1h-1zM30 16h1v1h-1zM32 16h1v1h-1zM34 16h1v1h-1zM36 16h1v1h-1zM2 17h1v1h-1zM3 17h1v1h-1zM5 17h1v1h-1zM8 17h1v1h-1zM10 17h1v1h-1zM12 17h1v1h-1zM14 17h1v1h-1zM15 17h1v1h-1zM16 17h1v1h-1zM21 17h1v1h-1zM22 17h1v1h-1zM23 17h1v1h-1zM24 17h1v1h-1zM28 17h1v1h-1zM31 17h1v1h-1zM33 17h1v1h-1zM34 17h1v1h-1zM35 17h1v1h-1zM0 18h1v1h-1zM1 18h1v1h-1zM2 18h1v1h-1zM3 18h1v1h-1zM6 18h1v1h-1zM9 18h1v1h-1zM10 18h1v1h-1zM11 18h1v1h-1zM12 18h1v1h-1zM13 18h1v1h-1zM14 18h1v1h-1zM18 18h1v1h-1zM20 18h1v1h-1zM21 18h1v1h-1zM22 18h1v1h-1zM24 18h1v1h-1zM26 18h1v1h-1zM27 18h1v1h-1zM28 18h1v1h-1zM29 18h1v1h-1zM31 18h1v1h-1zM35 18h1v1h-1zM36 18h1v1h-1zM0 19h1v1h-1zM2 19h1v1h-1zM3 19h1v1h-1zM4 19h1v1h-1zM5 19h1v1h-1zM11 19h1v1h-1zM12 19h1v1h-1zM16 19h1v1h-1zM21 19h1v1h-1zM22 19h1v1h-1zM26 19h1v1h-1zM28 19h1v1h-1zM30 19h1v1h-1zM32 19h1v1h-1zM36 19h1v1h-1zM2 20h1v1h-1zM3 20h1v1h-1zM6 20h1v1h-1zM7 20h1v1h-1zM10 20h1v1h-1zM12 20h1v1h-1zM16 20h1v1h-1zM17 20h1v1h-1zM20 20h1v1h-1zM22 20h1v1h-1zM23 20h1v1h-1zM25 20h1v1h-1zM26 20h1v1h-1zM27 20h1v1h-1zM29 20h1v1h-1zM30 20h1v1h-1zM32 20h1v1h-1zM33 20h1v1h-1zM34 20h1v1h-1zM1 21h1v1h-1zM3 21h1v1h-1zM4 21h1v1h-1zM10 21h1v1h-1zM11 21h1v1h-1zM12 21h1v1h-1zM16 21h1v1h-1zM17 21h1v1h-1zM19 21h1v1h-1zM20 21h1v1h-1zM21 21h1v1h-1zM23 21h1v1h-1zM25 21h1v1h-1zM28 21h1v1h-1zM33 21h1v1h-1zM0 22h1v1h-1zM1 22h1v1h-1zM5 22h1v1h-1zM6 22h1v1h-1zM10 22h1v1h-1zM11 22h1v1h-1zM12 22h1v1h-1zM14 22h1v1h-1zM15 22h1v1h-1zM17 22h1v1h-1zM24 22h1v1h-1zM25 22h1v1h-1zM26 22h1v1h-1zM27 22h1v1h-1zM28 22h1v1h-1zM29 22h1v1h-1zM31 22h1v1h-1zM32 22h1v1h-1zM33 22h1v1h-1zM35 22h1v1h-1zM36 22h1v1h-1zM1 23h1v1h-1zM3 23h1v1h-1zM4 23h1v1h-1zM5 23h1v1h-1zM7 23h1v1h-1zM9 23h1v1h-1zM10 23h1v1h-1zM12 23h1v1h-1zM14 23h1v1h-1zM15 23h1v1h-1zM16 23h1v1h-1zM17 23h1v1h-1zM18 23h1v1h-1zM21 23h1v1h-1zM23 23h1v1h-1zM27 23h1v1h-1zM29 23h1v1h-1zM30 23h1v1h-1zM31 23h1v1h-1zM32 23h1v1h-1zM35 23h1v1h-1zM36 23h1v1h-1zM0 24h1v1h-1zM4 24h1v1h-1zM5 24h1v1h-1zM6 24h1v1h-1zM7 24h1v1h-1zM8 24h1v1h-1zM9 24h1v1h-1zM11 24h1v1h-1zM13 24h1v1h-1zM14 24h1v1h-1zM15 24h1v1h-1zM16 24h1v1h-1zM22 24h1v1h-1zM23 24h1v1h-1zM24 24h1v1h-1zM25 24h1v1h-1zM26 24h1v1h-1zM29 24h1v1h-1zM30 24h1v1h-1zM32 24h1v1h-1zM34 24h1v1h-1zM35 24h1v1h-1zM0 25h1v1h-1zM1 25h1v1h-1zM5 25h1v1h-1zM10 25h1v1h-1zM11 25h1v1h-1zM15 25h1v1h-1zM18 25h1v1h-1zM20 25h1v1h-1zM23 25h1v1h-1zM25 25h1v1h-1zM28 25h1v1h-1zM31 25h1v1h-1zM34 25h1v1h-1zM0 26h1v1h-1zM3 26h1v1h-1zM4 26h1v1h-1zM6 26h1v1h-1zM11 26h1v1h-1zM13 26h1v1h-1zM14 26h1v1h-1zM15 26h1v1h-1zM16 26h1v1h-1zM18 26h1v1h-1zM19 26h1v1h-1zM21 26h1v1h-1zM22 26h1v1h-1zM25 26h1v1h-1zM26 26h1v1h-1zM27 26h1v1h-1zM28 26h1v1h-1zM29 26h1v1h-1zM35 26h1v1h-1zM36 26h1v1h-1zM0 27h1v1h-1zM2 27h1v1h-1zM8 27h1v1h-1zM10 27h1v1h-1zM12 27h1v1h-1zM13 27h1v1h-1zM14 27h1v1h-1zM15 27h1v1h-1zM19 27h1v1h-1zM20 27h1v1h-1zM21 27h1v1h-1zM27 27h1v1h-1zM29 27h1v1h-1zM31 27h1v1h-1zM36 27h1v1h-1zM0 28h1v1h-1zM2 28h1v1h-1zM3 28h1v1h-1zM4 28h1v1h-1zM5 28h1v1h-1zM6 28h1v1h-1zM8 28h1v1h-1zM11 28h1v1h-1zM12 28h1v1h-1zM15 28h1v1h-1zM16 28h1v1h-1zM17 28h1v1h-1zM19 28h1v1h-1zM20 28h1v1h-1zM23 28h1v1h-1zM24 28h1v1h-1zM25 28h1v1h-1zM26 28h1v1h-1zM27 28h1v1h-1zM28 28h1v1h-1zM29 28h1v1h-1zM30 28h1v1h-1zM31 28h1v1h-1zM32 28h1v1h-1zM33 28h1v1h-1zM34 28h1v1h-1zM8 29h1v1h-1zM9 29h1v1h-1zM11 29h1v1h-1zM13 29h1v1h-1zM14 29h1v1h-1zM16 29h1v1h-1zM19 29h1v1h-1zM20 29h1v1h-1zM21 29h1v1h-1zM23 29h1v1h-1zM24 29h1v1h-1zM25 29h1v1h-1zM26 29h1v1h-1zM27 29h1v1h-1zM28 29h1v1h-1zM32 29h1v1h-1zM33 29h1v1h-1zM0 30h1v1h-1zM1 30h1v1h-1zM2 30h1v1h-1zM3 30h1v1h-1zM4 30h1v1h-1zM5 30h1v1h-1zM6 30h1v1h-1zM10 30h1v1h-1zM13 30h1v1h-1zM15 30h1v1h-1zM16 30h1v1h-1zM18 30h1v1h-1zM20 30h1v1h-1zM21 30h1v1h-1zM22 30h1v1h-1zM28 30h1v1h-1zM30 30h1v1h-1zM32 30h1v1h-1zM34 30h1v1h-1zM36 30h1v1h-1zM0 31h1v1h-1zM6 31h1v1h-1zM8 31h1v1h-1zM9 31h1v1h-1zM10 31h1v1h-1zM13 31h1v1h-1zM14 31h1v1h-1zM15 31h1v1h-1zM16 31h1v1h-1zM21 31h1v1h-1zM22 31h1v1h-1zM23 31h1v1h-1zM24 31h1v1h-1zM28 31h1v1h-1zM32 31h1v1h-1zM33 31h1v1h-1zM35 31h1v1h-1zM36 31h1v1h-1zM0 32h1v1h-1zM2 32h1v1h-1zM3 32h1v1h-1zM4 32h1v1h-1zM6 32h1v1h-1zM8 32h1v1h-1zM10 32h1v1h-1zM12 32h1v1h-1zM14 32h1v1h-1zM15 32h1v1h-1zM18 32h1v1h-1zM22 32h1v1h-1zM24 32h1v1h-1zM25 32h1v1h-1zM26 32h1v1h-1zM27 32h1v1h-1zM28 32h1v1h-1zM29 32h1v1h-1zM30 32h1v1h-1zM31 32h1v1h-1zM32 32h1v1h-1zM34 32h1v1h-1zM35 32h1v1h-1zM36 32h1v1h-1zM0 33h1v1h-1zM2 33h1v1h-1zM3 33h1v1h-1zM4 33h1v1h-1zM6 33h1v1h-1zM8 33h1v1h-1zM9 33h1v1h-1zM10 33h1v1h-1zM11 33h1v1h-1zM14 33h1v1h-1zM15 33h1v1h-1zM16 33h1v1h-1zM22 33h1v1h-1zM23 33h1v1h-1zM26 33h1v1h-1zM28 33h1v1h-1zM29 33h1v1h-1zM30 33h1v1h-1zM32 33h1v1h-1zM33 33h1v1h-1zM36 33h1v1h-1zM0 34h1v1h-1zM2 34h1v1h-1zM3 34h1v1h-1zM4 34h1v1h-1zM6 34h1v1h-1zM8 34h1v1h-1zM10 34h1v1h-1zM11 34h1v1h-1zM12 34h1v1h-1zM13 34h1v1h-1zM14 34h1v1h-1zM20 34h1v1h-1zM22 34h1v1h-1zM24 34h1v1h-1zM26 34h1v1h-1zM29 34h1v1h-1zM35 34h1v1h-1zM36 34h1v1h-1zM0 35h1v1h-1zM6 35h1v1h-1zM9 35h1v1h-1zM12 35h1v1h-1zM16 35h1v1h-1zM19 35h1v1h-1zM21 35h1v1h-1zM27 35h1v1h-1zM28 35h1v1h-1zM29 35h1v1h-1zM32 35h1v1h-1zM36 35h1v1h-1zM0 36h1v1h-1zM1 36h1v1h-1zM2 36h1v1h-1zM3 36h1v1h-1zM4 36h1v1h-1zM5 36h1v1h-1zM6 36h1v1h-1zM8 36h1v1h-1zM10 36h1v1h-1zM12 36h1v1h-1zM13 36h1v1h-1zM17 36h1v1h-1zM22 36h1v1h-1zM25 36h1v1h-1zM26 36h1v1h-1zM29 36h1v1h-1zM30 36h1v1h-1zM32 36h1v1h-1zM34 36h1v1h-1zM35 36h1v1h-1zM36 36h1v1h-1z" fill="#1B3A5C"/></symbol>
+    <symbol id="qr-se" viewBox="-2 -2 37 37"><path d="M0 0h1v1h-1zM1 0h1v1h-1zM2 0h1v1h-1zM3 0h1v1h-1zM4 0h1v1h-1zM5 0h1v1h-1zM6 0h1v1h-1zM8 0h1v1h-1zM10 0h1v1h-1zM11 0h1v1h-1zM14 0h1v1h-1zM15 0h1v1h-1zM16 0h1v1h-1zM17 0h1v1h-1zM18 0h1v1h-1zM20 0h1v1h-1zM23 0h1v1h-1zM26 0h1v1h-1zM27 0h1v1h-1zM28 0h1v1h-1zM29 0h1v1h-1zM30 0h1v1h-1zM31 0h1v1h-1zM32 0h1v1h-1zM0 1h1v1h-1zM6 1h1v1h-1zM11 1h1v1h-1zM12 1h1v1h-1zM17 1h1v1h-1zM19 1h1v1h-1zM22 1h1v1h-1zM26 1h1v1h-1zM32 1h1v1h-1zM0 2h1v1h-1zM2 2h1v1h-1zM3 2h1v1h-1zM4 2h1v1h-1zM6 2h1v1h-1zM9 2h1v1h-1zM13 2h1v1h-1zM19 2h1v1h-1zM21 2h1v1h-1zM23 2h1v1h-1zM26 2h1v1h-1zM28 2h1v1h-1zM29 2h1v1h-1zM30 2h1v1h-1zM32 2h1v1h-1zM0 3h1v1h-1zM2 3h1v1h-1zM3 3h1v1h-1zM4 3h1v1h-1zM6 3h1v1h-1zM8 3h1v1h-1zM11 3h1v1h-1zM12 3h1v1h-1zM14 3h1v1h-1zM17 3h1v1h-1zM18 3h1v1h-1zM20 3h1v1h-1zM22 3h1v1h-1zM26 3h1v1h-1zM28 3h1v1h-1zM29 3h1v1h-1zM30 3h1v1h-1zM32 3h1v1h-1zM0 4h1v1h-1zM2 4h1v1h-1zM3 4h1v1h-1zM4 4h1v1h-1zM6 4h1v1h-1zM8 4h1v1h-1zM9 4h1v1h-1zM11 4h1v1h-1zM13 4h1v1h-1zM14 4h1v1h-1zM17 4h1v1h-1zM18 4h1v1h-1zM19 4h1v1h-1zM20 4h1v1h-1zM21 4h1v1h-1zM23 4h1v1h-1zM26 4h1v1h-1zM28 4h1v1h-1zM29 4h1v1h-1zM30 4h1v1h-1zM32 4h1v1h-1zM0 5h1v1h-1zM6 5h1v1h-1zM8 5h1v1h-1zM9 5h1v1h-1zM11 5h1v1h-1zM12 5h1v1h-1zM13 5h1v1h-1zM14 5h1v1h-1zM16 5h1v1h-1zM17 5h1v1h-1zM19 5h1v1h-1zM21 5h1v1h-1zM22 5h1v1h-1zM24 5h1v1h-1zM26 5h1v1h-1zM32 5h1v1h-1zM0 6h1v1h-1zM1 6h1v1h-1zM2 6h1v1h-1zM3 6h1v1h-1zM4 6h1v1h-1zM5 6h1v1h-1zM6 6h1v1h-1zM8 6h1v1h-1zM10 6h1v1h-1zM12 6h1v1h-1zM14 6h1v1h-1zM16 6h1v1h-1zM18 6h1v1h-1zM20 6h1v1h-1zM22 6h1v1h-1zM24 6h1v1h-1zM26 6h1v1h-1zM27 6h1v1h-1zM28 6h1v1h-1zM29 6h1v1h-1zM30 6h1v1h-1zM31 6h1v1h-1zM32 6h1v1h-1zM8 7h1v1h-1zM11 7h1v1h-1zM14 7h1v1h-1zM15 7h1v1h-1zM16 7h1v1h-1zM17 7h1v1h-1zM21 7h1v1h-1zM22 7h1v1h-1zM0 8h1v1h-1zM4 8h1v1h-1zM6 8h1v1h-1zM7 8h1v1h-1zM8 8h1v1h-1zM10 8h1v1h-1zM11 8h1v1h-1zM12 8h1v1h-1zM17 8h1v1h-1zM19 8h1v1h-1zM21 8h1v1h-1zM24 8h1v1h-1zM25 8h1v1h-1zM26 8h1v1h-1zM27 8h1v1h-1zM28 8h1v1h-1zM29 8h1v1h-1zM32 8h1v1h-1zM3 9h1v1h-1zM4 9h1v1h-1zM7 9h1v1h-1zM8 9h1v1h-1zM10 9h1v1h-1zM11 9h1v1h-1zM12 9h1v1h-1zM13 9h1v1h-1zM15 9h1v1h-1zM21 9h1v1h-1zM23 9h1v1h-1zM25 9h1v1h-1zM29 9h1v1h-1zM30 9h1v1h-1zM2 10h1v1h-1zM6 10h1v1h-1zM8 10h1v1h-1zM9 10h1v1h-1zM15 10h1v1h-1zM16 10h1v1h-1zM17 10h1v1h-1zM21 10h1v1h-1zM23 10h1v1h-1zM24 10h1v1h-1zM29 10h1v1h-1zM31 10h1v1h-1zM0 11h1v1h-1zM2 11h1v1h-1zM4 11h1v1h-1zM5 11h1v1h-1zM9 11h1v1h-1zM14 11h1v1h-1zM15 11h1v1h-1zM17 11h1v1h-1zM18 11h1v1h-1zM20 11h1v1h-1zM21 11h1v1h-1zM24 11h1v1h-1zM26 11h1v1h-1zM31 11h1v1h-1zM32 11h1v1h-1zM0 12h1v1h-1zM1 12h1v1h-1zM5 12h1v1h-1zM6 12h1v1h-1zM9 12h1v1h-1zM11 12h1v1h-1zM13 12h1v1h-1zM14 12h1v1h-1zM15 12h1v1h-1zM18 12h1v1h-1zM19 12h1v1h-1zM20 12h1v1h-1zM21 12h1v1h-1zM22 12h1v1h-1zM26 12h1v1h-1zM27 12h1v1h-1zM28 12h1v1h-1zM29 12h1v1h-1zM0 13h1v1h-1zM1 13h1v1h-1zM2 13h1v1h-1zM10 13h1v1h-1zM16 13h1v1h-1zM19 13h1v1h-1zM21 13h1v1h-1zM23 13h1v1h-1zM25 13h1v1h-1zM27 13h1v1h-1zM30 13h1v1h-1zM1 14h1v1h-1zM3 14h1v1h-1zM6 14h1v1h-1zM9 14h1v1h-1zM10 14h1v1h-1zM13 14h1v1h-1zM14 14h1v1h-1zM16 14h1v1h-1zM18 14h1v1h-1zM19 14h1v1h-1zM21 14h1v1h-1zM23 14h1v1h-1zM24 14h1v1h-1zM25 14h1v1h-1zM26 14h1v1h-1zM27 14h1v1h-1zM28 14h1v1h-1zM29 14h1v1h-1zM31 14h1v1h-1zM0 15h1v1h-1zM3 15h1v1h-1zM7 15h1v1h-1zM9 15h1v1h-1zM10 15h1v1h-1zM11 15h1v1h-1zM13 15h1v1h-1zM17 15h1v1h-1zM19 15h1v1h-1zM20 15h1v1h-1zM21 15h1v1h-1zM23 15h1v1h-1zM24 15h1v1h-1zM25 15h1v1h-1zM26 15h1v1h-1zM27 15h1v1h-1zM28 15h1v1h-1zM0 16h1v1h-1zM4 16h1v1h-1zM6 16h1v1h-1zM7 16h1v1h-1zM8 16h1v1h-1zM9 16h1v1h-1zM10 16h1v1h-1zM13 16h1v1h-1zM14 16h1v1h-1zM15 16h1v1h-1zM17 16h1v1h-1zM21 16h1v1h-1zM22 16h1v1h-1zM26 16h1v1h-1zM28 16h1v1h-1zM29 16h1v1h-1zM31 16h1v1h-1zM0 17h1v1h-1zM4 17h1v1h-1zM5 17h1v1h-1zM7 17h1v1h-1zM8 17h1v1h-1zM9 17h1v1h-1zM10 17h1v1h-1zM11 17h1v1h-1zM14 17h1v1h-1zM15 17h1v1h-1zM16 17h1v1h-1zM17 17h1v1h-1zM18 17h1v1h-1zM23 17h1v1h-1zM25 17h1v1h-1zM29 17h1v1h-1zM30 17h1v1h-1zM31 17h1v1h-1zM0 18h1v1h-1zM1 18h1v1h-1zM2 18h1v1h-1zM3 18h1v1h-1zM4 18h1v1h-1zM6 18h1v1h-1zM8 18h1v1h-1zM10 18h1v1h-1zM12 18h1v1h-1zM15 18h1v1h-1zM18 18h1v1h-1zM23 18h1v1h-1zM24 18h1v1h-1zM25 18h1v1h-1zM27 18h1v1h-1zM29 18h1v1h-1zM1 19h1v1h-1zM2 19h1v1h-1zM3 19h1v1h-1zM5 19h1v1h-1zM7 19h1v1h-1zM9 19h1v1h-1zM11 19h1v1h-1zM12 19h1v1h-1zM13 19h1v1h-1zM14 19h1v1h-1zM15 19h1v1h-1zM19 19h1v1h-1zM20 19h1v1h-1zM21 19h1v1h-1zM22 19h1v1h-1zM24 19h1v1h-1zM25 19h1v1h-1zM27 19h1v1h-1zM2 20h1v1h-1zM6 20h1v1h-1zM7 20h1v1h-1zM9 20h1v1h-1zM11 20h1v1h-1zM14 20h1v1h-1zM16 20h1v1h-1zM20 20h1v1h-1zM21 20h1v1h-1zM22 20h1v1h-1zM23 20h1v1h-1zM24 20h1v1h-1zM26 20h1v1h-1zM27 20h1v1h-1zM28 20h1v1h-1zM29 20h1v1h-1zM31 20h1v1h-1zM32 20h1v1h-1zM0 21h1v1h-1zM3 21h1v1h-1zM4 21h1v1h-1zM5 21h1v1h-1zM8 21h1v1h-1zM13 21h1v1h-1zM14 21h1v1h-1zM18 21h1v1h-1zM19 21h1v1h-1zM20 21h1v1h-1zM23 21h1v1h-1zM25 21h1v1h-1zM27 21h1v1h-1zM30 21h1v1h-1zM31 21h1v1h-1zM3 22h1v1h-1zM4 22h1v1h-1zM6 22h1v1h-1zM9 22h1v1h-1zM10 22h1v1h-1zM11 22h1v1h-1zM15 22h1v1h-1zM17 22h1v1h-1zM18 22h1v1h-1zM20 22h1v1h-1zM21 22h1v1h-1zM23 22h1v1h-1zM24 22h1v1h-1zM25 22h1v1h-1zM29 22h1v1h-1zM30 22h1v1h-1zM31 22h1v1h-1zM2 23h1v1h-1zM4 23h1v1h-1zM5 23h1v1h-1zM9 23h1v1h-1zM11 23h1v1h-1zM12 23h1v1h-1zM15 23h1v1h-1zM16 23h1v1h-1zM17 23h1v1h-1zM18 23h1v1h-1zM19 23h1v1h-1zM21 23h1v1h-1zM23 23h1v1h-1zM26 23h1v1h-1zM32 23h1v1h-1zM0 24h1v1h-1zM1 24h1v1h-1zM6 24h1v1h-1zM7 24h1v1h-1zM10 24h1v1h-1zM13 24h1v1h-1zM14 24h1v1h-1zM17 24h1v1h-1zM19 24h1v1h-1zM20 24h1v1h-1zM21 24h1v1h-1zM22 24h1v1h-1zM23 24h1v1h-1zM24 24h1v1h-1zM25 24h1v1h-1zM26 24h1v1h-1zM27 24h1v1h-1zM28 24h1v1h-1zM31 24h1v1h-1zM32 24h1v1h-1zM8 25h1v1h-1zM10 25h1v1h-1zM13 25h1v1h-1zM15 25h1v1h-1zM16 25h1v1h-1zM21 25h1v1h-1zM22 25h1v1h-1zM24 25h1v1h-1zM28 25h1v1h-1zM30 25h1v1h-1zM0 26h1v1h-1zM1 26h1v1h-1zM2 26h1v1h-1zM3 26h1v1h-1zM4 26h1v1h-1zM5 26h1v1h-1zM6 26h1v1h-1zM8 26h1v1h-1zM10 26h1v1h-1zM13 26h1v1h-1zM15 26h1v1h-1zM17 26h1v1h-1zM20 26h1v1h-1zM24 26h1v1h-1zM26 26h1v1h-1zM28 26h1v1h-1zM29 26h1v1h-1zM31 26h1v1h-1zM0 27h1v1h-1zM6 27h1v1h-1zM9 27h1v1h-1zM13 27h1v1h-1zM14 27h1v1h-1zM16 27h1v1h-1zM17 27h1v1h-1zM18 27h1v1h-1zM20 27h1v1h-1zM21 27h1v1h-1zM24 27h1v1h-1zM28 27h1v1h-1zM0 28h1v1h-1zM2 28h1v1h-1zM3 28h1v1h-1zM4 28h1v1h-1zM6 28h1v1h-1zM8 28h1v1h-1zM10 28h1v1h-1zM14 28h1v1h-1zM18 28h1v1h-1zM19 28h1v1h-1zM21 28h1v1h-1zM22 28h1v1h-1zM24 28h1v1h-1zM25 28h1v1h-1zM26 28h1v1h-1zM27 28h1v1h-1zM28 28h1v1h-1zM29 28h1v1h-1zM31 28h1v1h-1zM32 28h1v1h-1zM0 29h1v1h-1zM2 29h1v1h-1zM3 29h1v1h-1zM4 29h1v1h-1zM6 29h1v1h-1zM11 29h1v1h-1zM13 29h1v1h-1zM14 29h1v1h-1zM16 29h1v1h-1zM24 29h1v1h-1zM26 29h1v1h-1zM27 29h1v1h-1zM28 29h1v1h-1zM29 29h1v1h-1zM0 30h1v1h-1zM2 30h1v1h-1zM3 30h1v1h-1zM4 30h1v1h-1zM6 30h1v1h-1zM11 30h1v1h-1zM12 30h1v1h-1zM13 30h1v1h-1zM14 30h1v1h-1zM16 30h1v1h-1zM20 30h1v1h-1zM24 30h1v1h-1zM26 30h1v1h-1zM27 30h1v1h-1zM28 30h1v1h-1zM30 30h1v1h-1zM0 31h1v1h-1zM6 31h1v1h-1zM10 31h1v1h-1zM11 31h1v1h-1zM13 31h1v1h-1zM14 31h1v1h-1zM17 31h1v1h-1zM21 31h1v1h-1zM22 31h1v1h-1zM23 31h1v1h-1zM24 31h1v1h-1zM25 31h1v1h-1zM26 31h1v1h-1zM29 31h1v1h-1zM0 32h1v1h-1zM1 32h1v1h-1zM2 32h1v1h-1zM3 32h1v1h-1zM4 32h1v1h-1zM5 32h1v1h-1zM6 32h1v1h-1zM8 32h1v1h-1zM9 32h1v1h-1zM12 32h1v1h-1zM13 32h1v1h-1zM15 32h1v1h-1zM17 32h1v1h-1zM20 32h1v1h-1zM21 32h1v1h-1zM22 32h1v1h-1zM23 32h1v1h-1zM24 32h1v1h-1zM26 32h1v1h-1zM32 32h1v1h-1z" fill="#1B3A5C"/></symbol>
+  </defs>
+</svg>
+
+<div class="stage" id="stage">
+
+  <!-- 1. PROMESSE + DEUX PUBLICS -->
+  <section class="pg on" id="hero" data-titre="Un &eacute;v&eacute;nement, un seul jeu">
+    <div class="in two">
+      <div class="txt">
+        <svg class="sel" role="img" aria-label="Flowin Super Event" viewBox="0 0 437.4 92.6"><use href="#fl-super-event"/></svg>
+        <h1>Un &eacute;v&eacute;nement. Tous ses partenaires. <em>Un seul jeu.</em></h1>
+        <p class="lede">Le m&ecirc;me jeu dans tous les commerces autour de l&rsquo;&eacute;v&eacute;nement.</p>
+        <div class="choix">
+          <button class="ch" type="button" data-aud="org"><span class="pic"><svg class="ic"><use href="#i-event"/></svg></span>J&rsquo;organise un &eacute;v&eacute;nement<span class="go">&rsaquo;</span></button>
+          <button class="ch bl" type="button" data-aud="com"><span class="pic"><svg class="ic"><use href="#i-vitrine"/></svg></span>J&rsquo;ai un commerce<span class="go">&rsaquo;</span></button>
+        </div>
+      </div>
+      <div class="vis" style="--vh:440px" data-v="10"></div>
+    </div>
+  </section>
+
+  <!-- 2. ORGANISATEUR -->
+  <section class="pg" id="organisateur" data-titre="Tu organises un &eacute;v&eacute;nement">
+    <div class="in two">
+      <div class="txt">
+        <div class="eyebrow">Tu organises</div>
+        <h2>Connecte ton &eacute;v&eacute;nement avec <em>l&rsquo;ensemble du r&eacute;seau local</em>.</h2>
+        <div class="verbs"><span>Diffuse</span><span>Sois visible</span><span>Sois pr&eacute;sent</span><span>En proximit&eacute;</span></div>
+        <p class="lede">Tes partenaires diffusent ton &eacute;v&eacute;nement en vitrine, en caisse et sur leurs r&eacute;seaux.</p>
+      </div>
+      <div class="vis" style="--vh:330px" data-v="9"></div>
+    </div>
+  </section>
+
+  <!-- 3. COMMERCE -->
+  <section class="pg" id="commerce" data-titre="Tu as un commerce">
+    <div class="in two">
+      <div class="txt">
+        <div class="eyebrow">Tu as un commerce</div>
+        <h2>Connecte ton commerce <em>aux &eacute;v&eacute;nements locaux</em>.</h2>
+        <p class="lede">De la visibilit&eacute; aupr&egrave;s des festivaliers et des spectateurs.</p>
+        <div class="grid g2">
+          <div class="card"><span class="pic"><svg class="ic"><use href="#i-jeu"/></svg></span><b>Station jeu</b><span>Les festivaliers jouent et retirent leur lot chez toi.</span></div>
+          <div class="card"><span class="pic"><svg class="ic"><use href="#i-mega"/></svg></span><b>Sponsor</b><span>Visible sur le jeu, m&ecirc;me sans lots.</span></div>
+        </div>
+      </div>
+      <div class="vis" style="--vh:440px" data-v="6"></div>
+    </div>
+  </section>
+
+  <!-- 4. COMMERCES + ÉVÉNEMENT (illustration V2 gardée) -->
+  <section class="pg" id="macaron" data-titre="Commerces et &eacute;v&eacute;nement">
+    <div class="in two">
+      <div class="txt">
+        <div class="eyebrow">Commerces + &eacute;v&eacute;nement</div>
+        <h2>Un seul jeu <em>chez tous les partenaires</em>.</h2>
+        <p class="lede">Caf&eacute;, boutique, h&ocirc;tel, sponsor&nbsp;: chacun affiche le macaron de l&rsquo;&eacute;v&eacute;nement.</p>
+      </div>
+      <div class="vis" style="--vh:250px" data-v="1"></div>
+    </div>
+  </section>
+
+  <!-- 5. PARCOURS DU FESTIVALIER (allégé) -->
+  <section class="pg" id="parcours" data-titre="Le parcours du festivalier">
+    <div class="in two">
+      <div class="txt">
+        <div class="eyebrow">Le parcours du festivalier</div>
+        <h2>Il joue chez le boulanger, <em>il revient chercher son lot</em>.</h2>
+      </div>
+      <div class="grid">
+        <div class="card it"><span class="nb">1</span><span class="pic"><svg class="ic"><use href="#i-qr"/></svg></span><div><b>Il flashe le macaron en caisse</b></div></div>
+        <div class="card it"><span class="nb">2</span><span class="pic"><svg class="ic"><use href="#i-quiz"/></svg></span><div><b>Il r&eacute;pond au quiz</b><span>Trois questions, une minute.</span></div></div>
+        <div class="card it"><span class="nb">3</span><span class="pic"><svg class="ic"><use href="#i-gift"/></svg></span><div><b>Il gagne un lot</b></div></div>
+        <div class="card it"><span class="nb">4</span><span class="pic"><svg class="ic"><use href="#i-vitrine"/></svg></span><div><b>Il revient le retirer en boutique</b></div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 6. QUIZ ET SONDAGES (6 cartes V2 ramenées à 3) -->
+  <section class="pg" id="quiz" data-titre="Quiz et sondages">
+    <div class="in two">
+      <div class="txt">
+        <div class="eyebrow">Quiz et sondages</div>
+        <h2>Tes questions, <em>ton message</em>.</h2>
+        <p class="lede">Le jeu parle de ton &eacute;v&eacute;nement.</p>
+      </div>
+      <div class="grid">
+        <div class="card it"><span class="pic"><svg class="ic"><use href="#i-book"/></svg></span><div><b>Quiz de l&rsquo;&eacute;v&eacute;nement</b><span>Programme, lieux, histoire.</span></div></div>
+        <div class="card it"><span class="pic"><svg class="ic"><use href="#i-libre"/></svg></span><div><b>Sondages</b><span>&Eacute;cologie, pr&eacute;vention, transports.</span></div></div>
+        <div class="card it"><span class="pic"><svg class="ic"><use href="#i-star"/></svg></span><div><b>Tes couleurs</b><span>Le jeu &agrave; l&rsquo;image de l&rsquo;&eacute;v&eacute;nement.</span></div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 7. CHIFFRES AU MILIEU&nbsp;: 56 % + 70 lots (chiffres autorisés, DECISIONS) -->
+  <section class="pg" id="contact" data-titre="56 % veulent rester en contact">
+    <div class="in two">
+      <div class="txt">
+        <div class="eyebrow">Nuits du Sud 2026</div>
+        <h2>Ton fichier client. <em>Tu restes en contact.</em></h2>
+        <p class="lede">Avec l&rsquo;accord de chaque joueur.</p>
+      </div>
+      <div>
+        <div class="card kpi"><div class="num">56&nbsp;%</div><span class="lab">des participants ont coch&eacute; &laquo;&nbsp;Je souhaite rester en contact&nbsp;&raquo;.</span></div>
+        <div class="card kpi2"><div class="num"><small>Plus de</small>70</div><span>lots distribu&eacute;s dans les commerces locaux.</span></div>
+        <p class="small">Source&nbsp;: bilan Nuits du Sud 2026, Vence.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 8. CE QUE L'ON MESURE -->
+  <section class="pg" id="mesure" data-titre="Ce que l&rsquo;on mesure">
+    <div class="in two">
+      <div class="txt">
+        <div class="eyebrow">Le suivi</div>
+        <h2>Ce que l&rsquo;on <em>mesure pour toi</em>.</h2>
+        <p class="lede">Un rapport clair &agrave; la fin de l&rsquo;&eacute;v&eacute;nement.</p>
+        <div class="vis desk" style="--vh:0px;margin-top:20px;max-width:380px" data-v="4"></div>
+      </div>
+      <div class="grid g2">
+        <div class="card"><span class="pic"><svg class="ic"><use href="#i-carte"/></svg></span><b>O&ugrave; ils ont jou&eacute;</b><span>Station par station</span></div>
+        <div class="card"><span class="pic"><svg class="ic"><use href="#i-rapport"/></svg></span><b>Combien</b><span>Participants et parties</span></div>
+        <div class="card"><span class="pic"><svg class="ic"><use href="#i-contact"/></svg></span><b>Contacts recueillis</b><span>Avec leur accord</span></div>
+        <div class="card"><span class="pic"><svg class="ic"><use href="#i-mail"/></svg></span><b>Ta base de donn&eacute;es</b><span>Pour la prochaine &eacute;dition</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 9. FORMULES COMMERCE (cadrage 08/11&nbsp;: 500 / 1 331 / 3 331 € HT), une carte à la fois -->
+  <section class="pg" id="formules" data-titre="Formules commerce">
+    <div class="in two">
+      <div class="txt">
+        <div class="eyebrow">Commerces&nbsp;: les formules</div>
+        <h2>Station jeu ou sponsor&nbsp;: <em>choisis ta formule</em>.</h2>
+        <p class="lede">Organisateur&nbsp;: pas de grille, une &eacute;tude sur mesure.</p>
+      </div>
+      <div>
+        <div class="car" id="car">
+          <div class="card fo"><div class="tag">Sponsor</div><h3>Sponsor digital</h3><div class="px">500&nbsp;&euro; <small>HT</small></div>
+            <ul><li><svg class="ic"><use href="#i-ok"/></svg>Ton commerce dans la liste des partenaires</li><li><svg class="ic"><use href="#i-ok"/></svg>Tes contacts et r&eacute;seaux accessibles depuis le jeu</li></ul></div>
+          <div class="card fo"><div class="tag">Station jeu</div><h3>Partenaire digital + sur place</h3><div class="px">1&nbsp;331&nbsp;&euro; <small>HT</small></div>
+            <ul><li><svg class="ic"><use href="#i-ok"/></svg>Tout le sponsor digital</li><li><svg class="ic"><use href="#i-ok"/></svg>Tes clients jouent chez toi</li><li><svg class="ic"><use href="#i-ok"/></svg>Sur la carte des partenaires</li><li><svg class="ic"><use href="#i-ok"/></svg>Rapport de passage</li></ul></div>
+          <div class="card fo"><div class="tag">Premium</div><h3>Partenaire premium tous supports</h3><div class="px">3&nbsp;331&nbsp;&euro; <small>HT</small></div>
+            <ul><li><svg class="ic"><use href="#i-ok"/></svg>Tout le partenaire sur place</li><li><svg class="ic"><use href="#i-ok"/></svg>Pr&eacute;sent sur tous les supports et stations</li><li><svg class="ic"><use href="#i-ok"/></svg>Quiz &agrave; ta marque</li></ul></div>
+        </div>
+        <div class="dots" id="dots"><button type="button" class="on" aria-label="Formule 1"><i></i></button><button type="button" aria-label="Formule 2"><i></i></button><button type="button" aria-label="Formule 3"><i></i></button></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 10. CONVERSION HIÉRARCHISÉE -->
+  <section class="pg" id="action" data-titre="Passer &agrave; l&rsquo;action">
+    <div class="in wide">
+      <div class="txt">
+        <div class="eyebrow">Passer &agrave; l&rsquo;action</div>
+        <h2>On en parle <em>pour ton prochain &eacute;v&eacute;nement</em>&nbsp;?</h2>
+      </div>
+      <div class="conv">
+        <div class="card cv or">
+          <h3><span class="pic"><svg class="ic"><use href="#i-event"/></svg></span>J&rsquo;organise</h3>
+          <button class="btn" type="button" id="cta" data-mode="org"><svg class="ic"><use href="#i-cal"/></svg>Prendre rendez-vous</button>
+          <span>Par WhatsApp ou email. Sur &eacute;tude.</span>
+        </div>
+        <div class="card cv bl">
+          <h3><span class="pic"><svg class="ic"><use href="#i-vitrine"/></svg></span>J&rsquo;ai un commerce</h3>
+          <button class="btn" type="button" id="ctaCom" data-mode="com"><svg class="ic"><use href="#i-carte"/></svg>&Ecirc;tre pr&eacute;venu du prochain super event de ma ville</button>
+          <div class="qrr"><svg viewBox="0 0 37 37" role="img" aria-label="QR code vers l&rsquo;inscription commerce"><use href="#qr-se"/></svg>
+            <div><b>Rejoindre un &eacute;v&eacute;nement</b><a class="lnk" href="https://flowin-events.vercel.app/pro/premiere-fois">flowin-events.vercel.app/pro/premiere-fois</a></div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Volet contact&nbsp;: WhatsApp ou email pré-rempli (aucun envoi serveur, aucun agenda en ligne) -->
+  <section class="sheet" id="rappel" aria-label="Nous contacter">
+    <button class="sx" type="button" data-close="1" aria-label="Fermer">&times;</button>
+    <div class="in">
+      <div class="eyebrow" id="shEye">Prendre rendez-vous</div>
+      <h2 id="shTit">Parlons de ton <em>prochain &eacute;v&eacute;nement</em>.</h2>
+      <div class="card rdvc">
+        <a class="btn" id="rdvWa" href="https://wa.me/" target="_blank" rel="noopener"><svg class="ic"><use href="#i-phone"/></svg>Par WhatsApp</a>
+        <a class="btn line" id="rdvMail" href="mailto:"><svg class="ic"><use href="#i-mail"/></svg>Par email</a>
+        <p class="ph">Message pr&eacute;-rempli, tu l&rsquo;envoies toi-m&ecirc;me.</p>
+        <p class="ph">WhatsApp&nbsp;: [&hellip; &agrave; compl&eacute;ter] &middot; Email&nbsp;: [&hellip; &agrave; compl&eacute;ter]</p>
+      </div>
+    </div>
+  </section>
+</div>
+
+<div class="nav" id="nav"><button id="prev" type="button">&larr; Pr&eacute;c&eacute;dent</button><span class="cnt" id="pgn">1 / 10</span><button class="next" id="next" type="button">Suivant &rarr;</button></div>
+
+
+<script>
+(function(){
+  'use strict';
+  /* Prise de rendez-vous : WhatsApp ou email pré-rempli (décision de Romain, 08/11/2026).
+     Coordonnées Flowin à renseigner ici (jamais inventées) : WHATSAPP au format international sans + ni espace,
+     EMAIL l'adresse de rendez-vous. Tant qu'elles sont vides, WhatsApp et la messagerie demandent le destinataire. */
+  var RDV = { WHATSAPP: '', EMAIL: '' }; /* [à compléter] */
+  function $(id){ return document.getElementById(id); }
+  function qs(n){ var m = new RegExp('[?&]' + n + '=([^&]+)').exec(location.search); return m ? decodeURIComponent(m[1].replace(/\+/g, ' ')) : null; }
+  function n1(x){ return (+x).toFixed(1); }
+  function trim(s){ return String(s || '').replace(/^\s+|\s+$/g, ''); }
+  var commercial = qs('commercial') || '';
+  var aud = qs('public') === 'com' ? 'com' : (qs('public') === 'org' ? 'org' : '');
+  function setAud(a){ aud = a; document.body.className = a ? 'aud-' + a : ''; }
+  setAud(aud);
+
+  /* ---------- Navigation page par page (un seul chapitre, compteur « n / 8 ») ---------- */
+  var pages = document.querySelectorAll('.pg'), cur = 0, links = '';
+  for (var pi = 0; pi < pages.length; pi++) links += '<a href="#' + pages[pi].id + '" data-i="' + pi + '"><small>' + (pi + 1) + '</small>' + pages[pi].getAttribute('data-titre') + '</a>';
+  $('dLinks').innerHTML = links;
+  var dl = document.querySelectorAll('#dLinks a');
+  function drawer(on){ $('drawer').className = 'drawer' + (on ? ' on' : ''); $('dim').className = 'dim' + (on ? ' on' : ''); }
+  function sheetOpen(){ return $('rappel').className.indexOf(' on') >= 0; }
+  function closeSheet(){ $('rappel').className = 'sheet'; }
+  /* Deux contacts : organisateur = prendre rendez-vous ; commerce = être prévenu du prochain super event / carte des partenaires */
+  function rdvLiens(mode){
+    var com = mode === 'com';
+    var txt = (com ? 'Bonjour, je souhaite \u00eatre pr\u00e9venu du prochain super event de ma ville et appara\u00eetre sur la carte des partenaires Flowin.'
+      : 'Bonjour, je souhaite prendre rendez-vous pour parler de mon prochain \u00e9v\u00e9nement avec Flowin Super Event.') + (commercial ? ' (Contact : ' + commercial + ')' : '');
+    var champs = com ? '\n\nCommerce : \nVille : \nT\u00e9l\u00e9phone : ' : '\n\nOrganisation : \nVille : \nDates de l\u2019\u00e9v\u00e9nement : \nT\u00e9l\u00e9phone : ';
+    $('rdvWa').href = 'https://wa.me/' + RDV.WHATSAPP.replace(/[^0-9]/g, '') + '?text=' + encodeURIComponent(txt);
+    $('rdvMail').href = 'mailto:' + RDV.EMAIL + '?subject=' + encodeURIComponent(com ? 'Prochain super event, commerce' : 'Rendez-vous Flowin Super Event') + '&body=' + encodeURIComponent(txt + champs);
+    $('shEye').innerHTML = com ? '\u00catre pr\u00e9venu' : 'Prendre rendez-vous';
+    $('shTit').innerHTML = com ? 'Le prochain super event <em>de ta ville</em>.' : 'Parlons de ton <em>prochain \u00e9v\u00e9nement</em>.';
+  }
+  function openSheet(mode){ rdvLiens(mode || (aud === 'com' ? 'com' : 'org')); $('rappel').className = 'sheet on'; $('rappel').scrollTop = 0; }
+  function show(i, noHash){
+    if (i < 0 || i >= pages.length) return;
+    closeSheet();
+    for (var k = 0; k < pages.length; k++) {
+      pages[k].className = pages[k].className.replace(/ on| back/g, '') + (k === i ? ' on' : (k < i ? ' back' : ''));
+      dl[k].className = k === i ? 'on' : '';
+    }
+    cur = i; pages[i].scrollTop = 0;
+    $('pgn').innerHTML = '<small>Super event</small>' + (i + 1) + ' / ' + pages.length;
+    $('prog').style.width = ((i + 1) / pages.length * 100) + '%';
+    $('prev').disabled = i === 0; $('next').disabled = i === pages.length - 1;
+    if (!noHash) { try { history.replaceState(null, '', '#' + pages[i].id); } catch (e) {} }
+  }
+  function go(id){
+    if (id === 'rappel') { openSheet(); return; }
+    for (var k = 0; k < pages.length; k++) if (pages[k].id === id) { show(k); return; }
+  }
+  for (var di = 0; di < dl.length; di++) dl[di].addEventListener('click', function(e){ e.preventDefault(); drawer(false); show(+this.getAttribute('data-i')); });
+  $('burger').addEventListener('click', function(){ drawer(true); });
+  $('dClose').addEventListener('click', function(){ drawer(false); });
+  $('dim').addEventListener('click', function(){ drawer(false); });
+  $('dCta').addEventListener('click', function(e){ e.preventDefault(); drawer(false); go('action'); });
+  $('topCta').addEventListener('click', function(e){ e.preventDefault(); go('action'); });
+  $('cta').addEventListener('click', function(){ openSheet('org'); });
+  $('ctaCom').addEventListener('click', function(){ openSheet('com'); });
+  var chs = document.querySelectorAll('[data-aud]');
+  for (var ci = 0; ci < chs.length; ci++) chs[ci].addEventListener('click', function(){ var a = this.getAttribute('data-aud'); setAud(a); go(a === 'com' ? 'commerce' : 'organisateur'); });
+  /* Formules : une carte à la fois, points cliquables */
+  var car = $('car'), dots = document.querySelectorAll('#dots button');
+  function dotOn(n){ for (var d = 0; d < dots.length; d++) dots[d].className = d === n ? 'on' : ''; }
+  for (var dk = 0; dk < dots.length; dk++) (function(n){ dots[n].addEventListener('click', function(){ car.scrollLeft = car.children[n].offsetLeft - car.children[0].offsetLeft; dotOn(n); }); })(dk);
+  car.addEventListener('scroll', function(){ var w = car.children[1].offsetLeft - car.children[0].offsetLeft; dotOn(Math.min(dots.length - 1, Math.round(car.scrollLeft / w))); }, { passive: true });
+  document.querySelector('[data-close]').addEventListener('click', closeSheet);
+  $('brand').addEventListener('click', function(){ show(0); });
+  $('prev').addEventListener('click', function(){ show(cur - 1); });
+  $('next').addEventListener('click', function(){ show(cur + 1); });
+  document.addEventListener('keydown', function(e){
+    var t = (e.target && e.target.tagName) || ''; if (t === 'INPUT' || t === 'TEXTAREA' || t === 'SELECT') return;
+    if (e.key === 'ArrowRight') show(cur + 1); if (e.key === 'ArrowLeft') show(cur - 1); if (e.key === 'Escape') { drawer(false); closeSheet(); }
+  });
+  var tx = null, ty = null;
+  $('stage').addEventListener('touchstart', function(e){ if (e.touches.length === 1) { tx = e.touches[0].clientX; ty = e.touches[0].clientY; } }, { passive: true });
+  $('stage').addEventListener('touchend', function(e){
+    if (tx === null) return; var t = e.changedTouches[0], dx = t.clientX - tx, dy = t.clientY - ty; tx = null;
+    if (sheetOpen() || (e.target.closest && e.target.closest('input,textarea,select,form,.car'))) return;
+    if (Math.abs(dx) > 70 && Math.abs(dx) > Math.abs(dy) * 1.6) show(cur + (dx < 0 ? 1 : -1));
+  }, { passive: true });
+  window.addEventListener('hashchange', function(){ var h = location.hash.replace('#', ''); if (h === 'rappel') { openSheet(); return; } for (var k = 0; k < pages.length; k++) if (pages[k].id === h && k !== cur) show(k, true); });
+  $('stage').addEventListener('scroll', function(){ if (this.scrollLeft || this.scrollTop) { this.scrollLeft = 0; this.scrollTop = 0; } });
+
+  /* ---------- Super event : illustrations BD (SVG générés, mêmes briques sur toutes les slides) ---------- */
+  /* V3 : palette des illustrations alignée sur la charte (encre, orange, bleu) ; plus de jaune / rouge BD, plus d'ombre décalée */
+  var SK = '#1B3A5C', SR = '#1B3A5C', SA = '#C2410C', SY = '#FF8A14', SO = '#FFD9B8', SC = '#FFF1E6', SBL = '#3B5CC4', SBP = '#C9D4F2', SBG = '#FFFFFF';
+  function sTxt(x, y, s, size, o){
+    o = o || {}; size = size === 17 ? 19 : (size === 16 ? 18 : size);
+    return '<text x="' + x + '" y="' + y + '" text-anchor="' + (o.a || 'middle') + '" font-size="' + size + '" fill="' + (o.c || SK) + '"' +
+      ' font-weight="900"' +
+      (o.halo ? ' stroke="' + SBG + '" stroke-width="' + o.halo + '" paint-order="stroke" stroke-linejoin="round"' : '') + '>' + s + '</text>';
+  }
+  function sPts(cx, cy, R, r){
+    var p = [], i, a, rr;
+    cx = +cx; cy = +cy;
+    for (i = 0; i < 10; i++) { a = -Math.PI / 2 + i * Math.PI / 5; rr = i % 2 ? r : R; p.push(n1(cx + rr * Math.cos(a)) + ',' + n1(cy + rr * Math.sin(a))); }
+    return p.join(' ');
+  }
+  function sStar(cx, cy, R, fill){ return '<polygon points="' + sPts(cx, cy, R, R * 0.46) + '" fill="' + fill + '" stroke="' + SK + '" stroke-width="' + n1(Math.max(1, R * 0.15)) + '" stroke-linejoin="round"/>'; }
+  /* Le macaron de l'événement : le même chez tous les partenaires */
+  function sMac(x, y, r){
+    return '<g><circle cx="' + x + '" cy="' + y + '" r="' + r + '" fill="' + SY + '" stroke="' + SK + '" stroke-width="' + n1(Math.max(1.6, r * 0.17)) + '"/>' +
+      '<circle cx="' + x + '" cy="' + y + '" r="' + n1(r * 0.8) + '" fill="none" stroke="' + SK + '" stroke-width="' + n1(Math.max(0.7, r * 0.06)) + '" stroke-dasharray="' + n1(r * 0.28) + ' ' + n1(r * 0.28) + '"/>' +
+      sStar(x, y, r * 0.55, SA) + '</g>';
+  }
+  function sUse(id, x, y, s, col, w){
+    return '<use href="#' + id + '" x="' + n1(x) + '" y="' + n1(y) + '" width="' + n1(s) + '" height="' + n1(s) + '" style="fill:none;stroke:' + (col || SK) + ';stroke-width:' + (w || 1.7) + ';stroke-linecap:round;stroke-linejoin:round"/>';
+  }
+  /* Partenaire : boutique à store rayé aux couleurs de l'événement + macaron */
+  function sShop(x, y, w, h, icon, opt){
+    opt = opt || {};
+    var a = h * 0.3, n = 4, sw = w / n, g = '', i, col = opt.col || SO, r = sw / 2;
+        g += '<rect x="' + x + '" y="' + y + '" width="' + w + '" height="' + h + '" rx="3" fill="#fff" stroke="' + SK + '" stroke-width="2.4"/>';
+    for (i = 0; i < n; i++) g += '<path d="M' + n1(x + i * sw) + ' ' + n1(y) + 'h' + n1(sw) + 'v' + n1(a) + 'a' + n1(r) + ' ' + n1(r) + ' 0 0 1 ' + n1(-sw) + ' 0z" fill="' + (i % 2 ? '#fff' : col) + '" stroke="' + SK + '" stroke-width="2" stroke-linejoin="round"/>';
+    var dw = w * 0.26, dh = h * 0.4, wy = y + a + r + 3, wh = Math.max(10, y + h - dh - 4 - wy), wx = x + w * 0.44, ww = w * 0.46;
+    g += '<rect x="' + n1(x + w * 0.1) + '" y="' + n1(y + h - dh) + '" width="' + n1(dw) + '" height="' + n1(dh) + '" fill="' + SC + '" stroke="' + SK + '" stroke-width="2"/>';
+    g += '<rect x="' + n1(wx) + '" y="' + n1(wy) + '" width="' + n1(ww) + '" height="' + n1(wh) + '" fill="#DCE6F7" stroke="' + SK + '" stroke-width="2"/>';
+    if (icon) { var is = Math.min(ww, wh) * 0.9; g += sUse(icon, wx + ww / 2 - is / 2, wy + wh / 2 - is / 2, is); }
+    if (!opt.nomac) g += sMac(x + w, y + 2, Math.min(15, Math.max(8, w * 0.2)));
+    return g;
+  }
+  function sHotel(x, y, w, h, opt){
+    opt = opt || {};
+    var g = '', r, c, cw = w / 4;
+        g += '<rect x="' + x + '" y="' + y + '" width="' + w + '" height="' + h + '" rx="3" fill="#fff" stroke="' + SK + '" stroke-width="2.4"/>';
+    for (r = 0; r < 3; r++) for (c = 0; c < 3; c++) g += '<rect x="' + n1(x + cw * 0.5 + c * cw * 1.0 - cw * 0.05) + '" y="' + n1(y + 18 + r * (h - 46) / 3) + '" width="' + n1(cw * 0.72) + '" height="' + n1((h - 46) / 3 - 6) + '" fill="' + ((r + c) % 2 ? SC : '#DCE6F7') + '" stroke="' + SK + '" stroke-width="1.6"/>';
+    g += '<rect x="' + n1(x + w * 0.36) + '" y="' + n1(y + h - 22) + '" width="' + n1(w * 0.28) + '" height="22" fill="' + SC + '" stroke="' + SK + '" stroke-width="2"/>';
+    g += '<rect x="' + n1(x + w * 0.2) + '" y="' + (y - 14) + '" width="' + n1(w * 0.6) + '" height="16" rx="3" fill="' + SR + '" stroke="' + SK + '" stroke-width="2"/>' + sUse('i-lit', x + w / 2 - 8, y - 14, 16, SY, 2);
+    if (!opt.nomac) g += sMac(x + w, y + 2, Math.min(15, Math.max(8, w * 0.2)));
+    return g;
+  }
+  function sPerson(x, y, s, col){
+    var sw = n1(s * 0.2);
+    return '<g><circle cx="' + x + '" cy="' + n1(y - s * 2.2) + '" r="' + n1(s * 0.55) + '" fill="' + SC + '" stroke="' + SK + '" stroke-width="' + sw + '"/>' +
+      '<path d="M' + n1(x - s * 0.8) + ' ' + y + 'v' + n1(-s * 0.9) + 'a' + n1(s * 0.8) + ' ' + n1(s * 0.8) + ' 0 0 1 ' + n1(s * 1.6) + ' 0v' + n1(s * 0.9) + 'z" fill="' + col + '" stroke="' + SK + '" stroke-width="' + sw + '" stroke-linejoin="round"/></g>';
+  }
+  function sCrowd(x0, x1, y, s){
+    var g = '', i = 0, x, cols = [SBL, SA, SY, SBP, '#fff'];
+    for (x = x0; x <= x1; x += s * 1.9) { g += sPerson(n1(x), y + ((i % 2) ? 3 : 0), s, cols[i % cols.length]); i++; }
+    return g;
+  }
+  function sTicket(x, y, w, h, rot, fill, num, size){
+    return '<g transform="rotate(' + rot + ' ' + n1(x + w / 2) + ' ' + n1(y + h / 2) + ')">' +
+            '<rect x="' + x + '" y="' + y + '" width="' + w + '" height="' + h + '" rx="4" fill="' + fill + '" stroke="' + SK + '" stroke-width="2"/>' +
+      '<circle cx="' + x + '" cy="' + n1(y + h / 2) + '" r="' + n1(h * 0.15) + '" fill="#fff" stroke="' + SK + '" stroke-width="1.6"/><circle cx="' + (x + w) + '" cy="' + n1(y + h / 2) + '" r="' + n1(h * 0.15) + '" fill="#fff" stroke="' + SK + '" stroke-width="1.6"/>' +
+      '<line x1="' + n1(x + w * 0.27) + '" y1="' + (y + 4) + '" x2="' + n1(x + w * 0.27) + '" y2="' + (y + h - 4) + '" stroke="' + SK + '" stroke-width="1.6" stroke-dasharray="3 3"/>' +
+      sStar(n1(x + w * 0.135), n1(y + h / 2), h * 0.2, SY === fill ? '#fff' : SY) +
+      (num ? sTxt(n1(x + w * 0.64), n1(y + h / 2 + (size || 14) * 0.35), num, size || 14, {}) : '') + '</g>';
+  }
+  /* La scène de l'événement : guirlande, projecteurs, rideau, public */
+  function sStage(cx, y, w, label, crowd){
+    var x = cx - w / 2, g = '', i, t, px, py, y0 = y + 34, h = 62;
+    g += '<path d="M' + n1(x) + ' ' + y + 'Q' + cx + ' ' + (y + 28) + ' ' + n1(x + w) + ' ' + y + '" fill="none" stroke="' + SK + '" stroke-width="1.8"/>';
+    for (i = 1; i < 11; i++) { t = i / 11; px = x + w * t; py = y + 2 * (1 - t) * t * 28 + 1;
+      g += '<polygon points="' + n1(px - 7) + ',' + n1(py) + ' ' + n1(px + 7) + ',' + n1(py) + ' ' + n1(px) + ',' + n1(py + 14) + '" fill="' + (i % 3 === 0 ? '#fff' : (i % 3 === 1 ? SR : SY)) + '" stroke="' + SK + '" stroke-width="1.4" stroke-linejoin="round"/>'; }
+    g += '<polygon points="' + n1(x + 28) + ',' + (y0 + 4) + ' ' + n1(x + 4) + ',' + (y0 + h + 14) + ' ' + n1(x + 46) + ',' + (y0 + h + 14) + '" fill="' + SC + '" opacity=".75"/>';
+    g += '<polygon points="' + n1(x + w - 28) + ',' + (y0 + 4) + ' ' + n1(x + w - 4) + ',' + (y0 + h + 14) + ' ' + n1(x + w - 46) + ',' + (y0 + h + 14) + '" fill="' + SC + '" opacity=".75"/>';
+    g += '<polygon points="' + n1(x + 14) + ',' + (y0 + 14) + ' ' + n1(x + w - 14) + ',' + (y0 + 14) + ' ' + n1(x + w - 26) + ',' + y0 + ' ' + n1(x + 26) + ',' + y0 + '" fill="' + SY + '" stroke="' + SK + '" stroke-width="2.4" stroke-linejoin="round"/>';
+    g += '<rect x="' + n1(x + 10) + '" y="' + (y0 + 14) + '" width="' + n1(w - 20) + '" height="' + (h - 14) + '" fill="' + SR + '" stroke="' + SK + '" stroke-width="2.4"/>';
+    for (i = 1; i < 8; i++) g += '<line x1="' + n1(x + 10 + (w - 20) * i / 8) + '" y1="' + (y0 + 14) + '" x2="' + n1(x + 10 + (w - 20) * i / 8) + '" y2="' + (y0 + h) + '" stroke="#5A3A28" stroke-width="2"/>';
+    g += '<rect x="' + n1(cx - w * 0.3) + '" y="' + (y0 + 24) + '" width="' + n1(w * 0.6) + '" height="' + (h - 34) + '" rx="3" fill="#fff" stroke="' + SK + '" stroke-width="2"/>';
+    g += sTxt(cx, y0 + 24 + (h - 34) * 0.7, label, n1(Math.min(15, w * 0.07)), { c: SR });
+    g += sStar(n1(x + 4), y0 + 8, 9, SY) + sStar(n1(x + w - 4), y0 + 8, 9, SY);
+    if (crowd !== false) g += sCrowd(x + 8, x + w - 8, y0 + h + 24, 5.2);
+    return g;
+  }
+  function sRibbon(cx, y, w, h, txt, size, fill, col){
+    return '<g><rect x="' + n1(cx - w / 2) + '" y="' + y + '" width="' + w + '" height="' + h + '" rx="5" fill="' + (fill || SO) + '" stroke="' + SK + '" stroke-width="2.4"/>' +
+      sTxt(cx, n1(y + h / 2 + size * 0.34), txt, size, { c: col || SK }) + '</g>';
+  }
+  function sSvg(vb, inner, extra){ return '<svg viewBox="0 0 ' + vb + '" role="img" aria-label="' + (extra || '') + '">' + inner + '</svg>'; }
+  function sFlux(d, delay){ return '<path d="' + d + '" fill="none" stroke="' + SR + '" stroke-width="3" stroke-linecap="round" stroke-dasharray="1 9" class="flw"' + (delay ? ' style="animation-delay:' + delay + 's"' : '') + '/>'; }
+
+  /* 1. Un événement, tous ses partenaires, un seul jeu */
+  function se1(){
+    var g = '', xs = [14, 100, 196, 282], cx = [46, 132, 228, 314], i;
+    g += sStage(180, 4, 210, 'FESTIVAL', true);
+    g += sRibbon(180, 128, 196, 28, 'L’ÉVÉNEMENT', 19);
+    for (i = 0; i < 4; i++) g += sFlux('M180 154 C180 176 ' + cx[i] + ' 170 ' + cx[i] + ' ' + (i === 2 ? 178 : 196), i * 0.3);
+    g += sShop(xs[0], 200, 64, 54, 'i-cup') + sShop(xs[1], 200, 64, 54, 'i-bag') + sHotel(xs[2], 184, 64, 70) + sShop(xs[3], 200, 64, 54, 'i-star');
+    g += sTxt(cx[0], 276, 'Café', 17) + sTxt(cx[1], 276, 'Boutique', 17) + sTxt(cx[2], 276, 'Hôtel', 17) + sTxt(cx[3], 276, 'Sponsor', 17);
+    g += sMac(88, 295, 9) + sTxt(104, 301, 'Même macaron, même jeu', 15, { a: 'start' });
+    return sSvg('360 306', g, 'Un événement au centre, relie à ses partenaires : café, boutique, hôtel, sponsor, tous marqués du même macaron');
+  }
+
+  /* 3. Les 4 temps (petites scènes 120 x 92) */
+  function se3(n){
+    var g = '', i;
+    if (n === 1) {
+      g += '<rect x="22" y="10" width="76" height="62" rx="7" fill="#fff" stroke="' + SK + '" stroke-width="2.6"/>';
+      g += '<rect x="22" y="10" width="76" height="16" rx="7" fill="' + SR + '" stroke="' + SK + '" stroke-width="2.6"/>' + sStar(60, 18, 6, SY);
+      g += '<rect x="30" y="34" width="34" height="5" rx="2.5" fill="' + SK + '"/><rect x="30" y="45" width="26" height="5" rx="2.5" fill="' + SBP + '"/><rect x="30" y="56" width="30" height="5" rx="2.5" fill="' + SBP + '"/>';
+      g += '<rect x="70" y="33" width="20" height="28" rx="3" fill="' + SC + '" stroke="' + SK + '" stroke-width="2"/>' + sUse('i-cal', 72, 36, 16);
+      g += '<rect x="48" y="76" width="24" height="5" rx="2" fill="' + SK + '"/><line x1="104" y1="8" x2="104" y2="40" stroke="' + SK + '" stroke-width="2.6"/><polygon points="104,8 118,14 104,21" fill="' + SR + '" stroke="' + SK + '" stroke-width="2"/>';
+    } else if (n === 2) {
+      g += sShop(8, 34, 62, 52, 'i-bag');
+      g += '<g transform="rotate(5 94 40)"><rect x="80" y="14" width="32" height="46" rx="3" fill="#fff" stroke="' + SK + '" stroke-width="2.2"/><rect x="80" y="14" width="32" height="10" fill="' + SR + '" stroke="' + SK + '" stroke-width="2.2"/><use href="#qrc" x="86" y="29" width="20" height="20"/></g>';
+      g += sUse('i-mega', 66, 0, 26, SA, 1.9);
+    } else if (n === 3) {
+      g += '<rect x="10" y="8" width="38" height="70" rx="8" fill="#fff" stroke="' + SK + '" stroke-width="2.6"/>';
+      g += '<rect x="15" y="18" width="28" height="44" rx="3" fill="' + SC + '"/>' + sStar(29, 33, 8, SY) + '<rect x="19" y="47" width="20" height="6" rx="3" fill="' + SR + '"/>';
+      g += '<path d="M54 46 C70 20 88 70 106 30" fill="none" stroke="' + SR + '" stroke-width="3" stroke-dasharray="6 6" stroke-linecap="round" class="flw"/>';
+      g += sMac(70, 30, 9) + sMac(88, 62, 9) + sMac(108, 30, 9);
+    } else {
+      g += '<rect x="42" y="50" width="36" height="34" fill="' + SY + '" stroke="' + SK + '" stroke-width="2.4"/><rect x="6" y="62" width="36" height="22" fill="' + SR + '" stroke="' + SK + '" stroke-width="2.4"/><rect x="78" y="68" width="36" height="16" fill="' + SBL + '" stroke="' + SK + '" stroke-width="2.4"/>';
+      g += sTxt(60, 78, '1', 22, { bang: 1 }) + sTxt(24, 79, '2', 18, { bang: 1, c: '#fff' }) + sTxt(96, 80, '3', 14, { bang: 1, c: '#fff' });
+      g += sUse('i-trophee', 46, 12, 28, SK, 1.8) + sStar(26, 40, 8, SY) + sStar(98, 48, 7, SY);
+    }
+    return sSvg('120 92', g, '');
+  }
+
+  /* 4. Rapports et mesure (illustration, aucune donnée réelle) */
+  function seRap(){
+    var g = '', T = [[6, 6, 'Fr\u00e9quentation'], [184, 6, 'Par station'], [6, 154, 'Profils'], [184, 154, 'Sondage']], i, x, y, b;
+    for (i = 0; i < 4; i++) { x = T[i][0]; y = T[i][1];
+      g += '<rect x="' + x + '" y="' + y + '" width="170" height="138" rx="10" fill="#fff" stroke="' + SK + '" stroke-width="2.4"/>' + sTxt(x + 85, y + 26, T[i][2], 17); }
+    var hs = [26, 40, 34, 56, 76];
+    for (b = 0; b < 5; b++) g += '<rect x="' + (18 + b * 29) + '" y="' + (128 - hs[b]) + '" width="21" height="' + hs[b] + '" rx="3" fill="' + (b % 2 ? SY : SR) + '" stroke="' + SK + '" stroke-width="2"/>';
+    g += '<path d="M20 78 L70 64 L100 70 L150 40" fill="none" stroke="' + SK + '" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/><polygon points="156,34 138,38 150,52" fill="' + SK + '"/>';
+    var ws = [100, 76, 54, 32];
+    for (b = 0; b < 4; b++) { y = 52 + b * 22; g += sMac(204, y + 6, 7.5) + '<rect x="220" y="' + y + '" width="' + ws[b] + '" height="12" rx="6" fill="' + [SR, SY, SBL, SBP][b] + '" stroke="' + SK + '" stroke-width="1.8"/>'; }
+    var cxd = 91, cyd = 238, r = 30, C = 2 * Math.PI * r, parts = [0.4, 0.25, 0.2, 0.15], cols = [SR, SY, SBL, SBP], off = 0;
+    for (b = 0; b < 4; b++) { g += '<circle cx="' + cxd + '" cy="' + cyd + '" r="' + r + '" fill="none" stroke="' + cols[b] + '" stroke-width="18" stroke-dasharray="' + n1(C * parts[b]) + ' ' + n1(C) + '" stroke-dashoffset="' + n1(-off) + '" transform="rotate(-90 ' + cxd + ' ' + cyd + ')"/>'; off += C * parts[b]; }
+    g += '<circle cx="' + cxd + '" cy="' + cyd + '" r="39" fill="none" stroke="' + SK + '" stroke-width="2.2"/><circle cx="' + cxd + '" cy="' + cyd + '" r="21" fill="#fff" stroke="' + SK + '" stroke-width="2.2"/>' + sUse('i-contact', cxd - 9, cyd - 9, 18, SK, 2);
+    g += '<path d="M200 188 h128 a8 8 0 0 1 8 8 v50 a8 8 0 0 1 -8 8 h-82 l-16 14 v-14 h-30 a8 8 0 0 1 -8 -8 v-50 a8 8 0 0 1 8 -8z" fill="' + SBG + '" stroke="' + SK + '" stroke-width="2.2" stroke-linejoin="round"/>';
+    var w2 = [96, 62, 38];
+    for (b = 0; b < 3; b++) g += '<rect x="210" y="' + (200 + b * 18) + '" width="' + w2[b] + '" height="11" rx="5.5" fill="' + [SBL, SY, SBP][b] + '" stroke="' + SK + '" stroke-width="1.6"/>';
+    return sSvg('360 300', g, 'Rapports : fr\u00e9quentation, par station, profils, retours de sondage, illustration');
+  }
+
+  /* 9. Diffusion : les partenaires relaient l'événement */
+  function seDiff(){
+    var g = '', cx = [58, 180, 302], i;
+    g += '<g transform="rotate(-3 180 64)"><rect x="132" y="12" width="96" height="104" rx="4" fill="#fff" stroke="' + SK + '" stroke-width="2.6"/><rect x="132" y="12" width="96" height="26" fill="' + SR + '" stroke="' + SK + '" stroke-width="2.6"/>' + sTxt(180, 31, 'FESTIVAL', 15, { c: '#fff' }) + sStar(180, 68, 16, SY) + '<rect x="146" y="92" width="68" height="7" rx="3.5" fill="' + SBP + '"/><rect x="156" y="103" width="48" height="6" rx="3" fill="' + SBP + '"/></g>';
+    g += sUse('i-mega', 80, 28, 40, SA, 1.9) + '<g transform="translate(522 0) scale(-1 1)">' + sUse('i-mega', 242, 28, 40, SA, 1.9) + '</g>';
+    for (i = 0; i < 3; i++) g += sFlux('M180 124 C180 150 ' + cx[i] + ' 144 ' + cx[i] + ' 172', i * 0.3);
+    /* 1. vitrine avec l'affiche */
+    g += sShop(16, 176, 84, 76, 'i-bag');
+    g += '<rect x="58" y="206" width="30" height="22" fill="' + SR + '" stroke="' + SK + '" stroke-width="2"/>' + sStar(73, 217, 6, SY);
+    /* 2. publication sur les réseaux */
+    g += '<rect x="138" y="173" width="84" height="98" rx="7" fill="#fff" stroke="' + SK + '" stroke-width="2.4"/>';
+    g += '<circle cx="153" cy="187" r="7" fill="' + SBL + '" stroke="' + SK + '" stroke-width="1.8"/><rect x="164" y="182" width="42" height="8" rx="4" fill="' + SBP + '"/>';
+    g += '<rect x="146" y="198" width="68" height="40" rx="3" fill="' + SY + '" stroke="' + SK + '" stroke-width="2"/>' + sStar(180, 218, 12, SA);
+    g += '<path d="M152 252 c-6 -5 -8 -9 -4 -12 c2 -2 5 -1 4 2 c-1 -3 2 -4 4 -2 c4 3 2 7 -4 12z" fill="' + SA + '" stroke="' + SK + '" stroke-width="1.6" stroke-linejoin="round"/><rect x="170" y="244" width="40" height="7" rx="3.5" fill="' + SBP + '"/><rect x="146" y="258" width="56" height="6" rx="3" fill="' + SBP + '"/>';
+    /* 3. client : story partagée */
+    g += '<rect x="272" y="173" width="60" height="98" rx="10" fill="#fff" stroke="' + SK + '" stroke-width="2.4"/>';
+    g += '<circle cx="302" cy="206" r="19" fill="none" stroke="' + SA + '" stroke-width="4"/><circle cx="302" cy="206" r="14" fill="' + SC + '" stroke="' + SK + '" stroke-width="1.8"/>' + sPerson(302, 218, 5.5, SBL);
+    g += '<rect x="282" y="236" width="40" height="6" rx="3" fill="' + SBP + '"/>' + sUse('i-mega', 288, 246, 22, SA, 2);
+    g += sTxt(58, 292, 'Vitrines', 17) + sTxt(180, 292, 'R\u00e9seaux', 17) + sTxt(302, 292, 'Clients', 17);
+    return sSvg('360 300', g, 'L\u2019affiche de l\u2019\u00e9v\u00e9nement diffus\u00e9e par les partenaires : vitrines, r\u00e9seaux sociaux, clients');
+  }
+
+  /* 6. La carte : stations-jeux au festival ET chez les partenaires */
+  function seCarte(){
+    var g = '', i, S = [[210, 238, 'i-cup', 'Caf\u00e9'], [306, 232, 'i-bag', 'Boutique'], [304, 150, 'i-lit', 'H\u00f4tel'], [206, 142, 'i-book', 'Librairie']];
+    g += '<rect width="360" height="300" fill="#F6F8FB"/>';
+    g += '<path d="M-10 276 C70 254 120 292 200 270 S320 266 372 250" fill="none" stroke="' + SBP + '" stroke-width="22" stroke-linecap="round"/><path d="M-10 276 C70 254 120 292 200 270 S320 266 372 250" fill="none" stroke="#DCE6F7" stroke-width="12" stroke-dasharray="3 9" stroke-linecap="round"/>';
+    g += '<path d="M0 112 H360 M0 190 H360 M150 0 V300 M258 0 V300" stroke="#fff" stroke-width="12"/>';
+    g += '<g fill="#EEF2FC"><rect x="164" y="8" width="84" height="92" rx="6"/><rect x="272" y="8" width="80" height="92" rx="6"/><rect x="166" y="126" width="80" height="52" rx="6"/><rect x="272" y="204" width="80" height="50" rx="6"/></g>';
+    /* zone du festival */
+    g += '<rect x="8" y="120" width="132" height="152" rx="16" fill="rgba(255,138,20,.10)" stroke="' + SK + '" stroke-width="2.6" stroke-dasharray="7 5"/>';
+    g += sRibbon(74, 106, 128, 26, 'AU FESTIVAL', 17);
+    var path = 'M44 244 C58 226 64 214 58 200 S96 224 104 236 S170 250 210 238 S312 248 306 232 S330 188 304 150 S260 140 206 142 S120 96 96 60';
+    g += '<path id="se-trajet" d="' + path + '" fill="none" stroke="' + SK + '" stroke-width="8" stroke-linecap="round" opacity=".14"/>';
+    g += '<path d="' + path + '" fill="none" stroke="' + SA + '" stroke-width="3.6" stroke-linecap="round" stroke-dasharray="9 8" class="flw"/>';
+    /* scène */
+    g += '<g transform="translate(44 244)"><rect x="-22" y="-16" width="44" height="30" rx="4" fill="' + SK + '" stroke="' + SK + '" stroke-width="2.4"/><polygon points="-22,-16 22,-16 14,-26 -14,-26" fill="' + SY + '" stroke="' + SK + '" stroke-width="2.4" stroke-linejoin="round"/>' + sStar(0, 0, 8, SY) + '</g>';
+    /* stations-jeux du festival : pastille jaune, manette */
+    var F2 = [[58, 196], [106, 232]];
+    for (i = 0; i < F2.length; i++) g += '<circle cx="' + F2[i][0] + '" cy="' + F2[i][1] + '" r="17" fill="' + SY + '" stroke="' + SK + '" stroke-width="2.6"/>' + sUse('i-jeu', F2[i][0] - 11, F2[i][1] - 11, 22, SK, 2);
+    /* partenaires : boutiques au macaron */
+    for (i = 0; i < S.length; i++) {
+      g += sShop(S[i][0] - 22, S[i][1] - 20, 44, 40, S[i][2]);
+      g += sTxt(S[i][0], S[i][1] + 38, S[i][3], 17, { halo: 4 });
+    }
+    g += '<g transform="translate(96 60)"><circle r="19" fill="' + SY + '" stroke="' + SK + '" stroke-width="2.6"/>' + sUse('i-trophee', -12, -12, 24, SK, 2) + '</g>';
+    g += sTxt(96, 96, 'Tirage', 17, { halo: 4 });
+    g += '<g><circle r="7" fill="' + SBL + '" stroke="' + SK + '" stroke-width="2"/><circle cy="-11" r="5" fill="' + SC + '" stroke="' + SK + '" stroke-width="2"/><animateMotion dur="10s" repeatCount="indefinite"><mpath href="#se-trajet"/></animateMotion></g>';
+    return sSvg('360 300', g, 'Carte de l\u2019\u00e9v\u00e9nement : des stations-jeux dans le festival et chez les partenaires, reli\u00e9es par le parcours du public');
+  }
+
+  /* 7. Exemple : tickets, grand tirage, podium des partenaires les plus participatifs */
+  function se7(){
+    var g = '', i;
+    g += '<circle cx="74" cy="82" r="52" fill="rgba(255,255,255,.75)" stroke="' + SK + '" stroke-width="2.8"/>';
+    var tk = [[44, 74, -30, SY], [66, 90, 20, SC], [52, 98, 5, '#fff'], [82, 70, -10, SBP], [78, 96, 35, SY], [36, 92, 60, '#fff']];
+    for (i = 0; i < tk.length; i++) g += sTicket(tk[i][0] - 14, tk[i][1] - 7, 28, 14, tk[i][2], tk[i][3], '', 8);
+    g += '<path d="M40 62 a44 44 0 0 1 68 -4" fill="none" stroke="#fff" stroke-width="5" stroke-linecap="round" opacity=".9"/>';
+    g += '<rect x="48" y="130" width="52" height="14" rx="3" fill="' + SK + '"/><rect x="38" y="142" width="72" height="10" rx="3" fill="' + SR + '" stroke="' + SK + '" stroke-width="2.4"/>';
+    g += '<path d="M126 86 h20" stroke="' + SK + '" stroke-width="4" stroke-linecap="round"/><polygon points="152,86 142,78 142,94" fill="' + SK + '"/>';
+    g += sTicket(160, 40, 120, 52, -4, SY, '0427', 22);
+    g += sTxt(222, 112, 'Ticket gagnant', 16, { c: SK });
+    g += sTicket(176, 6, 56, 24, -10, '#fff', '0426', 11) + sTicket(250, 4, 56, 24, 9, '#fff', '0428', 11);
+    g += sStar(300, 70, 9, SY) + sStar(318, 50, 6, SA) + sStar(330, 104, 6, SBL);
+    /* podium */
+    var base = 288;
+    g += '<rect x="110" y="' + (base - 66) + '" width="76" height="66" fill="' + SY + '" stroke="' + SK + '" stroke-width="2.6"/><rect x="34" y="' + (base - 46) + '" width="76" height="46" fill="' + SR + '" stroke="' + SK + '" stroke-width="2.6"/><rect x="186" y="' + (base - 34) + '" width="76" height="34" fill="' + SBL + '" stroke="' + SK + '" stroke-width="2.6"/>';
+    g += sTxt(148, base - 22, '1', 34, { bang: 1 }) + sTxt(72, base - 14, '2', 28, { bang: 1, c: '#fff' }) + sTxt(224, base - 10, '3', 24, { bang: 1, c: '#fff' });
+    g += sShop(122, base - 66 - 50, 52, 44, 'i-cup') + sShop(46, base - 46 - 50, 52, 44, 'i-bag') + sShop(198, base - 34 - 50, 52, 44, 'i-book');
+    g += sUse('i-gift', 270, 232, 44, SA, 1.8);
+    g += sTxt(292, 292, 'Lots', 17);
+    return sSvg('360 304', g, 'Grand tirage : tickets numérotés, ticket gagnant et podium des partenaires les plus participatifs');
+  }
+
+  /* 10. Communication mutualisée : en local, puis sur une zone plus étendue */
+  function seZone(){
+    var g = '', i, loc = [[118, 118], [242, 118], [112, 188], [248, 188]], far = [[50, 70], [310, 70], [34, 160], [326, 160], [70, 250], [290, 250], [180, 28]];
+    g += '<circle cx="180" cy="152" r="128" fill="rgba(255,138,20,.05)" stroke="' + SK + '" stroke-width="2.4" stroke-dasharray="3 9" stroke-linecap="round"/>';
+    g += '<circle cx="180" cy="152" r="74" fill="rgba(255,138,20,.10)" stroke="' + SK + '" stroke-width="2.6" stroke-dasharray="7 6"/>';
+    for (i = 0; i < far.length; i++) g += '<path d="M' + far[i][0] + ' ' + (far[i][1] + 14) + ' c-9 -8 -12 -13 -12 -18 a12 12 0 0 1 24 0 c0 5 -3 10 -12 18z" fill="' + SBL + '" stroke="' + SK + '" stroke-width="2.2" stroke-linejoin="round"/><circle cx="' + far[i][0] + '" cy="' + (far[i][1] - 4) + '" r="4.5" fill="#fff" stroke="' + SK + '" stroke-width="1.6"/>';
+    for (i = 0; i < loc.length; i++) g += sFlux('M180 152 L' + loc[i][0] + ' ' + loc[i][1], i * 0.25) + sShop(loc[i][0] - 17, loc[i][1] - 15, 34, 30, ['i-cup', 'i-bag', 'i-book', 'i-pain'][i], { nomac: true });
+    g += '<g transform="translate(180 152)"><circle r="26" fill="' + SY + '" stroke="' + SK + '" stroke-width="3"/>' + sStar(0, 0, 15, SA) + '</g>';
+    g += sRibbon(180, 14, 178, 26, 'ZONE \u00c9TENDUE', 17) + sRibbon(180, 80, 120, 24, 'EN LOCAL', 17);
+    return sSvg('360 300', g, 'La communication de l\u2019\u00e9v\u00e9nement mutualis\u00e9e : en local, puis sur une zone plus \u00e9tendue, via les partenaires et le jeu');
+  }
+
+  var SEV = { 1: se1, 4: seRap, 6: seCarte, 7: se7, 9: seDiff, 10: seZone }, svs = document.querySelectorAll('[data-v]'), sj;
+  for (sj = 0; sj < svs.length; sj++) { var sk2 = +svs[sj].getAttribute('data-v'); if (SEV[sk2]) svs[sj].innerHTML = SEV[sk2](); }
+  (function(){
+    var h3 = document.querySelectorAll('[data-s3]'), q;
+    for (q = 0; q < h3.length; q++) h3[q].innerHTML = se3(+h3[q].getAttribute('data-s3'));
+  })();
+
+  var h0 = (location.hash || '').replace('#', ''), start = 0;
+  for (var hk = 0; hk < pages.length; hk++) if (pages[hk].id === h0) start = hk;
+  show(start, true);
+  if (h0 === 'rappel') openSheet();
+})();
+</script>
+<script src="/validation/plaquette-demo.js"></script>
+</body>
+</html>
