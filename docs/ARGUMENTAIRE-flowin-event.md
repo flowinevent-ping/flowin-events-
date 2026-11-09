@@ -42,6 +42,16 @@ Avant toute livraison, chaque texte est relu contre ce fichier (et la liste « i
 - Promesse : « Un événement. Tous ses partenaires. Un seul jeu. »
 - Les partenaires diffusent l'événement (jamais « financent »).
 
+## Super Event : avant, pendant, après (point crucial, Romain 09/11)
+- **Avant l'événement** : communiquez, faites venir les participants en faisant gagner des lots pour
+  participer au festival : places de concert, places, réductions, goodies.
+- **Pendant l'événement** : faites-leur gagner des lots qui les font revenir chez les partenaires ;
+  développez et dynamisez les partenaires et le commerce local.
+- **Après l'événement** : communiquez sur le tirage au sort, les gagnants, et le bénéfice obtenu
+  pendant le festival.
+- **Ce que l'on mesure et restitue** : chiffres, nombre de personnes, hommes / femmes, RSE,
+  sensibilisation, sécurité (sondages des questions bonus), où ils ont joué, contacts.
+
 ## Chiffres (exacts)
 - **56 % des participants souhaitent garder le contact.**
 - **Plus de 70 lots distribués dans les commerces locaux.**
