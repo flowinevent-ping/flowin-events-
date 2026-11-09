@@ -151,9 +151,23 @@
   .qrr svg{width:88px;height:88px;flex:none;border-radius:10px;background:#fff;padding:4px}
   .qrr b{font-size:var(--f15);font-weight:800;display:block}
   .nuit .lnk{color:var(--jaune)}
-  .aud-com .conv .cv.bl{order:-1}
+
   .aud-com .cv.bl,.aud-org .cv.or{border-color:var(--orange-vif)}
 
+  /* 8. Action : 3 étapes numérotées */
+  .no{display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:50%;background:var(--jaune);color:var(--nuit);font-style:normal;font-size:var(--f15);font-weight:900;flex:none}
+  #action .conv{gap:8px;margin-top:12px} #action .cv{padding:12px;gap:8px} #action .cv h3{font-size:var(--f15)}
+  #action .btn{min-height:46px}
+  #action .btn.line{background:transparent;color:#fff;border-color:var(--nuit3)}
+  #action .cv.a1{border-color:var(--orange-vif)}
+  .ff{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+  .ff .full{grid-column:1/-1}
+  .ff label{display:block;font-size:var(--f13);font-weight:700;color:var(--nuit-texte);margin-bottom:3px}
+  .ff input{width:100%;min-height:44px;border-radius:12px;border:1px solid var(--nuit3);background:var(--nuit);color:#fff;font:inherit;font-size:16px;padding:0 12px}
+  .okm{display:none;font-size:var(--f13);font-weight:700;color:var(--jaune)} .okm.on{display:block}
+  #action .qrr{border-top:0;padding-top:0} #action .qrr svg{width:64px;height:64px}
+  .tarif{font-size:var(--f13);font-weight:600;color:var(--texte2);margin-top:8px;text-align:center}
+  @media (min-width:1000px){ #action .conv{display:grid;grid-template-columns:1.3fr 1fr 1fr;align-items:start} #temps .tp svg{margin:0 auto} #temps .tp{justify-items:center;text-align:center} }
   /* Navigation basse (conservée) */
   .nav{position:fixed;left:0;right:0;bottom:0;height:var(--bot);z-index:30;display:flex;align-items:center;justify-content:space-between;gap:10px;padding:0 12px;background:var(--fond);border-top:1px solid var(--trait)}
   .nav button{min-height:44px;border-radius:99px;border:1px solid var(--trait);background:var(--fond);color:var(--encre);font-weight:800;font-size:var(--f15);padding:0 16px;cursor:pointer;white-space:nowrap}
@@ -222,7 +236,7 @@
   <div class="dlg">Flow<em>in</em> Event</div>
   <div id="dLinks"></div>
   <a class="cta" href="#action" id="dCta">Nous contacter</a>
-  <a class="cta2" href="/plaquette-animation-magasin.html">Flowin Animation, le jeu dans ton commerce</a>
+  <a class="cta2" href="/validation/plaquette-animation-v3.html">Flowin Animation, le jeu dans votre commerce</a>
 </aside>
 
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
@@ -324,20 +338,19 @@
         <h2>Votre &eacute;v&eacute;nement <em>gagne sur trois plans</em>.</h2><p class="lede">Une communication pour votre &eacute;v&eacute;nement, avant, pendant, apr&egrave;s.</p>
       </div>
       <div class="t3">
-        <div class="card tp"><svg viewBox="0 0 240 180" role="img" aria-label="Avant : l’affiche du festival et une place de concert gagnée"><g clip-path="url(#cp240)"><rect width="240" height="180" fill="url(#ciel)"/><circle class="tw" cx="20" cy="20" r="1.3" fill="#FFFFFF" style="animation-delay:0s"/><circle class="tw" cx="220" cy="26" r="1.3" fill="#FFFFFF" style="animation-delay:0.6s"/><g class="pop"><g transform="translate(26 30) scale(1.1)"><rect width="60" height="84" rx="4" fill="#FF8A14" stroke="#0E1B30" stroke-width="2.5"/><circle cx="30" cy="30" r="16" fill="#FFD23F" stroke="#0E1B30" stroke-width="2"/><path fill="#E2231A" d="M30 19l3.2 6.8 7.4.9-5.5 5 1.5 7.3L30 35.4l-6.6 3.6 1.5-7.3-5.5-5 7.4-.9z"/><rect x="10" y="56" width="40" height="6" rx="3" fill="#0E1B30"/><rect x="16" y="68" width="28" height="5" rx="2.5" fill="#FFFFFF"/></g></g><g class="pop d1"><g transform="rotate(-10 160 90)"><use href="#ticket" x="104" y="62" width="116" height="58"/><text x="148" y="113" text-anchor="middle" font-size="13" font-weight="900" fill="#0E1B30">GAGNÉ</text></g></g><g class="pop d2"><use href="#gift" x="176" y="118" width="40" height="40"/></g><use href="#spark" x="98" y="34" width="16" height="16" class="tw"/><use href="#spark" x="214" y="46" width="12" height="12" class="tw" style="animation-delay:.7s"/><rect y="160" width="240" height="20" fill="#0E1B30"/></g></svg><div><div class="k">Avant</div><b>Augmentez la visibilit&eacute;</b><p>Votre campagne habituelle, plus le r&eacute;seau Flowin. Des lots en lien avec votre &eacute;v&eacute;nement.</p></div></div>
+        <div class="card tp"><svg viewBox="0 0 240 180" role="img" aria-label="Avant : l’affiche du festival et une place de concert gagnée"><g clip-path="url(#cp240)"><rect width="240" height="180" fill="url(#ciel)"/><circle class="tw" cx="20" cy="20" r="1.3" fill="#FFFFFF" style="animation-delay:0s"/><circle class="tw" cx="220" cy="26" r="1.3" fill="#FFFFFF" style="animation-delay:0.6s"/><g class="pop"><g transform="translate(26 30) scale(1.1)"><rect width="60" height="84" rx="4" fill="#FF8A14" stroke="#0E1B30" stroke-width="2.5"/><circle cx="30" cy="30" r="16" fill="#FFD23F" stroke="#0E1B30" stroke-width="2"/><path fill="#E2231A" d="M30 19l3.2 6.8 7.4.9-5.5 5 1.5 7.3L30 35.4l-6.6 3.6 1.5-7.3-5.5-5 7.4-.9z"/><rect x="10" y="56" width="40" height="6" rx="3" fill="#0E1B30"/><rect x="16" y="68" width="28" height="5" rx="2.5" fill="#FFFFFF"/></g></g><g class="pop d1"><g transform="rotate(-10 160 90)"><use href="#ticket" x="104" y="62" width="116" height="58"/><text x="148" y="113" text-anchor="middle" font-size="13" font-weight="900" fill="#0E1B30">GAGNÉ</text></g></g><g class="pop d2"><use href="#gift" x="176" y="118" width="40" height="40"/></g><use href="#spark" x="98" y="34" width="16" height="16" class="tw"/><use href="#spark" x="214" y="46" width="12" height="12" class="tw" style="animation-delay:.7s"/><rect y="160" width="240" height="20" fill="#0E1B30"/></g></svg><div><div class="k">Avant</div><b>Augmentez la visibilit&eacute; avant l&rsquo;&eacute;v&eacute;nement</b><p>Votre plan de campagne habituel, plus le r&eacute;seau Flowin.</p></div></div>
         <div class="card tp"><svg viewBox="0 0 240 180" role="img" aria-label="Pendant : le lot se retire chez le commerçant partenaire"><g clip-path="url(#cp240)"><rect width="240" height="180" fill="url(#ciel)"/><circle class="tw" cx="210" cy="20" r="1.3" fill="#FFFFFF" style="animation-delay:0.2s"/><circle class="tw" cx="150" cy="30" r="1.1" fill="#FFFFFF" style="animation-delay:0.8s"/><g class="pop"><use href="#shop" x="20" y="50" width="104" height="110.9"/><use href="#mac" x="42.5" y="107.2" width="31.2" height="31.2"/></g><rect y="160" width="240" height="20" fill="#0E1B30"/><path d="M196 112 L146 112" fill="none" stroke="#FFD23F" stroke-width="3" stroke-linecap="round" marker-end="url(#fleche)"/><g class="pop d1"><use href="#gift" x="172" y="84" width="52" height="52"/><use href="#spark" x="214" y="70" width="14" height="14" class="tw"/></g></g></svg><div><div class="k">Pendant</div><b>Favorisez le r&eacute;seau local</b><p>Devenez acteur du boost du commerce local.</p></div></div>
-        <div class="card tp"><svg viewBox="0 0 240 180" role="img" aria-label="Après : le podium du tirage au sort et le graphique des résultats"><g clip-path="url(#cp240)"><rect width="240" height="180" fill="url(#ciel)"/><circle class="tw" cx="220" cy="18" r="1.3" fill="#FFFFFF" style="animation-delay:0s"/><circle class="tw" cx="18" cy="22" r="1.2" fill="#FFFFFF" style="animation-delay:0.5s"/><g class="pop"><rect x="22" y="114" width="40" height="46" rx="3" fill="#FFD23F" stroke="#0E1B30" stroke-width="2.5"/><text x="42" y="138" text-anchor="middle" font-size="18" font-weight="900" fill="#0E1B30">2</text><rect x="64" y="90" width="40" height="70" rx="3" fill="#FF8A14" stroke="#0E1B30" stroke-width="2.5"/><text x="84" y="114" text-anchor="middle" font-size="18" font-weight="900" fill="#0E1B30">1</text><rect x="106" y="128" width="40" height="32" rx="3" fill="#E2231A" stroke="#0E1B30" stroke-width="2.5"/><text x="126" y="152" text-anchor="middle" font-size="18" font-weight="900" fill="#0E1B30">3</text><path d="M70 44h28v14a14 14 0 0 1-28 0z" fill="#FFD23F" stroke="#0E1B30" stroke-width="2.5"/><path d="M84 72v8M74 84h20" stroke="#FFD23F" stroke-width="3" stroke-linecap="round"/></g><g class="pop d2"><rect x="160" y="138" width="14" height="22" rx="2" fill="#2A3B58" stroke="#0E1B30" stroke-width="2"/><rect x="179" y="122" width="14" height="38" rx="2" fill="#C2410C" stroke="#0E1B30" stroke-width="2"/><rect x="198" y="104" width="14" height="56" rx="2" fill="#FF8A14" stroke="#0E1B30" stroke-width="2"/><rect x="217" y="80" width="14" height="80" rx="2" fill="#FFD23F" stroke="#0E1B30" stroke-width="2"/><path d="M156 118 222 66" stroke="#FFFFFF" stroke-width="3" stroke-linecap="round"/><path d="M208 64h15v15" fill="none" stroke="#FFFFFF" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></g><use href="#spark" x="40" y="40" width="14" height="14" class="tw"/><use href="#spark" x="126" y="54" width="12" height="12" class="tw" style="animation-delay:.6s"/><rect y="160" width="240" height="20" fill="#0E1B30"/></g></svg><div><div class="k">Apr&egrave;s</div><b>D&eacute;tenez des chiffres utiles</b><p>Pour vos partenaires et institutions. Mieux conna&icirc;tre votre public, garder le contact.</p></div></div>
+        <div class="card tp"><svg viewBox="0 0 240 180" role="img" aria-label="Après : le podium du tirage au sort et le graphique des résultats"><g clip-path="url(#cp240)"><rect width="240" height="180" fill="url(#ciel)"/><circle class="tw" cx="220" cy="18" r="1.3" fill="#FFFFFF" style="animation-delay:0s"/><circle class="tw" cx="18" cy="22" r="1.2" fill="#FFFFFF" style="animation-delay:0.5s"/><g class="pop"><rect x="22" y="114" width="40" height="46" rx="3" fill="#FFD23F" stroke="#0E1B30" stroke-width="2.5"/><text x="42" y="138" text-anchor="middle" font-size="18" font-weight="900" fill="#0E1B30">2</text><rect x="64" y="90" width="40" height="70" rx="3" fill="#FF8A14" stroke="#0E1B30" stroke-width="2.5"/><text x="84" y="114" text-anchor="middle" font-size="18" font-weight="900" fill="#0E1B30">1</text><rect x="106" y="128" width="40" height="32" rx="3" fill="#E2231A" stroke="#0E1B30" stroke-width="2.5"/><text x="126" y="152" text-anchor="middle" font-size="18" font-weight="900" fill="#0E1B30">3</text><path d="M70 44h28v14a14 14 0 0 1-28 0z" fill="#FFD23F" stroke="#0E1B30" stroke-width="2.5"/><path d="M84 72v8M74 84h20" stroke="#FFD23F" stroke-width="3" stroke-linecap="round"/></g><g class="pop d2"><rect x="160" y="138" width="14" height="22" rx="2" fill="#2A3B58" stroke="#0E1B30" stroke-width="2"/><rect x="179" y="122" width="14" height="38" rx="2" fill="#C2410C" stroke="#0E1B30" stroke-width="2"/><rect x="198" y="104" width="14" height="56" rx="2" fill="#FF8A14" stroke="#0E1B30" stroke-width="2"/><rect x="217" y="80" width="14" height="80" rx="2" fill="#FFD23F" stroke="#0E1B30" stroke-width="2"/><path d="M156 118 222 66" stroke="#FFFFFF" stroke-width="3" stroke-linecap="round"/><path d="M208 64h15v15" fill="none" stroke="#FFFFFF" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></g><use href="#spark" x="40" y="40" width="14" height="14" class="tw"/><use href="#spark" x="126" y="54" width="12" height="12" class="tw" style="animation-delay:.6s"/><rect y="160" width="240" height="20" fill="#0E1B30"/></g></svg><div><div class="k">Apr&egrave;s</div><b>D&eacute;tenez des chiffres utiles</b><p>Pour communiquer apr&egrave;s votre &eacute;v&eacute;nement&nbsp;: partenaires, institutions.</p></div></div>
       </div>
     </div>
   </section>
 
   <!-- 4. PARCOURS DU FESTIVALIER -->
-  <section class="pg" id="parcours" data-titre="Le parcours du festivalier">
+  <section class="pg" id="parcours" data-titre="Des lots qui font revenir">
     <div class="in two">
       <div class="txt">
         <div class="eyebrow">Le parcours du festivalier</div>
-        <h2>Il joue chez le boulanger, <em>il revient chercher son lot</em>.</h2>
-        <p class="lede">Trois questions, une minute.</p>
+        <h2>Des lots <em>qui font revenir chez les partenaires</em>.</h2>
       </div>
       <div class="vis" style="--vmax:50vh;--vmaxd:62vh"><svg viewBox="0 0 400 300" role="img" aria-label="Le parcours du festivalier : il flashe le macaron, il joue, il gagne, il revient en boutique"><g clip-path="url(#cp400)"><rect width="400" height="300" fill="url(#ciel)"/><circle class="tw" cx="200" cy="22" r="1.4" fill="#FFFFFF" style="animation-delay:0s"/><circle class="tw" cx="380" cy="150" r="1.2" fill="#FFFFFF" style="animation-delay:0.5s"/><circle class="tw" cx="20" cy="150" r="1.2" fill="#FFFFFF" style="animation-delay:1s"/><path d="M130 66 H272" fill="none" stroke="#FFD23F" stroke-width="3" stroke-linecap="round" marker-end="url(#fleche)"/><path d="M330 144 V166" fill="none" stroke="#FFD23F" stroke-width="3" stroke-linecap="round" marker-end="url(#fleche)"/><path d="M272 206 H138" fill="none" stroke="#FFD23F" stroke-width="3" stroke-linecap="round" marker-end="url(#fleche)"/><path d="M72 166 V146" fill="none" stroke="#FFD23F" stroke-width="3" stroke-linecap="round" marker-end="url(#fleche)"/><g class="pop"><use href="#mac" x="176" y="126" width="48" height="48"/></g><g class="pop"><rect x="30" y="58" width="84" height="40" rx="4" fill="#FFF1E6" stroke="#0E1B30" stroke-width="2.5"/><use href="#mac" x="46" y="24" width="34" height="34"/><use href="#tel" x="94" y="22" width="28" height="50.4"/><path d="M101 38h12M101 45h8" stroke="#FF8A14" stroke-width="2.5" stroke-linecap="round"/></g><g class="pop d1"><use href="#tel" x="306" y="12" width="48" height="86.4"/><rect x="315" y="27" width="30" height="8" rx="3" fill="#C2410C"/><rect x="315" y="42" width="30" height="11" rx="4" fill="#FFD23F" stroke="#0E1B30" stroke-width="1.5"/><rect x="315" y="57" width="30" height="11" rx="4" fill="#F1EAE0" stroke="#0E1B30" stroke-width="1.5"/><rect x="315" y="72" width="30" height="11" rx="4" fill="#F1EAE0" stroke="#0E1B30" stroke-width="1.5"/></g><g class="pop d2"><use href="#gift" x="302" y="172" width="56" height="56"/><use href="#spark" x="292" y="168" width="16" height="16" class="tw"/><use href="#spark" x="364" y="180" width="14" height="14" class="tw" style="animation-delay:.5s"/></g><g class="pop d3"><use href="#shop" x="30" y="172" width="60" height="64"/><use href="#mac" x="43" y="205" width="18" height="18"/><path d="M96 208h24l-2 26h-20z" fill="#FFD23F" stroke="#0E1B30" stroke-width="2.5" stroke-linejoin="round"/><path d="M102 208v-4a6 6 0 0 1 12 0v4" fill="none" stroke="#0E1B30" stroke-width="2.5"/></g><circle cx="26" cy="123" r="12" fill="#FFD23F" stroke="#0E1B30" stroke-width="2.5"/><text x="26" y="128" text-anchor="middle" font-size="15" font-weight="900" fill="#0E1B30">1</text><text x="42" y="128" font-size="15" font-weight="800" fill="#FFFFFF">Il flashe</text><circle cx="284" cy="123" r="12" fill="#FFD23F" stroke="#0E1B30" stroke-width="2.5"/><text x="284" y="128" text-anchor="middle" font-size="15" font-weight="900" fill="#0E1B30">2</text><text x="300" y="128" font-size="15" font-weight="800" fill="#FFFFFF">Il joue</text><circle cx="284" cy="257" r="12" fill="#FFD23F" stroke="#0E1B30" stroke-width="2.5"/><text x="284" y="262" text-anchor="middle" font-size="15" font-weight="900" fill="#0E1B30">3</text><text x="300" y="262" font-size="15" font-weight="800" fill="#FFFFFF">Il gagne</text><circle cx="26" cy="257" r="12" fill="#FFD23F" stroke="#0E1B30" stroke-width="2.5"/><text x="26" y="262" text-anchor="middle" font-size="15" font-weight="900" fill="#0E1B30">4</text><text x="42" y="262" font-size="15" font-weight="800" fill="#FFFFFF">Il revient</text></g></svg></div>
     </div>
@@ -369,13 +382,11 @@
         </div>
       </div>
       <div class="rest pop d2">
-        <b class="rt">Ce que l&rsquo;on mesure et restitue</b>
-        <div><svg class="ic"><use href="#i-rapport"/></svg>Les chiffres, le nombre de personnes</div>
+        <b class="rt">Ce que l&rsquo;on restitue</b>
+        <div><svg class="ic"><use href="#i-rapport"/></svg>Le nombre de personnes</div>
         <div><svg class="ic"><use href="#i-client"/></svg>Hommes / femmes</div>
         <div><svg class="ic"><use href="#i-carte"/></svg>O&ugrave; ils ont jou&eacute;</div>
-        <div><svg class="ic"><use href="#i-contact"/></svg>Les contacts&nbsp;: le fichier client</div>
-        <div><svg class="ic"><use href="#i-libre"/></svg>RSE, sensibilisation</div>
-        <div><svg class="ic"><use href="#i-ok"/></svg>S&eacute;curit&eacute;&nbsp;: les sondages</div>
+        <div><svg class="ic"><use href="#i-contact"/></svg>Le fichier client</div>
       </div>
     </div>
   </section>
@@ -392,12 +403,13 @@
       <div>
         <div class="car" id="car">
           <div class="card fo"><div class="tag">Sponsor</div><h3>Sponsor digital</h3><div class="px">500&nbsp;&euro; <small>HT</small></div>
-            <ul><li><svg class="ic"><use href="#i-ok"/></svg>Visible sur le jeu, m&ecirc;me sans lots</li><li><svg class="ic"><use href="#i-ok"/></svg>Ton commerce dans la liste des partenaires</li><li><svg class="ic"><use href="#i-ok"/></svg>Tes contacts et r&eacute;seaux sociaux accessibles depuis le jeu</li></ul></div>
+            <ul><li><svg class="ic"><use href="#i-ok"/></svg>Visible sur le jeu, m&ecirc;me sans lots</li><li><svg class="ic"><use href="#i-ok"/></svg>Votre commerce dans la liste des partenaires</li><li><svg class="ic"><use href="#i-ok"/></svg>Vos contacts et r&eacute;seaux sociaux accessibles depuis le jeu</li></ul></div>
           <div class="card fo"><div class="tag">Station jeu</div><h3>Partenaire digital + sur place</h3><div class="px">1&nbsp;331&nbsp;&euro; <small>HT</small></div>
-            <ul><li><svg class="ic"><use href="#i-ok"/></svg>Tout le sponsor digital</li><li><svg class="ic"><use href="#i-ok"/></svg>Les festivaliers jouent et retirent leur lot chez toi</li><li><svg class="ic"><use href="#i-ok"/></svg>Sur la carte des partenaires</li><li><svg class="ic"><use href="#i-ok"/></svg>Rapport de passage</li></ul></div>
+            <ul><li><svg class="ic"><use href="#i-ok"/></svg>Tout le sponsor digital</li><li><svg class="ic"><use href="#i-ok"/></svg>Les festivaliers jouent et retirent leur lot chez vous</li><li><svg class="ic"><use href="#i-ok"/></svg>Sur la carte des partenaires</li><li><svg class="ic"><use href="#i-ok"/></svg>Rapport de passage</li></ul></div>
           <div class="card fo"><div class="tag">Premium</div><h3>Partenaire premium tous supports</h3><div class="px">3&nbsp;331&nbsp;&euro; <small>HT</small></div>
-            <ul><li><svg class="ic"><use href="#i-ok"/></svg>Tout le partenaire sur place</li><li><svg class="ic"><use href="#i-ok"/></svg>Pr&eacute;sent sur tous les supports et stations</li><li><svg class="ic"><use href="#i-ok"/></svg>Quiz &agrave; ta marque</li></ul></div>
+            <ul><li><svg class="ic"><use href="#i-ok"/></svg>Tout le partenaire sur place</li><li><svg class="ic"><use href="#i-ok"/></svg>Pr&eacute;sent sur tous les supports et stations</li><li><svg class="ic"><use href="#i-ok"/></svg>Quiz &agrave; votre marque</li></ul></div>
         </div>
+        <p class="tarif">Tarifs &agrave; confirmer</p>
         <div class="dots" id="dots"><button type="button" class="on" aria-label="Formule 1"><i></i></button><button type="button" aria-label="Formule 2"><i></i></button><button type="button" aria-label="Formule 3"><i></i></button></div>
       </div>
     </div>
@@ -406,21 +418,28 @@
   <!-- 8. ACTION (vous) -->
   <section class="pg nuit" id="action" data-titre="Passer &agrave; l&rsquo;action">
     <div class="in">
-      <div class="txt">
-        <div class="eyebrow">Passer &agrave; l&rsquo;action</div>
-        <h2>Le prochain super event, <em>c&rsquo;est le v&ocirc;tre</em>.</h2>
-      </div>
+      <div class="eyebrow">Passer &agrave; l&rsquo;action</div>
+      <h2>Diffusez <em>en local</em>.</h2>
       <div class="conv">
-        <div class="card cv or">
-          <h3><span class="pic"><svg class="ic"><use href="#i-cal"/></svg></span>J&rsquo;organise un &eacute;v&eacute;nement</h3>
-          <button class="btn" type="button" id="cta" data-mode="org"><svg class="ic"><use href="#i-cal"/></svg>Prendre rendez-vous</button>
-          <span>Par WhatsApp ou email. Tarif sur &eacute;tude de votre &eacute;v&eacute;nement.</span>
+        <div class="card cv a1">
+          <h3><i class="no">1</i>&Ecirc;tre recontact&eacute;</h3>
+          <form class="ff" id="ffc" novalidate onsubmit="return false">
+            <div><label for="fPrenom">Pr&eacute;nom</label><input id="fPrenom" autocomplete="given-name" placeholder="[&hellip; &agrave; compl&eacute;ter]"></div>
+            <div><label for="fTel">T&eacute;l&eacute;phone</label><input id="fTel" type="tel" inputmode="tel" autocomplete="tel" placeholder="[&hellip; &agrave; compl&eacute;ter]"></div>
+            <div class="full"><label for="fMail">Email</label><input id="fMail" type="email" autocomplete="email" placeholder="[&hellip; &agrave; compl&eacute;ter]"></div>
+          </form>
+          <button class="btn" type="button" id="fGo">&Ecirc;tre recontact&eacute;</button>
+          <p class="okm" id="fOk">Maquette&nbsp;: rien n&rsquo;est envoy&eacute;.</p>
         </div>
         <div class="card cv bl">
-          <h3><span class="pic"><svg class="ic"><use href="#i-vitrine"/></svg></span>J&rsquo;ai un commerce</h3>
-          <button class="btn" type="button" id="ctaCom" data-mode="com"><svg class="ic"><use href="#i-carte"/></svg>&Ecirc;tre pr&eacute;venu du prochain super event</button>
+          <h3><i class="no">2</i>&Ecirc;tre pr&eacute;venu du prochain super event</h3>
+          <button class="btn line" type="button" id="ctaCom" data-mode="com"><svg class="ic"><use href="#i-carte"/></svg>&Ecirc;tre sur la carte des partenaires</button>
+        </div>
+        <div class="card cv or">
+          <h3><i class="no">3</i>Rejoindre un super event</h3>
           <div class="qrr"><svg viewBox="0 0 37 37" role="img" aria-label="QR code vers l&rsquo;inscription commerce"><use href="#qr-se"/></svg>
-            <div><b>Rejoindre un super event</b><a class="lnk" href="https://flowin-events.vercel.app/pro/premiere-fois">flowin-events.vercel.app/pro/premiere-fois</a></div></div>
+            <div><a class="lnk" href="https://flowin-events.vercel.app/pro/premiere-fois">flowin-events.vercel.app/pro/premiere-fois</a></div></div>
+          <button class="btn line" type="button" id="cta" data-mode="org"><svg class="ic"><use href="#i-cal"/></svg>J&rsquo;organise un &eacute;v&eacute;nement&nbsp;: prendre rendez-vous</button>
         </div>
       </div>
     </div>
@@ -506,6 +525,7 @@
   $('topCta').addEventListener('click', function(e){ e.preventDefault(); go('action'); });
   $('cta').addEventListener('click', function(){ openSheet('org'); });
   $('ctaCom').addEventListener('click', function(){ openSheet('com'); });
+  $('fGo').addEventListener('click', function(){ $('fOk').className = 'okm on'; });
   var chs = document.querySelectorAll('[data-aud]');
   for (var ci = 0; ci < chs.length; ci++) chs[ci].addEventListener('click', function(){ var a = this.getAttribute('data-aud'); setAud(a); go(a === 'com' ? 'commerce' : 'organisateur'); });
   /* Formules : une carte à la fois, points cliquables */
