@@ -6,11 +6,13 @@
 <title>Flowin Super Event</title>
 <meta name="description" content="Flowin Super Event : un événement, tous ses partenaires, un seul jeu. Pour les organisateurs et pour les commerces.">
 <style>
-  /* V3 (09/11/2026) : charte propre « outil ». Toutes les couleurs ici, nulle part ailleurs.
+  /* V3 bis (09/11/2026) : univers festival Super Event. Toutes les couleurs ici, nulle part ailleurs.
      Style BD (Bangers, jaune / rouge) réservé au logo Super Event. Cartes blanches, bordures fines, pas d'ombre décalée. */
   :root{
     --fond:#FFFFFF; --papier:#F6F8FB; --encre:#1B3A5C; --texte2:#4A5F78; --trait:#DCE3EC;
-    --orange:#C2410C; --orange-vif:#FF8A14; --orange-clair:#FFF1E6; --bleu:#3B5CC4; --bleu-clair:#EEF2FC;
+    /* Univers Super Event (distinct de Flowin Animation, bleu) : orange dominant, jaune et rouge du logo en accents, nuit pour les écrans forts */
+    --orange:#C2410C; --orange-vif:#FF8A14; --orange-clair:#FFF1E6; --jaune:#FFD23F; --jaune-clair:#FFF6D6; --rouge:#E2231A;
+    --nuit:#0E1B30; --nuit2:#1A2B47; --nuit-texte:#C9D3E3;
     --f13:13px; --f15:15px; --f18:18px; --f24:24px; --f32:32px;
     --r:16px; --top:56px; --bot:64px;
   }
@@ -23,7 +25,7 @@
   /* En-tête : logo Flowin Event à gauche */
   .menu{position:fixed;top:0;left:0;right:0;height:var(--top);z-index:40;display:flex;align-items:center;gap:8px;padding:0 12px 0 16px;background:var(--fond);border-bottom:1px solid var(--trait)}
   .menu .lg{font-size:var(--f18);font-weight:900;letter-spacing:-.02em;color:var(--encre);cursor:pointer;margin-right:auto;line-height:44px;white-space:nowrap}
-  .menu .lg em,.drawer .dlg em{font-style:normal;color:var(--bleu)}
+  .menu .lg em,.drawer .dlg em{font-style:normal;color:var(--orange)}
   .menu a.cmd{font-size:var(--f13);font-weight:800;color:#fff;background:var(--orange);border-radius:99px;padding:0 14px;min-height:44px;display:inline-flex;align-items:center;text-decoration:none;white-space:nowrap}
   .burger{display:flex;flex-direction:column;gap:4px;width:44px;height:44px;align-items:center;justify-content:center;border-radius:12px;background:var(--fond);border:1px solid var(--trait);cursor:pointer;flex:none}
   .burger span{display:block;width:18px;height:2px;border-radius:2px;background:var(--encre)}
@@ -72,7 +74,7 @@
   .btn{display:flex;align-items:center;justify-content:center;gap:10px;background:var(--orange);color:#fff;border:1px solid var(--orange);cursor:pointer;font-weight:800;font-size:var(--f15);min-height:50px;padding:0 20px;border-radius:99px;text-decoration:none;width:100%;text-align:center;line-height:1.2}
   .btn.line{background:var(--fond);color:var(--encre);border-color:var(--trait)}
   .btn .ic{width:22px;height:22px}
-  .lnk{display:inline-flex;align-items:center;min-height:44px;font-size:var(--f15);font-weight:800;color:var(--bleu);text-decoration:underline;text-underline-offset:3px;word-break:break-all}
+  .lnk{display:inline-flex;align-items:center;min-height:44px;font-size:var(--f15);font-weight:800;color:var(--orange);text-decoration:underline;text-underline-offset:3px;word-break:break-all}
 
   /* 1. Promesse et choix du public */
   .sel{display:block;width:min(230px,62vw);height:auto;margin:0 0 12px}
@@ -80,21 +82,51 @@
   .ch{display:flex;align-items:center;gap:12px;min-height:60px;padding:8px 14px;border:1px solid var(--trait);border-radius:var(--r);background:var(--fond);color:var(--encre);font-size:var(--f15);font-weight:800;cursor:pointer;text-align:left;width:100%}
   .ch .pic{width:40px;height:40px}
   .ch .go{margin-left:auto;color:var(--orange);font-size:var(--f18);font-weight:900}
-  .ch.bl .pic{background:var(--bleu-clair);color:var(--bleu)}
   .ch:active{background:var(--papier)}
 
   /* 2. Verbes organisateur */
   .verbs{display:flex;flex-wrap:wrap;gap:6px;margin-top:14px}
   .verbs span{font-size:var(--f13);font-weight:800;color:var(--orange);background:var(--orange-clair);border-radius:99px;padding:6px 12px}
 
-  /* 7. Chiffres clés */
-  .kpi{margin-top:16px;padding:18px 16px;text-align:left}
-  .kpi .num{font-size:64px;font-weight:900;line-height:1;color:var(--orange);letter-spacing:-.03em;font-variant-numeric:tabular-nums}
-  .kpi .lab{display:block;font-size:var(--f18);font-weight:800;line-height:1.3;color:var(--encre);margin-top:8px}
-  .kpi2{margin-top:8px;display:flex;align-items:center;gap:14px}
-  .kpi2 span{font-size:var(--f15)!important;color:var(--encre)!important}
-  .kpi2 .num{font-size:var(--f32);font-weight:900;color:var(--bleu);line-height:1;white-space:nowrap}
-  .kpi2 .num small{display:block;font-size:var(--f13);font-weight:800;color:var(--texte2)}
+  /* Écrans forts : fond nuit (promesse, chiffres, action) */
+  .pg.nuit{background:var(--nuit);color:#fff}
+  .nuit h1,.nuit h2{color:#fff} .nuit h1 em,.nuit h2 em{color:var(--orange-vif)}
+  .nuit .eyebrow{color:var(--jaune)} .nuit .lede{color:var(--nuit-texte)}
+  .nuit .card{color:var(--encre);border-color:transparent}
+  .nuit .ch{border-color:var(--nuit2);background:var(--nuit2);color:#fff}
+  .nuit .ch:active{background:#24385A}
+  .nuit .ch .pic{background:var(--orange-vif);color:var(--nuit)}
+  .nuit .ch .go{color:var(--jaune)}
+  .nuit .vis{border-color:transparent}
+
+  /* 3. Avant / pendant / après */
+  .t3{display:grid;grid-template-columns:1fr;gap:8px;margin-top:16px}
+  .tp{border-top:4px solid var(--orange-vif)}
+  .tp:nth-child(2){border-top-color:var(--orange)} .tp:nth-child(3){border-top-color:var(--rouge)}
+  .tph{display:flex;align-items:center;gap:12px}
+  .tph .pic{width:40px;height:40px}
+  .tph b{font-size:var(--f18);font-weight:900;text-transform:uppercase;letter-spacing:.06em}
+  .tp p{font-size:var(--f15);font-weight:600;line-height:1.4;margin-top:8px;color:var(--encre)}
+
+  /* 5. Sondages des questions bonus */
+  .sond{margin-top:12px}
+  .sond>b{display:block;font-size:var(--f13);font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--texte2)}
+  .chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+  .chips span{display:inline-flex;align-items:center;gap:6px;min-height:36px;padding:0 12px;border:1px solid var(--trait);border-radius:99px;font-size:var(--f13);font-weight:800;background:var(--fond)}
+  .chips .ic{width:18px;height:18px;color:var(--orange)}
+
+  /* 6. Chiffres clés + restitution */
+  .kpis{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:16px}
+  .kp .num{font-size:56px;font-weight:900;line-height:1;color:var(--orange-vif);letter-spacing:-.03em;font-variant-numeric:tabular-nums;white-space:nowrap}
+  .kp .num.j{color:var(--jaune)}
+  .kp .num small{display:block;font-size:var(--f13);font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--nuit-texte);margin-bottom:2px}
+  .kp span{display:block;font-size:var(--f15);font-weight:700;line-height:1.35;margin-top:6px;color:#fff}
+  .kp .num:not(.j){padding-top:19px}
+  .rest{margin-top:16px;padding:14px 16px}
+  .rest .rt{font-size:var(--f15);font-weight:900}
+  .rest ul{list-style:none;margin-top:8px;display:flex;flex-direction:column}
+  .rest li{display:flex;align-items:center;gap:10px;min-height:40px;font-size:var(--f15);font-weight:700;border-top:1px solid var(--trait)}
+  .rest li .ic{width:22px;height:22px;color:var(--orange)}
 
   /* 9. Formules : une carte à la fois */
   .car{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;gap:12px;margin-top:16px;scrollbar-width:none;padding:1px}
@@ -117,7 +149,7 @@
   .cv{padding:14px;display:flex;flex-direction:column;gap:8px}
   .cv h3{font-size:var(--f18);font-weight:900;line-height:1.25;display:flex;align-items:center;gap:10px}
   .cv .pic{width:36px;height:36px}
-  .cv.bl .pic{background:var(--bleu-clair);color:var(--bleu)}
+  .cv.bl .pic{background:var(--jaune-clair);color:var(--orange)}
   .qrr{display:flex;align-items:center;gap:12px;margin-top:4px;padding-top:10px;border-top:1px solid var(--trait)}
   .qrr svg{width:88px;height:88px;flex:none;border:1px solid var(--trait);border-radius:10px;background:#fff}
   .qrr b{font-size:var(--f15);font-weight:800;display:block}
@@ -127,7 +159,7 @@
   /* Navigation basse (conservée) */
   .nav{position:fixed;left:0;right:0;bottom:0;height:var(--bot);z-index:30;display:flex;align-items:center;justify-content:space-between;gap:10px;padding:0 12px;background:var(--fond);border-top:1px solid var(--trait)}
   .nav button{min-height:44px;border-radius:99px;border:1px solid var(--trait);background:var(--fond);color:var(--encre);font-weight:800;font-size:var(--f15);padding:0 16px;cursor:pointer;white-space:nowrap}
-  .nav button.next{background:var(--encre);color:#fff;border-color:var(--encre)}
+  .nav button.next{background:var(--orange);color:#fff;border-color:var(--orange)}
   .nav button[disabled]{opacity:.35;cursor:default}
   .nav .cnt{font-size:var(--f13);font-weight:800;color:var(--texte2);display:flex;flex-direction:column;align-items:center;line-height:1.2;white-space:nowrap}
   .nav .cnt small{font-size:var(--f13);font-weight:800;color:var(--orange);text-transform:uppercase;letter-spacing:.1em}
@@ -154,11 +186,11 @@
     .two .grid,.two .conv,.two .car{margin-top:0}
     .card{padding:16px 18px}
     .it b,.card b{font-size:var(--f18)} .it span,.card span{font-size:var(--f15)}
-    .kpi{margin-top:0;padding:28px}
-    .kpi .num{font-size:120px}
-    .kpi .lab{font-size:var(--f24)}
-    .kpi2 span{font-size:var(--f15)!important;color:var(--encre)!important}
-  .kpi2 .num{font-size:48px}
+    .kpis{gap:32px} .kp .num{font-size:80px} .kp .num:not(.j){padding-top:21px} .kp span{font-size:var(--f18)}
+    .two .rest{margin-top:0;padding:20px 24px}
+    .t3{grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;margin-top:28px}
+    .tp{padding:20px}
+    .tp p{font-size:var(--f18)}
     .fo{padding:24px;flex-basis:100%}
     .fo .px{font-size:48px}
     .conv{flex-direction:row;align-items:stretch}
@@ -168,7 +200,7 @@
     .mob{display:none}
   }
   @media (max-width:999px){ .desk{display:none} }
-  @media (max-width:370px){ .pg{padding:16px 12px 14px} .menu a.cmd{padding:0 10px} .nav button{padding:0 12px} .kpi .num{font-size:56px} }
+  @media (max-width:370px){ .pg{padding:16px 12px 14px} .menu a.cmd{padding:0 10px} .nav button{padding:0 12px} .kp .num{font-size:48px} }
   @media (max-height:740px){ .pg{padding-top:14px} .vis{margin-top:10px} .grid{margin-top:10px} }
   @media (prefers-reduced-motion:reduce){ .pg{transition:none} .flw{animation:none} }
 
@@ -235,64 +267,51 @@
 
 <div class="stage" id="stage">
 
-  <!-- 1. PROMESSE + DEUX PUBLICS -->
-  <section class="pg on" id="hero" data-titre="Un &eacute;v&eacute;nement, un seul jeu">
+  <!-- 1. PROMESSE + DEUX PUBLICS (fond nuit, logo et illustration « zone étendue / en local » gardés) -->
+  <section class="pg nuit on" id="hero" data-titre="Un &eacute;v&eacute;nement, un seul jeu">
     <div class="in two">
       <div class="txt">
         <svg class="sel" role="img" aria-label="Flowin Super Event" viewBox="0 0 437.4 92.6"><use href="#fl-super-event"/></svg>
         <h1>Un &eacute;v&eacute;nement. Tous ses partenaires. <em>Un seul jeu.</em></h1>
-        <p class="lede">Le m&ecirc;me jeu dans tous les commerces autour de l&rsquo;&eacute;v&eacute;nement.</p>
+        <p class="lede">Pour les organisateurs d&rsquo;&eacute;v&eacute;nements et les commerces locaux.</p>
         <div class="choix">
           <button class="ch" type="button" data-aud="org"><span class="pic"><svg class="ic"><use href="#i-event"/></svg></span>J&rsquo;organise un &eacute;v&eacute;nement<span class="go">&rsaquo;</span></button>
-          <button class="ch bl" type="button" data-aud="com"><span class="pic"><svg class="ic"><use href="#i-vitrine"/></svg></span>J&rsquo;ai un commerce<span class="go">&rsaquo;</span></button>
+          <button class="ch" type="button" data-aud="com"><span class="pic"><svg class="ic"><use href="#i-vitrine"/></svg></span>J&rsquo;ai un commerce<span class="go">&rsaquo;</span></button>
         </div>
       </div>
       <div class="vis" style="--vh:440px" data-v="10"></div>
     </div>
   </section>
 
-  <!-- 2. ORGANISATEUR -->
-  <section class="pg" id="organisateur" data-titre="Tu organises un &eacute;v&eacute;nement">
+  <!-- 2. ORGANISATEUR (illustration « festival → vitrines, réseaux, clients » gardée) -->
+  <section class="pg" id="organisateur" data-titre="Vous organisez un &eacute;v&eacute;nement">
     <div class="in two">
       <div class="txt">
-        <div class="eyebrow">Tu organises</div>
+        <div class="eyebrow">Organisateur</div>
         <h2>Connecte ton &eacute;v&eacute;nement avec <em>l&rsquo;ensemble du r&eacute;seau local</em>.</h2>
         <div class="verbs"><span>Diffuse</span><span>Sois visible</span><span>Sois pr&eacute;sent</span><span>En proximit&eacute;</span></div>
-        <p class="lede">Tes partenaires diffusent ton &eacute;v&eacute;nement en vitrine, en caisse et sur leurs r&eacute;seaux.</p>
+        <p class="lede">Les partenaires diffusent l&rsquo;&eacute;v&eacute;nement, en boutique et en ligne&nbsp;: vitrines, r&eacute;seaux sociaux, clients.</p>
       </div>
       <div class="vis" style="--vh:330px" data-v="9"></div>
     </div>
   </section>
 
-  <!-- 3. COMMERCE -->
-  <section class="pg" id="commerce" data-titre="Tu as un commerce">
-    <div class="in two">
+  <!-- 3. AVANT, PENDANT, APRÈS (écran V2 rétabli, textes de l'argumentaire) -->
+  <section class="pg" id="temps" data-titre="Avant, pendant, apr&egrave;s">
+    <div class="in wide">
       <div class="txt">
-        <div class="eyebrow">Tu as un commerce</div>
-        <h2>Connecte ton commerce <em>aux &eacute;v&eacute;nements locaux</em>.</h2>
-        <p class="lede">De la visibilit&eacute; aupr&egrave;s des festivaliers et des spectateurs.</p>
-        <div class="grid g2">
-          <div class="card"><span class="pic"><svg class="ic"><use href="#i-jeu"/></svg></span><b>Station jeu</b><span>Les festivaliers jouent et retirent leur lot chez toi.</span></div>
-          <div class="card"><span class="pic"><svg class="ic"><use href="#i-mega"/></svg></span><b>Sponsor</b><span>Visible sur le jeu, m&ecirc;me sans lots.</span></div>
-        </div>
+        <div class="eyebrow">Le super event en trois temps</div>
+        <h2>Avant, pendant, apr&egrave;s&nbsp;: <em>l&rsquo;&eacute;v&eacute;nement vit chez tous ses partenaires</em>.</h2>
       </div>
-      <div class="vis" style="--vh:440px" data-v="6"></div>
+      <div class="t3">
+        <div class="card tp"><div class="tph"><span class="pic"><svg class="ic"><use href="#i-mega"/></svg></span><b>Avant</b></div><p>Communiquez, faites venir les participants en faisant gagner des lots pour participer au festival&nbsp;: places de concert, places, r&eacute;ductions, goodies.</p></div>
+        <div class="card tp"><div class="tph"><span class="pic"><svg class="ic"><use href="#i-gift"/></svg></span><b>Pendant</b></div><p>Faites-leur gagner des lots qui les font revenir chez les partenaires&nbsp;; d&eacute;veloppez et dynamisez les partenaires et le commerce local.</p></div>
+        <div class="card tp"><div class="tph"><span class="pic"><svg class="ic"><use href="#i-trophee"/></svg></span><b>Apr&egrave;s</b></div><p>Communiquez sur le tirage au sort, les gagnants, et le b&eacute;n&eacute;fice obtenu pendant le festival.</p></div>
+      </div>
     </div>
   </section>
 
-  <!-- 4. COMMERCES + ÉVÉNEMENT (illustration V2 gardée) -->
-  <section class="pg" id="macaron" data-titre="Commerces et &eacute;v&eacute;nement">
-    <div class="in two">
-      <div class="txt">
-        <div class="eyebrow">Commerces + &eacute;v&eacute;nement</div>
-        <h2>Un seul jeu <em>chez tous les partenaires</em>.</h2>
-        <p class="lede">Caf&eacute;, boutique, h&ocirc;tel, sponsor&nbsp;: chacun affiche le macaron de l&rsquo;&eacute;v&eacute;nement.</p>
-      </div>
-      <div class="vis" style="--vh:250px" data-v="1"></div>
-    </div>
-  </section>
-
-  <!-- 5. PARCOURS DU FESTIVALIER (allégé) -->
+  <!-- 4. PARCOURS DU FESTIVALIER (gardé) -->
   <section class="pg" id="parcours" data-titre="Le parcours du festivalier">
     <div class="in two">
       <div class="txt">
@@ -308,96 +327,90 @@
     </div>
   </section>
 
-  <!-- 6. QUIZ ET SONDAGES (6 cartes V2 ramenées à 3) -->
-  <section class="pg" id="quiz" data-titre="Quiz et sondages">
+  <!-- 5. LE POINT FORT : QUIZ + QUESTIONS BONUS (sondages V2 rétablis) -->
+  <section class="pg" id="quiz" data-titre="Le quiz, le point fort">
     <div class="in two">
       <div class="txt">
-        <div class="eyebrow">Quiz et sondages</div>
-        <h2>Tes questions, <em>ton message</em>.</h2>
-        <p class="lede">Le jeu parle de ton &eacute;v&eacute;nement.</p>
-      </div>
-      <div class="grid">
-        <div class="card it"><span class="pic"><svg class="ic"><use href="#i-book"/></svg></span><div><b>Quiz de l&rsquo;&eacute;v&eacute;nement</b><span>Programme, lieux, histoire.</span></div></div>
-        <div class="card it"><span class="pic"><svg class="ic"><use href="#i-libre"/></svg></span><div><b>Sondages</b><span>&Eacute;cologie, pr&eacute;vention, transports.</span></div></div>
-        <div class="card it"><span class="pic"><svg class="ic"><use href="#i-star"/></svg></span><div><b>Tes couleurs</b><span>Le jeu &agrave; l&rsquo;image de l&rsquo;&eacute;v&eacute;nement.</span></div></div>
-      </div>
-    </div>
-  </section>
-
-  <!-- 7. CHIFFRES AU MILIEU&nbsp;: 56 % + 70 lots (chiffres autorisés, DECISIONS) -->
-  <section class="pg" id="contact" data-titre="56 % veulent rester en contact">
-    <div class="in two">
-      <div class="txt">
-        <div class="eyebrow">Nuits du Sud 2026</div>
-        <h2>Ton fichier client. <em>Tu restes en contact.</em></h2>
-        <p class="lede">Avec l&rsquo;accord de chaque joueur.</p>
+        <div class="eyebrow">Le point fort&nbsp;: le quiz</div>
+        <h2>Sonder son public, <em>c&rsquo;est avoir les moyens de r&eacute;pondre</em>.</h2>
       </div>
       <div>
-        <div class="card kpi"><div class="num">56&nbsp;%</div><span class="lab">des participants ont coch&eacute; &laquo;&nbsp;Je souhaite rester en contact&nbsp;&raquo;.</span></div>
-        <div class="card kpi2"><div class="num"><small>Plus de</small>70</div><span>lots distribu&eacute;s dans les commerces locaux.</span></div>
-        <p class="small">Source&nbsp;: bilan Nuits du Sud 2026, Vence.</p>
+        <div class="grid">
+          <div class="card it"><span class="pic"><svg class="ic"><use href="#i-book"/></svg></span><div><b>Quiz th&eacute;matique</b><span>Cr&eacute;er une identit&eacute; &agrave; la marque&nbsp;: connaissance, participation.</span></div></div>
+          <div class="card it"><span class="pic"><svg class="ic"><use href="#i-quiz"/></svg></span><div><b>Questions bonus</b><span>Elles ont pour vocation d&rsquo;int&eacute;resser et de sonder&nbsp;: les meilleurs indicateurs aupr&egrave;s du public.</span></div></div>
+        </div>
+        <div class="sond">
+          <b>Les sondages des questions bonus</b>
+          <div class="chips"><span><svg class="ic"><use href="#i-libre"/></svg>RSE</span><span><svg class="ic"><use href="#i-mega"/></svg>Sensibilisation</span><span><svg class="ic"><use href="#i-ok"/></svg>S&eacute;curit&eacute;</span><span><svg class="ic"><use href="#i-carte"/></svg>Mobilit&eacute;</span><span><svg class="ic"><use href="#i-star"/></svg>Envie de venir</span></div>
+        </div>
       </div>
     </div>
   </section>
 
-  <!-- 8. CE QUE L'ON MESURE -->
-  <section class="pg" id="mesure" data-titre="Ce que l&rsquo;on mesure">
+  <!-- 6. CHIFFRES + CE QUE L'ON MESURE ET RESTITUE (fond nuit) -->
+  <section class="pg nuit" id="mesure" data-titre="56 % gardent le contact">
     <div class="in two">
       <div class="txt">
-        <div class="eyebrow">Le suivi</div>
-        <h2>Ce que l&rsquo;on <em>mesure pour toi</em>.</h2>
-        <p class="lede">Un rapport clair &agrave; la fin de l&rsquo;&eacute;v&eacute;nement.</p>
-        <div class="vis desk" style="--vh:0px;margin-top:20px;max-width:380px" data-v="4"></div>
+        <div class="eyebrow">Nuits du Sud 2026, Vence</div>
+        <h2>Gardez le lien, <em>gardez le contact</em>.</h2>
+        <div class="kpis">
+          <div class="kp"><div class="num">56&nbsp;%</div><span>des participants souhaitent garder le contact.</span></div>
+          <div class="kp"><div class="num j"><small>Plus de</small>70</div><span>lots distribu&eacute;s dans les commerces locaux.</span></div>
+        </div>
       </div>
-      <div class="grid g2">
-        <div class="card"><span class="pic"><svg class="ic"><use href="#i-carte"/></svg></span><b>O&ugrave; ils ont jou&eacute;</b><span>Station par station</span></div>
-        <div class="card"><span class="pic"><svg class="ic"><use href="#i-rapport"/></svg></span><b>Combien</b><span>Participants et parties</span></div>
-        <div class="card"><span class="pic"><svg class="ic"><use href="#i-contact"/></svg></span><b>Contacts recueillis</b><span>Avec leur accord</span></div>
-        <div class="card"><span class="pic"><svg class="ic"><use href="#i-mail"/></svg></span><b>Ta base de donn&eacute;es</b><span>Pour la prochaine &eacute;dition</span></div>
+      <div class="card rest">
+        <b class="rt">Ce que l&rsquo;on mesure et restitue</b>
+        <ul>
+          <li><svg class="ic"><use href="#i-rapport"/></svg>Les chiffres, le nombre de personnes</li>
+          <li><svg class="ic"><use href="#i-client"/></svg>Hommes / femmes</li>
+          <li><svg class="ic"><use href="#i-carte"/></svg>O&ugrave; ils ont jou&eacute;</li>
+          <li><svg class="ic"><use href="#i-contact"/></svg>Les contacts&nbsp;: le fichier client</li>
+          <li><svg class="ic"><use href="#i-libre"/></svg>RSE, sensibilisation, s&eacute;curit&eacute;&nbsp;: les sondages</li>
+        </ul>
       </div>
     </div>
   </section>
 
-  <!-- 9. FORMULES COMMERCE (cadrage 08/11&nbsp;: 500 / 1 331 / 3 331 € HT), une carte à la fois -->
-  <section class="pg" id="formules" data-titre="Formules commerce">
+  <!-- 7. COMMERCE + FORMULES (une carte à la fois ; montants à trancher par Romain) -->
+  <section class="pg" id="commerce" data-titre="Vous avez un commerce">
     <div class="in two">
       <div class="txt">
-        <div class="eyebrow">Commerces&nbsp;: les formules</div>
-        <h2>Station jeu ou sponsor&nbsp;: <em>choisis ta formule</em>.</h2>
-        <p class="lede">Organisateur&nbsp;: pas de grille, une &eacute;tude sur mesure.</p>
+        <div class="eyebrow">Commerce</div>
+        <h2>Connecte ton commerce <em>aux &eacute;v&eacute;nements locaux</em>.</h2>
+        <p class="lede">Donne de la visibilit&eacute; aupr&egrave;s des festivaliers et spectateurs.</p>
       </div>
       <div>
         <div class="car" id="car">
           <div class="card fo"><div class="tag">Sponsor</div><h3>Sponsor digital</h3><div class="px">500&nbsp;&euro; <small>HT</small></div>
-            <ul><li><svg class="ic"><use href="#i-ok"/></svg>Ton commerce dans la liste des partenaires</li><li><svg class="ic"><use href="#i-ok"/></svg>Tes contacts et r&eacute;seaux accessibles depuis le jeu</li></ul></div>
+            <ul><li><svg class="ic"><use href="#i-ok"/></svg>Visible sur le jeu, m&ecirc;me sans lots</li><li><svg class="ic"><use href="#i-ok"/></svg>Votre commerce dans la liste des partenaires</li><li><svg class="ic"><use href="#i-ok"/></svg>Vos contacts et r&eacute;seaux sociaux accessibles depuis le jeu</li></ul></div>
           <div class="card fo"><div class="tag">Station jeu</div><h3>Partenaire digital + sur place</h3><div class="px">1&nbsp;331&nbsp;&euro; <small>HT</small></div>
-            <ul><li><svg class="ic"><use href="#i-ok"/></svg>Tout le sponsor digital</li><li><svg class="ic"><use href="#i-ok"/></svg>Tes clients jouent chez toi</li><li><svg class="ic"><use href="#i-ok"/></svg>Sur la carte des partenaires</li><li><svg class="ic"><use href="#i-ok"/></svg>Rapport de passage</li></ul></div>
+            <ul><li><svg class="ic"><use href="#i-ok"/></svg>Tout le sponsor digital</li><li><svg class="ic"><use href="#i-ok"/></svg>Les festivaliers jouent et retirent leur lot chez vous</li><li><svg class="ic"><use href="#i-ok"/></svg>Sur la carte des partenaires</li><li><svg class="ic"><use href="#i-ok"/></svg>Rapport de passage</li></ul></div>
           <div class="card fo"><div class="tag">Premium</div><h3>Partenaire premium tous supports</h3><div class="px">3&nbsp;331&nbsp;&euro; <small>HT</small></div>
-            <ul><li><svg class="ic"><use href="#i-ok"/></svg>Tout le partenaire sur place</li><li><svg class="ic"><use href="#i-ok"/></svg>Pr&eacute;sent sur tous les supports et stations</li><li><svg class="ic"><use href="#i-ok"/></svg>Quiz &agrave; ta marque</li></ul></div>
+            <ul><li><svg class="ic"><use href="#i-ok"/></svg>Tout le partenaire sur place</li><li><svg class="ic"><use href="#i-ok"/></svg>Pr&eacute;sent sur tous les supports et stations</li><li><svg class="ic"><use href="#i-ok"/></svg>Quiz &agrave; votre marque</li></ul></div>
         </div>
         <div class="dots" id="dots"><button type="button" class="on" aria-label="Formule 1"><i></i></button><button type="button" aria-label="Formule 2"><i></i></button><button type="button" aria-label="Formule 3"><i></i></button></div>
       </div>
     </div>
   </section>
 
-  <!-- 10. CONVERSION HIÉRARCHISÉE -->
-  <section class="pg" id="action" data-titre="Passer &agrave; l&rsquo;action">
+  <!-- 8. CONVERSION (fond nuit) -->
+  <section class="pg nuit" id="action" data-titre="Passer &agrave; l&rsquo;action">
     <div class="in wide">
       <div class="txt">
         <div class="eyebrow">Passer &agrave; l&rsquo;action</div>
-        <h2>On en parle <em>pour ton prochain &eacute;v&eacute;nement</em>&nbsp;?</h2>
+        <h2>Le prochain super event, <em>c&rsquo;est le v&ocirc;tre</em>.</h2>
       </div>
       <div class="conv">
         <div class="card cv or">
-          <h3><span class="pic"><svg class="ic"><use href="#i-event"/></svg></span>J&rsquo;organise</h3>
+          <h3><span class="pic"><svg class="ic"><use href="#i-event"/></svg></span>J&rsquo;organise un &eacute;v&eacute;nement</h3>
           <button class="btn" type="button" id="cta" data-mode="org"><svg class="ic"><use href="#i-cal"/></svg>Prendre rendez-vous</button>
-          <span>Par WhatsApp ou email. Sur &eacute;tude.</span>
+          <span>Par WhatsApp ou email. Tarif sur &eacute;tude de votre &eacute;v&eacute;nement.</span>
         </div>
         <div class="card cv bl">
           <h3><span class="pic"><svg class="ic"><use href="#i-vitrine"/></svg></span>J&rsquo;ai un commerce</h3>
-          <button class="btn" type="button" id="ctaCom" data-mode="com"><svg class="ic"><use href="#i-carte"/></svg>&Ecirc;tre pr&eacute;venu du prochain super event de ma ville</button>
+          <button class="btn" type="button" id="ctaCom" data-mode="com"><svg class="ic"><use href="#i-carte"/></svg>&Ecirc;tre pr&eacute;venu du prochain super event</button>
           <div class="qrr"><svg viewBox="0 0 37 37" role="img" aria-label="QR code vers l&rsquo;inscription commerce"><use href="#qr-se"/></svg>
-            <div><b>Rejoindre un &eacute;v&eacute;nement</b><a class="lnk" href="https://flowin-events.vercel.app/pro/premiere-fois">flowin-events.vercel.app/pro/premiere-fois</a></div></div>
+            <div><b>Rejoindre un super event</b><a class="lnk" href="https://flowin-events.vercel.app/pro/premiere-fois">flowin-events.vercel.app/pro/premiere-fois</a></div></div>
         </div>
       </div>
     </div>
@@ -408,11 +421,11 @@
     <button class="sx" type="button" data-close="1" aria-label="Fermer">&times;</button>
     <div class="in">
       <div class="eyebrow" id="shEye">Prendre rendez-vous</div>
-      <h2 id="shTit">Parlons de ton <em>prochain &eacute;v&eacute;nement</em>.</h2>
+      <h2 id="shTit">Parlons de votre <em>prochain &eacute;v&eacute;nement</em>.</h2>
       <div class="card rdvc">
         <a class="btn" id="rdvWa" href="https://wa.me/" target="_blank" rel="noopener"><svg class="ic"><use href="#i-phone"/></svg>Par WhatsApp</a>
         <a class="btn line" id="rdvMail" href="mailto:"><svg class="ic"><use href="#i-mail"/></svg>Par email</a>
-        <p class="ph">Message pr&eacute;-rempli, tu l&rsquo;envoies toi-m&ecirc;me.</p>
+        <p class="ph">Message pr&eacute;-rempli, vous l&rsquo;envoyez vous-m&ecirc;me.</p>
         <p class="ph">WhatsApp&nbsp;: [&hellip; &agrave; compl&eacute;ter] &middot; Email&nbsp;: [&hellip; &agrave; compl&eacute;ter]</p>
       </div>
     </div>
@@ -455,7 +468,7 @@
     $('rdvWa').href = 'https://wa.me/' + RDV.WHATSAPP.replace(/[^0-9]/g, '') + '?text=' + encodeURIComponent(txt);
     $('rdvMail').href = 'mailto:' + RDV.EMAIL + '?subject=' + encodeURIComponent(com ? 'Prochain super event, commerce' : 'Rendez-vous Flowin Super Event') + '&body=' + encodeURIComponent(txt + champs);
     $('shEye').innerHTML = com ? '\u00catre pr\u00e9venu' : 'Prendre rendez-vous';
-    $('shTit').innerHTML = com ? 'Le prochain super event <em>de ta ville</em>.' : 'Parlons de ton <em>prochain \u00e9v\u00e9nement</em>.';
+    $('shTit').innerHTML = com ? 'Le prochain super event <em>de votre ville</em>.' : 'Parlons de votre <em>prochain \u00e9v\u00e9nement</em>.';
   }
   function openSheet(mode){ rdvLiens(mode || (aud === 'com' ? 'com' : 'org')); $('rappel').className = 'sheet on'; $('rappel').scrollTop = 0; }
   function show(i, noHash){
@@ -509,8 +522,8 @@
   $('stage').addEventListener('scroll', function(){ if (this.scrollLeft || this.scrollTop) { this.scrollLeft = 0; this.scrollTop = 0; } });
 
   /* ---------- Super event : illustrations BD (SVG générés, mêmes briques sur toutes les slides) ---------- */
-  /* V3 : palette des illustrations alignée sur la charte (encre, orange, bleu) ; plus de jaune / rouge BD, plus d'ombre décalée */
-  var SK = '#1B3A5C', SR = '#1B3A5C', SA = '#C2410C', SY = '#FF8A14', SO = '#FFD9B8', SC = '#FFF1E6', SBL = '#3B5CC4', SBP = '#C9D4F2', SBG = '#FFFFFF';
+  /* V3 bis : palette festival (nuit, orange, jaune et rouge du logo). Seules les deux illustrations gardées par Romain restent (zone, diffusion). */
+  var SK = '#0E1B30', SR = '#E2231A', SA = '#C2410C', SY = '#FFD23F', SO = '#FFD9B8', SC = '#FFF1E6', SBL = '#FF8A14', SBP = '#FFE3C2', SBG = '#FFFFFF';
   function sTxt(x, y, s, size, o){
     o = o || {}; size = size === 17 ? 19 : (size === 16 ? 18 : size);
     return '<text x="' + x + '" y="' + y + '" text-anchor="' + (o.a || 'middle') + '" font-size="' + size + '" fill="' + (o.c || SK) + '"' +
@@ -598,63 +611,6 @@
   function sSvg(vb, inner, extra){ return '<svg viewBox="0 0 ' + vb + '" role="img" aria-label="' + (extra || '') + '">' + inner + '</svg>'; }
   function sFlux(d, delay){ return '<path d="' + d + '" fill="none" stroke="' + SR + '" stroke-width="3" stroke-linecap="round" stroke-dasharray="1 9" class="flw"' + (delay ? ' style="animation-delay:' + delay + 's"' : '') + '/>'; }
 
-  /* 1. Un événement, tous ses partenaires, un seul jeu */
-  function se1(){
-    var g = '', xs = [14, 100, 196, 282], cx = [46, 132, 228, 314], i;
-    g += sStage(180, 4, 210, 'FESTIVAL', true);
-    g += sRibbon(180, 128, 196, 28, 'L’ÉVÉNEMENT', 19);
-    for (i = 0; i < 4; i++) g += sFlux('M180 154 C180 176 ' + cx[i] + ' 170 ' + cx[i] + ' ' + (i === 2 ? 178 : 196), i * 0.3);
-    g += sShop(xs[0], 200, 64, 54, 'i-cup') + sShop(xs[1], 200, 64, 54, 'i-bag') + sHotel(xs[2], 184, 64, 70) + sShop(xs[3], 200, 64, 54, 'i-star');
-    g += sTxt(cx[0], 276, 'Café', 17) + sTxt(cx[1], 276, 'Boutique', 17) + sTxt(cx[2], 276, 'Hôtel', 17) + sTxt(cx[3], 276, 'Sponsor', 17);
-    g += sMac(88, 295, 9) + sTxt(104, 301, 'Même macaron, même jeu', 15, { a: 'start' });
-    return sSvg('360 306', g, 'Un événement au centre, relie à ses partenaires : café, boutique, hôtel, sponsor, tous marqués du même macaron');
-  }
-
-  /* 3. Les 4 temps (petites scènes 120 x 92) */
-  function se3(n){
-    var g = '', i;
-    if (n === 1) {
-      g += '<rect x="22" y="10" width="76" height="62" rx="7" fill="#fff" stroke="' + SK + '" stroke-width="2.6"/>';
-      g += '<rect x="22" y="10" width="76" height="16" rx="7" fill="' + SR + '" stroke="' + SK + '" stroke-width="2.6"/>' + sStar(60, 18, 6, SY);
-      g += '<rect x="30" y="34" width="34" height="5" rx="2.5" fill="' + SK + '"/><rect x="30" y="45" width="26" height="5" rx="2.5" fill="' + SBP + '"/><rect x="30" y="56" width="30" height="5" rx="2.5" fill="' + SBP + '"/>';
-      g += '<rect x="70" y="33" width="20" height="28" rx="3" fill="' + SC + '" stroke="' + SK + '" stroke-width="2"/>' + sUse('i-cal', 72, 36, 16);
-      g += '<rect x="48" y="76" width="24" height="5" rx="2" fill="' + SK + '"/><line x1="104" y1="8" x2="104" y2="40" stroke="' + SK + '" stroke-width="2.6"/><polygon points="104,8 118,14 104,21" fill="' + SR + '" stroke="' + SK + '" stroke-width="2"/>';
-    } else if (n === 2) {
-      g += sShop(8, 34, 62, 52, 'i-bag');
-      g += '<g transform="rotate(5 94 40)"><rect x="80" y="14" width="32" height="46" rx="3" fill="#fff" stroke="' + SK + '" stroke-width="2.2"/><rect x="80" y="14" width="32" height="10" fill="' + SR + '" stroke="' + SK + '" stroke-width="2.2"/><use href="#qrc" x="86" y="29" width="20" height="20"/></g>';
-      g += sUse('i-mega', 66, 0, 26, SA, 1.9);
-    } else if (n === 3) {
-      g += '<rect x="10" y="8" width="38" height="70" rx="8" fill="#fff" stroke="' + SK + '" stroke-width="2.6"/>';
-      g += '<rect x="15" y="18" width="28" height="44" rx="3" fill="' + SC + '"/>' + sStar(29, 33, 8, SY) + '<rect x="19" y="47" width="20" height="6" rx="3" fill="' + SR + '"/>';
-      g += '<path d="M54 46 C70 20 88 70 106 30" fill="none" stroke="' + SR + '" stroke-width="3" stroke-dasharray="6 6" stroke-linecap="round" class="flw"/>';
-      g += sMac(70, 30, 9) + sMac(88, 62, 9) + sMac(108, 30, 9);
-    } else {
-      g += '<rect x="42" y="50" width="36" height="34" fill="' + SY + '" stroke="' + SK + '" stroke-width="2.4"/><rect x="6" y="62" width="36" height="22" fill="' + SR + '" stroke="' + SK + '" stroke-width="2.4"/><rect x="78" y="68" width="36" height="16" fill="' + SBL + '" stroke="' + SK + '" stroke-width="2.4"/>';
-      g += sTxt(60, 78, '1', 22, { bang: 1 }) + sTxt(24, 79, '2', 18, { bang: 1, c: '#fff' }) + sTxt(96, 80, '3', 14, { bang: 1, c: '#fff' });
-      g += sUse('i-trophee', 46, 12, 28, SK, 1.8) + sStar(26, 40, 8, SY) + sStar(98, 48, 7, SY);
-    }
-    return sSvg('120 92', g, '');
-  }
-
-  /* 4. Rapports et mesure (illustration, aucune donnée réelle) */
-  function seRap(){
-    var g = '', T = [[6, 6, 'Fr\u00e9quentation'], [184, 6, 'Par station'], [6, 154, 'Profils'], [184, 154, 'Sondage']], i, x, y, b;
-    for (i = 0; i < 4; i++) { x = T[i][0]; y = T[i][1];
-      g += '<rect x="' + x + '" y="' + y + '" width="170" height="138" rx="10" fill="#fff" stroke="' + SK + '" stroke-width="2.4"/>' + sTxt(x + 85, y + 26, T[i][2], 17); }
-    var hs = [26, 40, 34, 56, 76];
-    for (b = 0; b < 5; b++) g += '<rect x="' + (18 + b * 29) + '" y="' + (128 - hs[b]) + '" width="21" height="' + hs[b] + '" rx="3" fill="' + (b % 2 ? SY : SR) + '" stroke="' + SK + '" stroke-width="2"/>';
-    g += '<path d="M20 78 L70 64 L100 70 L150 40" fill="none" stroke="' + SK + '" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/><polygon points="156,34 138,38 150,52" fill="' + SK + '"/>';
-    var ws = [100, 76, 54, 32];
-    for (b = 0; b < 4; b++) { y = 52 + b * 22; g += sMac(204, y + 6, 7.5) + '<rect x="220" y="' + y + '" width="' + ws[b] + '" height="12" rx="6" fill="' + [SR, SY, SBL, SBP][b] + '" stroke="' + SK + '" stroke-width="1.8"/>'; }
-    var cxd = 91, cyd = 238, r = 30, C = 2 * Math.PI * r, parts = [0.4, 0.25, 0.2, 0.15], cols = [SR, SY, SBL, SBP], off = 0;
-    for (b = 0; b < 4; b++) { g += '<circle cx="' + cxd + '" cy="' + cyd + '" r="' + r + '" fill="none" stroke="' + cols[b] + '" stroke-width="18" stroke-dasharray="' + n1(C * parts[b]) + ' ' + n1(C) + '" stroke-dashoffset="' + n1(-off) + '" transform="rotate(-90 ' + cxd + ' ' + cyd + ')"/>'; off += C * parts[b]; }
-    g += '<circle cx="' + cxd + '" cy="' + cyd + '" r="39" fill="none" stroke="' + SK + '" stroke-width="2.2"/><circle cx="' + cxd + '" cy="' + cyd + '" r="21" fill="#fff" stroke="' + SK + '" stroke-width="2.2"/>' + sUse('i-contact', cxd - 9, cyd - 9, 18, SK, 2);
-    g += '<path d="M200 188 h128 a8 8 0 0 1 8 8 v50 a8 8 0 0 1 -8 8 h-82 l-16 14 v-14 h-30 a8 8 0 0 1 -8 -8 v-50 a8 8 0 0 1 8 -8z" fill="' + SBG + '" stroke="' + SK + '" stroke-width="2.2" stroke-linejoin="round"/>';
-    var w2 = [96, 62, 38];
-    for (b = 0; b < 3; b++) g += '<rect x="210" y="' + (200 + b * 18) + '" width="' + w2[b] + '" height="11" rx="5.5" fill="' + [SBL, SY, SBP][b] + '" stroke="' + SK + '" stroke-width="1.6"/>';
-    return sSvg('360 300', g, 'Rapports : fr\u00e9quentation, par station, profils, retours de sondage, illustration');
-  }
-
   /* 9. Diffusion : les partenaires relaient l'événement */
   function seDiff(){
     var g = '', cx = [58, 180, 302], i;
@@ -677,58 +633,6 @@
     return sSvg('360 300', g, 'L\u2019affiche de l\u2019\u00e9v\u00e9nement diffus\u00e9e par les partenaires : vitrines, r\u00e9seaux sociaux, clients');
   }
 
-  /* 6. La carte : stations-jeux au festival ET chez les partenaires */
-  function seCarte(){
-    var g = '', i, S = [[210, 238, 'i-cup', 'Caf\u00e9'], [306, 232, 'i-bag', 'Boutique'], [304, 150, 'i-lit', 'H\u00f4tel'], [206, 142, 'i-book', 'Librairie']];
-    g += '<rect width="360" height="300" fill="#F6F8FB"/>';
-    g += '<path d="M-10 276 C70 254 120 292 200 270 S320 266 372 250" fill="none" stroke="' + SBP + '" stroke-width="22" stroke-linecap="round"/><path d="M-10 276 C70 254 120 292 200 270 S320 266 372 250" fill="none" stroke="#DCE6F7" stroke-width="12" stroke-dasharray="3 9" stroke-linecap="round"/>';
-    g += '<path d="M0 112 H360 M0 190 H360 M150 0 V300 M258 0 V300" stroke="#fff" stroke-width="12"/>';
-    g += '<g fill="#EEF2FC"><rect x="164" y="8" width="84" height="92" rx="6"/><rect x="272" y="8" width="80" height="92" rx="6"/><rect x="166" y="126" width="80" height="52" rx="6"/><rect x="272" y="204" width="80" height="50" rx="6"/></g>';
-    /* zone du festival */
-    g += '<rect x="8" y="120" width="132" height="152" rx="16" fill="rgba(255,138,20,.10)" stroke="' + SK + '" stroke-width="2.6" stroke-dasharray="7 5"/>';
-    g += sRibbon(74, 106, 128, 26, 'AU FESTIVAL', 17);
-    var path = 'M44 244 C58 226 64 214 58 200 S96 224 104 236 S170 250 210 238 S312 248 306 232 S330 188 304 150 S260 140 206 142 S120 96 96 60';
-    g += '<path id="se-trajet" d="' + path + '" fill="none" stroke="' + SK + '" stroke-width="8" stroke-linecap="round" opacity=".14"/>';
-    g += '<path d="' + path + '" fill="none" stroke="' + SA + '" stroke-width="3.6" stroke-linecap="round" stroke-dasharray="9 8" class="flw"/>';
-    /* scène */
-    g += '<g transform="translate(44 244)"><rect x="-22" y="-16" width="44" height="30" rx="4" fill="' + SK + '" stroke="' + SK + '" stroke-width="2.4"/><polygon points="-22,-16 22,-16 14,-26 -14,-26" fill="' + SY + '" stroke="' + SK + '" stroke-width="2.4" stroke-linejoin="round"/>' + sStar(0, 0, 8, SY) + '</g>';
-    /* stations-jeux du festival : pastille jaune, manette */
-    var F2 = [[58, 196], [106, 232]];
-    for (i = 0; i < F2.length; i++) g += '<circle cx="' + F2[i][0] + '" cy="' + F2[i][1] + '" r="17" fill="' + SY + '" stroke="' + SK + '" stroke-width="2.6"/>' + sUse('i-jeu', F2[i][0] - 11, F2[i][1] - 11, 22, SK, 2);
-    /* partenaires : boutiques au macaron */
-    for (i = 0; i < S.length; i++) {
-      g += sShop(S[i][0] - 22, S[i][1] - 20, 44, 40, S[i][2]);
-      g += sTxt(S[i][0], S[i][1] + 38, S[i][3], 17, { halo: 4 });
-    }
-    g += '<g transform="translate(96 60)"><circle r="19" fill="' + SY + '" stroke="' + SK + '" stroke-width="2.6"/>' + sUse('i-trophee', -12, -12, 24, SK, 2) + '</g>';
-    g += sTxt(96, 96, 'Tirage', 17, { halo: 4 });
-    g += '<g><circle r="7" fill="' + SBL + '" stroke="' + SK + '" stroke-width="2"/><circle cy="-11" r="5" fill="' + SC + '" stroke="' + SK + '" stroke-width="2"/><animateMotion dur="10s" repeatCount="indefinite"><mpath href="#se-trajet"/></animateMotion></g>';
-    return sSvg('360 300', g, 'Carte de l\u2019\u00e9v\u00e9nement : des stations-jeux dans le festival et chez les partenaires, reli\u00e9es par le parcours du public');
-  }
-
-  /* 7. Exemple : tickets, grand tirage, podium des partenaires les plus participatifs */
-  function se7(){
-    var g = '', i;
-    g += '<circle cx="74" cy="82" r="52" fill="rgba(255,255,255,.75)" stroke="' + SK + '" stroke-width="2.8"/>';
-    var tk = [[44, 74, -30, SY], [66, 90, 20, SC], [52, 98, 5, '#fff'], [82, 70, -10, SBP], [78, 96, 35, SY], [36, 92, 60, '#fff']];
-    for (i = 0; i < tk.length; i++) g += sTicket(tk[i][0] - 14, tk[i][1] - 7, 28, 14, tk[i][2], tk[i][3], '', 8);
-    g += '<path d="M40 62 a44 44 0 0 1 68 -4" fill="none" stroke="#fff" stroke-width="5" stroke-linecap="round" opacity=".9"/>';
-    g += '<rect x="48" y="130" width="52" height="14" rx="3" fill="' + SK + '"/><rect x="38" y="142" width="72" height="10" rx="3" fill="' + SR + '" stroke="' + SK + '" stroke-width="2.4"/>';
-    g += '<path d="M126 86 h20" stroke="' + SK + '" stroke-width="4" stroke-linecap="round"/><polygon points="152,86 142,78 142,94" fill="' + SK + '"/>';
-    g += sTicket(160, 40, 120, 52, -4, SY, '0427', 22);
-    g += sTxt(222, 112, 'Ticket gagnant', 16, { c: SK });
-    g += sTicket(176, 6, 56, 24, -10, '#fff', '0426', 11) + sTicket(250, 4, 56, 24, 9, '#fff', '0428', 11);
-    g += sStar(300, 70, 9, SY) + sStar(318, 50, 6, SA) + sStar(330, 104, 6, SBL);
-    /* podium */
-    var base = 288;
-    g += '<rect x="110" y="' + (base - 66) + '" width="76" height="66" fill="' + SY + '" stroke="' + SK + '" stroke-width="2.6"/><rect x="34" y="' + (base - 46) + '" width="76" height="46" fill="' + SR + '" stroke="' + SK + '" stroke-width="2.6"/><rect x="186" y="' + (base - 34) + '" width="76" height="34" fill="' + SBL + '" stroke="' + SK + '" stroke-width="2.6"/>';
-    g += sTxt(148, base - 22, '1', 34, { bang: 1 }) + sTxt(72, base - 14, '2', 28, { bang: 1, c: '#fff' }) + sTxt(224, base - 10, '3', 24, { bang: 1, c: '#fff' });
-    g += sShop(122, base - 66 - 50, 52, 44, 'i-cup') + sShop(46, base - 46 - 50, 52, 44, 'i-bag') + sShop(198, base - 34 - 50, 52, 44, 'i-book');
-    g += sUse('i-gift', 270, 232, 44, SA, 1.8);
-    g += sTxt(292, 292, 'Lots', 17);
-    return sSvg('360 304', g, 'Grand tirage : tickets numérotés, ticket gagnant et podium des partenaires les plus participatifs');
-  }
-
   /* 10. Communication mutualisée : en local, puis sur une zone plus étendue */
   function seZone(){
     var g = '', i, loc = [[118, 118], [242, 118], [112, 188], [248, 188]], far = [[50, 70], [310, 70], [34, 160], [326, 160], [70, 250], [290, 250], [180, 28]];
@@ -741,13 +645,8 @@
     return sSvg('360 300', g, 'La communication de l\u2019\u00e9v\u00e9nement mutualis\u00e9e : en local, puis sur une zone plus \u00e9tendue, via les partenaires et le jeu');
   }
 
-  var SEV = { 1: se1, 4: seRap, 6: seCarte, 7: se7, 9: seDiff, 10: seZone }, svs = document.querySelectorAll('[data-v]'), sj;
+  var SEV = { 9: seDiff, 10: seZone }, svs = document.querySelectorAll('[data-v]'), sj;
   for (sj = 0; sj < svs.length; sj++) { var sk2 = +svs[sj].getAttribute('data-v'); if (SEV[sk2]) svs[sj].innerHTML = SEV[sk2](); }
-  (function(){
-    var h3 = document.querySelectorAll('[data-s3]'), q;
-    for (q = 0; q < h3.length; q++) h3[q].innerHTML = se3(+h3[q].getAttribute('data-s3'));
-  })();
-
   var h0 = (location.hash || '').replace('#', ''), start = 0;
   for (var hk = 0; hk < pages.length; hk++) if (pages[hk].id === h0) start = hk;
   show(start, true);
