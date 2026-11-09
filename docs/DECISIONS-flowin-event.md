@@ -256,3 +256,9 @@ que sur instruction explicite de Romain.
 - Couleurs Super Event V3 : un peu mieux (base à garder).
 - Niveau attendu : design exceptionnel, artistique, marketing, impactant, puissant, esthétique ; un
   produit présenté comme une vraie révolution. Ne pas demander d'explications déjà données.
+
+## Retour plaquette Super Event V3, 2e passage (09/11/2026)
+- Beaucoup mieux. Couleurs un peu mieux. Garder la présentation Nuits du Sud et le dessin de
+  l'écran quiz (question bonus → graphique).
+- À retirer : le « théâtre » devant la ville (incompréhensible), les arcs en pointillés, les halos
+  lumineux, les bonhommes (mauvaise qualité).

@@ -42,6 +42,15 @@ Avant toute livraison, chaque texte est relu contre ce fichier (et la liste « i
 - ~~« Un événement. Tous ses partenaires. Un seul jeu. »~~ rejeté comme accroche par Romain le 09/11 (pas d'impact).
 - Les partenaires diffusent l'événement (jamais « financent »).
 
+## Super Event : positionnement (Romain 09/11, soir)
+- **Flowin Super Event, c'est la super diffusion locale.** Un outil de communication et de
+  diffusion, avant, pendant et après l'événement.
+- « Connectez votre événement aux acteurs locaux. » / « Diffusez en local. »
+- Avant : **« Augmentez la visibilité avant l'événement »** (et non « Remplissez votre événement »).
+- Preuve : « Dernier événement local, Alpes-Maritimes : Nuits du Sud 2026 ».
+- « Sonder son public, c'est avoir les moyens de répondre » : **rejeté** comme titre. Quiz : reprendre
+  « questions bonus qui intéressent et sondent : les meilleurs indicateurs auprès du public ».
+
 ## Super Event : avant, pendant, après (point crucial, Romain 09/11)
 - **Avant l'événement** : communiquez, faites venir les participants en faisant gagner des lots pour
   participer au festival : places de concert, places, réductions, goodies.
