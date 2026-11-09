@@ -234,3 +234,13 @@ que sur instruction explicite de Romain.
   visibilité et ta fréquentation. »
 - **Niveau attendu** : travail complet d'expert (design, ergonomie, stratégie de conversion), sans
   que Romain ait à dicter page par page. Ne rien supprimer de l'existant sans le dire.
+
+## Règle absolue : ne pas recréer l'existant (09/11/2026, Romain)
+
+- Ne jamais recréer ce qui marche déjà dans l'application. Tout existe : connexions, données
+  Supabase, tableaux de bord, souscription / première connexion, création d'animation, jeux et leur
+  design, matériel. **D'abord chercher l'existant**, puis redesigner, améliorer ou changer le parcours
+  si nécessaire. Jamais repartir de zéro.
+- Plaquettes : on est en V2, on produit la **V3**, poussée dans le super admin (Outils et
+  communication), comme les vidéos de présentation.
+- L'app (souscription, création) est redesignée aux couleurs de la plaquette : même rendu des deux côtés.
