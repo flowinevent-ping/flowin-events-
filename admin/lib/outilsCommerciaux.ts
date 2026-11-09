@@ -42,6 +42,14 @@ export const PUBLICS: { v: Public; label: string }[] = [
 ]
 
 export const OUTILS: Outil[] = [
+  { statut: 'brouillon', id: 'film-participant', titre: 'Film participant (scénarisé)', public: ['commerce', 'organisateur'], type: 'video', suivi: false,
+    description: 'Flashe, joue, gagne, reviens : le jeu vu par le participant (34 s).',
+    chemin: '/videos/flowin-film-participant.mp4',
+    message: 'Bonjour, voici comment vos clients jouent avec Flowin :' },
+  { statut: 'brouillon', id: 'film-pro', titre: 'Film pro (scénarisé)', public: ['commerce'], type: 'video', suivi: false,
+    description: 'De l’inscription aux rapports : le parcours du commerçant mis en scène (40 s).',
+    chemin: '/videos/flowin-film-pro.mp4',
+    message: 'Bonjour, voici comment créer votre jeu Flowin :' },
   { statut: 'validé', id: 'video-animation-v3', titre: 'Vidéo Flowin Animation (présentation)', public: ['commerce'], type: 'video', suivi: false,
     description: 'Présentation animée de Flowin Animation, format vertical (27 s).',
     chemin: '/videos/flowin-animation-presentation.mp4',
