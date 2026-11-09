@@ -42,6 +42,18 @@ export const PUBLICS: { v: Public; label: string }[] = [
 ]
 
 export const OUTILS: Outil[] = [
+  { statut: 'validé', id: 'video-animation-v3', titre: 'Vidéo Flowin Animation (présentation)', public: ['commerce'], type: 'video', suivi: false,
+    description: 'Présentation animée de Flowin Animation, format vertical (27 s).',
+    chemin: '/videos/flowin-animation-presentation.mp4',
+    message: 'Bonjour, découvrez Flowin Animation en 30 secondes :' },
+  { statut: 'validé', id: 'video-super-event-v3', titre: 'Vidéo Flowin Super Event (présentation)', public: ['organisateur', 'commerce'], type: 'video', suivi: false,
+    description: 'La super diffusion locale de votre événement, format vertical (27 s).',
+    chemin: '/videos/flowin-super-event-presentation.mp4',
+    message: 'Bonjour, découvrez Flowin Super Event en 30 secondes :' },
+  { statut: 'validé', id: 'video-parcours-commercant', titre: 'Vidéo parcours commerçant', public: ['commerce'], type: 'video', suivi: false,
+    description: 'Le parcours vu par le commerçant : inscription, jeu, lots, publication, QR, rapports, super event (35 s).',
+    chemin: '/videos/flowin-parcours-commercant.mp4',
+    message: 'Bonjour, voici comment on crée son jeu Flowin :' },
   { statut: 'validé', id: 'plaquette-animation-v3', titre: 'Plaquette Flowin Animation V3', public: ['commerce'], type: 'plaquette', suivi: true,
     description: 'Présentation Flowin Animation (V3) : jeux, quiz, QR par support, fichier client, offres, inscription.',
     chemin: '/validation/plaquette-animation-v3.html',
