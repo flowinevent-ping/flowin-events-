@@ -7,7 +7,7 @@ Instructions de travail pour toute session Claude Code (cloud ou terminal) sur c
 
 Source de vérité du reste-à-faire : `HANDOFF-flowin-nds2026.md`.
 
-**À lire avant tout travail : `docs/DECISIONS-flowin-event.md`** (décisions tranchées par Romain et méthode de travail). Ce qui y est écrit ne se redemande jamais.
+**À lire avant tout travail : `docs/DECISIONS-flowin-event.md` et `docs/REGISTRE-livrables-refonte.md`** (registre des livrables : aucune ligne supprimée sans Romain) (décisions tranchées par Romain et méthode de travail). Ce qui y est écrit ne se redemande jamais.
 
 ## Projet
 - Flowin : plateforme B2B de gamification événementielle. Produit de **BAITA EURL (OPConsult)**.

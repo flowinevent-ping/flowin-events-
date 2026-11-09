@@ -1,5 +1,7 @@
 # Proposition : plaquettes Flowin Event en carrousel (09/11/2026) — à valider
 
+> Correction 09/11 : la plaquette n'a pas besoin de montrer l'application de bout en bout ; elle se termine par un QR / lien vers la souscription (voir REGISTRE, L1).
+
 Principe : on garde les deux plaquettes existantes (contenu, illustrations, prix, présentation
 commerces + événement) et la visite guidée. On les **fusionne** : chaque plaquette devient un
 carrousel de diapositives courtes ; les écrans de l'application sont **les vrais écrans de la
