@@ -1,7 +1,7 @@
 /* Visite guidée Flowin : démo statique, aucune donnée, aucun appel réseau. */
 :root{
   --encre:#1B3A5C;--nuit:#0E1B30;--bleu:#3B5CC4;--bleu-c:#E3E9F8;--bleu-d:#8DA2EC;
-  --violet:#00B4A0;--violet-t:#00806F;--violet-c:#DDF5F1;
+  --violet:#3B5CC4;--violet-t:#2B47A8;--violet-c:#E3E9F8;
   --orange:#C2410C;--orange-v:#FF8A14;--orange-c:#FFEDDC;
   --ok:#0B7A4F;--ok-c:#E2F4EC;--ko:#C62F2F;--ko-c:#FBE6E6;
   --papier:#F4F6F9;--carte:#FFFFFF;--texte:#1B3A5C;--texte2:#5a6b80;--trait:#DCE3EC;--champ:#CBD5E2;
@@ -12,11 +12,11 @@
 }
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
   --papier:#0E1B30;--carte:#16263F;--texte:#EAF0F8;--texte2:#A9B6C8;--trait:#2A3D5C;--champ:#3A4F70;
-  --bleu-c:#1F3160;--violet-c:#12403A;--violet-t:#4FD6C4;--orange-c:#3A2414;--ok-c:#12352A;--ko-c:#3A1A1E;
+  --bleu-c:#1F3160;--violet-c:#1F3160;--violet-t:#8DA2EC;--orange-c:#3A2414;--ok-c:#12352A;--ko-c:#3A1A1E;
   --fond-page:#08111F;--logo-in:#8DA2EC;--ombre:0 14px 32px -22px rgba(0,0,0,.8);color-scheme:dark}}
 :root[data-theme="dark"]{
   --papier:#0E1B30;--carte:#16263F;--texte:#EAF0F8;--texte2:#A9B6C8;--trait:#2A3D5C;--champ:#3A4F70;
-  --bleu-c:#1F3160;--violet-c:#12403A;--violet-t:#4FD6C4;--orange-c:#3A2414;--ok-c:#12352A;--ko-c:#3A1A1E;
+  --bleu-c:#1F3160;--violet-c:#1F3160;--violet-t:#8DA2EC;--orange-c:#3A2414;--ok-c:#12352A;--ko-c:#3A1A1E;
   --fond-page:#08111F;--logo-in:#8DA2EC;--ombre:0 14px 32px -22px rgba(0,0,0,.8);color-scheme:dark}
 *{box-sizing:border-box}
 [hidden]{display:none!important}
@@ -141,7 +141,7 @@ textarea.in{padding:12px 14px;min-height:80px}
 .door{display:flex;align-items:center;gap:14px;width:100%;min-height:84px;padding:14px 16px;margin:8px 0;border-radius:18px;border:1px solid var(--trait);background:var(--carte);color:var(--texte);cursor:pointer;text-align:left;box-shadow:var(--ombre)}
 .door b{display:block;font-size:18px}.door .grow span{font-size:14px;color:var(--texte2)}
 .door>.i:last-child{color:var(--texte2)}
-.door .pic{color:#fff}.door.pro .pic{background:var(--bleu)}.door.org .pic{background:var(--orange)}.door.jou .pic{background:var(--violet)}
+.door .pic{color:#fff}.door.pro .pic{background:var(--bleu)}.door.org .pic{background:var(--orange)}.door.jou .pic{background:var(--encre)}
 
 /* Jeu côté joueur (habillage master Quiz + bonus) */
 .jeu{--c:#3B5CC4;--c2:#EAEFFB}

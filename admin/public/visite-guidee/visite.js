@@ -145,9 +145,9 @@
 
   var JEUX = [
     { id: 'quiz', nom: 'Quiz + bonus', ic: 'trophy', d: 'Des questions, puis un petit sondage. Idéal pour faire connaître votre métier.', col: '#3B5CC4' },
-    { id: 'roue', nom: 'Roue', ic: 'wheel', d: 'Le joueur tourne la roue et découvre son lot tout de suite.', col: '#00B4A0' },
+    { id: 'roue', nom: 'Roue', ic: 'wheel', d: 'Le joueur tourne la roue et découvre son lot tout de suite.', col: '#3B5CC4' },
     { id: 'vote', nom: 'Vote', ic: 'vote', d: 'Vos clients votent pour leur produit préféré.', col: '#1B3A5C' },
-    { id: 'tombola', nom: 'Tombola', ic: 'ticket', d: 'Chaque participant reçoit un ticket, tirage au sort à la fin.', col: '#00806F' }
+    { id: 'tombola', nom: 'Tombola', ic: 'ticket', d: 'Chaque participant reçoit un ticket, tirage au sort à la fin.', col: '#2B47A8' }
   ];
 
   var EVENTS = [
@@ -742,7 +742,7 @@
         '<button class="opt' + (m ? '' : ' on') + '" data-act="paie" data-v="an">' + ic('star') + '<span class="grow">À l\'année</span><b>990 € HT / an</b></button></div>' +
         (S.formule === 'kit' ? '<p class="small">Kit imprimé : prix communiqué avec votre commande [prix du kit à compléter].</p>' : '') +
         '<div class="card" style="margin:10px 0"><b>Règlement par virement</b><p class="small" style="margin:4px 0">Bénéficiaire : BAITA EURL</p>' +
-        '<div class="rib">IBAN [à compléter]</div><div class="rib">BIC [à compléter]</div><p class="small" style="margin:4px 0 0">Référence : ANIM-' + (S.paie === 'mois' ? 'M' : 'A') + '-[n°]. Votre animation passe en ligne à réception.</p></div>' +
+        '<div class="rib">IBAN FR76 1460 7003 3470 2211 6462 345</div><div class="rib">BIC CCBPFRPPMAR</div><p class="small" style="margin:4px 0 0">Référence : ANIM-' + (S.paie === 'mois' ? 'M' : 'A') + '-[n°]. Votre animation passe en ligne à réception.</p></div>' +
         '<p class="small">Démo : aucun paiement réel.</p>' + btn('J\'ai fait le virement, publier', 'data-act="publier"', '', 'send') };
     },
     rdv: function () {
