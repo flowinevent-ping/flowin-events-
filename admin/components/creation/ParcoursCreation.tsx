@@ -37,6 +37,7 @@
  * + se_lots, crm_retours (demandes adressees a Flowin). Aucune table nouvelle.
  */
 
+import { REGLEMENT, OFFRES_ANIMATION, referenceVirement, type CleOffreAnimation } from '@/lib/reglement'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { supabase, supabasePublic } from '@/lib/supabase'
 import { creerAnimation, enregistrerDemandeQuiz, enregistrerDemandeSuperEvent } from '@/lib/pro'
@@ -324,6 +325,7 @@ export default function ParcoursCreation({ mode = 'pro', pro, banques, supers, p
   const diffQr = false /* remplace par les QR traces crees ci-dessous (lot QR) */
   const [qrBrouillons, setQrBrouillons] = useState<{ nom: string; support: string; type: TypeQr }[]>([])
   const [offre, setOffre] = useState('')
+  const [offreAnim, setOffreAnim] = useState<CleOffreAnimation>('annuelle')
   /* Tarifs : grille a cocher (3 packs de nds-partenaire.html), pour PRESELECTIONNER la demande. Aucun prix invente, rien n'est facture. */
   const [packChoisi, setPackChoisi] = useState<string | null>(null)
   const packsSE = packsPourSuperEvent(se)
@@ -755,6 +757,14 @@ export default function ParcoursCreation({ mode = 'pro', pro, banques, supers, p
               <div style={{ fontSize: 13, lineHeight: 1.6, marginBottom: 16 }}>
                 Les commerces le rejoignent depuis leur espace ou par ce lien :
                 <div style={{ fontWeight: 800, wordBreak: 'break-all', color: C.accent }}>{BASE}/rejoindre/{fait.superId}</div>
+              </div>
+            )}
+            {!sa && !rejoindre && !estSuper && fait.eventId && (
+              <div data-virement style={{ border: `1.5px solid ${C.accent}`, borderRadius: 14, padding: '12px 14px', marginBottom: 16, background: '#fff', fontSize: 13.5, lineHeight: 1.6 }}>
+                <b style={{ display: 'block', fontSize: 15 }}>Règlement par virement</b>
+                Offre {(OFFRES_ANIMATION.find(x => x.cle === offreAnim) || OFFRES_ANIMATION[1]).nom.toLowerCase()} · {(OFFRES_ANIMATION.find(x => x.cle === offreAnim) || OFFRES_ANIMATION[1]).prix} (tarif à confirmer).<br />
+                Bénéficiaire : {REGLEMENT.titulaire} · IBAN {REGLEMENT.iban} · BIC {REGLEMENT.bic}<br />
+                Référence à indiquer : <b>{referenceVirement(fait.eventId)}</b>
               </div>
             )}
             {lien && (
@@ -1303,6 +1313,23 @@ export default function ParcoursCreation({ mode = 'pro', pro, banques, supers, p
 
               {rejoindre && !sa && <GrilleTarifs valeur={packChoisi} onChange={setPackChoisi} accent={ACCENT_SUPER} packs={packsSE} />}
 
+              {!sa && !rejoindre && !estSuper && (
+                <div data-reglement style={{ marginTop: 18, border: `1px solid ${C.bordure}`, borderRadius: 14, padding: 14, background: '#fff' }}>
+                  <div style={{ fontSize: 14, fontWeight: 800 }}>Votre offre</div>
+                  <div style={{ fontSize: 13, ...MUTED, margin: '3px 0 10px', lineHeight: 1.5 }}>Vous avez vu votre jeu : le règlement se fait maintenant, par virement. Tarifs à confirmer.</div>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(150px,1fr))', gap: 8 }}>
+                    {OFFRES_ANIMATION.map(o => (
+                      <button key={o.cle} type="button" style={{ ...choix(offreAnim === o.cle), textAlign: 'left', minHeight: 64 }} onClick={() => setOffreAnim(o.cle)}>
+                        <b style={{ display: 'block' }}>{o.nom}</b><span style={{ fontSize: 15, fontWeight: 800 }}>{o.prix}</span>
+                        <span style={{ display: 'block', fontSize: 13, ...MUTED }}>{o.detail}</span>
+                      </button>
+                    ))}
+                  </div>
+                  <div style={{ fontSize: 13, marginTop: 12, lineHeight: 1.6 }}>
+                    <b>Règlement par virement</b> à {REGLEMENT.titulaire} · IBAN {REGLEMENT.iban} · BIC {REGLEMENT.bic}. La référence de virement vous est donnée à la publication.
+                  </div>
+                </div>
+              )}
               <div style={{ fontSize: 14, fontWeight: 800, margin: '20px 0 8px' }}>Récapitulatif</div>
               <div style={{ border: `1px solid ${C.bordure}`, borderRadius: 14, overflow: 'hidden' }}>
                 {([
@@ -1316,6 +1343,7 @@ export default function ParcoursCreation({ mode = 'pro', pro, banques, supers, p
                   ['Jeu', libelleModule(moduleActif)],
                   ...(sansLots ? [] : [['Lots', lotsNommes.map(l => `${l.nom.trim()} × ${l.quantite}`).join(' · ') || '—']]),
                   ...(estSuper ? [['Pros participants', participants.length ? String(participants.length) : 'aucun pour l’instant']] : []),
+                  ...(!sa && !rejoindre && !estSuper ? [['Offre', (() => { const o = OFFRES_ANIMATION.find(x => x.cle === offreAnim); return o ? `${o.nom} · ${o.prix}` : '—' })()]] : []),
                   ...(!estSuper ? [['Diffusion', [diffPhysique && 'QR imprimé', diffDigital && 'lien réseaux'].filter(Boolean).join(' · ') || 'Aucune']] : []),
                   ...(qrPossibles ? [['QR tracés', `${QR_PAR_DEFAUT.length + qrBrouillons.length} (dont ${qrBrouillons.length} ajouté${qrBrouillons.length > 1 ? 's' : ''})`]] : []),
                   ...(aUnTirage ? [['Tirage', tirage.mode === 'auto' ? `Automatique le ${libelleDateTirage(localVersIso(tirage.date))}` : 'Manuel (un clic)'], ['Liste des gagnants', tirage.publier ? 'Publiée après le tirage' : 'Non publiée']] : []),
@@ -1364,7 +1392,7 @@ export default function ParcoursCreation({ mode = 'pro', pro, banques, supers, p
                   {envoi === 'envoi' ? 'Enregistrement…'
                     : rejoindre ? (sa ? 'Rattacher au super event' : 'Envoyer ma demande à Flowin')
                     : estSuper ? 'Créer le super event'
-                    : sa ? 'Créer l’animation' : 'Créer mon animation'}
+                    : sa ? 'Créer l’animation' : 'Publier mon animation'}
                 </button>
               </div>
             </>
