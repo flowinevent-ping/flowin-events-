@@ -45,3 +45,18 @@ fois) → L3 → L4 → L5 (vidéos tournées sur les écrans finis, pour ne pas
 - Nouvelles demandes : pré-remplissage de l'inscription avec les coordonnées laissées dans la
   plaquette (« Être recontacté ») ; vérifier le mot de passe oublié par email (Resend) ; QR
   d'inscription correct.
+
+## Point au 09/11 (nuit)
+- L6 : formulaire « Être recontacté » des plaquettes branché sur le CRM (RPC existante
+  crm_landing_flowin_upsert) ; inscription /pro/premiere-fois pré-remplie ; espace pro en bleu
+  (charte.ts), logo Flowin Event. Mot de passe oublié existant ; expéditeur Resend et URL de retour
+  à vérifier dans Supabase par Romain.
+- L7 : création d'animation : choix de l'offre + règlement par virement (IBAN du bon de commande),
+  bouton « Publier mon animation », référence ANIM-xxxxxx. Offre choisie non stockée en base.
+- L8 : demande super event : statut station jeu / sponsor (existant : persona commerce / annonceur),
+  règlement par virement après validation (référence SE-xxxxxx), lien « participer à un autre super
+  event » (plusieurs événements = plusieurs demandes).
+- L9 : tableau de bord existant (onglets jeu, lots, diffusion, gagnants, trafic, CRM avec genre) :
+  conservé, recoloré en bleu.
+- Restent : L3-L5 vidéos ; incohérence de prix des packs Super Event (cadrage 500/1 331/3 331,
+  commercial.ts 500/1 400/3 590, GrilleTarifs 500/1 490/3 590) à trancher par Romain.
