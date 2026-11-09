@@ -35,3 +35,13 @@ Source unique de ce qui est demandé par Romain. Règles :
 ## Ordre de production proposé
 L1 → L2 (plaquettes, mobile + ordinateur) → L6 → L7 → L8 → L9 (app réelle, un parcours prouvé à la
 fois) → L3 → L4 → L5 (vidéos tournées sur les écrans finis, pour ne pas les refaire).
+
+## Point au 09/11 (soir)
+- L1, L2 : plaquettes V3 jugées « bonnes » par Romain (corrections plus tard) ; poussées dans le
+  super admin (Outils et communication).
+- L3, L4, L5 (vidéos) : non faites.
+- L6 à L9 (souscription, création, demande super event, tableau de bord) : non faits ; à faire en
+  partant de l'existant.
+- Nouvelles demandes : pré-remplissage de l'inscription avec les coordonnées laissées dans la
+  plaquette (« Être recontacté ») ; vérifier le mot de passe oublié par email (Resend) ; QR
+  d'inscription correct.

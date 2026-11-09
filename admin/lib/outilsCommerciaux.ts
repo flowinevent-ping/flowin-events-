@@ -42,6 +42,14 @@ export const PUBLICS: { v: Public; label: string }[] = [
 ]
 
 export const OUTILS: Outil[] = [
+  { statut: 'validé', id: 'plaquette-animation-v3', titre: 'Plaquette Flowin Animation V3', public: ['commerce'], type: 'plaquette', suivi: true,
+    description: 'Présentation Flowin Animation (V3) : jeux, quiz, QR par support, fichier client, offres, inscription.',
+    chemin: '/validation/plaquette-animation-v3.html',
+    message: 'Bonjour, voici la présentation de Flowin Animation pour votre commerce :' },
+  { statut: 'validé', id: 'plaquette-super-event-v3', titre: 'Plaquette Flowin Super Event V3', public: ['organisateur', 'commerce'], type: 'plaquette', suivi: true,
+    description: 'La super diffusion locale de votre événement (V3) : avant, pendant, après, formules, contact.',
+    chemin: '/validation/plaquette-super-event-v3.html',
+    message: 'Bonjour, voici la présentation de Flowin Super Event :' },
   { statut: 'validé', id: 'plaquette-animation', titre: 'Plaquette Animation magasin', public: ['commerce'], type: 'plaquette', suivi: true,
     description: 'L’offre Animation pour un commerce : formules, prix, bouton « je m’inscris ».',
     chemin: '/plaquette-animation-magasin.html',
