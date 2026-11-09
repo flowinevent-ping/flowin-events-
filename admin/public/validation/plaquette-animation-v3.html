@@ -505,6 +505,36 @@
   #animation .vthumbs button svg{width:18px;height:18px}
   @media (min-width:1024px){ #animation .vstage svg{max-height:40vh} }
   @media (max-height:800px) and (max-width:1023px){ #animation .vstage svg{max-height:22vh} #animation .qr2 div{padding:4px 10px} #animation .lede{margin-top:4px} #animation h2{line-height:1.1} }
+
+  /* ===== Audit design vs information (P0/P1, 09/11) : gabarit commun avec Super Event ===== */
+  .pg{padding:20px 16px}
+  .v3{margin:0 auto}
+  @media (min-width:1024px){ .pg{padding:32px 48px} .v3{align-items:start} .lede{font-size:var(--t2)} h2{font-size:var(--t5)} }
+  .eyebrow{font-size:var(--t1)} h2{font-size:var(--t4)} .lede{font-size:var(--t2)}
+  .bl{color:var(--c-action)}
+  .dessin{max-height:48vh;border-radius:18px;background:#F5F7FD}
+  @media (min-width:1024px){ .dessin{max-height:64vh} }
+  .plus{margin-top:8px;text-align:left}
+  .plus summary{display:inline-flex;align-items:center;min-height:44px;font-size:var(--t2);font-weight:800;color:var(--c-action);cursor:pointer;list-style:none;text-decoration:underline}
+  .plus summary::-webkit-details-marker{display:none}
+  .plus[open]{background:#fff;border:1px solid var(--line);border-radius:14px;padding:0 12px 10px}
+  .plus p,.plus li{font-size:var(--t2)}
+  .plus .qr2{margin-top:4px}
+  .plus .lgtoggle{margin-top:8px}
+  #animation .vstage svg{max-height:34vh}
+  @media (max-height:800px) and (max-width:1023px){ #animation .vstage svg{max-height:28vh} }
+  @media (min-width:1024px){ #animation .vstage svg{max-height:44vh} }
+  /* Preuves */
+  .pv{padding:14px 10px}
+  .pv .pvi{width:32px;height:32px;color:var(--c-action)}
+  .pv .pn{font-size:clamp(64px,21vw,112px);align-items:baseline;height:auto}
+  .pv .pn small{font-size:.45em}
+  .pv p{font-size:var(--t2)}
+  @media (min-width:1024px){ .pv .pn{font-size:112px} .pv p{font-size:var(--t2)} }
+  /* Offres : hauteur ajustée, deux offres côte à côte sur ordinateur */
+  .track{align-items:flex-start}
+  .oc h3,.oc .two strong{font-size:var(--t2)}
+  @media (min-width:1024px){ .oc{flex:0 0 calc(50% - 6px)} #offres{padding-bottom:16px} #offres .track{padding-bottom:6px} }
   /* Ordinateur : textes à l'échelle de l'écran */
   @media (min-width:1100px){body{zoom:1.3}}
   @media (min-width:1500px){body{zoom:1.5}}
@@ -590,14 +620,16 @@
       <div class="tx">
         <div class="eyebrow">Plug and play</div>
         <h2>Le principe <em>en 4 temps</em>.</h2>
-        <ol class="pitch">
+        <details class="plus"><summary>En savoir plus</summary>
+          <ol class="pitch">
           <li><span class="n">1</span><span>Tu installes Flowin, tu fais jouer tes clients.</span></li>
           <li><span class="n">2</span><span>Ils connaissent mieux ton magasin, ton m&eacute;tier&nbsp;: renforcement de marque. Ils font participer leurs amis&nbsp;: tu agrandis ton r&eacute;seau.</span></li>
           <li><span class="n">3</span><span>Ils gagnent des lots, des remises, ce que tu veux.</span></li>
           <li><span class="n">4</span><span>Ils reviennent&nbsp;: tu augmentes ta visibilit&eacute; et ta fr&eacute;quentation.</span></li>
         </ol>
+        </details>
       </div>
-      <div class="vis"><svg class="dessin" viewBox="0 0 400 340" role="img" aria-label="La boucle : il flashe le QR, il joue sur son t&eacute;l&eacute;phone, il gagne un lot, il revient en boutique"><defs><marker id="ar1" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10z" fill="#3B5CC4"/></marker></defs><g transform="translate(0 34)"><circle cx="78" cy="66" r="44" fill="#3B5CC4" stroke="#1B3A5C" stroke-width="2.5"/><circle cx="78" cy="66" r="34" fill="#FFFFFF" stroke="#1B3A5C" stroke-width="2"/><rect x="60" y="48" width="36" height="36" rx="5.14286" fill="#FFFFFF" stroke="#1B3A5C" stroke-width="2"/><rect x="65.1429" y="53.1429" width="10.2857" height="10.2857" fill="#1B3A5C"/><rect x="80.5714" y="53.1429" width="10.2857" height="10.2857" fill="#1B3A5C"/><rect x="65.1429" y="68.5714" width="10.2857" height="10.2857" fill="#1B3A5C"/><rect x="81.6" y="69.6" width="8.22857" height="8.22857" fill="#3B5CC4"/><rect x="292" y="18" width="62" height="104" rx="11" fill="#FFFFFF" stroke="#1B3A5C" stroke-width="2.5"/><rect x="300" y="30" width="46" height="12" rx="4" fill="#3B5CC4"/><rect x="300" y="48" width="46" height="14" rx="5" fill="#8DA2EC" stroke="#1B3A5C" stroke-width="1.6"/><rect x="300" y="68" width="46" height="14" rx="5" fill="#E3E9F8" stroke="#1B3A5C" stroke-width="1.6"/><rect x="300" y="88" width="46" height="14" rx="5" fill="#E3E9F8" stroke="#1B3A5C" stroke-width="1.6"/><path d="M316 112h14" stroke="#1B3A5C" stroke-width="2.5" stroke-linecap="round"/><rect x="290" y="196" width="66" height="54" rx="4" fill="#3B5CC4" stroke="#1B3A5C" stroke-width="2.5"/><rect x="282" y="180" width="82" height="18" rx="4" fill="#8DA2EC" stroke="#1B3A5C" stroke-width="2.5"/><rect x="317" y="180" width="12" height="70" fill="#FFFFFF" stroke="#1B3A5C" stroke-width="2"/><path d="M323 180c-6-14-22-16-22-6s16 6 22 6c6 0 22 4 22-6s-16-8-22 6z" fill="#FFFFFF" stroke="#1B3A5C" stroke-width="2.2" stroke-linejoin="round"/><rect x="36" y="196" width="84" height="62" fill="#FFFFFF" stroke="#1B3A5C" stroke-width="2.5"/><path d="M36 178h21v14a10.5 8 0 0 1-21 0z" fill="#3B5CC4" stroke="#1B3A5C" stroke-width="2"/><path d="M57 178h21v14a10.5 8 0 0 1-21 0z" fill="#FFFFFF" stroke="#1B3A5C" stroke-width="2"/><path d="M78 178h21v14a10.5 8 0 0 1-21 0z" fill="#3B5CC4" stroke="#1B3A5C" stroke-width="2"/><path d="M99 178h21v14a10.5 8 0 0 1-21 0z" fill="#FFFFFF" stroke="#1B3A5C" stroke-width="2"/><rect x="48" y="214" width="24" height="44" fill="#E3E9F8" stroke="#1B3A5C" stroke-width="2"/><rect x="82" y="214" width="28" height="22" fill="#E3E9F8" stroke="#1B3A5C" stroke-width="2"/><path d="M132 66 H276" fill="none" stroke="#3B5CC4" stroke-width="4" stroke-linecap="round" marker-end="url(#ar1)"/><path d="M323 132 V166" fill="none" stroke="#3B5CC4" stroke-width="4" stroke-linecap="round" marker-end="url(#ar1)"/><path d="M274 222 H134" fill="none" stroke="#3B5CC4" stroke-width="4" stroke-linecap="round" marker-end="url(#ar1)"/><path d="M78 168 V122" fill="none" stroke="#3B5CC4" stroke-width="4" stroke-linecap="round" marker-end="url(#ar1)"/><text x="200" y="149" text-anchor="middle" font-size="15" font-weight="800" fill="#2B47A8">Votre commerce</text></g><circle cx="34" cy="18" r="13" fill="#3B5CC4"/><text x="34" y="23" text-anchor="middle" font-size="15" font-weight="900" fill="#fff">1</text><text x="52" y="24" font-size="17" font-weight="800" fill="#1B3A5C">Il flashe</text><circle cx="279" cy="18" r="13" fill="#3B5CC4"/><text x="279" y="23" text-anchor="middle" font-size="15" font-weight="900" fill="#fff">2</text><text x="297" y="24" font-size="17" font-weight="800" fill="#1B3A5C">Il joue</text><circle cx="279" cy="322" r="13" fill="#3B5CC4"/><text x="279" y="327" text-anchor="middle" font-size="15" font-weight="900" fill="#fff">3</text><text x="297" y="328" font-size="17" font-weight="800" fill="#1B3A5C">Il gagne</text><circle cx="34" cy="322" r="13" fill="#3B5CC4"/><text x="34" y="327" text-anchor="middle" font-size="15" font-weight="900" fill="#fff">4</text><text x="52" y="328" font-size="17" font-weight="800" fill="#1B3A5C">Il revient</text></svg></div>
+      <div class="vis"><svg class="dessin" viewBox="0 0 400 400" role="img" aria-label="La boucle : il flashe le QR, il joue sur son t&eacute;l&eacute;phone, il gagne un lot, il revient en boutique"><defs><marker id="ar1" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10z" fill="#3B5CC4"/></marker></defs><g transform="translate(0 62)"><circle cx="78" cy="66" r="44" fill="#3B5CC4" stroke="#1B3A5C" stroke-width="2.5"/><circle cx="78" cy="66" r="34" fill="#FFFFFF" stroke="#1B3A5C" stroke-width="2"/><rect x="60" y="48" width="36" height="36" rx="5.14286" fill="#FFFFFF" stroke="#1B3A5C" stroke-width="2"/><rect x="65.1429" y="53.1429" width="10.2857" height="10.2857" fill="#1B3A5C"/><rect x="80.5714" y="53.1429" width="10.2857" height="10.2857" fill="#1B3A5C"/><rect x="65.1429" y="68.5714" width="10.2857" height="10.2857" fill="#1B3A5C"/><rect x="81.6" y="69.6" width="8.22857" height="8.22857" fill="#3B5CC4"/><rect x="292" y="18" width="62" height="104" rx="11" fill="#FFFFFF" stroke="#1B3A5C" stroke-width="2.5"/><rect x="300" y="30" width="46" height="12" rx="4" fill="#3B5CC4"/><rect x="300" y="48" width="46" height="14" rx="5" fill="#8DA2EC" stroke="#1B3A5C" stroke-width="1.6"/><rect x="300" y="68" width="46" height="14" rx="5" fill="#E3E9F8" stroke="#1B3A5C" stroke-width="1.6"/><rect x="300" y="88" width="46" height="14" rx="5" fill="#E3E9F8" stroke="#1B3A5C" stroke-width="1.6"/><path d="M316 112h14" stroke="#1B3A5C" stroke-width="2.5" stroke-linecap="round"/><rect x="290" y="196" width="66" height="54" rx="4" fill="#3B5CC4" stroke="#1B3A5C" stroke-width="2.5"/><rect x="282" y="180" width="82" height="18" rx="4" fill="#8DA2EC" stroke="#1B3A5C" stroke-width="2.5"/><rect x="317" y="180" width="12" height="70" fill="#FFFFFF" stroke="#1B3A5C" stroke-width="2"/><path d="M323 180c-6-14-22-16-22-6s16 6 22 6c6 0 22 4 22-6s-16-8-22 6z" fill="#FFFFFF" stroke="#1B3A5C" stroke-width="2.2" stroke-linejoin="round"/><rect x="36" y="196" width="84" height="62" fill="#FFFFFF" stroke="#1B3A5C" stroke-width="2.5"/><path d="M36 178h21v14a10.5 8 0 0 1-21 0z" fill="#3B5CC4" stroke="#1B3A5C" stroke-width="2"/><path d="M57 178h21v14a10.5 8 0 0 1-21 0z" fill="#FFFFFF" stroke="#1B3A5C" stroke-width="2"/><path d="M78 178h21v14a10.5 8 0 0 1-21 0z" fill="#3B5CC4" stroke="#1B3A5C" stroke-width="2"/><path d="M99 178h21v14a10.5 8 0 0 1-21 0z" fill="#FFFFFF" stroke="#1B3A5C" stroke-width="2"/><rect x="48" y="214" width="24" height="44" fill="#E3E9F8" stroke="#1B3A5C" stroke-width="2"/><rect x="82" y="214" width="28" height="22" fill="#E3E9F8" stroke="#1B3A5C" stroke-width="2"/><path d="M132 66 H276" fill="none" stroke="#3B5CC4" stroke-width="4" stroke-linecap="round" marker-end="url(#ar1)"/><path d="M323 132 V166" fill="none" stroke="#3B5CC4" stroke-width="4" stroke-linecap="round" marker-end="url(#ar1)"/><path d="M274 222 H134" fill="none" stroke="#3B5CC4" stroke-width="4" stroke-linecap="round" marker-end="url(#ar1)"/><path d="M78 168 V122" fill="none" stroke="#3B5CC4" stroke-width="4" stroke-linecap="round" marker-end="url(#ar1)"/><text x="200" y="149" text-anchor="middle" font-size="15" font-weight="800" fill="#2B47A8">Votre commerce</text></g><circle cx="27" cy="18" r="13" fill="#3B5CC4"/><text x="27" y="23" text-anchor="middle" font-size="15" font-weight="900" fill="#fff">1</text><text x="46" y="24" text-anchor="start" font-size="17" font-weight="800" fill="#1B3A5C">Il flashe</text><text x="14" y="46" text-anchor="start" font-size="14" font-weight="700" fill="#3B5CC4">tu fais jouer tes clients</text><circle cx="373" cy="18" r="13" fill="#3B5CC4"/><text x="373" y="23" text-anchor="middle" font-size="15" font-weight="900" fill="#fff">2</text><text x="354" y="24" text-anchor="end" font-size="17" font-weight="800" fill="#1B3A5C">Il joue</text><text x="386" y="46" text-anchor="end" font-size="14" font-weight="700" fill="#3B5CC4">renforcement de marque</text><circle cx="373" cy="354" r="13" fill="#3B5CC4"/><text x="373" y="359" text-anchor="middle" font-size="15" font-weight="900" fill="#fff">3</text><text x="354" y="360" text-anchor="end" font-size="17" font-weight="800" fill="#1B3A5C">Il gagne</text><text x="386" y="382" text-anchor="end" font-size="14" font-weight="700" fill="#3B5CC4">des lots, des remises</text><circle cx="27" cy="354" r="13" fill="#3B5CC4"/><text x="27" y="359" text-anchor="middle" font-size="15" font-weight="900" fill="#fff">4</text><text x="46" y="360" text-anchor="start" font-size="17" font-weight="800" fill="#1B3A5C">Il revient</text><text x="14" y="382" text-anchor="start" font-size="14" font-weight="700" fill="#3B5CC4">ta visibilit&#233; et ta fr&#233;quentation</text></svg></div>
     </div>
   </section>
 
@@ -652,13 +684,12 @@
       <div class="tx">
         <div class="eyebrow">Le point fort</div>
         <h2>Le quiz <em>&agrave; votre image</em>.</h2>
-        <p class="lede">Quiz th&eacute;matique, sur l&rsquo;industrie ou le commerce, pour cr&eacute;er une identit&eacute; &agrave; la marque&nbsp;: connaissance, participation.</p>
-        <ul class="qz">
-          <li><b>Questions bonus</b>&nbsp;: elles int&eacute;ressent et sondent. Les meilleurs indicateurs aupr&egrave;s du public.</li>
-          <li>D&eacute;velopper ses produits, am&eacute;liorer ses offres.</li>
-        </ul>
+        <p class="lede"><b class="bl">Questions bonus</b>&nbsp;: elles int&eacute;ressent et sondent. Les meilleurs indicateurs aupr&egrave;s du public.</p>
+        <details class="plus"><summary>En savoir plus</summary>
+          <p>Quiz th&eacute;matique, sur l&rsquo;industrie ou le commerce, pour cr&eacute;er une identit&eacute; &agrave; la marque&nbsp;: connaissance, participation.</p>
+        </details>
       </div>
-      <div class="vis"><svg class="dessin" viewBox="0 0 400 260" role="img" aria-label="Une question bonus sur le t&eacute;l&eacute;phone devient un graphique : le public est sond&eacute;"><defs><marker id="ar2" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10z" fill="#3B5CC4"/></marker></defs><rect x="46" y="14" width="124" height="232" rx="18" fill="#FFFFFF" stroke="#1B3A5C" stroke-width="2.5"/><path d="M94 230h28" stroke="#1B3A5C" stroke-width="3" stroke-linecap="round"/><rect x="62" y="34" width="92" height="22" rx="7" fill="#3B5CC4"/><text x="108" y="50" text-anchor="middle" font-size="14" font-weight="900" fill="#fff">BONUS</text><rect x="62" y="66" width="92" height="8" rx="4" fill="#1B3A5C"/><rect x="62" y="80" width="64" height="8" rx="4" fill="#1B3A5C"/><rect x="62" y="102" width="92" height="24" rx="8" fill="#E3E9F8" stroke="#1B3A5C" stroke-width="1.8"/><rect x="62" y="102" width="80" height="24" rx="8" fill="#3B5CC4" stroke="#1B3A5C" stroke-width="1.8"/><rect x="62" y="136" width="92" height="24" rx="8" fill="#E3E9F8" stroke="#1B3A5C" stroke-width="1.8"/><rect x="62" y="136" width="54" height="24" rx="8" fill="#8DA2EC" stroke="#1B3A5C" stroke-width="1.8"/><rect x="62" y="170" width="92" height="24" rx="8" fill="#E3E9F8" stroke="#1B3A5C" stroke-width="1.8"/><rect x="62" y="170" width="30" height="24" rx="8" fill="#2B47A8" stroke="#1B3A5C" stroke-width="1.8"/><path d="M186 130 H226" fill="none" stroke="#3B5CC4" stroke-width="4" stroke-linecap="round" marker-end="url(#ar2)"/><rect x="238" y="40" width="140" height="150" rx="16" fill="#FFFFFF" stroke="#1B3A5C" stroke-width="2.5"/><rect x="258" y="122" width="26" height="46" rx="4" fill="#8DA2EC" stroke="#1B3A5C" stroke-width="2"/><rect x="296" y="92" width="26" height="76" rx="4" fill="#3B5CC4" stroke="#1B3A5C" stroke-width="2"/><rect x="334" y="64" width="26" height="104" rx="4" fill="#2B47A8" stroke="#1B3A5C" stroke-width="2"/><path d="M252 168h112" stroke="#1B3A5C" stroke-width="2.5" stroke-linecap="round"/><text x="308" y="218" text-anchor="middle" font-size="17" font-weight="800" fill="#1B3A5C">Les indicateurs</text></svg></div>
+      <div class="vis"><svg class="dessin" viewBox="0 0 400 260" role="img" aria-label="Une question bonus sur le t&eacute;l&eacute;phone devient un graphique : le public est sond&eacute;"><defs><marker id="ar2" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10z" fill="#3B5CC4"/></marker></defs><rect x="46" y="14" width="124" height="232" rx="18" fill="#FFFFFF" stroke="#1B3A5C" stroke-width="2.5"/><path d="M94 230h28" stroke="#1B3A5C" stroke-width="3" stroke-linecap="round"/><rect x="62" y="34" width="92" height="22" rx="7" fill="#3B5CC4"/><text x="108" y="50" text-anchor="middle" font-size="14" font-weight="900" fill="#fff">BONUS</text><rect x="62" y="66" width="92" height="8" rx="4" fill="#1B3A5C"/><rect x="62" y="80" width="64" height="8" rx="4" fill="#1B3A5C"/><rect x="62" y="102" width="92" height="24" rx="8" fill="#E3E9F8" stroke="#1B3A5C" stroke-width="1.8"/><rect x="62" y="102" width="80" height="24" rx="8" fill="#3B5CC4" stroke="#1B3A5C" stroke-width="1.8"/><rect x="62" y="136" width="92" height="24" rx="8" fill="#E3E9F8" stroke="#1B3A5C" stroke-width="1.8"/><rect x="62" y="136" width="54" height="24" rx="8" fill="#8DA2EC" stroke="#1B3A5C" stroke-width="1.8"/><rect x="62" y="170" width="92" height="24" rx="8" fill="#E3E9F8" stroke="#1B3A5C" stroke-width="1.8"/><rect x="62" y="170" width="30" height="24" rx="8" fill="#2B47A8" stroke="#1B3A5C" stroke-width="1.8"/><path d="M186 130 H226" fill="none" stroke="#3B5CC4" stroke-width="4" stroke-linecap="round" marker-end="url(#ar2)"/><rect x="238" y="40" width="140" height="150" rx="16" fill="#FFFFFF" stroke="#1B3A5C" stroke-width="2.5"/><rect x="258" y="122" width="26" height="46" rx="4" fill="#8DA2EC" stroke="#1B3A5C" stroke-width="2"/><rect x="296" y="92" width="26" height="76" rx="4" fill="#3B5CC4" stroke="#1B3A5C" stroke-width="2"/><rect x="334" y="64" width="26" height="104" rx="4" fill="#2B47A8" stroke="#1B3A5C" stroke-width="2"/><path d="M252 168h112" stroke="#1B3A5C" stroke-width="2.5" stroke-linecap="round"/><text x="306" y="216" text-anchor="middle" font-size="13.5" font-weight="800" fill="#1B3A5C">D&#233;velopper ses produits,</text><text x="306" y="236" text-anchor="middle" font-size="13.5" font-weight="800" fill="#1B3A5C">am&#233;liorer ses offres</text></svg></div>
     </div>
   </section>
   <!-- 4. SUPPORTS ET QR : visionneuse de la V2 (affiche, macaron, caisse, écran, réseaux, flyer) -->
@@ -668,13 +699,8 @@
         <div class="eyebrow">Supports et QR</div>
         <h2>Un QR <em>par support</em>.</h2>
         <p class="lede">Captez l&rsquo;attention. Mesurez chaque action commerciale, chaque campagne.</p>
-        <div class="qr2">
-          <div><svg class="ic"><use href="#i-flyer"/></svg><b>QR &agrave; imprimer</b><span>Vitrine, caisse</span></div>
-          <div><svg class="ic"><use href="#i-social"/></svg><b>QR digital</b><span>Un par r&eacute;seau social, par campagne</span></div>
-        </div>
       </div>
       <div class="vis">
-        <div class="lgtoggle"><button type="button" class="on" id="lgOn">Avec un logo</button><button type="button" id="lgOff">Vierge</button></div>
         <div class="card viewer logo-on" id="viewer">
           <div class="vstage" id="vstage"></div>
           <button class="vnav p" type="button" id="vPrev" aria-label="Support pr&eacute;c&eacute;dent">&lsaquo;</button>
@@ -683,6 +709,13 @@
           <div class="vbar"><i id="vBar"></i></div>
         </div>
         <div class="vthumbs" id="vThumbs"></div>
+        <details class="plus"><summary>En savoir plus</summary>
+          <div class="qr2">
+          <div><svg class="ic"><use href="#i-flyer"/></svg><b>QR &agrave; imprimer</b><span>Vitrine, caisse</span></div>
+          <div><svg class="ic"><use href="#i-social"/></svg><b>QR digital</b><span>Un par r&eacute;seau social, par campagne</span></div>
+        </div>
+          <div class="lgtoggle"><button type="button" class="on" id="lgOn">Avec un logo</button><button type="button" id="lgOff">Vierge</button></div>
+        </details>
       </div>
     </div>
   </section>
@@ -694,8 +727,8 @@
         <div class="eyebrow">Nuits du Sud 2026</div>
         <h2>Dernier &eacute;v&eacute;nement local, <em>Alpes-Maritimes</em>.</h2>
         <div class="preuves">
-          <div class="pv"><div class="pd">&nbsp;</div><div class="pn">56<small>&nbsp;%</small></div><p>des participants souhaitent garder le contact</p></div>
-          <div class="pv"><div class="pd">plus de</div><div class="pn">70</div><p>lots distribu&eacute;s dans les commerces locaux</p></div>
+          <div class="pv"><svg class="ic pvi"><use href="#i-mail"/></svg><div class="pd">&nbsp;</div><div class="pn">56<small>&nbsp;%</small></div><p>des participants souhaitent garder le contact</p></div>
+          <div class="pv"><svg class="ic pvi"><use href="#i-gift"/></svg><div class="pd">plus de</div><div class="pn">70</div><p>lots distribu&eacute;s dans les commerces locaux</p></div>
         </div>
         <p class="src">Source : bilan Nuits du Sud 2026</p>
       </div>
@@ -709,7 +742,9 @@
         <div class="eyebrow">Votre fichier client</div>
         <h2>Flowin fait grandir <em>votre fichier client</em>.</h2>
         <p class="lede">Toute personne qui enregistre ses coordonn&eacute;es dans Flowin entre dans le fichier client. Gardez le lien, gardez le contact.</p>
-        <div class="kpis"><span><svg class="ic"><use href="#i-ok"/></svg>Nombre de personnes</span><span><svg class="ic"><use href="#i-rapport"/></svg>Hommes / femmes</span><span><svg class="ic"><use href="#i-qr"/></svg>Un QR par support</span></div>
+        <details class="plus"><summary>En savoir plus</summary>
+          <div class="kpis"><span><svg class="ic"><use href="#i-ok"/></svg>Nombre de personnes</span><span><svg class="ic"><use href="#i-rapport"/></svg>Hommes / femmes</span></div>
+        </details>
       </div>
       <div class="vis">
         <svg class="dessin" viewBox="0 0 400 270" role="img" aria-label="Les QR de la vitrine, des r&eacute;seaux sociaux et de la caisse remplissent le fichier client de fiches"><defs><marker id="ar3" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10z" fill="#3B5CC4"/></marker></defs><g transform="translate(16 0)"><rect x="20" y="22" width="56" height="44" fill="#FFFFFF" stroke="#1B3A5C" stroke-width="2.2"/><path d="M20 12h14v9a7 6 0 0 1-14 0z" fill="#3B5CC4" stroke="#1B3A5C" stroke-width="1.8"/><path d="M34 12h14v9a7 6 0 0 1-14 0z" fill="#FFFFFF" stroke="#1B3A5C" stroke-width="1.8"/><path d="M48 12h14v9a7 6 0 0 1-14 0z" fill="#3B5CC4" stroke="#1B3A5C" stroke-width="1.8"/><path d="M62 12h14v9a7 6 0 0 1-14 0z" fill="#FFFFFF" stroke="#1B3A5C" stroke-width="1.8"/><rect x="34" y="34" width="26" height="26" rx="3.71429" fill="#FFFFFF" stroke="#1B3A5C" stroke-width="2"/><rect x="37.7143" y="37.7143" width="7.42857" height="7.42857" fill="#1B3A5C"/><rect x="48.8571" y="37.7143" width="7.42857" height="7.42857" fill="#1B3A5C"/><rect x="37.7143" y="48.8571" width="7.42857" height="7.42857" fill="#1B3A5C"/><rect x="49.6" y="49.6" width="5.94286" height="5.94286" fill="#3B5CC4"/><text x="48" y="86" text-anchor="middle" font-size="14" font-weight="800" fill="#1B3A5C">Vitrine</text><rect x="30" y="102" width="38" height="62" rx="8" fill="#FFFFFF" stroke="#1B3A5C" stroke-width="2.2"/><rect x="36" y="112" width="26" height="8" rx="3" fill="#3B5CC4"/><rect x="36" y="126" width="26" height="26" rx="3.71429" fill="#FFFFFF" stroke="#1B3A5C" stroke-width="2"/><rect x="39.7143" y="129.714" width="7.42857" height="7.42857" fill="#1B3A5C"/><rect x="50.8571" y="129.714" width="7.42857" height="7.42857" fill="#1B3A5C"/><rect x="39.7143" y="140.857" width="7.42857" height="7.42857" fill="#1B3A5C"/><rect x="51.6" y="141.6" width="5.94286" height="5.94286" fill="#3B5CC4"/><text x="48" y="182" text-anchor="middle" font-size="14" font-weight="800" fill="#1B3A5C">R&#233;seaux sociaux</text><rect x="20" y="210" width="58" height="30" rx="5" fill="#3B5CC4" stroke="#1B3A5C" stroke-width="2.2"/><rect x="28" y="196" width="30" height="16" rx="3" fill="#E3E9F8" stroke="#1B3A5C" stroke-width="2"/><rect x="52" y="214" width="22" height="22" rx="3.14286" fill="#FFFFFF" stroke="#1B3A5C" stroke-width="2"/><rect x="55.1429" y="217.143" width="6.28571" height="6.28571" fill="#1B3A5C"/><rect x="64.5714" y="217.143" width="6.28571" height="6.28571" fill="#1B3A5C"/><rect x="55.1429" y="226.571" width="6.28571" height="6.28571" fill="#1B3A5C"/><rect x="65.2" y="227.2" width="5.02857" height="5.02857" fill="#3B5CC4"/><text x="48" y="260" text-anchor="middle" font-size="14" font-weight="800" fill="#1B3A5C">Caisse</text></g><path d="M114 50 L152 104" fill="none" stroke="#3B5CC4" stroke-width="4" stroke-linecap="round" marker-end="url(#ar3)"/><path d="M110 134 H148" fill="none" stroke="#3B5CC4" stroke-width="4" stroke-linecap="round" marker-end="url(#ar3)"/><path d="M114 222 L152 166" fill="none" stroke="#3B5CC4" stroke-width="4" stroke-linecap="round" marker-end="url(#ar3)"/><rect x="160" y="92" width="78" height="62" rx="7" fill="#FFFFFF" stroke="#1B3A5C" stroke-width="2.2"/><rect x="170" y="104" width="54" height="7" rx="3.5" fill="#1B3A5C"/><rect x="170" y="118" width="40" height="7" rx="3.5" fill="#8DA2EC"/><rect x="170" y="132" width="48" height="7" rx="3.5" fill="#E3E9F8"/><rect x="168" y="104" width="78" height="62" rx="7" fill="#FFFFFF" stroke="#1B3A5C" stroke-width="2.2"/><rect x="178" y="116" width="54" height="7" rx="3.5" fill="#1B3A5C"/><rect x="178" y="130" width="40" height="7" rx="3.5" fill="#8DA2EC"/><rect x="178" y="144" width="48" height="7" rx="3.5" fill="#E3E9F8"/><rect x="176" y="116" width="78" height="62" rx="7" fill="#FFFFFF" stroke="#1B3A5C" stroke-width="2.2"/><rect x="186" y="128" width="54" height="7" rx="3.5" fill="#1B3A5C"/><rect x="186" y="142" width="40" height="7" rx="3.5" fill="#8DA2EC"/><rect x="186" y="156" width="48" height="7" rx="3.5" fill="#E3E9F8"/><path d="M262 134 H292" fill="none" stroke="#3B5CC4" stroke-width="4" stroke-linecap="round" marker-end="url(#ar3)"/><rect x="300" y="78" width="84" height="122" rx="8" fill="#3B5CC4" stroke="#1B3A5C" stroke-width="2.5"/><rect x="312" y="66" width="22" height="30" rx="3" fill="#FFFFFF" stroke="#1B3A5C" stroke-width="2"/><rect x="330" y="60" width="22" height="36" rx="3" fill="#E3E9F8" stroke="#1B3A5C" stroke-width="2"/><rect x="348" y="68" width="22" height="28" rx="3" fill="#FFFFFF" stroke="#1B3A5C" stroke-width="2"/><rect x="300" y="96" width="84" height="104" rx="8" fill="#3B5CC4" stroke="#1B3A5C" stroke-width="2.5"/><rect x="326" y="128" width="32" height="10" rx="5" fill="#FFFFFF" stroke="#1B3A5C" stroke-width="2"/><text x="342" y="226" text-anchor="middle" font-size="15" font-weight="800" fill="#1B3A5C">Fichier client</text></svg>
@@ -723,16 +758,15 @@
       <div class="tx">
         <div class="eyebrow">Les offres</div>
         <h2>Les offres <em>Flowin Animation</em>.</h2>
-        <p class="lede">Glissez pour voir chaque offre.</p>
         <p class="pay"><svg class="ic"><use href="#i-ok"/></svg>R&egrave;glement par virement &agrave; la publication : vous voyez votre jeu avant de payer.</p>
         <p class="tarif">Tarifs &agrave; confirmer.</p>
       </div>
       <div class="vis car" id="car">
         <div class="track" id="track">
           <article class="oc"><span class="badge">Le plus avantageux</span><h3>Annuelle</h3><div class="pp">990 &euro; <small>HT / an</small></div>
-            <ul><li>330 &euro; HT &eacute;conomis&eacute;s par rapport au mensuel</li><li>Engagement 12 mois</li></ul></article>
+            <ul><li>Engagement 12 mois</li></ul></article>
           <article class="oc"><h3>Mensuelle</h3><div class="pp">110 &euro; <small>HT / mois</small></div>
-            <ul><li>Engagement 3 mois minimum</li><li>Puis mois par mois</li></ul></article>
+            <ul><li>Engagement 3 mois minimum</li></ul></article>
           <article class="oc"><h3>Kit supports</h3>
             <div class="two"><div><b>Kit digital</b><strong>0 &euro;</strong><span>Affiches, macarons, support de caisse en fichiers, QR inclus</span></div>
             <div><b>Kit physique imprim&eacute;</b><strong>149 &euro; HT / boutique</strong><span>1 support de caisse, 3 affiches A4, 3 macarons, pr&ecirc;ts &agrave; poser</span></div></div></article>
@@ -953,9 +987,9 @@
         '<text x="180" y="74" text-anchor="middle" font-size="7.5" font-weight="900" letter-spacing=".6"' + B(1) + '>VOTRE COMMERCE</text><text x="180" y="86" text-anchor="middle" font-size="10" font-weight="900" fill="#1B3A5C">Roue de la fortune</text>' +
         '<circle cx="180" cy="146" r="46" fill="#fff" stroke="#CBD5E2"/>' + w + '<circle cx="180" cy="146" r="9" fill="#fff" stroke="#CBD5E2"/><circle cx="180" cy="146" r="4"' + B(1) + '/>' +
         '<path d="M180 108 l-5 -9 a5 5 0 1 1 10 0z" fill="#fff" stroke="#CBD5E2"/>' +
-        '<rect x="142" y="199" width="76" height="20" rx="10"' + B(1) + '/><text x="180" y="212.5" text-anchor="middle" font-size="8.5" font-weight="900" fill="#fff">À vos couleurs</text></g>' +
+        '<rect x="142" y="199" width="76" height="20" rx="10"' + B(1) + '/><text x="180" y="212.5" text-anchor="middle" font-size="8.5" font-weight="900" fill="#fff"></text></g>' +
         '<g transform="translate(36 150)"><rect width="76" height="24" rx="12" fill="#fff" filter="url(#ds)"/><text x="38" y="16" text-anchor="middle" font-size="9.5" font-weight="900" fill="#1B3A5C">Sans appli</text></g>' +
-        '<g transform="translate(250 50)"><rect width="84" height="24" rx="12" fill="#fff" filter="url(#ds)"/><text x="42" y="16" text-anchor="middle" font-size="9.5" font-weight="900"' + B(1) + '>À vos couleurs</text></g>'; } },
+        ''; } },
     { t: 'Post réseaux sociaux', d: 'Un lien tracé qui ramène vos abonnés en boutique.', ic: '<rect x="3.5" y="3.5" width="17" height="17" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17" cy="7" r=".8"/>',
       svg: function(){ return '<rect width="360" height="240" fill="#E9EDF3"/>' +
         '<g filter="url(#ds)"><rect x="82" y="4" width="196" height="232" rx="10" fill="#fff"/></g>' +
