@@ -205,3 +205,32 @@ que sur instruction explicite de Romain.
 - Pas d'emoji, pictogrammes uniquement. Parcours immersif pour la souscription et la création
   d'animation (choix du jeu, mise en place, QR…). Plaquettes cliquables et navigables.
 - Ne rien construire de trop lourd à mettre en place ; on modifie l'existant (fusion et mise à jour).
+
+## Retours de Romain du 09/11/2026 (plaquettes et visite)
+
+- **Couleurs** : turquoise + bleu = effet « pharmacie », pas assez animation/jeu. Direction : entre le
+  **bleu et l'orange** (prédominance à définir ; Romain cherche une charte). Fond blanc et
+  typographie : OK. Super Event = **orange**.
+- **Jamais faire jouer / tester** le jeu dans les plaquettes : hors script.
+- À **remettre** : la notion **plug and play** ; le **multi-jeux** (quiz, quiz + bonus, tombola,
+  roue de la fortune).
+- **La plaquette présente l'application** : on y retrouve le parcours réel jusqu'à l'**inscription**
+  et au **tableau de bord** complet, la **création / mise en place d'un jeu**, le QR.
+- **Trop d'infos sur une page = agressif** (prix compris) : présenter en **carrousel** (ou deux
+  images), pas tout sur la même page.
+- **Langage organisateur / événement culturel** : « Connecte ton événement avec l'ensemble du réseau
+  local. Diffuse, sois visible, sois présent, en proximité. »
+- **Langage commerce (Super Event)** : « Connecte ton commerce aux événements locaux. Donne de la
+  visibilité auprès des festivaliers / spectateurs. »
+- **Arguments communs** : créer son fichier client, rester en contact, avec au milieu le chiffre
+  **56 % des participants ont coché « Je souhaite rester en contact »**.
+- **Présentation commerces + événement** : très bonne chose, à garder.
+- **Trois conversions**, dans cet ordre : 1) laisser ses coordonnées ; 2) s'inscrire sur la carte /
+  se déclarer intéressé par le prochain super event de la ville ou des villes alentour ;
+  3) conversion prix Flowin Animation (solution autogérée).
+- **Pitch Flowin Animation** : « Tu installes Flowin, tu fais jouer tes clients. Ils connaissent mieux
+  ton magasin et ton métier (renforcement de marque). Ils font participer leurs amis : tu agrandis
+  ton réseau. Ils gagnent des lots, des remises, ce que tu veux. Ils reviennent : tu augmentes ta
+  visibilité et ta fréquentation. »
+- **Niveau attendu** : travail complet d'expert (design, ergonomie, stratégie de conversion), sans
+  que Romain ait à dicter page par page. Ne rien supprimer de l'existant sans le dire.
