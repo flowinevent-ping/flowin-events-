@@ -1,11 +1,11 @@
 /**
  * Règlement par virement à la publication (09/11/2026, décision de Romain) : pas de paiement en ligne
- * branché pour l'instant. Coordonnées bancaires de BAITA EURL à compléter par Romain (ne jamais inventer).
+ * branché pour l'instant. Coordonnées bancaires reprises du bon de commande Animation (bon-commande-animation.html).
  */
 export const REGLEMENT = {
   titulaire: 'BAITA EURL',
-  iban: '[IBAN à compléter]',
-  bic: '[BIC à compléter]',
+  iban: 'FR76 1460 7003 3470 2211 6462 345',
+  bic: 'CCBPFRPPMAR',
 }
 
 export const OFFRES_ANIMATION = [
