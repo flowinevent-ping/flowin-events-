@@ -753,6 +753,16 @@ export default function ParcoursCreation({ mode = 'pro', pro, banques, supers, p
                 ))}
               </div>
             )}
+            {rejoindre && !sa && (
+              <div data-virement-se style={{ border: `1.5px solid ${ACCENT_SUPER}`, borderRadius: 14, padding: '12px 14px', marginBottom: 16, background: '#fff', fontSize: 13.5, lineHeight: 1.6 }}>
+                <b style={{ display: 'block', fontSize: 15 }}>Règlement par virement, après validation</b>
+                {persona === 'annonceur' ? 'Sponsor' : 'Station jeu'}
+                {(() => { const pk = packsSE.find(x => x.cle === packChoisi); return pk ? ` · ${pk.nom} · ${prixAffiche(pk)} (${MENTION_TARIF_A_CONFIRMER.toLowerCase()})` : '' })()}.<br />
+                Une fois votre participation validée par l’organisateur : bénéficiaire {REGLEMENT.titulaire} · IBAN {REGLEMENT.iban} · BIC {REGLEMENT.bic}<br />
+                Référence à indiquer : <b>{referenceVirement(fait.eventId || seId, 'SE')}</b>
+                <div style={{ marginTop: 10 }}><a href="/rejoindre" style={{ color: ACCENT_SUPER, fontWeight: 800 }}>Participer à un autre super event</a></div>
+              </div>
+            )}
             {estSuper && fait.superId && (
               <div style={{ fontSize: 13, lineHeight: 1.6, marginBottom: 16 }}>
                 Les commerces le rejoignent depuis leur espace ou par ce lien :
