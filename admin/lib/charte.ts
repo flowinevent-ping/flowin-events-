@@ -64,20 +64,20 @@ export const CHARTE_PRO = {
   sidebar2: '#FFFFFF',
   encre: '#1B3A5C',
   bleu: '#3B5CC4',
-  violet: '#7A4FE0',
-  violetFonce: '#6A3FD0',
-  violetClair: '#EFE9FC',
+  /* 09/11/2026 (Romain) : le violet n'est plus la couleur Flowin. Espace pro aligné sur la plaquette
+     Animation V3 : bleu #3B5CC4 pour les actions. Les noms « violet » sont gardés pour ne rien casser. */
+  violet: '#3B5CC4',
+  violetFonce: '#2B47A8',
+  violetClair: '#E3E9F8',
   fuchsia: '#E0368C',
-  /* Accent commun = violet (01/11, decision Romain : violet partout, espace pro compris).
-     Source des valeurs : public/flowin-tokens.css (--fl-violet) / flowin-theme.css (--fl-accent). */
-  accent: '#7A4FE0',
-  accentFonce: '#6A3FD0',
-  /** Historique : « magenta » = la teinte de selection. Desormais le violet commun. */
-  magenta: '#7A4FE0',
+  accent: '#3B5CC4',
+  accentFonce: '#2B47A8',
+  /** Historique : « magenta » = la teinte de selection. */
+  magenta: '#3B5CC4',
   magenta2: '#3B5CC4',
   or: '#F5A100',
-  degrade: 'linear-gradient(135deg,#7A4FE0,#6A3FD0)',
-  filet: 'linear-gradient(90deg,#3B5CC4,#7A4FE0)',
+  degrade: 'linear-gradient(135deg,#3B5CC4,#2B47A8)',
+  filet: 'linear-gradient(90deg,#3B5CC4,#2B47A8)',
 } as const
 
 /** Les couleurs de l'espace pro en variables CSS, a poser sur :root ou un conteneur. */

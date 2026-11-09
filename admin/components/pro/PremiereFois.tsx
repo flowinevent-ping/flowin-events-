@@ -316,7 +316,7 @@ export default function PremiereFois() {
     <div className="pf" ref={haut}>
       <style dangerouslySetInnerHTML={{ __html: CSS }} />
       <header className="pf-top">
-        <Link href="/landing" className="pf-logo" aria-label="Flowin">Flow<em>in</em></Link>
+        <Link href="/landing" className="pf-logo" aria-label="Flowin Event">Flow<em>in</em> Event</Link>
         <span className="pf-badge">Espace pro</span>
         <span style={{ flex: 1 }} />
         <Link href="/pro/connexion" className="pf-lien">Déjà un compte ?</Link>
@@ -339,8 +339,8 @@ export default function PremiereFois() {
           <ul className="pf-promesses">
             <li><span className="pf-ic">1</span><div><b>Vous vous présentez</b><br />Votre SIRET suffit : l’annuaire officiel remplit le reste.</div></li>
             <li><span className="pf-ic">2</span><div><b>Vous créez votre accès</b><br />Un email, un mot de passe, et votre espace est ouvert.</div></li>
-            <li><span className="pf-ic">3</span><div><b>Vous choisissez votre offre et signez</b><br />Annuelle ou mensuelle, kit digital ou physique : bon de commande pré-rempli, signature électronique, virement ou prélèvement.</div></li>
-            <li><span className="pf-ic">4</span><div><b>Vous lancez votre première animation</b><br />Jeu, lots, QR par support : tout se règle depuis votre espace.</div></li>
+            <li><span className="pf-ic">3</span><div><b>Vous créez votre animation</b><br />Jeu, lots, QR par support : vous voyez votre jeu avant de payer.</div></li>
+            <li><span className="pf-ic">4</span><div><b>Vous publiez</b><br />Offre annuelle ou mensuelle, règlement par virement à la publication.</div></li>
           </ul>
           {selection && <div className="pf-info">Votre sélection : <b>{resumeSelection(selection)}</b>. Elle sera reprise dans votre bon de commande.</div>}
           <button className="pf-btn pf-grand" onClick={() => allerA(0)}>C’est parti</button>

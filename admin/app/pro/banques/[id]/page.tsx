@@ -21,7 +21,7 @@ export default async function EditerBanquePage({ params, searchParams }: { param
   return (
     <ProShell proName={data.pro?.nom ?? 'Mon établissement'} proId={proId} active="banques">
       {searchParams.depuis === 'jeu' && (
-        <a href={`/pro/nouvelle${q}${q ? '&' : '?'}type=animation`} style={{ display: 'inline-block', marginBottom: 14, fontSize: 13, fontWeight: 700, color: '#7A4FE0', textDecoration: 'none', background: 'rgba(122,79,224,.08)', borderRadius: 10, padding: '9px 14px' }}>
+        <a href={`/pro/nouvelle${q}${q ? '&' : '?'}type=animation`} style={{ display: 'inline-block', marginBottom: 14, fontSize: 13, fontWeight: 700, color: '#3B5CC4', textDecoration: 'none', background: 'rgba(122,79,224,.08)', borderRadius: 10, padding: '9px 14px' }}>
           ← Revenir au parcours « Créer mon animation » (onglet précédent, ou cliquez ici)
         </a>
       )}

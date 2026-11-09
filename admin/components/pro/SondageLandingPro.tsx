@@ -67,7 +67,7 @@ export default function SondageLandingPro({ s, nomsDuPro }: { s: SondageLanding;
               <td style={{ ...TD, fontWeight: 800 }}>{p.saisies}</td>
               <td style={TD}>
                 <span style={{ display: 'inline-block', width: 130, height: 8, borderRadius: 99, background: '#E3E8EF', overflow: 'hidden', verticalAlign: 'middle' }}>
-                  <span style={{ display: 'block', height: '100%', width: `${Math.max(4, Math.round(p.saisies / maxP * 100))}%`, background: `linear-gradient(90deg,#7A4FE0,${ACC})`, borderRadius: 99 }} />
+                  <span style={{ display: 'block', height: '100%', width: `${Math.max(4, Math.round(p.saisies / maxP * 100))}%`, background: `linear-gradient(90deg,#3B5CC4,${ACC})`, borderRadius: 99 }} />
                 </span>
               </td>
             </tr>
