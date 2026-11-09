@@ -7,8 +7,8 @@ Source unique de ce qui est demandé par Romain. Règles :
    l'**inventaire** du support existant (liste de ses blocs).
 4. Après production : refaire l'inventaire et comparer. Tout bloc disparu est soit remis, soit
    signalé à Romain avec la raison. Rien ne disparaît en silence.
-6. **Règle absolue (Romain, 09/11) : ne jamais recréer ce qui marche déjà dans l'application.** Tout existe : connexions, données Supabase, tableaux de bord, parcours de souscription, parcours de création, jeux et leur design, matériel. On va **d'abord chercher l'existant** ; s'il faut le redesigner, on le redesigne ; s'il faut l'améliorer, on l'améliore ; on change un parcours seulement s'il doit changer. Jamais repartir de zéro.
-5. Chaque livraison se termine par la **grille de contrôle** du livrable (critères ci-dessous, cochés
+5. **Règle absolue (Romain, 09/11) : ne jamais recréer ce qui marche déjà dans l'application.** Tout existe : connexions, données Supabase, tableaux de bord, parcours de souscription, parcours de création, jeux et leur design, matériel. On va **d'abord chercher l'existant** ; s'il faut le redesigner, on le redesigne ; s'il faut l'améliorer, on l'améliore ; on change un parcours seulement s'il doit changer. Jamais repartir de zéro.
+6. Chaque livraison se termine par la **grille de contrôle** du livrable (critères ci-dessous, cochés
    avec preuve : capture 360/390/430 px et ordinateur, lien).
 
 | N° | Livrable | Critères d'acceptation (mots de Romain) | État |
