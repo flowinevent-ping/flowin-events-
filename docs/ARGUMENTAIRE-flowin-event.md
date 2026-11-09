@@ -51,7 +51,17 @@ Avant toute livraison, chaque texte est relu contre ce fichier (et la liste « i
 - « Sonder son public, c'est avoir les moyens de répondre » : **rejeté** comme titre. Quiz : reprendre
   « questions bonus qui intéressent et sondent : les meilleurs indicateurs auprès du public ».
 
-## Super Event : avant, pendant, après (point crucial, Romain 09/11)
+## Super Event : votre événement gagne sur trois plans (Romain 09/11, version retenue)
+- Une communication pour votre événement, avant, pendant, après.
+- **Avant : augmentez la visibilité.** Votre plan de campagne habituel, plus le réseau Flowin.
+  Faites gagner des lots en lien avec votre événement, mettez en avant votre réseau.
+- **Pendant : favorisez le réseau local.** Devenez acteur du boost du commerce local.
+- **Après : détenez des chiffres utiles** pour communiquer après votre événement (partenaires,
+  institutions). Mieux connaître son public, garder le contact.
+- Dire « votre événement », pas « votre festival ».
+- Portes d'entrée : « J'organise un événement » / « Je suis un commerce : je participe à un Super Event ».
+
+## Super Event : avant, pendant, après (première version, Romain 09/11)
 - **Avant l'événement** : communiquez, faites venir les participants en faisant gagner des lots pour
   participer au festival : places de concert, places, réductions, goodies.
 - **Pendant l'événement** : faites-leur gagner des lots qui les font revenir chez les partenaires ;
