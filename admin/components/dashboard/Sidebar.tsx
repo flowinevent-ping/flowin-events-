@@ -276,14 +276,14 @@ export default function Sidebar() {
           <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
         </button>
         <span className="sa-sb-logo-dot" />
-        <span className="sa-mobile-titre">Flow<em>in</em></span>
+        <span className="sa-mobile-titre">Flow<em>in</em> Event</span>
       </div>
       {ouvert && <div className="sa-sb-backdrop" onClick={() => setOuvert(false)} />}
     <div className={`sa-sb${ouvert ? ' open' : ''}`}>
       {/* Logo */}
       <div className="sa-sb-logo">
         <div className="sa-sb-logo-dot" />
-        <span>Flow<em>in</em></span>
+        <span>Flow<em>in</em> Event</span>
       </div>
 
       {/* Navigation */}

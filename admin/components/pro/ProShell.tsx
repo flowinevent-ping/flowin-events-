@@ -38,7 +38,7 @@ const NAV: NavItem[] = [
   { key: 'operations', label: 'Mes animations', sous: 'Animations et super events', icon: 'calendar', route: '/pro' },
   { key: 'nouvelle', label: 'Nouvelle animation', sous: 'Créer ou rejoindre', icon: 'join', route: '/pro/nouvelle' },
   { key: 'scanner', label: 'Scanner un billet', sous: 'Remise des lots au téléphone', icon: 'scan', route: '/pro/scanner' },
-  { key: 'donnees', label: 'Mes contacts & stats', sous: 'Contacts consentants, trafic par support', icon: 'users', route: '/pro/donnees' },
+  { key: 'donnees', label: 'Mes contacts & stats', sous: 'Fichier client, trafic par support', icon: 'users', route: '/pro/donnees' },
   { key: 'compte', label: 'Mon profil', sous: 'Entreprise, RIB, factures, lots', icon: 'shop', route: '/pro/compte' },
 ]
 /* Les pages existantes gardent leur cle : elles se rangent sous l une des quatre. */
@@ -141,7 +141,7 @@ export default function ProShell({ proName, proId, active, children }: { proName
       <div style={{ padding: '4px 8px 18px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         {/* Logo texte de la landing : « Flow » encre + « in » bleu. */}
         <span style={{ display: 'flex', alignItems: 'baseline', gap: 7 }}>
-          <span className="fl-logo">Flow<em>in</em></span>
+          <span className="fl-logo">Flow<em>in</em> Event</span>
           <span style={{ fontSize: 10.5, fontWeight: 800, letterSpacing: '.12em', color: C.violet }}>PRO</span>
         </span>
         <button className="pro-drawer-close" onClick={() => setOpen(false)} aria-label="Fermer le menu" style={{ display: 'none', background: 'none', border: 'none', color: C.attenue, fontSize: 22, cursor: 'pointer', lineHeight: 1 }}>×</button>
@@ -211,7 +211,7 @@ export default function ProShell({ proName, proId, active, children }: { proName
       <main style={{ flex: 1, minWidth: 0 }}>
         <div style={{ background: '#fff', borderBottom: `1px solid ${C.bordure}`, height: 54, padding: '0 24px', display: 'flex', alignItems: 'center', gap: 10, fontSize: 13, color: C.attenue }}>
           <button className="pro-hamburger" onClick={() => setOpen(true)} aria-label="Menu" style={{ display: 'none', background: 'none', border: 'none', cursor: 'pointer', color: C.accent, padding: 0 }}><Icon k="more" /></button>
-          <span className="fl-logo" style={{ fontSize: 15 }}>Flow<em>in</em></span><span>›</span><span style={{ fontWeight: 800, color: C.texte }}>{page?.label ?? 'Mes animations'}</span>
+          <span className="fl-logo" style={{ fontSize: 15 }}>Flow<em>in</em> Event</span><span>›</span><span style={{ fontWeight: 800, color: C.texte }}>{page?.label ?? 'Mes animations'}</span>
         </div>
         <div className="pro-main-pad" style={{ padding: 26, maxWidth: 1180 }}>
           {sansPro === 'cherche' && <div style={{ fontSize: 14, color: C.attenue }}>Chargement de votre espace…</div>}
