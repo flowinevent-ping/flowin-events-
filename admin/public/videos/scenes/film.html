@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=540">
+<meta name="robots" content="noindex">
+<title>Film Flowin Event</title>
+<style>
+:root{--encre:#1B3A5C;--bleu:#3B5CC4;--bleuF:#2B47A8;--bleuC:#E3E9F8;--papier:#F4F6F9;--orange:#C2410C;--ok:#0B7A4F;--trait:#DCE3EC}
+*{box-sizing:border-box;margin:0}
+html,body{width:540px;height:960px;overflow:hidden;background:#fff;font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;color:var(--encre)}
+#st{position:relative;width:540px;height:960px;overflow:hidden;background:linear-gradient(#fff,#F4F6F9)}
+.a{position:absolute;will-change:transform,opacity}
+.cap{left:36px;right:36px;top:70px;font-size:38px;font-weight:900;line-height:1.1;letter-spacing:-.02em}
+.cap em{color:var(--bleu);font-style:normal}
+.sub{left:36px;right:36px;top:190px;font-size:21px;font-weight:600;color:#5a6b80;line-height:1.35}
+.logo{left:36px;top:24px;font-weight:900;font-size:20px}.logo b{color:var(--bleu)}
+/* téléphone */
+.phone{width:250px;height:500px;border-radius:38px;background:#111827;padding:10px;box-shadow:0 30px 60px -20px rgba(27,58,92,.5)}
+.scr{width:100%;height:100%;border-radius:30px;background:#fff;overflow:hidden;position:relative}
+.scr .top{height:58px;background:var(--bleu);color:#fff;display:flex;align-items:center;gap:8px;padding:0 14px;font-weight:800;font-size:15px}
+.mono{width:30px;height:30px;border-radius:9px;background:#fff;color:var(--bleu);display:grid;place-items:center;font-weight:900;font-size:13px}
+.view{position:absolute;left:0;right:0;top:58px;bottom:0;padding:16px 14px}
+.q{font-size:17px;font-weight:800;line-height:1.25;margin-bottom:14px}
+.opt{border:2px solid var(--trait);border-radius:14px;padding:11px 12px;font-size:15px;font-weight:700;margin-bottom:9px;background:#fff}
+.opt.on{border-color:var(--bleu);background:var(--bleuC)}
+.btn{background:var(--bleu);color:#fff;border-radius:99px;text-align:center;font-weight:800;padding:13px;font-size:16px}
+.kick{font-size:12px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--bleu);margin-bottom:6px}
+/* décor */
+.vitrine{width:300px;height:260px}
+.affiche{width:120px;height:160px;border-radius:10px;background:#fff;border:3px solid var(--encre);display:flex;flex-direction:column;align-items:center;padding:10px;gap:6px}
+.affiche b{font-size:13px;text-align:center}
+.qr{width:70px;height:70px;background:
+ conic-gradient(from 90deg at 30% 30%,#1B3A5C 25%,transparent 0) 0 0/14px 14px,#fff;border:4px solid var(--encre);border-radius:6px}
+.doigt{width:46px;height:46px;border-radius:50%;background:rgba(59,92,196,.25);border:3px solid var(--bleu)}
+.ticket{width:260px;border-radius:18px;background:#fff;border:3px dashed var(--bleu);padding:18px;text-align:center}
+.ticket .g{font-size:26px;font-weight:900;margin:6px 0}
+.code{font-size:30px;font-weight:900;letter-spacing:.25em;color:var(--bleu)}
+.card{background:#fff;border:1px solid var(--trait);border-radius:16px;padding:12px 14px;box-shadow:0 10px 24px -16px rgba(27,58,92,.5)}
+.bar{height:12px;border-radius:9px;background:var(--bleuC);overflow:hidden;margin-top:6px}.bar i{display:block;height:100%;background:var(--bleu)}
+.big{font-size:40px;font-weight:900;font-variant-numeric:tabular-nums}
+.fin{left:0;right:0;top:0;bottom:0;background:var(--encre);color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;text-align:center;padding:40px}
+.fin .l{font-size:44px;font-weight:900}.fin .l b{color:#8DA2EC}
+.fin .s{font-size:22px;font-weight:700;opacity:.85}
+.fin .c{background:var(--bleu);border-radius:99px;padding:16px 28px;font-size:22px;font-weight:800}
+.check{width:64px;height:64px;border-radius:50%;background:var(--ok);color:#fff;display:grid;place-items:center;font-size:36px;font-weight:900}
+.field{border:2px solid var(--trait);border-radius:12px;padding:11px 12px;font-size:16px;font-weight:700;margin-bottom:10px;min-height:46px}
+.lbl{font-size:12px;font-weight:800;color:#5a6b80;margin-bottom:4px}
+.tile{border:2px solid var(--trait);border-radius:14px;padding:12px;font-weight:800;font-size:15px;margin-bottom:8px}
+.tile.on{border-color:var(--bleu);background:var(--bleuC)}
+</style></head>
+<body><div id="st"></div>
+<script>
+/* Film scénarisé, rendu image par image : window.render(t) dessine l'instant t (secondes). */
+var FILM=(location.hash||'#participant').slice(1), st=document.getElementById('st');
+function e(h){var d=document.createElement('div');d.innerHTML=h;return d.firstElementChild;}
+function cl(x){return x<0?0:x>1?1:x}
+function ease(x){x=cl(x);return x<.5?2*x*x:1-Math.pow(-2*x+2,2)/2}
+function win(t,a,b){return cl((t-a)/(b-a))}
+function at(el,x,y,s,o){el.style.transform='translate('+x+'px,'+y+'px) scale('+(s==null?1:s)+')';el.style.opacity=o==null?1:o;}
+var S=[]; function scene(a,b,build,anim){S.push({a:a,b:b,build:build,anim:anim,els:null});}
+function cap(t1,t2){return '<div class="a cap">'+t1+'</div>'+(t2?'<div class="a sub">'+t2+'</div>':'');}
+
+if(FILM==='participant'){
+ scene(0,6,function(){return cap('Tu passes devant <em>la vitrine</em>.','Une affiche, un QR : flashe et joue.')+
+   '<div class="a vitrine" style="left:120px;top:330px"><svg viewBox="0 0 300 260" width="300" height="260"><rect x="10" y="40" width="280" height="210" rx="10" fill="#fff" stroke="#1B3A5C" stroke-width="5"/><path d="M10 40h280l-20-34H30z" fill="#3B5CC4"/><rect x="40" y="80" width="110" height="160" fill="#E3E9F8" stroke="#1B3A5C" stroke-width="4"/><rect x="180" y="110" width="80" height="130" fill="#fff" stroke="#1B3A5C" stroke-width="4"/></svg></div>'+
+   '<div class="a affiche" style="left:166px;top:400px"><b>JOUE ET GAGNE</b><div class="qr"></div><b style="font-size:11px">Boulangerie Exemple</b></div>'+
+   '<div class="a phone" style="left:145px;top:960px"><div class="scr"><div class="top"><span class="mono">BE</span>Appareil photo</div><div class="view" style="display:grid;place-items:center"><div class="qr" style="width:120px;height:120px"></div></div></div></div>';},
+  function(t,el){var c=el.querySelectorAll('.a');at(c[0],0,40*(1-ease(win(t,0,.8))),1,ease(win(t,0,.8)));at(c[1],0,0,1,ease(win(t,.5,1.3)));
+   var ph=c[4];at(ph,0,-420*ease(win(t,2.2,3.6)),1,1);at(c[2],0,0,1-0.1*ease(win(t,2.2,3.6)),1);});
+ scene(6,15,function(){return cap('Tu réponds <em>au quiz</em>.','Trois questions sur le métier de ton commerçant.')+
+   '<div class="a phone" style="left:145px;top:300px"><div class="scr"><div class="top"><span class="mono">BE</span>Boulangerie Exemple</div><div class="view"><div class="kick">Question 1 / 3</div><div class="q">Quel secret fait la croûte d’une bonne baguette ?</div><div class="opt">Un long repos de la pâte</div><div class="opt">Un ingrédient surprise</div><div class="opt">Un four à bois</div></div></div></div><div class="a doigt" style="left:0;top:0"></div>';},
+  function(t,el){var c=el.querySelectorAll('.a');at(c[0],0,0,1,ease(win(t,0,.6)));at(c[1],0,0,1,ease(win(t,.3,1)));
+   var o=el.querySelectorAll('.opt'),d=c[3],p=ease(win(t,2,3.2));at(d,330-120*p,900-300*p,1,win(t,1.8,2.2)*(1-win(t,4.2,4.6)));
+   o[0].className='opt'+(t>3.3?' on':'');
+   var q=el.querySelector('.q'),k=el.querySelector('.kick');
+   if(t>5.2){k.textContent='Question bonus';q.textContent='Comment as-tu connu ce commerce ?';o[0].textContent='Bouche à oreille';o[1].textContent='Réseaux sociaux';o[2].textContent='En passant devant';o[0].className='opt';o[2].className='opt'+(t>7?' on':'');at(d,330-90*p,900-180,1,win(t,6.2,6.6)*(1-win(t,8,8.4)));}
+   else {o[2].className='opt';}});
+ scene(15,22,function(){return cap('Tu gagnes <em>un lot</em>.','À retirer en boutique, avant la date indiquée.')+
+   '<div class="a ticket" style="left:140px;top:360px"><div class="kick">Gagné</div><div class="g">Un croissant offert</div><div style="font-size:16px;color:#5a6b80;font-weight:700">À retirer avant le 30/11</div><div style="margin-top:14px" class="code">4821</div></div>';},
+  function(t,el){var c=el.querySelectorAll('.a');at(c[0],0,0,1,ease(win(t,0,.6)));at(c[1],0,0,1,ease(win(t,.3,1)));var p=ease(win(t,.8,1.8));at(c[2],0,60*(1-p),.7+.3*p,p);});
+ scene(22,29,function(){return cap('Tu <em>reviens</em> le chercher.','Le commerçant valide ton code. Il garde le lien avec toi.')+
+   '<div class="a card" style="left:70px;top:380px;width:400px;text-align:center"><div class="lbl">Code de retrait</div><div class="code">4821</div><div class="btn" style="margin-top:14px">Valider le retrait</div></div><div class="a check" style="left:238px;top:620px">✓</div>';},
+  function(t,el){var c=el.querySelectorAll('.a');at(c[0],0,0,1,ease(win(t,0,.6)));at(c[1],0,0,1,ease(win(t,.3,1)));at(c[2],0,0,1,ease(win(t,.6,1.4)));var p=win(t,2.6,3.2);at(c[3],0,0,.5+.5*ease(p),p);});
+ scene(29,34,function(){return '<div class="a fin"><div class="l">Flashe. Joue. <b>Gagne.</b></div><div class="s">Et reviens chez tes commerçants.</div><div class="s" style="font-size:18px">Flowin Event</div></div>';},
+  function(t,el){at(el.querySelector('.fin'),0,0,1,ease(win(t,0,.6)));});
+}else{
+ scene(0,6,function(){return cap('Votre commerce, <em>animé</em> en quelques minutes.','Plug and play : un QR, un jeu, vos clients reviennent.')+
+   '<div class="a phone" style="left:145px;top:330px"><div class="scr"><div class="top">Flowin Event · Espace pro</div><div class="view"><div class="lbl">Numéro SIRET</div><div class="field" id="siret"></div><div class="card" id="trouve" style="opacity:0"><b>Boulangerie Exemple</b><div style="font-size:13px;color:#5a6b80">Adresse et activité remplies</div></div></div></div></div>';},
+  function(t,el){var c=el.querySelectorAll('.a');at(c[0],0,0,1,ease(win(t,0,.6)));at(c[1],0,0,1,ease(win(t,.4,1.1)));at(c[2],0,60*(1-ease(win(t,.6,1.6))),1,ease(win(t,.6,1.6)));
+   var s='123 456 789 00012',n=Math.floor(cl((t-1.8)/2)*s.length);el.querySelector('#siret').textContent=s.slice(0,n);el.querySelector('#trouve').style.opacity=ease(win(t,4,4.6));});
+ scene(6,13,function(){return cap('Vous choisissez <em>votre jeu</em>.','Quiz, quiz + bonus, tombola, roue de la fortune.')+
+   '<div class="a phone" style="left:145px;top:330px"><div class="scr"><div class="top">Nouvelle animation</div><div class="view"><div class="tile">Quiz</div><div class="tile" id="qb">Quiz + bonus</div><div class="tile">Tombola</div><div class="tile">Roue de la fortune</div><div class="lbl" style="margin-top:10px">Lots</div><div class="card" id="lot" style="opacity:0"><b>Croissant offert</b> × 20<div style="font-size:12px;color:#5a6b80">À retirer avant le 30/11</div></div></div></div></div><div class="a doigt"></div>';},
+  function(t,el){var c=el.querySelectorAll('.a');at(c[0],0,0,1,ease(win(t,0,.6)));at(c[1],0,0,1,ease(win(t,.4,1.1)));at(c[2],0,0,1,1);
+   var p=ease(win(t,1.4,2.6));at(c[3],330-110*p,920-480*p,1,win(t,1.2,1.6)*(1-win(t,3.2,3.6)));el.querySelector('#qb').className='tile'+(t>2.7?' on':'');el.querySelector('#lot').style.opacity=ease(win(t,4,4.8));});
+ scene(13,20,function(){return cap('Vous voyez votre jeu, <em>puis vous publiez</em>.','Règlement par virement à la publication.')+
+   '<div class="a phone" style="left:145px;top:330px"><div class="scr"><div class="top">Publier</div><div class="view"><div class="card"><b>Offre annuelle</b><div style="font-size:15px;font-weight:800">990 € HT / an</div></div><div class="card" style="margin-top:10px;font-size:13px;line-height:1.5"><b>Virement</b><br>BAITA EURL<br>Réf. ANIM-3F9A2C</div><div class="btn" id="pub" style="margin-top:14px">Publier mon animation</div></div></div></div><div class="a doigt"></div>';},
+  function(t,el){var c=el.querySelectorAll('.a');at(c[0],0,0,1,ease(win(t,0,.6)));at(c[1],0,0,1,ease(win(t,.4,1.1)));at(c[2],0,0,1,1);
+   var p=ease(win(t,2,3.2));at(c[3],330-100*p,920-250*p,1,win(t,1.8,2.2)*(1-win(t,4,4.4)));el.querySelector('#pub').style.background=t>3.3&&t<3.9?'#2B47A8':'';});
+ scene(20,27,function(){return cap('Votre QR est prêt, <em>un par support</em>.','Vitrine, caisse, réseaux sociaux : vous savez d’où viennent vos clients.')+
+   '<div class="a card" style="left:60px;top:340px;width:200px;text-align:center"><div class="qr" style="margin:0 auto;width:110px;height:110px"></div><b>Vitrine</b></div><div class="a card" style="left:280px;top:340px;width:200px;text-align:center"><div class="qr" style="margin:0 auto;width:110px;height:110px"></div><b>Réseaux sociaux</b></div><div class="a card" style="left:170px;top:560px;width:200px;text-align:center"><div class="qr" style="margin:0 auto;width:110px;height:110px"></div><b>Caisse</b></div>';},
+  function(t,el){var c=el.querySelectorAll('.a');at(c[0],0,0,1,ease(win(t,0,.6)));at(c[1],0,0,1,ease(win(t,.4,1.1)));for(var i=2;i<5;i++){var p=ease(win(t,.8+.5*(i-2),1.6+.5*(i-2)));at(c[i],0,40*(1-p),.8+.2*p,p);}});
+ scene(27,35,function(){return cap('Vous mesurez <em>chaque campagne</em>.','Votre fichier client grandit à chaque partie.')+
+   '<div class="a card" style="left:50px;top:330px;width:210px"><div class="big" id="n1">0</div><div style="font-weight:700;color:#5a6b80">personnes venues</div></div><div class="a card" style="left:280px;top:330px;width:210px"><div class="big" id="n2">0</div><div style="font-weight:700;color:#5a6b80">contacts dans votre fichier</div></div>'+
+   '<div class="a card" style="left:50px;top:500px;width:440px"><b>D’où ils viennent</b><div style="margin-top:8px;font-weight:700">Vitrine</div><div class="bar"><i id="b1"></i></div><div style="margin-top:8px;font-weight:700">Réseaux sociaux</div><div class="bar"><i id="b2"></i></div><div style="margin-top:8px;font-weight:700">Caisse</div><div class="bar"><i id="b3"></i></div></div>';},
+  function(t,el){var c=el.querySelectorAll('.a');at(c[0],0,0,1,ease(win(t,0,.6)));at(c[1],0,0,1,ease(win(t,.4,1.1)));for(var i=2;i<5;i++)at(c[i],0,30*(1-ease(win(t,.6,1.4))),1,ease(win(t,.6,1.4)));
+   var p=ease(win(t,1.4,4));el.querySelector('#n1').textContent=Math.round(412*p);el.querySelector('#n2').textContent=Math.round(268*p);
+   el.querySelector('#b1').style.width=46*p+'%';el.querySelector('#b2').style.width=31*p+'%';el.querySelector('#b3').style.width=23*p+'%';});
+ scene(35,40,function(){return '<div class="a fin"><div class="l">Animer. Booster. <b>Fidéliser.</b></div><div class="s">Animez votre clientèle. Faites-les revenir.</div><div class="c">Je crée mon jeu</div><div class="s" style="font-size:18px">Flowin Event · chiffres d’exemple</div></div>';},
+  function(t,el){at(el.querySelector('.fin'),0,0,1,ease(win(t,0,.6)));});
+}
+var logo=e('<div class="a logo">Flow<b>in</b> Event</div>');
+window.DUREE=S[S.length-1].b;
+window.render=function(t){
+ for(var i=0;i<S.length;i++){var s=S[i],on=t>=s.a&&t<s.b;
+  if(on&&!s.els){s.els=e('<div style="position:absolute;inset:0">'+s.build()+'</div>');st.appendChild(s.els);}
+  if(!on&&s.els){st.removeChild(s.els);s.els=null;}
+  if(on){s.anim(t-s.a,s.els);var f=Math.min(win(t,s.a,s.a+.35),1-win(t,s.b-.35,s.b));s.els.style.opacity=f;}}
+ if(!logo.parentNode)st.appendChild(logo);
+};
+window.render(0);
+</script></body></html>
