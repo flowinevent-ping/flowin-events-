@@ -34,3 +34,36 @@ lot, graphique), un doigt qui touche l'écran, compteurs qui montent. Fin sur l'
 
 ## À valider
 Pour chaque film : « ok » ou « scène n° + une phrase ». Son : muet, musique, ou voix off ?
+
+## Version 2 — format réseaux sociaux (TikTok, Instagram), demandée par Romain le 09/11
+
+Principe : des personnages, des situations vécues, rythme rapide (plans de 1,5 à 3 s), accroche
+dans les 2 premières secondes, gros sous-titres (vidéo regardée sans le son), 25 à 35 s.
+Personnages en illustration « flat » soignée, toujours les mêmes, cohérents (pas de bonhommes
+bâclés) : **Julie**, boulangère ; **Léo**, client ; **Sam**, organisateur de festival ; **Nadia**,
+fleuriste partenaire.
+
+### A. Flowin Animation — « POV : ta boutique est vide un mardi »
+1. (2 s) Julie derrière son comptoir, boutique vide, horloge qui tourne. « POV : mardi, 15 h. Personne. »
+2. (2 s) Dehors, des passants défilent sans regarder la vitrine. « Le monde passe… »
+3. (3 s) Julie colle une affiche « Joue et gagne » avec son QR. « …alors Julie installe Flowin. Plug and play. »
+4. (3 s) Léo s'arrête, flashe, sourit : quiz « Quel secret fait la croûte d'une bonne baguette ? ». « Ses clients jouent et découvrent son métier. »
+5. (3 s) Léo envoie le jeu à deux amis (bulles de messages). « Ils font jouer leurs amis. »
+6. (3 s) Ticket « Croissant offert, avant le 30/11 ». « Ils gagnent… »
+7. (3 s) Samedi : Léo revient avec ses amis, Julie valide le code, la boutique est pleine. « …et ils reviennent. »
+8. (3 s) Julie sur son téléphone : compteurs qui montent, QR vitrine / réseaux sociaux / caisse. « Elle sait ce qui marche. Son fichier client grandit. »
+9. (3 s) Avant / après : boutique vide → boutique pleine. « Animer · Booster · Fidéliser. »
+10. (2 s) « Et vous ? Je crée mon jeu » + logo Flowin Event.
+
+### B. Flowin Super Event — « Ton festival, dans toute la ville »
+1. (2 s) Sam devant sa scène, affiche à la main. « Ton festival commence dans 3 semaines. »
+2. (3 s) Sam diffuse : l'affiche part vers la boulangerie de Julie, la boutique de Nadia, le café. « Connecte ton événement à tout le réseau local. »
+3. (3 s) Avant : Léo gagne une place de concert en jouant chez Nadia. « Avant : plus de visibilité. »
+4. (3 s) Pendant : Léo, bracelet du festival, revient chercher son lot chez Julie. « Pendant : le commerce local vit. »
+5. (3 s) Après : tirage au sort sur scène, Sam montre les chiffres à ses partenaires. « Après : des chiffres utiles. »
+6. (3 s) Compteurs : 56 % / plus de 70 lots. « Nuits du Sud 2026. »
+7. (3 s) Nadia (commerce) : « Je suis station jeu, des festivaliers chez moi. » Sam : « Et mes partenaires diffusent. »
+8. (2 s) « La super diffusion locale. Flowin Super Event » + Prendre rendez-vous / Je participe.
+
+### Versions courtes
+Chaque film décliné en 15 s (plans 1, 3, 4, 7, 9, 10) pour Reels / TikTok.
