@@ -39,7 +39,7 @@ Avant toute livraison, chaque texte est relu contre ce fichier (et la liste « i
   sois présent, en proximité. »
 - Commerce : « Connecte ton commerce aux événements locaux. Donne de la visibilité auprès des
   festivaliers et spectateurs. »
-- Promesse : « Un événement. Tous ses partenaires. Un seul jeu. »
+- ~~« Un événement. Tous ses partenaires. Un seul jeu. »~~ rejeté comme accroche par Romain le 09/11 (pas d'impact).
 - Les partenaires diffusent l'événement (jamais « financent »).
 
 ## Super Event : avant, pendant, après (point crucial, Romain 09/11)

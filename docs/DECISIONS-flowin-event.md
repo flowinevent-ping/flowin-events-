@@ -244,3 +244,15 @@ que sur instruction explicite de Romain.
 - Plaquettes : on est en V2, on produit la **V3**, poussée dans le super admin (Outils et
   communication), comme les vidéos de présentation.
 - L'app (souscription, création) est redesignée aux couleurs de la plaquette : même rendu des deux côtés.
+
+## Retour plaquette Super Event V3 (09/11/2026, Romain)
+
+- « Un événement. Tous ses partenaires. Un seul jeu. » : **rejeté** comme accroche (ne dit rien,
+  pas d'impact). Écrire des accroches qui disent la force et le bénéfice du Super Event.
+- Chiffres clés (56 % / 70) : même taille, alignés.
+- Pas de pavés de couleur sans continuité ; homogénéité visuelle.
+- Illustrations : « mieux vaut un dessin qu'un long discours ». Dessins pédagogiques, compris en un
+  coup d'œil, qui expliquent le bénéfice. Moins de texte.
+- Couleurs Super Event V3 : un peu mieux (base à garder).
+- Niveau attendu : design exceptionnel, artistique, marketing, impactant, puissant, esthétique ; un
+  produit présenté comme une vraie révolution. Ne pas demander d'explications déjà données.
