@@ -2,6 +2,7 @@ import Link from 'next/link'
 import ParcoursCreation from '@/components/creation/ParcoursCreation'
 import { chargerSupersOuverts } from '@/lib/superEventsOuverts'
 import { CHARTE_PRO as C, POLICE_PRO } from '@/lib/charte'
+import CaptureSource from '@/components/CaptureSource'
 
 export const dynamic = 'force-dynamic'
 export const metadata = { title: 'Rejoindre un super event — Flowin' }
@@ -22,6 +23,7 @@ export default async function Page({ searchParams }: { searchParams: { se?: stri
         <span style={{ flex: 1 }} />
         <Link href="/pro/connexion?retour=%2Frejoindre" style={{ fontSize: 13, fontWeight: 800, color: C.accent, textDecoration: 'none' }}>Se connecter</Link>
       </header>
+      <CaptureSource />
       <main style={{ padding: '22px 16px 40px', maxWidth: 1180, margin: '0 auto' }}>
         <ParcoursCreation
           mode="visiteur" pro={null} banques={[]} supers={supers} packs={[]}

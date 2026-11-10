@@ -620,4 +620,6 @@
 })();
 </script>
 <script src="/validation/plaquette-demo.js"></script>
+<script>/* Canal d'origine (?src=, QR du film organisateur) : retenu a la 1re visite (lib/source.ts) */
+(function(){var m=/[?&]src=([a-z0-9_-]{1,40})/i.exec(location.search);try{if(m&&!window.localStorage.getItem('flowin_src'))window.localStorage.setItem('flowin_src',m[1].toLowerCase());}catch(e){}})();</script>
 </body>

@@ -1,6 +1,7 @@
 import { supabase } from '@/lib/supabase'
 import { fetchLotsSuperEvent } from '@/lib/superEventLots'
 import SuperEventClient from './SuperEventClient'
+import CaptureSource from '@/components/CaptureSource'
 
 export const revalidate = 60
 
@@ -42,6 +43,8 @@ export default async function Page({ params }: Props) {
   const autres = (autresRes.data ?? []).map((s) => ({ ...s, nb: counts[s.id] || 0 }))
 
   return (
+    <>
+    <CaptureSource />
     <SuperEventClient
       se={seRes.data}
       lots={lotsRes}
@@ -49,5 +52,6 @@ export default async function Page({ params }: Props) {
       sponsors={sponsorsRes.data ?? []}
       autres={autres}
     />
+    </>
   )
 }

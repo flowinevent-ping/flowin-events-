@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import CarteCommercesPublique from './CarteCommercesPublique'
+import CaptureSource from '@/components/CaptureSource'
 
 export const metadata: Metadata = {
   title: 'Où jouer · Flowin',
@@ -7,5 +8,5 @@ export const metadata: Metadata = {
 }
 
 export default function Page() {
-  return <CarteCommercesPublique />
+  return <><CaptureSource /><CarteCommercesPublique /></>
 }
