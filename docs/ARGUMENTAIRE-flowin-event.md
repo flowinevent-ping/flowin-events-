@@ -139,3 +139,15 @@ Avant toute livraison, chaque texte est relu contre ce fichier (et la liste « i
   événements**, apparaît en **station jeu** ou en **simple sponsor**.
 - Dans l'application : ses coordonnées, sa **géolocalisation**, jeu **digital ou physique**, quiz,
   bonus, sondage ; **fichier client qui grandit** → diffusion de ses offres, produits, services.
+
+## Compléments de Romain (10/11/2026)
+- **Plug and play** : argument fort, à mettre en avant.
+- Animation : **« Mieux qu'une carte de fidélité : une animation vivante qui vous permet de garder le
+  contact, animé, avec vos clients, vos services, vos produits, votre marque. »**
+- Super Event organisateur : **« Démultipliez votre communication avec la force du réseau local.
+  Boostez la visibilité. En proximité. »**
+- Argument de réseau : si tous les commerces adhèrent à Flowin, chacun apparaît sur la **carte
+  Flowin, mieux qu'un Google Maps**, et gagne en **attractivité** : **lots flash, promotions flash**.
+- L'animation du fichier client est **mieux qu'une simple relance email** pour donner des offres :
+  elle demande de la **participation** et dynamise le jeu.
+- **Effet cadeau** : les gagnants peuvent **offrir leur lot** à quelqu'un d'autre.
