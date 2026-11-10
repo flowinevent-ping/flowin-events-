@@ -32,6 +32,7 @@ import { CARD, MUTED, H1, SUB } from '@/lib/proui'
 import { Ico } from '@/lib/proicons'
 import ReglageTirage from '@/components/operations/ReglageTirage'
 import { messageFr } from '@/lib/erreursFr'
+import { relancerLotsInApp } from '@/lib/relanceLots'
 
 const input: React.CSSProperties = {
   border: '1.5px solid #E3E8EF', borderRadius: 10, padding: '10px 12px',
@@ -85,6 +86,8 @@ export function BlocGagnants({ op, data, onChange }: { op: DonneesOperation; dat
         }}>{message.texte}</div>
       )}
 
+      <RelancerLots op={op} setMessage={setMessage} onChange={onChange} />
+
       {op.type === 'event' && op.stations[0] && <ReglageTirage evId={op.stations[0].id} />}
       {op.type === 'event'
         ? <Tirage op={op} data={data} setMessage={setMessage} onChange={onChange} />
@@ -105,6 +108,31 @@ export function BlocGagnants({ op, data, onChange }: { op: DonneesOperation; dat
         </div>
       ))}
     </>
+  )
+}
+
+/** « Relancer des lots » : tous les gagnants dont le lot n'est pas utilisé, en un clic, dans l'application. */
+function RelancerLots({ op, setMessage, onChange }: { op: DonneesOperation; setMessage: (m: Msg) => void; onChange: () => void }) {
+  const [envoi, setEnvoi] = useState(false)
+  const aRelancer = op.gagnants.filter(g => g.etat !== 'retire' && g.etat !== 'annule')
+  if (aRelancer.length === 0) return null
+  const lancer = async () => {
+    if (typeof window !== 'undefined' && !window.confirm(`Relancer ${aRelancer.length} gagnant${aRelancer.length > 1 ? 's' : ''} dans l’application ?`)) return
+    setEnvoi(true); setMessage(null)
+    const r = await relancerLotsInApp(aRelancer.map(g => Number(g.id)))
+    setEnvoi(false)
+    setMessage(r.ok
+      ? { ok: true, texte: r.n > 0 ? `${r.n} gagnant${r.n > 1 ? 's' : ''} relancé${r.n > 1 ? 's' : ''} dans l’application.` : 'Aucun gagnant à relancer (compte joueur absent).' }
+      : { ok: false, texte: `Relance impossible — ${messageFr({ message: r.erreur ?? '' })}` })
+    if (r.ok) onChange()
+  }
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap', marginBottom: 12 }}>
+      <button style={btnPrimaire} disabled={envoi} onClick={lancer} data-relancer-lots>
+        <Ico k="bell" size={13} style={{ marginRight: 6, verticalAlign: -2 }} />{envoi ? 'Relance…' : `Relancer des lots (${aRelancer.length})`}
+      </button>
+      <span style={{ fontSize: 11.5, ...MUTED }}>Lots non utilisés · dans l’application, l’e-mail en relance.</span>
+    </div>
   )
 }
 

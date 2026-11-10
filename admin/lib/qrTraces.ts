@@ -47,6 +47,8 @@ export interface QrTrace {
   parDefaut?: boolean
   /** Code court du QR permanent (sql/09-qr-permaliens.sql) ; null = pas encore de code (SQL non applique). */
   code_court?: string | null
+  /** Archive (sql/2026-11-10-sa-carte-relance.sql) : le QR reste valable au scan, il sort des listes. */
+  archive_le?: string | null
 }
 
 /** Lien a imprimer / copier / encoder pour un QR : le permalien /q/<code> quand le QR a un code
@@ -87,11 +89,11 @@ export function slugQr(nom: string, support: string, type: TypeQr, existants: st
   return s
 }
 
-type LigneQr = QrStation & { support?: string | null; type_qr?: string | null; code_court?: string | null }
+type LigneQr = QrStation & { support?: string | null; type_qr?: string | null; code_court?: string | null; archive_le?: string | null }
 
 export function versQrTrace(r: LigneQr): QrTrace {
   const type: TypeQr = r.type_qr === 'digital' || r.type_qr === 'physique' ? r.type_qr : (estDigital(r.source_qr) ? 'digital' : 'physique')
-  return { id: r.id, nom: r.nom, support: r.support ?? null, type, source_qr: r.source_qr, publie: r.publie !== false, code_court: r.code_court ?? null }
+  return { id: r.id, nom: r.nom, support: r.support ?? null, type, source_qr: r.source_qr, publie: r.publie !== false, code_court: r.code_court ?? null, archive_le: r.archive_le ?? null }
 }
 
 export async function fetchQrTraces(eventId: string): Promise<QrTrace[]> {
@@ -145,6 +147,18 @@ export async function creerQrTrace(eventId: string, p: { nom: string; support: s
   if (r.error || !r.data) return { qr: null, erreur: r.error?.message ?? 'QR non enregistré' }
   const qr = versQrTrace(r.data as LigneQr)
   return { qr: { ...qr, support: qr.support ?? p.support, type: p.type } }
+}
+
+export async function renommerQrTrace(id: string, nom: string): Promise<boolean> {
+  const n = nom.trim()
+  if (!n) return false
+  const { error } = await supabase.from('qr_stations').update({ nom: n }).eq('id', id)
+  return !error
+}
+
+export async function archiverQrTrace(id: string, archive: boolean): Promise<boolean> {
+  const { error } = await supabase.from('qr_stations').update({ archive_le: archive ? new Date().toISOString() : null }).eq('id', id)
+  return !error
 }
 
 export async function publierQrTrace(id: string, publie: boolean): Promise<boolean> {

@@ -324,7 +324,7 @@ export default function EventDrawer() {
             </div>
             <div className="sa-field">
               <label className="sa-label">Couleur</label>
-              <input className="sa-input" type="color" value={form.couleur ?? '#7A4FE0'} onChange={f('couleur')} />
+              <input className="sa-input" type="color" value={form.couleur ?? '#3B5CC4'} onChange={f('couleur')} />
             </div>
             <div className="sa-field">
               <label className="sa-label">Super Event</label>

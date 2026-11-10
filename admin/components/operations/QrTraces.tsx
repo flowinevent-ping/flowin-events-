@@ -17,7 +17,7 @@
 import { useEffect, useState } from 'react'
 import Diffusion from '@/components/dashboard/Diffusion'
 import {
-  SUPPORTS_QR, typeParDefaut, fetchQrTraces, avecDefauts, creerQrTrace, publierQrTrace,
+  SUPPORTS_QR, typeParDefaut, fetchQrTraces, avecDefauts, creerQrTrace, publierQrTrace, renommerQrTrace, archiverQrTrace,
   assurerQrParDefaut, changerJeuStation, urlDuQr, estPermanent,
   type QrTrace, type TypeQr,
 } from '@/lib/qrTraces'
@@ -122,6 +122,8 @@ export default function QrTraces({ eventId, module, titre, mode, grille = false,
   const [jeuChoix, setJeuChoix] = useState<string>(module || 'quiz')
   const [jeuMsg, setJeuMsg] = useState<{ ok: boolean; t: string } | null>(null)
   const [jeuOccupe, setJeuOccupe] = useState(false)
+  const [edition, setEdition] = useState<{ id: string; nom: string } | null>(null)
+  const [voirArchives, setVoirArchives] = useState(false)
   useEffect(() => { setJeu(module || 'nds2026'); setJeuChoix(module || 'quiz') }, [module, eventId])
   const charger = () => { fetchQrTraces(eventId).then(setQrs) }
   /* Charge, puis cree (une fois) les QR par defaut en base pour qu'ils aient un code permanent. */
@@ -157,7 +159,21 @@ export default function QrTraces({ eventId, module, titre, mode, grille = false,
     setOuvert(r.qr.source_qr)
   }
 
-  const tous = avecDefauts(qrs)
+  async function renommer() {
+    if (!edition || !edition.nom.trim()) return
+    const ok = await renommerQrTrace(edition.id, edition.nom)
+    if (ok) { setEdition(null); charger() } else setErreur('Le QR n’a pas pu être renommé.')
+  }
+  async function archiver(q: QrTrace, archive: boolean) {
+    if (!q.id) return
+    if (archive && typeof window !== 'undefined' && !window.confirm(`Archiver « ${q.nom} » ?\n\nIl sort de la liste ; un QR déjà imprimé reste valable.`)) return
+    const ok = await archiverQrTrace(q.id, archive)
+    if (ok) charger(); else setErreur('Action impossible.')
+  }
+
+  const tousAvecArchives = avecDefauts(qrs)
+  const archives = tousAvecArchives.filter(q => !!q.archive_le)
+  const tous = tousAvecArchives.filter(q => !q.archive_le)
   /* Cote pro, un QR masque par le SA n apparait plus. */
   const visibles = mode === 'sa' ? tous : tous.filter(q => q.publie)
 
@@ -199,7 +215,15 @@ export default function QrTraces({ eventId, module, titre, mode, grille = false,
               <Diffusion vignette={44} url={url} titre={q.nom} />
               <div style={{ flex: 1, minWidth: 140 }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
-                  <span style={{ fontWeight: 700, fontSize: 12.5 }}>{q.nom}</span>
+                  {edition && q.id && edition.id === q.id ? (
+                    <span style={{ display: 'inline-flex', gap: 6, alignItems: 'center' }}>
+                      <input style={{ ...champ, padding: '4px 8px', fontSize: 12.5, width: 180 }} value={edition.nom} autoFocus aria-label="Nouveau nom du QR"
+                        onChange={e => setEdition({ id: edition.id, nom: e.target.value })}
+                        onKeyDown={e => { if (e.key === 'Enter') renommer(); if (e.key === 'Escape') setEdition(null) }} />
+                      <button style={btnP} onClick={renommer} disabled={!edition.nom.trim()}>OK</button>
+                      <button style={btn} onClick={() => setEdition(null)}>Annuler</button>
+                    </span>
+                  ) : <span style={{ fontWeight: 700, fontSize: 12.5 }}>{q.nom}</span>}
                   <BadgeTypeQr type={q.type} />
                   {jeu !== 'nds2026' && <BadgePermanent q={q} />}
                   {q.parDefaut && <span style={{ fontSize: 10.5, color: MUT }}>par défaut</span>}
@@ -208,6 +232,12 @@ export default function QrTraces({ eventId, module, titre, mode, grille = false,
                 <div style={{ fontSize: 10.5, color: MUT }}>{q.support ? `${q.support} · ` : ''}{q.code_court ? `réf. ${q.code_court}` : `?source=${q.source_qr}`}</div>
               </div>
               <button style={btn} onClick={() => setOuvert(o => (o === cle ? '' : cle))}>{ouvert === cle ? '▲ Supports' : '▼ Lien, PNG, SVG, affiche'}</button>
+              {q.id && !edition && (
+                <button style={btn} onClick={() => setEdition({ id: q.id as string, nom: q.nom })} aria-label={`Renommer ${q.nom}`}>Renommer</button>
+              )}
+              {q.id && !q.parDefaut && (
+                <button style={btn} onClick={() => archiver(q, true)} aria-label={`Archiver ${q.nom}`}>Archiver</button>
+              )}
               {mode === 'sa' && q.id && (
                 <button style={q.publie ? btn : btnP} onClick={() => publierQrTrace(q.id as string, !q.publie).then(charger)}>{q.publie ? 'Masquer' : 'Republier'}</button>
               )}
@@ -220,6 +250,19 @@ export default function QrTraces({ eventId, module, titre, mode, grille = false,
           </div>
         )
       })}
+      {archives.length > 0 && (
+        <div style={{ marginTop: 6 }}>
+          <button style={{ ...btn, border: 'none', padding: '4px 0', color: MUT }} onClick={() => setVoirArchives(v => !v)}>
+            {voirArchives ? '▲' : '▼'} Archivés ({archives.length})
+          </button>
+          {voirArchives && archives.map(q => (
+            <div key={q.source_qr} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '4px 0', fontSize: 12, color: MUT }}>
+              <span style={{ flex: 1 }}>{q.nom}{q.support ? ` · ${q.support}` : ''}</span>
+              <button style={btn} onClick={() => archiver(q, false)}>Restaurer</button>
+            </div>
+          ))}
+        </div>
+      )}
       <div style={{ marginTop: 8 }}>
         <FormulaireQr onAjouter={ajouter} occupe={occupe} />
         {erreur && <div style={{ fontSize: 12, color: '#B45309', fontWeight: 700, marginTop: 6 }}>{erreur}</div>}

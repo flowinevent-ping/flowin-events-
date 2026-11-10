@@ -42,7 +42,7 @@ type Props = {
   qrNom?: string
   support?: string | null
   code?: string | null
-  /** true = le lien contient le jeu (ancien format) : avertissement « change si le jeu change ». */
+  /** Conservé pour compatibilité des appels ; plus aucun libellé affiché (10/11). */
   ancienFormat?: boolean
 }
 
@@ -58,7 +58,7 @@ function telecharger(nom: string, blob: Blob) {
   setTimeout(() => URL.revokeObjectURL(href), 4000)
 }
 
-export default function Diffusion({ url, titre, sousTitre, compact = false, vignette, qrNom, support, code, ancienFormat = false }: Props) {
+export default function Diffusion({ url, titre, sousTitre, compact = false, vignette, qrNom, support, code }: Props) {
   /* L etat porte SON url : sans ca, en changeant d event dans un drawer qui
      n est jamais demonte, on affiche une frame le QR du precedent sous le nom
      et le lien du nouveau — avec les boutons de telechargement actifs. */
@@ -130,7 +130,7 @@ export default function Diffusion({ url, titre, sousTitre, compact = false, vign
   body { margin:0; font-family: Manrope, system-ui, -apple-system, Segoe UI, Roboto, sans-serif; color:#0F172A }
   .p { width:210mm; height:297mm; padding:22mm 18mm; display:flex; flex-direction:column;
        align-items:center; justify-content:center; text-align:center; page-break-after:always }
-  .k { font-size:13pt; font-weight:800; letter-spacing:.16em; text-transform:uppercase; color:#7A4FE0 }
+  .k { font-size:13pt; font-weight:800; letter-spacing:.16em; text-transform:uppercase; color:#3B5CC4 }
   h1 { font-size:34pt; line-height:1.1; margin:6mm 0 2mm; font-weight:900 }
   .s { font-size:15pt; color:#475569; margin:0 0 4mm }
   .i { font-size:12pt; font-weight:800; color:#0F172A; background:#F1F5F9; border-radius:99px; padding:2mm 6mm; margin:0 0 8mm }
@@ -139,7 +139,7 @@ export default function Diffusion({ url, titre, sousTitre, compact = false, vign
   .c { font-size:19pt; font-weight:800; margin-top:10mm }
   .u { font-size:9.5pt; color:#94A3B8; margin-top:4mm; word-break:break-all; max-width:150mm }
   @media print { .n { display:none } }
-  .n { position:fixed; top:10px; right:10px; font:600 13px/1 system-ui; background:#7A4FE0;
+  .n { position:fixed; top:10px; right:10px; font:600 13px/1 system-ui; background:#3B5CC4;
        color:#fff; border:0; border-radius:8px; padding:10px 14px; cursor:pointer }
 </style></head><body>
 <button class="n" onclick="window.print()">Imprimer</button>
@@ -185,11 +185,6 @@ export default function Diffusion({ url, titre, sousTitre, compact = false, vign
         {url}
       </div>
 
-      {ancienFormat && (
-        <div role="note" style={{ marginTop: 8, fontSize: 11, textAlign: 'left', color: '#B45309', background: 'rgba(245,158,11,.1)', borderRadius: 8, padding: '6px 10px' }}>
-          Ce lien contient le jeu : le QR changerait si vous changiez de jeu. Pour un QR à imprimer, utilisez les QR tracés (lien permanent <b>/q/…</b>).
-        </div>
-      )}
 
       <div style={{ marginTop: 10, display: 'flex', gap: 7, flexWrap: 'wrap', justifyContent: 'center' }}>
         <button className="sa-btn sm" style={btn} onClick={copier}>{copie ? '✓ Copié' : 'Copier le lien'}</button>

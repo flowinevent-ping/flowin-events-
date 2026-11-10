@@ -84,7 +84,7 @@ function ListeBanques({
           onChange={e => onChange(e.target.checked ? choisies.concat(b.id) : choisies.filter(x => x !== b.id))}
         />
         <div style={{ flex: 1 }}>
-          <div style={{ fontWeight: 700 }}>{b.nom}{b.pro_id === 'flowin' && <span style={{ marginLeft: 6, fontSize: 10, fontWeight: 800, color: '#5B34C2', background: 'rgba(122,79,224,.1)', borderRadius: 6, padding: '1px 6px' }}>COMMUNE FLOWIN</span>}</div>
+          <div style={{ fontWeight: 700 }}>{b.nom}{b.pro_id === 'flowin' && <span style={{ marginLeft: 6, fontSize: 10, fontWeight: 800, color: '#2B47A8', background: 'rgba(59,92,196,.1)', borderRadius: 6, padding: '1px 6px' }}>COMMUNE FLOWIN</span>}</div>
           <div style={{ fontSize: 11, color: 'var(--sa-muted)' }}>
             {n} question{n !== 1 ? 's' : ''}{unite} · {b.statut === 'valide' ? 'Validée' : 'Brouillon'}
             {aCompleter > 0 && <span style={{ color: '#B45309', fontWeight: 700 }}> · {aCompleter} à compléter (non posée{aCompleter > 1 ? 's' : ''} tant que vide)</span>}

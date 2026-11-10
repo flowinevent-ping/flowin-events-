@@ -109,7 +109,7 @@ function Contenu() {
             </button>
             <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', alignItems: 'center' }}>
               <span style={{ fontSize: 10.5, fontWeight: 800, color: b.statut === 'valide' ? '#15803D' : '#B45309' }}>{b.statut === 'valide' ? 'VALIDÉE' : 'BROUILLON'}</span>
-              {estCommune(b) && <span style={{ fontSize: 10, fontWeight: 800, color: '#5B34C2', background: 'rgba(122,79,224,.1)', borderRadius: 6, padding: '1px 7px' }}>{b.statut === 'valide' ? 'PARTAGÉE AVEC LES PROS' : 'NON PARTAGÉE'}</span>}
+              {estCommune(b) && <span style={{ fontSize: 10, fontWeight: 800, color: '#2B47A8', background: 'rgba(59,92,196,.1)', borderRadius: 6, padding: '1px 7px' }}>{b.statut === 'valide' ? 'PARTAGÉE AVEC LES PROS' : 'NON PARTAGÉE'}</span>}
             </div>
             <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginTop: 4 }}>
               <button className="sa-btn" disabled={occupe === b.id} data-valider={b.id} onClick={() => valider(b)} style={{ padding: '4px 10px', fontSize: 12 }}>{b.statut === 'valide' ? 'Repasser en brouillon' : 'Valider'}</button>
