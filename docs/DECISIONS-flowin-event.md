@@ -296,3 +296,12 @@ que sur instruction explicite de Romain.
 
 ## Exception Nuits du Sud 2026 (Romain, 10/11/2026)
 - Pas de date de péremption ni de refus en caisse pour les tickets Nuits du Sud 2026 (se-nds-2026), pour l'instant. Appliqué en base (date_limite_tirage renvoie null pour se-nds-2026).
+
+## Ce que voit et fait un pro (Romain, 10/11/2026 soir — référence de l'espace pro)
+- Publie une animation ; **un seul jeu par animation** ; peut lancer **plusieurs animations**.
+- Voit : **passages globaux = nombre de flashs** ET **nombre de joueurs** ; les personnes qui **souhaitent rester en contact** ; **sa base client existante** (import).
+- Peut intégrer **un ou plusieurs Super Events**, en **sponsor** ou en **station jeu** ; y voit le **nombre de flashs total de l'événement** + **sa station**.
+- Dans les deux cas (animation / super event) : voit **les gagnants**, accède au **fichier CRM**, peut **exporter** (pour envoyer des emails).
+- Répartitions avec **beaux graphiques comme dans le super admin** : donuts, « égaliseur » (barres), **hommes / femmes**, **zone de chalandise par code postal en %**.
+- **Rappel** au pro : « invitez vos clients à jouer » — plus ils jouent, plus ils partagent, plus le commerce est visible.
+- Objectifs affichés : constituer son fichier client, animer ses clients, augmenter son panier et son chiffre d'affaires.
