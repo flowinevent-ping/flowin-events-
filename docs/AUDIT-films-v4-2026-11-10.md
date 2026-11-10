@@ -62,3 +62,27 @@ grandit. » · 9 « Faites gagner des lots à vos clients… » · 10 « …ils 
 - Films 1 et 2 : la carte du lot cache la tête de Max.
 - Film 4 : chevauchement boutique / personnages.
 - Liens de fin des films 2, 3, 5 à définir.
+
+## Retours de Romain sur les films Super Event et les personnages (10/11, validés)
+Général : qualité bonne ; **trop rapide** (films 1 à 5) ; **identifier la cible** de chaque film
+(commerce / organisateur / participant). Intégrer l'esprit, pas seulement les mots.
+
+**Film 3 organisateur** : manque **la publication du jeu et l'intérêt du jeu**. Parfaits : « Interagissez
+avec votre public », « Mesurez la fréquentation sur place », « Sensibilisez-le », « Un outil de
+communication et de sondage », « Gardez le contact, annoncez les prochaines dates », « Le grand tirage
+au sort » (mais **à déplacer** : plus tôt, dans le pendant / après logique), « Des chiffres utiles ».
+Fin après les chiffres : **« Faites participer vos participants et futurs participants avant, pendant et
+après votre événement. Flowin Super Event : démultipliez votre communication en local. »**
+
+**Film 4 commerce** : « Devenez station jeu » parfait ; « Les festivaliers viennent jouer chez vous
+avant, pendant et après » ; remplacer « Jeu avec achat, votre lot spécial fait un gagnant » par **« Des lots
+du festival et des lots chez vous »** ; « Communiquez comme partenaire » ok ; **« Votre fichier client
+grandit. Votre visibilité aussi. »** ; **« Découvrez le prochain Super Event auquel participer : sponsor,
+affichage ou station jeu, vous choisissez. »** ; fin « Je participe au prochain Super Event » (très bien).
+
+**Film 5 participant** : « Rends-toi chez ton commerçant. Participe au jeu et tente de gagner des lots »
+ok ; montrer **roulette, quiz, tombola** : « Découvre le jeu de l'événement » ; « Pendant toute la période
+de l'événement, découvre les lots dans les stations jeu » ; « Des lots dans chaque commerce » parfait ;
+« Un grand tirage » parfait ; **« Fais jouer tes amis, augmente tes chances de gagner »**.
+
+**Personnages** : Alex **sans barbe** ; Léa, Max ok ; Sam ok mais **sans casque**.
