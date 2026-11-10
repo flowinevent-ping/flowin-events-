@@ -67,3 +67,63 @@ fleuriste partenaire.
 
 ### Versions courtes
 Chaque film décliné en 15 s (plans 1, 3, 4, 7, 9, 10) pour Reels / TikTok.
+
+## Audit des scénarios V2 (10/11/2026)
+
+| Argument fort (argumentaire) | Film A V2 | Film B V2 |
+|---|---|---|
+| Capter l'attention, le flux passant | oui (plans 2-3) | — |
+| Quiz à l'image du commerce = renforcement de marque | partiel (montré, pas dit) | absent |
+| Questions bonus qui sondent = meilleurs indicateurs | **absent** | **absent** (RSE, sécurité, sensibilisation) |
+| Fichier client qui grandit / garder le contact (56 %) | partiel (sans le chiffre) | chiffre seul, sans bénéfice |
+| Lots datés qui font revenir aux périodes choisies | partiel (date non expliquée) | partiel |
+| Mesurer chaque campagne (un QR par support) | partiel | absent |
+| Agrandir son réseau (amis) | oui | — |
+| Votre campagne habituelle + réseau Flowin ; lots liés à l'événement | — | **absent** |
+| Devenir acteur du boost du commerce local | — | partiel |
+| Chiffres utiles pour partenaires et institutions | — | partiel |
+| Vocabulaire : « votre événement », pas « festival » | — | **non respecté** (titre « Ton festival ») |
+| Bénéfice affiché à chaque plan (pas seulement l'action) | non : plusieurs plans décrivent sans dire ce qu'on gagne | non |
+| Appel à l'action unique et clair | oui | double (rendez-vous / je participe) : à séparer par cible |
+
+Défauts transverses : pas de chiffre de preuve dans A ; trop de plans « décor » sans bénéfice ;
+fin trop longue ; pas de version par cible dans B (organisateur et commerce mélangés).
+Son : **pas de voix off** (sauf voix professionnelle d'excellente qualité, non disponible) ;
+films **muets avec sous-titres intégrés**, musique d'ambiance libre de droits en option.
+
+## Version 3 (10/11/2026) — à valider
+
+Règle : chaque plan = **une action + un bénéfice écrit**. Accroche à 0 s, chiffre de preuve avant
+la fin, un seul appel à l'action par film. Personnages : Julie (boulangère), Léo (client), Sam
+(organisateur), Nadia (fleuriste, station jeu).
+
+### A. Flowin Animation (commerçant) — 30 s — « Ta vitrine voit passer 500 personnes par jour. Combien entrent ? »
+1. (0-3 s) Accroche : vue de rue, compteur de passants qui défile devant la vitrine de Julie, porte qui reste fermée. Texte : « 500 passants. Combien entrent ? »
+2. (3-6 s) Julie pose l'affiche QR en vitrine, chrono « 5 min ». Texte : « Plug and play : un QR, un jeu. **Captez le flux.** »
+3. (6-10 s) Léo flashe, quiz sur la baguette, il apprend le secret de la croûte. Texte : « Un quiz à votre image : **ils découvrent votre métier, votre marque se renforce.** »
+4. (10-13 s) Question bonus « Comment nous avez-vous connus ? » qui se transforme en graphique chez Julie. Texte : « Les questions bonus **sondent votre public : améliorez vos offres.** »
+5. (13-16 s) Léo laisse ses coordonnées, une fiche entre dans le fichier de Julie ; Léo partage le jeu à 2 amis. Texte : « **Votre fichier client grandit**, vos clients amènent leurs amis. »
+6. (16-20 s) Ticket « Croissant offert, à retirer du 2 au 8 décembre ». Calendrier qui surligne une semaine creuse. Texte : « **Des lots qui font revenir**, quand vous le décidez. »
+7. (20-23 s) Samedi : Léo et ses amis entrent, Julie valide le code. Texte : « **Ils reviennent. Votre fréquentation augmente.** »
+8. (23-26 s) Téléphone de Julie : 3 QR (vitrine, réseaux sociaux, caisse) avec leur trafic. Texte : « **Mesurez chaque campagne.** » + « 56 % des participants souhaitent garder le contact. »
+9. (26-30 s) Fin : « Animez votre clientèle. Faites-les revenir. » Bouton « Je crée mon jeu ». Logo.
+
+### B1. Flowin Super Event (organisateur) — 30 s — « Votre événement s'arrête-t-il aux portes du site ? »
+1. (0-3 s) Accroche : le site de l'événement, puis zoom arrière sur toute la ville. Texte : « Votre événement s'arrête aux portes du site ? »
+2. (3-7 s) Sam publie sa campagne habituelle ; en plus, l'affiche s'allume dans la boulangerie, chez la fleuriste, au café, à l'hôtel. Texte : « **Votre campagne habituelle, plus tout le réseau local.** La super diffusion locale. »
+3. (7-11 s) AVANT : Léo gagne une place de concert en jouant chez Nadia. Texte : « Avant : des lots liés à votre événement. **Plus de visibilité, plus de venues.** »
+4. (11-15 s) PENDANT : Léo, bracelet au poignet, va retirer son lot chez Julie. Texte : « Pendant : **vous dynamisez le commerce local.** »
+5. (15-19 s) Le quiz de l'événement + questions bonus (RSE, sécurité, mobilité) qui deviennent des graphiques. Texte : « Votre quiz informe et **sonde votre public.** »
+6. (19-24 s) APRÈS : tirage au sort sur scène, puis Sam présente un rapport à des partenaires et à une institution. Texte : « Après : **des chiffres utiles** pour vos partenaires et institutions. »
+7. (24-27 s) Preuve : « Nuits du Sud 2026, Vence : 56 % des participants souhaitent garder le contact · plus de 70 lots distribués dans les commerces locaux. »
+8. (27-30 s) Fin : « Connectez votre événement aux acteurs locaux. » Bouton « Prendre rendez-vous ».
+
+### B2. Flowin Super Event (commerce) — 20 s — « Un événement en ville. Et chez vous ? »
+1. (0-3 s) Accroche : foule de l'événement à 300 m, boutique de Nadia vide. Texte : « Un événement en ville. Et chez vous ? »
+2. (3-7 s) Nadia devient station jeu : macaron en vitrine, son nom dans le jeu. Texte : « Connectez votre commerce aux événements locaux. »
+3. (7-11 s) Des festivaliers flashent chez Nadia, gagnent, reviennent. Texte : « **Visibilité auprès des festivaliers. Des clients qui reviennent.** »
+4. (11-15 s) Une assurance (sponsor sans lot) visible dans le jeu. Texte : « Sans lot à offrir ? **Soyez sponsor du développement local.** »
+5. (15-20 s) Fin : « Je participe au prochain Super Event. » Logo.
+
+### Déclinaisons
+15 s par film pour Reels / TikTok (plans 1, 2, 7, fin). Muet, sous-titres intégrés.
