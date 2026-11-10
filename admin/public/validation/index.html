@@ -1,1 +1,210 @@
-<!doctype html><meta charset="utf-8"><meta name="robots" content="noindex"><title>Validation</title>
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Validation Flowin</title>
+<style>
+:root{--blue:#3B5CC4;--orange:#F28C28;--ink:#141a2e;--mute:#5d6680;--line:#e4e8f2;--bg:#ffffff;--soft:#f5f7fc;--ok:#1f8a4c;--part:#c27a00;--todo:#b3261e}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;font-size:15px;line-height:1.4}
+header{padding:20px 16px 10px;max-width:1100px;margin:0 auto}
+h1{font-size:22px}
+h1 b{color:var(--blue)}
+.banner{margin:10px 0 0;padding:10px 12px;border-radius:12px;background:#fff4e8;border:1px solid #f6c48f;font-size:13px}
+nav{position:sticky;top:0;background:#fff;z-index:5;border-bottom:1px solid var(--line)}
+.tabs{display:flex;gap:6px;overflow-x:auto;padding:10px 16px;max-width:1100px;margin:0 auto;scrollbar-width:none}
+.tabs button{flex:0 0 auto;border:1px solid var(--line);background:#fff;border-radius:999px;padding:8px 14px;font:inherit;font-weight:600;color:var(--mute);cursor:pointer}
+.tabs button.on{background:var(--blue);border-color:var(--blue);color:#fff}
+main{max-width:1100px;margin:0 auto;padding:14px 16px 40px}
+section{display:none}
+section.on{display:block}
+h2{font-size:18px;margin:4px 0 4px}
+.sub{color:var(--mute);font-size:13px;margin-bottom:12px}
+.row{display:flex;gap:12px;overflow-x:auto;scroll-snap-type:x mandatory;padding-bottom:10px}
+.card{flex:0 0 86%;max-width:340px;scroll-snap-align:start;border:1px solid var(--line);border-radius:16px;padding:14px;background:#fff;display:flex;flex-direction:column;gap:8px}
+.card.se{border-top:4px solid var(--orange)}
+.card.an{border-top:4px solid var(--blue)}
+.card h3{font-size:15px}
+.card p{font-size:13px;color:var(--mute)}
+.card a.go{margin-top:auto;display:block;text-align:center;padding:10px;border-radius:10px;background:var(--blue);color:#fff;text-decoration:none;font-weight:700}
+.card.se a.go{background:var(--orange)}
+.card a.go+a.go{margin-top:6px;background:#fff;color:var(--blue);border:1px solid var(--blue)}
+.card video{width:100%;border-radius:10px;background:#000;max-height:420px}
+.card img{width:100%;border-radius:10px;border:1px solid var(--line);cursor:zoom-in}
+.tag{display:inline-block;font-size:11px;font-weight:700;padding:3px 8px;border-radius:999px;align-self:flex-start}
+.t-ok{background:#e3f4ea;color:var(--ok)}.t-part{background:#fff1d6;color:var(--part)}.t-todo{background:#fde7e5;color:var(--todo)}
+.slot{border:2px dashed var(--line);color:var(--mute);justify-content:center;text-align:center;min-height:160px}
+table{width:100%;border-collapse:collapse;font-size:13px}
+td{padding:8px 6px;border-bottom:1px solid var(--line);vertical-align:top}
+td:first-child{font-weight:700;color:var(--blue);width:40px}
+#zoom{display:none;position:fixed;inset:0;background:rgba(10,14,30,.9);z-index:20;align-items:center;justify-content:center;padding:12px}
+#zoom img{max-width:100%;max-height:100%;border-radius:8px}
+@media(min-width:800px){.card{flex-basis:320px}}
+</style>
+</head>
+<body>
+<header>
+  <h1>Flowin · <b>tout ce qui est livré</b></h1>
+  <div class="banner"><b>Mode consultation, sans login.</b> Attention : certaines pages sont la vraie application avec un compte de test. Ne validez <b>aucun vrai paiement</b> et ne déclarez pas de virement.</div>
+</header>
+<nav><div class="tabs" id="tabs">
+  <button data-s="plaq" class="on">Plaquettes</button>
+  <button data-s="films">Films</button>
+  <button data-s="pro">Parcours pro</button>
+  <button data-s="joueur">Parcours joueur</button>
+  <button data-s="se">Super Event</button>
+  <button data-s="carte">Carte</button>
+  <button data-s="cap">Captures</button>
+  <button data-s="etat">État L1–L19</button>
+</div></nav>
+<main>
+
+<section id="plaq" class="on">
+  <h2>Plaquettes V3</h2><p class="sub">Faites glisser →</p>
+  <div class="row">
+    <div class="card an"><span class="tag t-ok">Faite</span><h3>Flowin Animation V3</h3><p>Bleu. Mobile et ordinateur.</p><a class="go" href="plaquette-animation-v3.html" target="_blank">Ouvrir</a></div>
+    <div class="card se"><span class="tag t-ok">Faite</span><h3>Flowin Super Event V3</h3><p>Orange. Mobile et ordinateur.</p><a class="go" href="plaquette-super-event-v3.html" target="_blank">Ouvrir</a></div>
+  </div>
+</section>
+
+<section id="films">
+  <h2>5 films réseaux sociaux</h2>
+  <p class="sub">Version 2 : une partie de vos corrections est faite. Les autres corrections demandées ne sont pas encore faites (ex. film 3 : fin « Démultipliez votre communication en local » ; film 4 : « Des lots du festival et des lots chez vous »).</p>
+  <div class="row" id="filmrow"></div>
+</section>
+
+<section id="pro">
+  <h2>Parcours pro</h2><p class="sub">Compte de test « pro-qa-tech-1 ». Rien à saisir pour regarder.</p>
+  <div class="row">
+    <div class="card an"><span class="tag t-part">Partiel</span><h3>1. Première connexion</h3><p>Inscription et offres.</p><a class="go" href="/pro/premiere-fois" target="_blank">Ouvrir</a></div>
+    <div class="card an"><span class="tag t-part">Partiel</span><h3>2. Espace pro</h3><p>Tableau de bord du commerce.</p><a class="go" href="/pro?pro=pro-qa-tech-1" target="_blank">Ouvrir</a></div>
+    <div class="card an"><span class="tag t-part">Partiel</span><h3>3. Créer et publier</h3><p>Configurer le jeu, puis payer.</p><a class="go" href="/pro/nouvelle?pro=pro-qa-tech-1" target="_blank">Ouvrir</a></div>
+    <div class="card an"><span class="tag t-part">Partiel</span><h3>4. Bon de commande</h3><p>« Valider mon bon de commande ».</p><a class="go" href="/bon-commande-animation.html" target="_blank">Ouvrir</a></div>
+    <div class="card an"><span class="tag t-ok">Faite</span><h3>Visite guidée</h3><p>Démo écran par écran.</p><a class="go" href="/visite-guidee/index.html" target="_blank">Ouvrir</a></div>
+  </div>
+</section>
+
+<section id="joueur">
+  <h2>Parcours joueur</h2><p class="sub">Événements de démonstration (pas de vrai client).</p>
+  <div class="row">
+    <div class="card an"><span class="tag t-ok">Existe</span><h3>Roue</h3><p>Animation de démo.</p><a class="go" href="/jouer?ev=ev-flowin-demo" target="_blank">Jouer</a></div>
+    <div class="card an"><span class="tag t-ok">Existe</span><h3>Quiz</h3><p>Animation de démo.</p><a class="go" href="/jouer?ev=ev-demo-quiz" target="_blank">Jouer</a></div>
+    <div class="card an"><span class="tag t-ok">Existe</span><h3>Tombola</h3><p>Animation de démo.</p><a class="go" href="/jouer?ev=ev-demo-tombola" target="_blank">Jouer</a></div>
+    <div class="card an"><span class="tag t-part">Partiel</span><h3>Autour de moi</h3><p>Accueil joueur.</p><a class="go" href="/jouer" target="_blank">Ouvrir</a></div>
+    <div class="card slot"><span class="tag t-todo" style="align-self:center">En cours</span><h3>Tickets dans le profil</h3><p>Captures à venir.</p></div>
+  </div>
+</section>
+
+<section id="se">
+  <h2>Super Event</h2><p class="sub">Souscription d'un commerce ou d'un sponsor.</p>
+  <div class="row">
+    <div class="card se"><span class="tag t-part">Partiel</span><h3>Rejoindre un Super Event</h3><p>Depuis l'espace pro (test).</p><a class="go" href="/pro/nouvelle?pro=pro-qa-tech-1&amp;type=rejoindre" target="_blank">Ouvrir</a></div>
+    <div class="card se"><span class="tag t-part">Partiel</span><h3>Page partenaire</h3><p>Présentation et inscription.</p><a class="go" href="/nds-partenaire.html" target="_blank">Ouvrir</a></div>
+    <div class="card se"><span class="tag t-ok">Existe</span><h3>Vue joueur Super Event</h3><p>Événement de test.</p><a class="go" href="/se/se-master-superevent" target="_blank">Ouvrir</a></div>
+  </div>
+</section>
+
+<section id="carte">
+  <h2>Carte des commerces</h2>
+  <div class="row">
+    <div class="card se"><span class="tag t-part">Existe</span><h3>Carte d'un Super Event</h3><p>Côté joueur, dans la page de l'événement de test.</p><a class="go" href="/se/se-master-superevent" target="_blank">Ouvrir</a></div>
+    <div class="card"><span class="tag t-todo">Pas encore faite</span><h3>Carte super admin</h3><p>Sélecteur bleu / orange / violet : pas encore faite.</p></div>
+    <div class="card"><span class="tag t-todo">Pas encore faite</span><h3>Carte commune des partenaires</h3><p>Animation + Super Event : pas encore faite.</p></div>
+  </div>
+</section>
+
+<section id="cap">
+  <h2>Captures</h2><p class="sub">Touchez une image pour l'agrandir.</p>
+  <div class="row" id="caprow"></div>
+</section>
+
+<section id="etat">
+  <h2>État des livrables</h2>
+  <table id="etattab"></table>
+</section>
+</main>
+<div id="zoom"><img alt=""></div>
+<script>
+(function(){
+  var tabs = document.getElementById('tabs').getElementsByTagName('button');
+  function show(id){
+    var i, s = document.getElementsByTagName('section');
+    for (i = 0; i < s.length; i++) { s[i].className = s[i].id === id ? 'on' : ''; }
+    for (i = 0; i < tabs.length; i++) { tabs[i].className = tabs[i].getAttribute('data-s') === id ? 'on' : ''; }
+  }
+  for (var t = 0; t < tabs.length; t++) {
+    tabs[t].onclick = function(){ show(this.getAttribute('data-s')); };
+  }
+
+  var films = [
+    ['f1-commerce', 'f1-15s', 'Film 1 · Animation · commerce', 'an'],
+    ['f2-participant-animation', 'f2-15s', 'Film 2 · Animation · participant', 'an'],
+    ['f3-organisateur', 'f3-15s', 'Film 3 · Super Event · organisateur', 'se'],
+    ['f4-commerce-super-event', 'f4-15s', 'Film 4 · Super Event · commerce', 'se'],
+    ['f5-participant-super-event', 'f5-15s', 'Film 5 · Super Event · participant', 'se']
+  ];
+  var fr = document.getElementById('filmrow'), h = '';
+  for (var f = 0; f < films.length; f++) {
+    h += '<div class="card ' + films[f][3] + '"><span class="tag t-part">Version 2</span><h3>' + films[f][2] + '</h3>' +
+      '<video controls playsinline preload="metadata" src="/videos/v4/' + films[f][0] + '.mp4"></video>' +
+      '<p>Version 15 s :</p><video controls playsinline preload="none" src="/videos/v4/' + films[f][1] + '.mp4"></video></div>';
+  }
+  fr.innerHTML = h;
+
+  var caps = [
+    ['pub-planche', 'Publication : planche (v1)'], ['pub-01-nos-offres', 'Nos offres'], ['pub-01b-publication-page', 'Page de publication'],
+    ['pub-02-animation-en-attente', 'Animation en attente'], ['pub-03-bon-prerempli', 'Bon de commande prérempli'],
+    ['pub-04-signature', 'Validation du bon'], ['pub-05-declaration-virement', 'Déclaration du virement'],
+    ['pub-06-virement-declare-en-ligne', 'Virement déclaré, en ligne'], ['pub-07-alerte-super-admin', 'Alerte super admin'],
+    ['sa-sidebar-1280', 'Super admin : menu'], ['sa-commercial-1-1280', 'Outils et communication'],
+    ['sa-commercial-1-390', 'Outils (mobile) 1'], ['sa-commercial-2-390', 'Outils (mobile) 2'], ['sa-commercial-3-390', 'Outils (mobile) 3'],
+    ['sa-commercial-4-390', 'Outils (mobile) 4'], ['sa-commercial-5-390', 'Outils (mobile) 5'], ['sa-commercial-mobile-touch-390', 'Outils (mobile, tactile)'],
+    ['film-planche-f1', 'Film 1 : planche'], ['film-planche-f2', 'Film 2 : planche'], ['film-planche-f3', 'Film 3 : planche'],
+    ['film-planche-f4', 'Film 4 : planche'], ['film-planche-f5', 'Film 5 : planche'], ['film-personnages', 'Personnages']
+  ];
+  var c = '<div class="card slot"><span class="tag t-todo" style="align-self:center">En cours</span><h3>Parcours de publication v2</h3><p>Captures à venir.</p></div>' +
+    '<div class="card slot"><span class="tag t-todo" style="align-self:center">En cours</span><h3>Tickets dans le profil</h3><p>Captures à venir.</p></div>';
+  for (var k = 0; k < caps.length; k++) {
+    c += '<div class="card"><h3>' + caps[k][1] + '</h3><img loading="lazy" src="captures/' + caps[k][0] + '.jpg" alt="' + caps[k][1] + '"></div>';
+  }
+  document.getElementById('caprow').innerHTML = c;
+
+  var zoom = document.getElementById('zoom');
+  document.getElementById('caprow').onclick = function(e){
+    var el = e.target;
+    if (el && el.tagName === 'IMG') { zoom.firstChild.src = el.src; zoom.style.display = 'flex'; }
+  };
+  zoom.onclick = function(){ zoom.style.display = 'none'; };
+
+  var etat = [
+    ['L1', 'Plaquette Animation V3', 'ok', 'Faite'],
+    ['L2', 'Plaquette Super Event V3', 'ok', 'Faite'],
+    ['L3', 'Vidéo Animation (tuto)', 'todo', 'À faire'],
+    ['L4', 'Vidéo Super Event', 'todo', 'À faire'],
+    ['L5', 'Vidéo vision joueur', 'todo', 'À faire'],
+    ['L6', 'Première connexion (redesign)', 'part', 'Partiel'],
+    ['L7', 'Création d\'animation', 'part', 'Partiel'],
+    ['L8', 'Demande Super Event', 'part', 'Partiel'],
+    ['L9', 'Tableau de bord', 'part', 'Partiel'],
+    ['L10', 'Visite guidée', 'ok', 'Faite, à valider'],
+    ['L11', 'Charte couleurs', 'todo', 'En attente de vous'],
+    ['L12', 'Carte des partenaires', 'todo', 'Plus tard'],
+    ['L13', 'Import du fichier client', 'todo', 'À faire'],
+    ['L14', 'Coût des emails', 'todo', 'À faire'],
+    ['L15', '5 films réseaux sociaux', 'part', 'Version 2, corrections en partie'],
+    ['L16', 'Parcours pro, publication, joueur', 'part', 'En cours'],
+    ['L17', 'Tickets dans le profil', 'part', 'En cours'],
+    ['L18', 'Publication sans scroll', 'part', 'En cours'],
+    ['L19', 'Cette page de consultation', 'ok', 'Faite']
+  ];
+  var r = '';
+  for (var e = 0; e < etat.length; e++) {
+    r += '<tr><td>' + etat[e][0] + '</td><td>' + etat[e][1] + '</td><td><span class="tag t-' + etat[e][2] + '">' + etat[e][3] + '</span></td></tr>';
+  }
+  document.getElementById('etattab').innerHTML = r;
+})();
+</script>
+</body>
+</html>
