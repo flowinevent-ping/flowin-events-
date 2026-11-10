@@ -54,6 +54,35 @@ Graphisme et simplicité = ceux des films et des plaquettes V3.
 Lot 0 → Lot 2 (bug Charvolin, bloquant) → Lot 1 → Lot 3 (cœur) → Lot 5 → Lot 4 → Lot 6 → Lot 7.
 Chaque lot : maquette ou captures avant / après sur la vraie app, validation, puis mise en ligne.
 
-## Questions à Romain
-1. Offre d'entrée : **99 € HT pour une année** (lancement) **ou 99 € HT pour 3 mois d'essai** ? Puis 990 € HT / an ou 110 € HT / mois.
-2. QR participant des films génériques : vers quelle page, puisque chaque commerce a son propre jeu ? Proposition : la carte / liste des commerces Flowin (à créer, lot 6) ; d'ici là, la page d'inscription joueur.
+## Ajouts de Romain (10/11, suite) — validés
+
+### Offres et prix (décidé)
+- **Première année à moitié prix : 445 € HT** (offre de lancement), puis **990 € HT / an** ou **110 € HT / mois**.
+- **Customisation totale : sur demande** (couleurs, thématique, jeu 100 % personnalisable et modifiable, lancement de campagne).
+- **Édition des quiz par Flowin** : 30 questions quiz + 5 questions bonus, **forfait 145 € HT** ; **-50 % la première année** (72,50 € HT).
+
+### Lot 1 bis — Commande au moment de publier
+- Au moment de « Publier mon jeu » : écran **Nos offres** (offre première année 445 €, options : quiz rédigés par Flowin -50 %, customisation sur demande).
+- **Bon de commande pré-rempli** (nom de l'entreprise, options), **signature électronique**, **paiement par virement**.
+- Paiement déclaré → **publication**, email au pro « paiement effectué, contrôle sous 3 à 5 jours », et **alerte « paiements à vérifier »** dans le super admin pour Romain.
+- **Mandat SEPA** pour le prélèvement mensuel, **contrat à tacite reconduction** (990 €/an ou 110 €/mois).
+- CGV : arrêt pour **défaut de paiement** ou sur **simple résiliation** ; résiliation en cours d'année : **décompte au prorata des mensualités sur la base de 110 €/mois**.
+
+### Lot 8 — Carte des commerces
+- QR participant des films → **carte des commerces Flowin** (page commune).
+- Super admin : visuel de la carte **Flowin Animation** au même endroit que la carte Super Event, avec un **sélecteur** : **bleu** = animation en cours, **orange** = super event en cours, **violet** = les deux.
+- Joueur : accès à la **liste des partenaires** et aux **coordonnées GPS** des partenaires sur la carte.
+
+## Critères de livraison (Romain, 10/11) — rien n'est « livré » sans vérification de bout en bout
+- [ ] Édition des QR codes faite et vérifiée (impression + digitaux par destination).
+- [ ] Édition et enregistrement du commerce vérifiés (profil, logo, coordonnées).
+- [ ] UX / UI de sélection et de publication des animations conformes (carrousels, un jeu à la fois).
+- [ ] QR codes rattachés au bon établissement.
+- [ ] Logo du commerce présent dans le jeu, présentation aux couleurs du jeu.
+- [ ] Interface joueur conforme (profil, jeux en cours par commerce, tickets gagnants / perdus, une seule autorisation).
+- [ ] Liste des partenaires et carte avec coordonnées GPS accessibles au joueur.
+- [ ] Commande : bon pré-rempli, signature, virement, email, alerte paiements à vérifier, SEPA.
+
+## Questions à Romain (réglées)
+1. Offre d'entrée : réglé, 445 € HT la première année.
+2. QR participant des films : réglé, la carte des commerces.
