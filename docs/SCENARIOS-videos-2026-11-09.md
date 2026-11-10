@@ -97,8 +97,8 @@ Règle : chaque plan = **une action + un bénéfice écrit**. Accroche à 0 s, c
 la fin, un seul appel à l'action par film. Personnages : Julie (boulangère), Léo (client), Sam
 (organisateur), Nadia (fleuriste, station jeu).
 
-### A. Flowin Animation (commerçant) — 30 s — « Ta vitrine voit passer 500 personnes par jour. Combien entrent ? »
-1. (0-3 s) Accroche : vue de rue, compteur de passants qui défile devant la vitrine de Julie, porte qui reste fermée. Texte : « 500 passants. Combien entrent ? »
+### A. Flowin Animation (commerçant) — 30 s — « Devant votre vitrine, ça passe. Combien entrent ? »
+1. (0-3 s) Accroche : vue de rue, des passants défilent devant la vitrine de Julie, la porte reste fermée. Texte : « Ça passe. Combien entrent ? » (aucun chiffre inventé)
 2. (3-6 s) Julie pose l'affiche QR en vitrine, chrono « 5 min ». Texte : « Plug and play : un QR, un jeu. **Captez le flux.** »
 3. (6-10 s) Léo flashe, quiz sur la baguette, il apprend le secret de la croûte. Texte : « Un quiz à votre image : **ils découvrent votre métier, votre marque se renforce.** »
 4. (10-13 s) Question bonus « Comment nous avez-vous connus ? » qui se transforme en graphique chez Julie. Texte : « Les questions bonus **sondent votre public : améliorez vos offres.** »
@@ -122,7 +122,7 @@ la fin, un seul appel à l'action par film. Personnages : Julie (boulangère), L
 1. (0-3 s) Accroche : foule de l'événement à 300 m, boutique de Nadia vide. Texte : « Un événement en ville. Et chez vous ? »
 2. (3-7 s) Nadia devient station jeu : macaron en vitrine, son nom dans le jeu. Texte : « Connectez votre commerce aux événements locaux. »
 3. (7-11 s) Des festivaliers flashent chez Nadia, gagnent, reviennent. Texte : « **Visibilité auprès des festivaliers. Des clients qui reviennent.** »
-4. (11-15 s) Une assurance (sponsor sans lot) visible dans le jeu. Texte : « Sans lot à offrir ? **Soyez sponsor du développement local.** »
+4. (11-15 s) [Option, à trancher : la décision du 08/11 dit de ne pas en faire un argument nouveau] Une assurance (sponsor sans lot) visible dans le jeu. Texte : « Sans lot à offrir ? Soyez visible dans le jeu. »
 5. (15-20 s) Fin : « Je participe au prochain Super Event. » Logo.
 
 ### Déclinaisons
