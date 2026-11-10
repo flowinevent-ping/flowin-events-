@@ -11,6 +11,7 @@ import ListeCRM, { type ColonneCRM } from '@/components/dashboard/ListeCRM'
 import { upsertPro } from '@/lib/dashboard'
 import type { FlowinPro } from '@/lib/types'
 import { useFiltreSuperEvent } from '@/lib/filtreSuperEvent'
+import { sansGabarit } from '@/lib/operations'
 import { BandeauFiltreSE } from '@/components/dashboard/BandeauFiltreSE'
 import { Ico } from '@/lib/proicons'
 import AutresActivites from '@/components/dashboard/AutresActivites'
@@ -30,11 +31,12 @@ function ProsContenu() {
   const { seId, proIds } = useFiltreSuperEvent()
   const lignes = proIds ? pros.filter((p: FlowinPro) => proIds.has(p.id)) : pros
   const nbEnAttente = lignes.filter((p: FlowinPro) => p.statut === 'en_attente').length
-  const nbStations = (id: string) => events.filter(e => e.pro_id === id).length
+  /* Gabarit (se-master-superevent) exclu des comptes (10/11). */
+  const nbStations = (id: string) => sansGabarit(events).filter(e => e.pro_id === id).length
   /* Demande de Romain (28/10) : le CRM Pro doit permettre de voir d'un coup
      d'oeil si un pro a une operation en cours, pas seulement son nombre total
      de stations (qui compte aussi les operations passees). */
-  const nbEnCours = (id: string) => events.filter(e => e.pro_id === id && e.status === 'live').length
+  const nbEnCours = (id: string) => sansGabarit(events).filter(e => e.pro_id === id && e.status === 'live').length
 
   async function traiter(id: string, statut: 'valide' | 'refuse') {
     setEnCours(id)

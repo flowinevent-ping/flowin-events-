@@ -17,6 +17,7 @@
  */
 import { useMemo } from 'react'
 import { useRouter } from 'next/navigation'
+import { sansGabarit } from '@/lib/operations'
 import { useDashboard } from '@/contexts/DashboardContext'
 import { Ico } from '@/lib/proicons'
 import AlerteLotsRetires from '@/components/dashboard/AlerteLotsRetires'
@@ -103,7 +104,10 @@ export default function DashboardPage() {
   const { joueurs, events, partenaires, pros, lots } = useDashboard()
 
   const estDemo = (e: { pro_id: string | null; nom: string }) => e.pro_id === null && e.nom.startsWith('Démo')
-  const reels = useMemo(() => events.filter(e => !estDemo(e)), [events])
+  /* Compte 10/11 : animations = events sans super event (gabarit exclu) ;
+     les stations d un super event sont des points de jeu, comptes a part. */
+  const reels = useMemo(() => sansGabarit(events).filter(e => !estDemo(e) && !e.super_event_id), [events])
+  const nbStations = useMemo(() => sansGabarit(events).filter(e => !!e.super_event_id).length, [events])
 
   const totalOptins = joueurs.filter(j => j.optin).length
   const totalGagnants = joueurs.filter(j => j.gains > 0).length
@@ -118,7 +122,7 @@ export default function DashboardPage() {
     { icone: 'users', val: String(joueurs.length), lbl: 'Joueurs CRM', sub: `${totalOptins} opt-in · ${totalGagnants} gagnants`, href: '/dashboard/joueurs' },
     { icone: 'building', val: String(pros.length), lbl: 'Pros enregistrés', sub: `${prosActifs} validés`, href: '/dashboard/pros' },
     { icone: 'handshake', val: String(partenaires.length), lbl: 'Partenaires', sub: `${partenairesActifs} actifs`, href: '/dashboard/partenaires' },
-    { icone: 'game', val: String(nbLive), lbl: 'Animations en cours', sub: `${nbUpcoming} à venir`, href: '/dashboard/events' },
+    { icone: 'game', val: String(nbLive), lbl: 'Animations en cours', sub: `${nbUpcoming} à venir · ${nbStations} stations de super event`, href: '/dashboard/events' },
     { icone: 'chart', val: `${sponsoring.toLocaleString('fr-FR')} €`, lbl: 'Sponsoring généré', sub: `sur ${partenaires.length} partenaires`, href: '/dashboard/partenaires' },
     { icone: 'gift', val: `${lotsUtilises} / ${lots.length}`, lbl: 'Lots utilisés', sub: `${lots.length - lotsUtilises} encore disponibles`, href: '/dashboard/nds-lots' },
   ]
@@ -134,7 +138,7 @@ export default function DashboardPage() {
     { icone: 'building', lbl: 'CRM Pro', n: `${pros.length} fiches`, href: '/dashboard/pros' },
     { icone: 'users', lbl: 'CRM Utilisateurs', n: `${joueurs.length} joueurs`, href: '/dashboard/joueurs' },
     { icone: 'game', lbl: 'Jeux', n: '7 modules', href: '/dashboard/jeux' },
-    { icone: 'calendar', lbl: 'Animations', n: `${reels.length} animations`, href: '/dashboard/events' },
+    { icone: 'calendar', lbl: 'Animations', n: `${reels.length} animations · ${nbStations} stations`, href: '/dashboard/events' },
     { icone: 'star', lbl: 'Super Events', n: 'Opérations', href: '/dashboard/super-events' },
   ]
 

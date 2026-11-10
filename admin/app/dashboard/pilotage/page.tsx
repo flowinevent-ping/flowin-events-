@@ -15,12 +15,15 @@ import { PageHeader, SectionHeader, EmptyState } from '@/components/dashboard/Da
 import { useDashboard } from '@/contexts/DashboardContext'
 import { fetchBonsCommande, estSigne, type BonCommande } from '@/lib/commercial'
 import { Ico } from '@/lib/proicons'
-import { ACCENT_ANIM } from '@/lib/charte'
+import { ACCENT_ANIM, ACCENT_SUPER } from '@/lib/charte'
+import { sansGabarit } from '@/lib/operations'
 
 const dateFr = (s: string | null) => (s ? new Date(s).toLocaleDateString('fr-FR') : '—')
 
 export default function Page() {
-  const { events, joueurs, partenaires } = useDashboard()
+  const { events: tous, joueurs, partenaires, openDrawer } = useDashboard()
+  /* Gabarit (se-master-superevent) exclu : ses 16 copies polluaient « À venir ». */
+  const events = useMemo(() => sansGabarit(tous), [tous])
   const [bons, setBons] = useState<BonCommande[] | null>(null)
 
   useEffect(() => {
@@ -62,20 +65,21 @@ export default function Page() {
           <div className="sa-kb-vide" style={{ lineHeight: 1.5 }}>{vide}</div>
         ) : (
           liste.slice(0, 8).map(e => (
-            <div key={e.id} className="sa-kb-vignette" style={{ cursor: 'default' }}>
+            /* REGRESSION signalee 10/11 : les vignettes ne s ouvraient pas. Clic = fiche de l animation / station. */
+            <button type="button" key={e.id} className="sa-kb-vignette" data-cockpit={e.id} onClick={() => openDrawer('event', e.id)} title={`Ouvrir ${e.nom}`}>
               <div className="sa-kb-ligne">
-                <span className="sa-kb-pastille" style={{ background: `${ACCENT_ANIM}20`, color: ACCENT_ANIM }}>
-                  <Ico k="ticket" size={14} />
+                <span className="sa-kb-pastille" style={{ background: `${e.super_event_id ? ACCENT_SUPER : ACCENT_ANIM}20`, color: e.super_event_id ? ACCENT_SUPER : ACCENT_ANIM }}>
+                  <Ico k={e.super_event_id ? 'star' : 'ticket'} size={14} />
                 </span>
                 <span className="sa-kb-nom">{e.nom}</span>
                 {e.date_d && <span className="sa-kb-date">{dateFr(e.date_d)}</span>}
               </div>
-              {(e.lieu || e.participants > 0) && (
+              {(e.lieu || e.participants > 0 || e.super_event_id) && (
                 <div className="sa-kb-sub">
-                  {[e.lieu, e.participants > 0 ? `${e.participants} participant${e.participants > 1 ? 's' : ''}` : ''].filter(Boolean).join(' · ')}
+                  {[e.super_event_id ? 'Station de super event' : '', e.lieu, e.participants > 0 ? `${e.participants} participant${e.participants > 1 ? 's' : ''}` : ''].filter(Boolean).join(' · ')}
                 </div>
               )}
-            </div>
+            </button>
           ))
         )}
       </div>

@@ -194,7 +194,7 @@ export default function Page() {
     (filtre === 'tous' || filtre === 'gerees') ? list.filter(l => !t || (l.nom ?? l.id).toLowerCase().includes(t)) : []
   , [list, filtre, t])
   const outilsFiltres = useMemo(() =>
-    OUTILS.filter(o => filtre !== 'gerees' && (filtre === 'archives' ? !!o.archive : !o.archive && (filtre === 'tous' || (filtre === 'animations' ? o.type === 'animation' : o.public.indexOf(filtre) >= 0)))
+    OUTILS.filter(o => filtre !== 'gerees' && (filtre === 'archives' ? !!o.archive : filtre === 'animations' ? o.type === 'animation' : !o.archive && (filtre === 'tous' || o.public.indexOf(filtre) >= 0))
       && (!t || (o.titre + ' ' + o.description).toLowerCase().includes(t)))
   , [OUTILS, filtre, t])
 

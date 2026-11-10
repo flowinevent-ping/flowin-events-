@@ -131,7 +131,7 @@ export default function Page() {
               {LIB_ETAT[etat]}
             </span>
             {etat === 'confirme' && t.notifie_at && <div style={{ fontSize: 10, color: 'var(--sa-muted)', marginTop: 2 }}>Notifié le {dateFr(t.notifie_at)}</div>}
-            {etat === 'retire' && t.retire_at && <div style={{ fontSize: 10, color: 'var(--sa-muted)', marginTop: 2 }}>Le {dateHeureFr(t.retire_at)}</div>}
+            {etat === 'retire' && <div data-utilise-chez style={{ fontSize: 10, color: 'var(--sa-muted)', marginTop: 2 }}>Utilisé chez {nomPartenaire(t.partenaire_id)}{t.retire_at ? ` le ${dateHeureFr(t.retire_at)}` : ''}</div>}
           </>
         )
       },

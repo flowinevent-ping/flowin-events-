@@ -78,7 +78,8 @@ const ICON_BY_ID: Record<string, string> = {
   'wizard-event-se': 'sparkles', 'wizard-pro': 'sparkles', 'envoi-masse': 'megaphone', 'apercu-pro': 'layout',
   'theme-parcours': 'layout',
   'demandes-rattachement': 'handshake',
-  'facture-nds': 'receipt', commercial: 'receipt', 'visite-guidee': 'globe',
+  'facture-nds': 'receipt', commercial: 'receipt',
+  'nds-bon-commande-co': 'receipt', 'commandes-animation-co': 'receipt', 'facture-nds-co': 'receipt', 'nds-packs-co': 'gift', 'cgv-co': 'receipt', 'visite-guidee': 'globe',
   roadmap: 'map', parametres: 'settings', maintenance: 'wrench', controle: 'check', 'emails-connexion': 'mail',
 }
 function SbIcon({ id }: { id: string }) {
@@ -229,6 +230,13 @@ export default function Sidebar() {
         { id: 'landing-page', label: 'Landing pages & outils commerciaux', href: '/dashboard/landing-page' },
         { id: 'envoi-masse', label: 'Envoi en masse', href: '/dashboard/envoi-masse' },
         { id: 'visite-guidee', label: 'Visite guidée Flowin', href: '/visite-guidee/index.html', nouvelOnglet: true },
+        /* REGRESSION 10/11 : ces entrees etaient ici avant le groupe « Commercial ». Elles restent
+           AUSSI a leur ancienne place (ids distincts) : rien ne disparait de l endroit ou Romain les cherche. */
+        { id: 'nds-bon-commande-co', label: 'Bons de commande & factures', href: '/dashboard/nds-bon-commande' },
+        { id: 'commandes-animation-co', label: 'Commandes Animation', href: '/admin-commandes-animation.html', external: true },
+        { id: 'facture-nds-co', label: 'Générer une facture', href: '/facture-nds.html', external: true },
+        { id: 'nds-packs-co', label: 'Packs de participation', href: '/dashboard/nds-packs' },
+        { id: 'cgv-co', label: 'CGV & légal', href: '/dashboard/cgv' },
         { id: 'pilotage', label: 'Pilotage', href: '/dashboard/pilotage' },
       ],
     },

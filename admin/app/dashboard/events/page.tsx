@@ -15,7 +15,8 @@
  * peuvent toujours coexister sur un event) -- seul le FILTRE D'AFFICHAGE de
  * cette page applique l'exclusivite, pas une contrainte structurelle.
  */
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
+import { fetchSuperEvents } from '@/lib/nds'
 import Link from 'next/link'
 import { useDashboard } from '@/contexts/DashboardContext'
 import { sansGabarit } from '@/lib/operations'
@@ -38,6 +39,8 @@ export default function Page() {
   const [search, setSearch] = useState('')
   const [ouvert, setOuvert] = useState<string | null>(null)
   const [onglet, setOnglet] = useState<'kanban' | 'parcours'>('kanban')
+  const [supersNoms, setSupersNoms] = useState<Record<string, string>>({})
+  useEffect(() => { fetchSuperEvents().then(l => { const m: Record<string, string> = {}; (l ?? []).forEach(x => { m[x.id] = x.nom }); setSupersNoms(m) }) }, [])
 
   const evsParcours = useMemo(() => {
     const reels = sansGabarit(events).filter(e => e.module && e.super_event_id)
@@ -56,7 +59,7 @@ export default function Page() {
      Flowin", sans pro rattache) n'a pas sa place ici -- il faisait apparaitre une
      fausse carte "-" avant ce fix. Meme regle qu'avant pour les super events. */
   const base = useMemo(() =>
-    events.filter((e: FlowinEvent & Record<string, unknown>) => !e.super_event_id && !!e.pro_id),
+    sansGabarit(events).filter((e: FlowinEvent & Record<string, unknown>) => !e.super_event_id && !!e.pro_id),
   [events])
 
   const list = useMemo(() => {
@@ -100,12 +103,23 @@ export default function Page() {
   /* Memes acces rapides que sur /dashboard/super-events, meme carte -- Romain
      demande explicitement la meme presentation. "Pros" retire ici (on est
      deja sur une vue par pro, redondant). */
-  const accesRapides: { icone: string; label: string; href: string }[] = [
-    { icone: 'handshake', label: 'Partenaires', href: '/dashboard/partenaires' },
-    { icone: 'users', label: 'Joueurs', href: '/dashboard/joueurs' },
-    { icone: 'gift', label: 'Lots', href: '/dashboard/nds-lots' },
-    { icone: 'star', label: 'Gagnants', href: '/dashboard/gagnants' },
+  /* REGRESSION 10/11 (Romain : « aucun ne fonctionnent ») : les chips ouvraient
+     les pages GLOBALES, sans rapport avec le pro de la carte. Elles ouvrent
+     desormais la fiche du pro sur l onglet correspondant (donnees filtrees sur
+     ce pro). Le lien vers la page globale reste en repli si le pro est inconnu. */
+  const accesRapides: { icone: string; label: string; href: string; onglet: string }[] = [
+    { icone: 'handshake', label: 'Partenaires', href: '/dashboard/partenaires', onglet: 'infos' },
+    { icone: 'users', label: 'Joueurs', href: '/dashboard/joueurs', onglet: 'crm' },
+    { icone: 'gift', label: 'Lots', href: '/dashboard/nds-lots', onglet: 'c-lots' },
+    { icone: 'star', label: 'Gagnants', href: '/dashboard/gagnants', onglet: 'c-gagnants' },
   ]
+  /* Stations de super event du pro (points de jeu / QR de suivi, PAS des
+     animations) : groupees sous leur super event, gabarit exclu. */
+  const stationsParSe = (pid: string) => {
+    const m = new Map<string, number>()
+    for (const e of sansGabarit(events)) if (e.pro_id === pid && e.super_event_id) m.set(e.super_event_id, (m.get(e.super_event_id) ?? 0) + 1)
+    return Array.from(m.entries()).map(([se, n]) => ({ se, n, nom: supersNoms[se] ?? se }))
+  }
 
   return (
     <div className="sa-content">
@@ -161,13 +175,24 @@ export default function Page() {
                       <div className="sa-kb-sub">
                         {animations.length} animation{animations.length > 1 ? 's' : ''} · {pid}
                       </div>
+                      {stationsParSe(pid).map(x => (
+                        <div key={x.se} className="sa-kb-sub" data-stations={x.se}>
+                          <a href={`/dashboard/super-events`} style={{ color: 'inherit' }}>{x.nom} · {x.n} station{x.n > 1 ? 's' : ''} (points de jeu)</a>
+                        </div>
+                      ))}
 
                       {/* Meme principe que l option B des cartes Super Events (validee
                           par Romain le 28/10) : raccourcis en chips plutot qu en gros
                           boutons pleine largeur, visibles sans ouvrir le detail. */}
                       <div className="sa-kb-chips">
                         {accesRapides.map(a => (
-                          <a key={a.label} href={a.href} className="sa-kb-chip">
+                          <a key={a.label} href={a.href} className="sa-kb-chip" data-chip={a.label}
+                            onClick={ev => {
+                              if (!pro) return
+                              ev.preventDefault()
+                              if (a.label === 'Partenaires' && pro.partenaire_id) openDrawer('partenaire', String(pro.partenaire_id), 'infos')
+                              else openDrawer('pro', pid, a.onglet)
+                            }}>
                             <Ico k={a.icone} size={12} style={{ marginRight: 4, verticalAlign: -2 }} />{a.label}
                           </a>
                         ))}

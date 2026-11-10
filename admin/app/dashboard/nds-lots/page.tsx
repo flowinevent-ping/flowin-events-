@@ -226,7 +226,7 @@ export default function Page() {
                 <div>
                   <ChipEtat etat={g.etat as 'a_confirmer' | 'confirme' | 'retire'} />
                   {g.etat === 'retire' && dateHeureFr(g.retire_at) && (
-                    <div style={{ fontSize: 10.5, color: 'var(--sa-muted)', marginTop: 2 }}>le {dateHeureFr(g.retire_at)}</div>
+                    <div style={{ fontSize: 10.5, color: 'var(--sa-muted)', marginTop: 2 }} data-utilise-chez>utilisé chez {l.nom} le {dateHeureFr(g.retire_at)}</div>
                   )}
                 </div>
                 <div style={{ gridColumn: '1 / -1', display: 'flex', gap: 6, flexWrap: 'wrap', marginTop: 4 }}>
