@@ -100,7 +100,7 @@ export const OUTILS: Outil[] = [
     message: 'Bonjour, pour créer votre espace Flowin, c’est ici (quelques minutes) :' },
   { statut: 'validé', id: 'visite-guidee', titre: 'Visite guidée Flowin', public: ['commerce', 'organisateur'], type: 'parcours', suivi: false,
     description: 'Démo cliquable sans compte : parcours commerçant, organisateur et joueur (données fictives).',
-    chemin: '/visite-guidee/',
+    chemin: '/visite-guidee/index.html',
     message: 'Bonjour, découvrez Flowin en quelques clics, sans créer de compte :' },
   { statut: 'validé', id: 'bon-commande-animation', titre: 'Bon de commande Animation', public: ['commerce'], type: 'document', suivi: true,
     description: 'Bon de commande en ligne, signature et paiement.',

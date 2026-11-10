@@ -78,7 +78,7 @@ const ICON_BY_ID: Record<string, string> = {
   'wizard-event-se': 'sparkles', 'wizard-pro': 'sparkles', 'envoi-masse': 'megaphone', 'apercu-pro': 'layout',
   'theme-parcours': 'layout',
   'demandes-rattachement': 'handshake',
-  'facture-nds': 'receipt',
+  'facture-nds': 'receipt', commercial: 'receipt', 'visite-guidee': 'globe',
   roadmap: 'map', parametres: 'settings', maintenance: 'wrench', controle: 'check',
 }
 function SbIcon({ id }: { id: string }) {
@@ -207,17 +207,27 @@ export default function Sidebar() {
       ],
     },
     {
+      /* Romain (10/11) : « un accès direct à la modification du prix et des infos, copie de ce
+         qui est publié ». Groupe Commercial : offres et prix, CGV, bons de commande, factures,
+         plaquettes. Les entrees existantes y sont RANGEES, aucune n est supprimee. */
+      group: 'Commercial',
+      ton: 'crm',
+      items: [
+        { id: 'commercial', label: 'Offres et prix (publié)', href: '/dashboard/commercial' },
+        { id: 'nds-packs', label: 'Packs de participation', href: '/dashboard/nds-packs' },
+        { id: 'cgv', label: 'CGV & légal', href: '/dashboard/cgv' },
+        { id: 'commandes-animation', label: 'Commandes Animation', href: '/admin-commandes-animation.html', external: true },
+        { id: 'nds-bon-commande', label: 'Bons de commande & factures', href: '/dashboard/nds-bon-commande' },
+        { id: 'facture-nds', label: 'Générer une facture', href: '/facture-nds.html', external: true },
+        { id: 'landing-page', label: 'Plaquettes, landing & outils', href: '/dashboard/landing-page' },
+      ],
+    },
+    {
       group: 'Comm & outils',
       ton: 'out',
       items: [
         { id: 'envoi-masse', label: 'Envoi en masse', href: '/dashboard/envoi-masse' },
-        { id: 'landing-page', label: 'Landing pages & outils commerciaux', href: '/dashboard/landing-page' },
-        { id: 'visite-guidee', label: 'Visite guidée Flowin', href: '/visite-guidee/', nouvelOnglet: true },
-        { id: 'nds-bon-commande', label: 'Bons de commande & factures', href: '/dashboard/nds-bon-commande' },
-        { id: 'commandes-animation', label: 'Commandes Animation', href: '/admin-commandes-animation.html', external: true },
-        { id: 'facture-nds', label: 'Générer une facture', href: '/facture-nds.html', external: true },
-        { id: 'nds-packs', label: 'Packs de participation', href: '/dashboard/nds-packs' },
-        { id: 'cgv', label: 'CGV & légal', href: '/dashboard/cgv' },
+        { id: 'visite-guidee', label: 'Visite guidée Flowin', href: '/visite-guidee/index.html', nouvelOnglet: true },
         { id: 'pilotage', label: 'Pilotage', href: '/dashboard/pilotage' },
       ],
     },

@@ -1,11 +1,11 @@
 /* ── Variables SA ── */
 :root {
   /* Charte commune (01/11) : memes valeurs que dashboard.html et lib/charte.ts —
-     accent violet #7A4FE0, papier, encre, barre laterale CLAIRE. */
+     accent bleu #3B5CC4 (violet retire, decision 08/11), papier, encre, barre laterale CLAIRE. */
   --sa-bg:#F4F6F9;--sa-card:#FFFFFF;--sa-border:#DCE3EC;--sa-text:#1B3A5C;--sa-muted:#5a6b80;
-  --sa-subtle:#F8FAFC;--sa-sb-bg:#FFFFFF;--sa-sb-bg-2:#F8FAFC;--sa-sb-hover:rgba(122,79,224,.07);
+  --sa-subtle:#F8FAFC;--sa-sb-bg:#FFFFFF;--sa-sb-bg-2:#F8FAFC;--sa-sb-hover:rgba(59,92,196,.07);
   --sa-sb-text:#1B3A5C;--sa-sb-text-dim:#5a6b80;--sa-sb-border:#DCE3EC;
-  --sa-accent:#7A4FE0;--sa-accent-light:#9B7BEA;--sa-accent-dark:#6A3FD0;
+  --sa-accent:#3B5CC4;--sa-accent-light:#7C93DC;--sa-accent-dark:#2E4AA3;
   --sa-sub-ink:#334155;
 }
 /* ── Layout shell ── */
@@ -25,14 +25,14 @@
 .sa-sb-group-label{flex:1;text-align:left}
 .sa-sb-group-chevron{flex-shrink:0;opacity:.55;transition:transform .15s}
 .sa-sb-group[aria-expanded="true"] .sa-sb-group-chevron{transform:rotate(90deg)}
-.sa-sb-group.ton-se{color:#6A3FD0}
+.sa-sb-group.ton-se{color:#1B3A5C}
 .sa-sb-group.ton-ev{color:#0B7A4F}
 .sa-sb-group.ton-crm{color:#3B5CC4}
 .sa-sb-group.ton-out{color:#B45309}
 .sa-sb-group.ton-sys{color:#5a6b80}
 .sa-sb-item{display:flex;align-items:center;gap:10px;padding:9px 22px;color:var(--sa-sb-text);cursor:pointer;width:100%;font-size:13px;font-weight:600;transition:all .15s;text-align:left;border:none;background:none;border-left:3px solid transparent}
-.sa-sb-item:hover{background:var(--sa-sb-hover);color:#6A3FD0}
-.sa-sb-item.active{background:#EEE8FC;color:#5B34C2;border-left-color:var(--sa-accent);font-weight:800}
+.sa-sb-item:hover{background:var(--sa-sb-hover);color:#2E4AA3}
+.sa-sb-item.active{background:#E8EDFA;color:#2E4AA3;border-left-color:var(--sa-accent);font-weight:800}
 .sa-sb-icon{width:18px;text-align:center;font-size:15px}
 .sa-sb-label{flex:1}
 .sa-sb-badge{background:rgba(27,58,92,.08);color:var(--sa-sb-text);font-size:10px;font-weight:700;padding:1px 7px;border-radius:100px;min-width:20px;text-align:center}
