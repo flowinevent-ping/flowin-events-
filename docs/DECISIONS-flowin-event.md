@@ -305,3 +305,15 @@ que sur instruction explicite de Romain.
 - Répartitions avec **beaux graphiques comme dans le super admin** : donuts, « égaliseur » (barres), **hommes / femmes**, **zone de chalandise par code postal en %**.
 - **Rappel** au pro : « invitez vos clients à jouer » — plus ils jouent, plus ils partagent, plus le commerce est visible.
 - Objectifs affichés : constituer son fichier client, animer ses clients, augmenter son panier et son chiffre d'affaires.
+
+## QR codes = métrique de chaque support de communication (Romain, 10/11/2026 soir)
+- Le pro ajoute autant de QR que de supports, avec un **intitulé libre** (ex. « Arrière de bus · campagne salle de sport »)
+  et un **type de support à pictogramme** (bus, Instagram, Facebook, affiche, flyer, ticket de caisse, vitrine, site, presse…).
+- Même jeu, mêmes questions, mêmes lots derrière tous les QR : on mesure **d'où viennent les flashs** et on distribue
+  les lots là où l'on touche le plus de monde.
+- Affichage comme la première animation (graphismes jugés très bons) : **égaliseur** des flashs par QR avec le **pictogramme**
+  du support ; côté pro et côté super admin.
+- Argument client (ex. contrôle technique : 5 000 € de pub ticket de caisse, ~15 % de retour) : savoir d'où vient chaque
+  campagne, ce que les gens gagnent, piloter en autonomie, récupérer les coordonnées ; ticket offert = coordonnées du
+  donneur ET du bénéficiaire.
+- **Piste de prix (non tranchée)** : 2 QR inclus, QR de tracking supplémentaire payant (5, 10 ou 15 € — à décider).

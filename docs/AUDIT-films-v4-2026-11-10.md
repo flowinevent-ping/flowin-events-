@@ -117,3 +117,20 @@ Contrôle texte : aucune occurrence de « promo flash », « consent », « acco
 | Fin organisateur (f3) | QR réel vers la plaquette Super Event organisateur (`/validation/plaquette-super-event-v3.html#organisateur`), bouton « Je découvre le Super Event » | Fin f3 |
 | Fin participant Animation (f2) | QR réel vers `/carte-commerces` (carte publique des commerces, en ligne : 200), bouton « Je trouve les commerces » | Fin f2 |
 | Fin participant Super Event (f5) | QR réel vers `/se/se-master-superevent` (page joueur du Super Event) | Fin f5 |
+
+## Version 3.1 (10/11/2026) : fin du film 4 vers « rejoindre » et canal d'origine sur tous les QR
+Moteur : `admin/public/videos/scenes/films-v4.html` (5 nouveaux QR `QR_F1` à `QR_F5`). Les 10 vidéos et les 5 affiches
+(image à 1 s) sont réenregistrées sous les mêmes noms dans `admin/public/videos/v4/` (1080x1920, H.264, 24 i/s).
+
+| Film | QR de fin (décodé sur la dernière image, version longue ET version 15 s) | Bouton |
+|---|---|---|
+| f1 commerce | `https://flowin-events.vercel.app/pro/premiere-fois?src=video-commerce` | Je publie mon jeu |
+| f2 participant Animation | `https://flowin-events.vercel.app/carte-commerces?src=video-participant` | Je trouve les commerces |
+| f3 organisateur | `https://flowin-events.vercel.app/validation/plaquette-super-event-v3.html?src=video-organisateur#organisateur` | Je découvre le Super Event |
+| f4 commerce Super Event | `https://flowin-events.vercel.app/rejoindre?src=video-partenaire-se` (demande de participation, sans compte) | Je participe au prochain Super Event |
+| f5 participant Super Event | `https://flowin-events.vercel.app/se/se-master-superevent?src=video-participant-se` | Je joue |
+
+- Page de partage f4 (`animations/film-v4-f4-commerce-super-event.html`) : bouton « Je participe au prochain Super Event » vers `/rejoindre` (le script de la page ajoute `?src=video-partenaire-se`). Les 5 pages de partage ajoutent déjà leur canal à leurs boutons.
+- Canaux identiques à `admin/lib/source.ts` (cartes Animations du super admin).
+- Canal retenu à l'arrivée (localStorage `flowin_src`, 1re visite) : `/pro/premiere-fois` (déjà), et désormais `/rejoindre`, `/carte-commerces`, `/se/[se]` (composant `components/CaptureSource.tsx`) et la plaquette Super Event v3 (script en fin de page).
+- Contrôles : ffprobe (1080x1920, durées inchangées : 15,0 s ; f1 53,1 · f2 30,6 · f3 52,3 · f4 37,7 · f5 38,2 s), QR décodés avec jsQR = URL attendue pour les 10 vidéos, les 5 URL répondent 200.
