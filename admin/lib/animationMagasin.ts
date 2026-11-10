@@ -12,20 +12,24 @@
  */
 
 import { createHmac, timingSafeEqual } from 'crypto'
+import { PRIX_ANIMATION } from './reglement'
 
+/* Prix repris de la source unique lib/reglement.ts (Lot A, 10/11/2026). */
 export const PRIX_AM = {
-  annuelleHt: 990, // formule annuelle, engagement 12 mois
-  mensuelleHt: 110, // formule mensuelle, par mois, engagement 3 mois minimum
+  lancementHt: PRIX_ANIMATION.lancement, // 1re année, offre de lancement -50 %
+  annuelleHt: PRIX_ANIMATION.annuelle, // formule annuelle, reconduction tacite
+  mensuelleHt: PRIX_ANIMATION.mensuelle, // formule mensuelle, par mois
   kitPhysiqueHt: 149, // par boutique
-  optQuizHt: 180, // par animation
-  optBonusHt: 180, // par sondage
+  optQuizHt: PRIX_ANIMATION.quizFlowin, // quiz rediges par Flowin (30 + 5 bonus), forfait
+  optQuizLancementHt: PRIX_ANIMATION.quizFlowinLancement, // meme option, 1re annee
+  optBonusHt: 0, // integre a l'option quiz Flowin (5 questions bonus) : plus vendue seule
   tva: 0.2,
 } as const
 
 export type CommandeAnimation = {
   id: string
   statut: string
-  offre: 'mensuelle' | 'annuelle'
+  offre: 'mensuelle' | 'annuelle' | 'lancement'
   engagement_mois?: number
   gc_subscription_id?: string | null
   raison_sociale: string
@@ -53,9 +57,9 @@ export function calculerMontants(c: Pick<CommandeAnimation, 'offre' | 'nb_boutiq
   const quiz = Math.max(0, Math.min(20, Math.floor(Number(c.opt_quiz_qte) || 0)))
   const bonus = Math.max(0, Math.min(20, Math.floor(Number(c.opt_bonus_qte) || 0)))
   const kitHt = c.kit === 'physique' ? PRIX_AM.kitPhysiqueHt * nb : 0
-  const optHt = PRIX_AM.optQuizHt * quiz + PRIX_AM.optBonusHt * bonus
+  const optHt = (c.offre === 'lancement' ? PRIX_AM.optQuizLancementHt : PRIX_AM.optQuizHt) * Math.min(quiz, 1) + PRIX_AM.optBonusHt * bonus
   // Offre mensuelle : la commande porte le 1er mois ; les mois suivants sont prélevés par l'abonnement GoCardless.
-  const aboHt = c.offre === 'annuelle' ? PRIX_AM.annuelleHt : PRIX_AM.mensuelleHt
+  const aboHt = c.offre === 'lancement' ? PRIX_AM.lancementHt : c.offre === 'annuelle' ? PRIX_AM.annuelleHt : PRIX_AM.mensuelleHt
   const ht = aboHt + kitHt + optHt
   const ttcCents = cents(ht) + Math.round(cents(ht) * PRIX_AM.tva)
   const aboTtcCents = cents(aboHt) + Math.round(cents(aboHt) * PRIX_AM.tva)

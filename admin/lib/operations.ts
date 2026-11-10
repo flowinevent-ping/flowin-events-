@@ -600,6 +600,7 @@ export function libelleStatut(s: string | null | undefined): string {
     case 'upcoming': return 'À venir'
     case 'past': return 'Terminé'
     case 'archived': return 'Archivé'
+    case 'pending': return 'En attente de paiement'
     default: return s || '—'
   }
 }

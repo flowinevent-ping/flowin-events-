@@ -104,6 +104,10 @@ export interface CreationAnimation {
   diffusionPhysique: boolean
   diffusionDigital: boolean
   diffusionQrTracking: boolean
+  /** Lot A (10/11/2026) : publication par le pro = commande. L animation est enregistree en status 'pending'
+   *  (non jouable, lib/etatAnimation) avec cfg.paiement.statut = 'en_attente' ; elle passe en 'upcoming' quand le pro
+   *  declare son virement sur le bon de commande (public/bon-commande-animation.html). Absent (Super Admin) : en ligne. */
+  paiement?: { offre: string; quizFlowin: boolean; customisation: boolean }
 }
 export async function creerAnimation(params: CreationAnimation): Promise<{ ok: boolean; eventId: string | null; error?: string }> {
   const id = 'ev-' + params.proId.replace(/^pro-/, '') + '-' + Math.random().toString(36).slice(2, 8)
@@ -114,7 +118,7 @@ export async function creerAnimation(params: CreationAnimation): Promise<{ ok: b
     pro_id: params.proId,
     nom: params.nom,
     module: params.module,
-    status: 'upcoming',
+    status: params.paiement ? 'pending' : 'upcoming',
     date_d: params.dateD,
     date_f: params.dateF,
     gain_ticket: params.lots.some(l => l.type === 'tirage'),
@@ -132,6 +136,7 @@ export async function creerAnimation(params: CreationAnimation): Promise<{ ok: b
       lotQuantite: premierLot?.quantite ?? 0,
       lots: params.lots,
       regleRecompense: params.regleRecompense ?? null,
+      ...(params.paiement ? { paiement: { statut: 'en_attente', offre: params.paiement.offre, quiz_flowin: params.paiement.quizFlowin, customisation: params.paiement.customisation, cree_le: new Date().toISOString() } } : {}),
       diffusion_demandee: {
         physique: params.diffusionPhysique,
         digital: params.diffusionDigital,

@@ -282,10 +282,11 @@
     <div class="sec">
       <div class="sec-h"><span class="n">2</span><h2>Votre formule</h2></div>
       <div class="choices" id="offerChoices">
-        <button type="button" class="choice sel" data-offre="annuelle"><span class="badge-top">Le plus avantageux</span><span class="ck"></span><div class="cn">Formule annuelle</div><div class="cd">Quiz, roue, tombola, tirages, billets, stock, relances, mesure par support. Un seul paiement pour l&rsquo;ann&eacute;e.</div><div class="cp">990 &euro; <small>HT / an</small></div><span class="eng">Engagement 12 mois</span></button>
-        <button type="button" class="choice" data-offre="mensuelle"><span class="ck"></span><div class="cn">Formule mensuelle</div><div class="cd">La m&ecirc;me offre, r&eacute;gl&eacute;e chaque mois. Apr&egrave;s 3 mois, r&eacute;siliable chaque mois.</div><div class="cp">110 &euro; <small>HT / mois</small></div><span class="eng">Engagement 3 mois minimum</span></button>
+        <button type="button" class="choice sel" data-offre="lancement"><span class="badge-top">Offre de lancement -50&nbsp;%</span><span class="ck"></span><div class="cn">Premi&egrave;re ann&eacute;e</div><div class="cd">Quiz, roue, tombola, tirages, billets, stock, relances, mesure par support. Puis 990 &euro; HT / an ou 110 &euro; HT / mois, reconduction tacite.</div><div class="cp">445 &euro; <small>HT la 1re ann&eacute;e</small></div><span class="eng">Engagement 12 mois</span></button>
+        <button type="button" class="choice" data-offre="annuelle"><span class="ck"></span><div class="cn">Formule annuelle</div><div class="cd">La m&ecirc;me offre, un seul paiement pour l&rsquo;ann&eacute;e. Reconduction tacite, r&eacute;siliable.</div><div class="cp">990 &euro; <small>HT / an</small></div><span class="eng">Engagement 12 mois</span></button>
+        <button type="button" class="choice" data-offre="mensuelle"><span class="ck"></span><div class="cn">Formule mensuelle</div><div class="cd">La m&ecirc;me offre, pr&eacute;lev&eacute;e chaque mois (mandat SEPA). Reconduction tacite ; apr&egrave;s 3 mois, r&eacute;siliable chaque mois.</div><div class="cp">110 &euro; <small>HT / mois</small></div><span class="eng">Engagement 3 mois minimum</span></button>
       </div>
-      <p class="eco">12 &times; 110 &euro; = 1&nbsp;320 &euro; HT par an en mensuel, contre 990 &euro; HT en annuel : <b>330 &euro; HT d&rsquo;&eacute;conomie</b> avec la formule annuelle.</p>
+      <p class="eco">Premi&egrave;re ann&eacute;e &agrave; moiti&eacute; prix : 445 &euro; HT au lieu de 990 &euro; HT. Ensuite, 12 &times; 110 &euro; = 1&nbsp;320 &euro; HT par an en mensuel, contre 990 &euro; HT en annuel : <b>330 &euro; HT d&rsquo;&eacute;conomie</b> avec la formule annuelle.</p>
       <div class="engbox" id="engBox" style="display:none">
         <label class="chk" id="engRow" style="margin:0"><input type="checkbox" id="engChk"><span>J&rsquo;ai bien not&eacute; que la formule mensuelle comporte un <b>engagement de 3 mois minimum</b> (3 &times; 110 &euro; HT), puis qu&rsquo;elle est r&eacute;siliable chaque mois selon le pr&eacute;avis des CGV.</span></label>
       </div>
@@ -296,11 +297,13 @@
       </div>
       <div class="subh">Options <span style="font-weight:700;color:var(--muted)">(facultatives)</span></div>
       <div class="choices">
-        <div class="choice" id="optQuiz" role="button" tabindex="0"><span class="ck"></span><div class="cn">Quiz personnalis&eacute;</div><div class="cd">Vos questions, r&eacute;dig&eacute;es pour un &eacute;v&eacute;nement.</div><div class="cp">180 &euro; <small>HT par &eacute;v&eacute;nement</small></div>
-          <div class="opt-qty">Animations <span class="stepper"><button type="button" data-q="quiz" data-d="-1">&minus;</button><input id="qQuiz" value="1" inputmode="numeric" aria-label="Nombre d'&eacute;v&eacute;nements"><button type="button" data-q="quiz" data-d="1">+</button></span></div></div>
-        <div class="choice" id="optBonus" role="button" tabindex="0"><span class="ck"></span><div class="cn">Questions bonus</div><div class="cd">Votre sondage sur mesure : avis client, sensibilisation.</div><div class="cp">180 &euro; <small>HT</small></div>
+        <div class="choice" id="optQuiz" role="button" tabindex="0"><span class="ck"></span><div class="cn">Quiz r&eacute;dig&eacute;s par Flowin</div><div class="cd">30 questions quiz + 5 questions bonus, r&eacute;dig&eacute;es pour votre commerce.</div><div class="cp" id="optQuizPrix">145 &euro; <small>HT, forfait</small></div>
+          <div class="opt-qty" hidden style="display:none">Animations <span class="stepper"><button type="button" data-q="quiz" data-d="-1">&minus;</button><input id="qQuiz" value="1" inputmode="numeric" aria-label="Nombre d'&eacute;v&eacute;nements"><button type="button" data-q="quiz" data-d="1">+</button></span></div></div>
+        <!-- Questions bonus : incluses dans l'option quiz Flowin (5 questions bonus) depuis le Lot A du 10/11/2026 ; plus vendues seules. Carte gardée masquée. -->
+        <div class="choice" id="optBonus" role="button" tabindex="0" hidden style="display:none"><span class="ck"></span><div class="cn">Questions bonus</div><div class="cd">Votre sondage sur mesure : avis client, sensibilisation.</div><div class="cp">180 &euro; <small>HT</small></div>
           <div class="opt-qty">Sondages <span class="stepper"><button type="button" data-q="bonus" data-d="-1">&minus;</button><input id="qBonus" value="1" inputmode="numeric" aria-label="Nombre de sondages"><button type="button" data-q="bonus" data-d="1">+</button></span></div></div>
       </div>
+      <div class="choice sel" id="optCustom" hidden style="cursor:default"><span class="ck"></span><div class="cn">Customisation totale</div><div class="cd">Couleurs, th&eacute;matique, jeu 100&nbsp;% personnalisable et modifiable, lancement de campagne. Flowin vous adresse un devis s&eacute;par&eacute;.</div><div class="cp">Sur demande</div></div>
       <div class="guarbox" id="guarBox" data-garantie hidden>
         <span class="gtag">Offre sp&eacute;ciale premiers adh&eacute;rents &middot; formule annuelle</span>
         <div class="gprinc" id="garTxt">Satisfait ou rembours&eacute; : sur 12 mois, avec au moins 4 animations, si le nombre de clients venus retirer leur lot en boutique n&rsquo;atteint pas l&rsquo;objectif fix&eacute; avec votre panier moyen, Flowin vous rembourse la diff&eacute;rence (hors part digitale). <a href="/cgv-animation-magasin.html" target="_blank" rel="noopener">Conditions d&eacute;taill&eacute;es dans les CGV</a>.</div>
@@ -398,6 +401,13 @@
         R&eacute;f&eacute;rence &agrave; rappeler : <b id="mRef">&mdash;</b>
       </div>
     </div>
+    <div class="sec" id="mDeclare" style="display:none" data-declaration>
+      <div class="sec-h"><span class="n">&#10003;</span><h2>Votre animation</h2></div>
+      <div class="banner warn" id="mDeclAttente"><b>Animation enregistr&eacute;e, en attente de paiement.</b> Elle passe en ligne d&egrave;s que vous d&eacute;clarez votre virement.</div>
+      <label class="chk" id="mDeclRow"><input type="checkbox" id="mDeclChk"><span>J&rsquo;ai effectu&eacute; le virement de <b id="mDeclMt">&mdash;</b> TTC avec la r&eacute;f&eacute;rence <b id="mDeclRef">&mdash;</b>.</span></label>
+      <div class="actions" style="margin-top:10px"><button type="button" class="btn" id="mDeclBtn">J&rsquo;ai effectu&eacute; le virement</button></div>
+      <div class="banner info" id="mDeclOk" style="display:none"></div>
+    </div>
     <div class="mgar" id="mGarantie" data-garantie hidden style="display:none"><div id="mGarTxt"></div><button type="button" class="btn" id="mGarBtn">Je veux b&eacute;n&eacute;ficier du satisfait ou rembours&eacute;</button></div>
     <div class="sec">
       <div class="sec-h"><span class="n" id="mStepsN">3</span><h2>Les prochaines &eacute;tapes</h2></div>
@@ -474,8 +484,10 @@
   var KEY = 'sb_publishable_yQcGyoh4UdlUCwA96RKSwg_3jMJVVb1'; /* clé publishable : publique par design */
   var TABLE = 'commandes_animation';
   var API_GC = '/api/paiement/gocardless';
-  var CGV_VERSION = 'am-v3-2026-11-01';
-  var PRIX = { annuelle: 990, mensuelle: 110, kitPhysique: 149, optQuiz: 180, optBonus: 180, tva: 0.20 };
+  var CGV_VERSION = 'am-v4-2026-11-10'; /* CGV art. 4 et 6 : grille du Lot A, tacite reconduction, prorata 110 € / mois */
+  /* Grille unique : admin/lib/reglement.ts (Lot A, 10/11/2026) ; même valeurs que /bon-commande-pdf.js */
+  var PRIX = (window.FlowinBonPDF && window.FlowinBonPDF.PRIX) || { lancement: 445, annuelle: 990, mensuelle: 110, kitPhysique: 149, optQuiz: 145, optQuizLancement: 72.5, optBonus: 0, tva: 0.20 };
+  var DELAI_CONTROLE = '3 à 5 jours';
   var IBAN = 'FR76 1460 7003 3470 2211 6462 345', BIC = 'CCBPFRPPMAR';
   var LS_FILE = 'flowin_am_file_attente', LS_DERNIERE = 'flowin_am_derniere';
   var EMAIL_FLOWIN = 'flowinevent@gmail.com';
@@ -516,7 +528,7 @@
   })();
 
   /* ---------- État ---------- */
-  var st = { offre: 'annuelle', renouv: false, nb: 1, kit: 'digital', quiz: 0, bonus: 0, garantie: false, certif: null, pay: 'virement', gcDispo: false, logo: null };
+  var st = { offre: 'lancement', custom: false, ev: null, renouv: false, nb: 1, kit: 'digital', quiz: 0, bonus: 0, garantie: false, certif: null, pay: 'virement', gcDispo: false, logo: null };
   var now = new Date();
   function genId(){
     var alpha = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789', s = '', i, buf = null;
@@ -531,7 +543,7 @@
 
   var MODELE = window.FlowinBonPDF;   /* modèle unique : /bon-commande-pdf.js (calcul + PDF) */
   var NOM_OFFRE = MODELE ? MODELE.NOM_OFFRE : { annuelle: 'Formule annuelle Flowin, jeu d\'animation', mensuelle: 'Formule mensuelle Flowin, jeu d\'animation' };
-  var ENGAGEMENT = { annuelle: 12, mensuelle: 3 };
+  var ENGAGEMENT = { lancement: 12, annuelle: 12, mensuelle: 3 };
   function calc(){ return MODELE.calcul({ offre: st.offre, kit: st.kit, nb: st.nb, quiz: st.quiz, bonus: st.bonus }); }
   /* Garantie : X = arrondi supérieur (prix sur 12 mois ÷ panier moyen) */
   function clientsGarantie(){
@@ -554,7 +566,11 @@
     var kits = document.querySelectorAll('#kitChoices .choice');
     for (var kk = 0; kk < kits.length; kk++) kits[kk].className = 'choice' + (kits[kk].getAttribute('data-kit') === st.kit ? ' sel' : '');
     $('engBox').style.display = st.offre === 'mensuelle' ? 'block' : 'none';
-    var suite = st.offre === 'mensuelle' ? 'Puis ' + eur(PRIX.mensuelle) + ' HT (' + eur(Math.round(PRIX.mensuelle * (1 + PRIX.tva) * 100) / 100) + ' TTC) par mois, engagement 3 mois minimum.' : 'Engagement 12 mois.';
+    var suite = st.offre === 'mensuelle' ? 'Puis ' + eur(PRIX.mensuelle) + ' HT (' + eur(Math.round(PRIX.mensuelle * (1 + PRIX.tva) * 100) / 100) + ' TTC) par mois, reconduction tacite, engagement 3 mois minimum.'
+      : st.offre === 'lancement' ? 'Engagement 12 mois. Puis ' + eur(PRIX.annuelle) + ' HT par an ou ' + eur(PRIX.mensuelle) + ' HT par mois, reconduction tacite.' : 'Engagement 12 mois, reconduction tacite.';
+    if (st.custom) suite += ' Customisation totale : sur demande, devis séparé.';
+    $('optQuizPrix').innerHTML = st.offre === 'lancement' ? '72,50 &euro; <small>HT la 1re ann&eacute;e</small> <s style="font-size:12px;color:var(--muted)">145 &euro;</s>' : '145 &euro; <small>HT, forfait</small>';
+    var oc = $('optCustom'); oc.hidden = !st.custom; oc.style.display = st.custom ? '' : 'none';
     $('tSuite').textContent = suite; $('mSuite').textContent = suite;
     $('kitNb').textContent = st.nb + ' boutique' + (st.nb > 1 ? 's' : '');
     var annuelle = st.offre === 'annuelle';
@@ -607,7 +623,7 @@
   (function(){
     var b = qs('boutiques'); if (b) st.nb = clampInt(b, 1, 200);
     var k = qs('kit'); if (k === 'physique' || k === 'digital') st.kit = k;
-    var of = qs('offre'); if (of === 'annuelle' || of === 'mensuelle') st.offre = of; else if (of === 'kit_digital') { st.offre = 'annuelle'; st.kit = 'digital'; }
+    var of = qs('offre'); if (of === 'lancement' || of === 'annuelle' || of === 'mensuelle') st.offre = of; else if (of === 'kit_digital') { st.offre = 'annuelle'; st.kit = 'digital'; }
     /* Garantie : seules les données certifiées sur la page Garantie sont acceptées, puis verrouillées */
     var pm = parseFloat(qs('panier') || ''), fx = qs('flux'), cle = qs('certif_le'), cpar = qs('certif_par');
     var dCert = cle ? new Date(cle) : null;
@@ -618,8 +634,10 @@
       $('f_flux').value = fx; $('f_flux').disabled = true;
       $('garChk').disabled = true;
     }
-    if (qs('quiz')) st.quiz = clampInt(qs('quiz'), 1, 20);
-    if (qs('bonus')) st.bonus = clampInt(qs('bonus'), 1, 20);
+    /* Option quiz Flowin : forfait unique (une seule unité) ; ?quizflowin=1 vient de « Publier mon animation » */
+    if (qs('quiz') || qs('quizflowin') === '1') st.quiz = 1;
+    if (qs('custom') === '1') st.custom = true;
+    var ev = qs('ev'); if (ev && /^[A-Za-z0-9_-]{3,100}$/.test(ev)) st.ev = ev;
     var c = qs('commercial') || qs('vendeur'); if (c) $('f_commercial').value = c.slice(0, 60);
   })();
 
@@ -656,7 +674,7 @@
   $('garBtn').addEventListener('click', function(){ ouvrirDemarche('bon'); });
   $('garToAn').addEventListener('click', function(e){ e.preventDefault(); st.offre = 'annuelle'; render(); });
   $('f_flux').addEventListener('change', function(){ var q = this.closest ? this.closest('.f[data-f]') : null; if (q) q.className = q.className.replace(/ err/g, ''); });
-  function toggleOpt(name){ st[name] = st[name] > 0 ? 0 : 1; render(); }
+  function toggleOpt(name){ st[name] = st[name] > 0 ? 0 : 1; render(); }  /* quiz : forfait, 0 ou 1 */
   function bindOpt(id, name){
     var el = $(id);
     el.addEventListener('click', function(e){ var t = e.target; if (t.closest && t.closest('.opt-qty')) return; toggleOpt(name); });
@@ -800,6 +818,7 @@
   }
   function inserer(rec){
     var corps = rec.pro_id ? rec : sansProId(rec);
+    if (corps.offre_demandee) { var c2 = {}, kk; for (kk in corps) { if (corps.hasOwnProperty(kk) && kk !== 'offre_demandee') c2[kk] = corps[kk]; } corps = c2; }
     return fetch(SUPA + '/rest/v1/' + TABLE, {
       method: 'POST',
       headers: { 'apikey': KEY, 'Authorization': 'Bearer ' + KEY, 'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
@@ -810,6 +829,9 @@
       if (r.status === 400 && corps.pro_id) {
         return r.text().then(function(t){
           if (t.indexOf('pro_id') >= 0) return inserer(sansProId(rec));
+          /* Base sans l'offre « lancement » (sql/2026-11-10-lot-a.sql pas encore appliqué) : la commande part en
+             « annuelle » pour ne pas bloquer le client ; la base recalcule alors les montants à l'ancienne grille. */
+          if (rec.offre === 'lancement' && t.indexOf('offre') >= 0) { rec.offre_demandee = 'lancement'; rec.offre = 'annuelle'; return inserer(rec); }
           var e = new Error('http 400'); e.http = 400; throw e;
         });
       }
@@ -882,12 +904,72 @@
     var info = $('mSepaInfo');
     if (opts.sepaMsg) { info.style.display = 'block'; info.innerHTML = opts.sepaMsg; } else info.style.display = 'none';
     $('mGc').style.display = opts.gcRetry ? 'inline-flex' : 'none';
+    preparerDeclaration(rec, virMt);
     if (PRO_ID || rec.pro_id) { var esp = $('mEspace'); esp.className = 'btn'; esp.setAttribute('href', lienEspacePro(rec.pro_id)); esp.textContent = 'Accéder à mon espace pro'; try { window.localStorage.removeItem('flowin_am_prefill'); } catch (e) {} }
     window.scrollTo(0, 0);
     $('mPdf').onclick = function(){ if (!pdf(rec, true)) { $('mStatus').textContent = 'Le générateur PDF n’a pas pu se charger.'; $('mStatus').className = 'status err'; } };
     $('mGc').onclick = function(){ var b = this; b.disabled = true; lancerGoCardless(rec, $('mStatus')).catch(function(){ b.disabled = false; $('mStatus').textContent = 'Le prélèvement n’est pas disponible pour le moment : réglez par virement avec les coordonnées ci-dessus.'; $('mStatus').className = 'status err'; $('mVirement').style.display = 'block'; $('mVirMt').textContent = eur(t.ttc); }); };
   }
 
+  /* ---------- Publication depuis l'espace pro (?ev=) : animation en attente -> déclaration du virement -> en ligne ----------
+     L'animation (events) est créée en status 'pending' par « Publier mon animation » (ParcoursCreation).
+     Ici : le bon signé est relié à l'animation (cfg.paiement), puis la déclaration du virement la met en ligne
+     (status 'upcoming'), crée l'alerte « paiement à vérifier » lue par /admin-commandes-animation.html
+     (cfg.paiement.statut = 'declare') et demande l'email au pro (fonction notify-commande-animation). */
+  function jetonEcriture(){ var s = sessionPro(); return s ? s.access_token : KEY; }
+  function lireAnimation(ev){
+    return fetch(SUPA + '/rest/v1/events?select=id,status,cfg&id=eq.' + encodeURIComponent(ev) + '&limit=1', { headers: { 'apikey': KEY, 'Authorization': 'Bearer ' + jetonEcriture() } })
+      .then(function(r){ return r.ok ? r.json() : []; }).then(function(rows){ return rows && rows[0] ? rows[0] : null; });
+  }
+  function lierAnimation(rec, declare){
+    return lireAnimation(st.ev).then(function(ev){
+      if (!ev) throw new Error('animation introuvable');
+      var cfg = ev.cfg && typeof ev.cfg === 'object' ? ev.cfg : {}, k, nv = {};
+      for (k in cfg) { if (cfg.hasOwnProperty(k)) nv[k] = cfg[k]; }
+      var ancien = cfg.paiement && typeof cfg.paiement === 'object' ? cfg.paiement : {}, pay = {};
+      for (k in ancien) { if (ancien.hasOwnProperty(k)) pay[k] = ancien[k]; }
+      pay.commande_id = rec.id; pay.reference = rec.id; pay.offre = rec.offre_demandee || rec.offre;
+      pay.quiz_flowin = rec.opt_quiz_qte > 0; pay.customisation = !!st.custom; pay.montant_ttc = calc().ttc;
+      pay.raison_sociale = rec.raison_sociale; pay.email = rec.email;
+      pay.signe_le = rec.signature_horodatage_client;
+      pay.statut = declare ? 'declare' : 'signe';
+      if (declare) pay.declare_le = new Date().toISOString();
+      nv.paiement = pay;
+      var corps = { cfg: nv };
+      if (declare) corps.status = 'upcoming';
+      return fetch(SUPA + '/rest/v1/events?id=eq.' + encodeURIComponent(st.ev), {
+        method: 'PATCH', headers: { 'apikey': KEY, 'Authorization': 'Bearer ' + jetonEcriture(), 'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
+        body: JSON.stringify(corps)
+      }).then(function(r){ if (!r.ok) throw new Error('http ' + r.status); return true; });
+    });
+  }
+  function preparerDeclaration(rec, virMt){
+    var box = $('mDeclare'); if (!box) return;
+    if (!st.ev || rec.mode_paiement !== 'virement') { box.style.display = 'none'; return; }
+    box.style.display = 'block';
+    $('mDeclMt').textContent = eur(virMt); $('mDeclRef').textContent = rec.id;
+    $('mDeclBtn').onclick = function(){
+      var b = this, ok = $('mDeclOk');
+      if (!$('mDeclChk').checked) { $('mDeclRow').className = 'chk err'; return; }
+      $('mDeclRow').className = 'chk'; b.disabled = true; ok.style.display = 'block'; ok.className = 'banner info'; ok.textContent = 'Enregistrement de votre déclaration…';
+      lierAnimation(rec, true).then(function(){
+        /* Trace côté commande (RPC du lot A, si appliquée) puis email au pro ; un échec n'empêche pas la mise en ligne. */
+        var H = { 'apikey': KEY, 'Authorization': 'Bearer ' + KEY, 'Content-Type': 'application/json' };
+        var rpc = fetch(SUPA + '/rest/v1/rpc/declarer_virement_animation', { method: 'POST', headers: H, body: JSON.stringify({ p_commande: rec.id, p_event: st.ev }) }).then(function(r){ return r.ok; }, function(){ return false; });
+        var mail = fetch(SUPA + '/functions/v1/notify-commande-animation', { method: 'POST', headers: H, body: JSON.stringify({ type: 'paiement_declare', commande_id: rec.id, event_id: st.ev }) })
+          .then(function(r){ return r.ok ? r.json().then(function(j){ return !!(j && j.ok); }, function(){ return false; }) : false; }, function(){ return false; });
+        return Promise.all([rpc, mail]);
+      }).then(function(res){
+        $('mDeclAttente').style.display = 'none'; $('mDeclRow').style.display = 'none'; b.style.display = 'none';
+        ok.innerHTML = '<b>Paiement déclaré : votre animation est en ligne.</b> Flowin contrôle la réception du virement sous ' + DELAI_CONTROLE + '.' +
+          (res && res[1] ? ' Un email de confirmation vous est envoyé.' : ' (L’email de confirmation n’a pas pu partir : gardez le numéro ' + esc(rec.id) + '.)') +
+          (PRO_ID || rec.pro_id ? ' <a href="/pro/historique?pro=' + encodeURIComponent(PRO_ID || rec.pro_id) + '&op=' + encodeURIComponent('ev:' + st.ev) + '">Ouvrir mon animation</a>' : '');
+      }, function(){
+        b.disabled = false; ok.className = 'banner warn';
+        ok.textContent = 'La déclaration n’a pas pu être enregistrée. Réessayez dans un instant ; votre commande, elle, est bien signée.';
+      });
+    };
+  }
   /* Premiere souscription ou renouvellement : la fonction publique type_commande_client (sql/03) ne renvoie qu'un mot. */
   function verifierClient(cb){
     var siret = val('f_siret').replace(/\s/g, ''), mail = val('f_email').toLowerCase();
@@ -925,6 +1007,7 @@
       } else {
         afficherMerci(rec, {});
       }
+      if (st.ev) lierAnimation(rec, false);
     }, function(e){
       if (e && e.http) {
         /* Jamais d'impasse : la commande signée est gardée, le client repart avec le PDF, l'email pré-rempli et le virement */

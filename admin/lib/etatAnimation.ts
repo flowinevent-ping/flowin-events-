@@ -8,7 +8,7 @@
  *
  * Regles (jour = jour calendaire a Paris) :
  *  - terminee  : status past / archived, OU date de fin depassee ;
- *  - a venir   : date de debut dans le futur, OU status pending / draft sans date,
+ *  - a venir   : status pending (en attente de paiement, Lot A), date de debut dans le futur, OU status draft sans date,
  *                OU status upcoming sans date ;
  *  - ouverte   : tout le reste (en particulier status live, dates non renseignees).
  */
@@ -27,6 +27,8 @@ export function etatAnimation(ev: AnimationDates | null | undefined, aujourdhui:
   const d = ev.date_d ? String(ev.date_d).slice(0, 10) : ''
   const f = ev.date_f ? String(ev.date_f).slice(0, 10) : ''
   if (st === 'past' || st === 'archived') return 'terminee'
+  /* Lot A : animation publiee par le pro, paiement pas encore declare -> jamais jouable, quelles que soient ses dates. */
+  if (st === 'pending') return 'avenir'
   if (f && f < aujourdhui) return 'terminee'
   if (d && d > aujourdhui) return 'avenir'
   if (!d && (st === 'pending' || st === 'draft' || st === 'upcoming')) return 'avenir'

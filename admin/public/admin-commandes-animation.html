@@ -55,6 +55,8 @@
   <h1>Commandes jeu d'animation</h1>
   <p class="sub">Souscriptions issues de la plaquette et du bon de commande. Un paiement valid&eacute; (webhook GoCardless ou virement marqu&eacute; re&ccedil;u) &eacute;met la facture et envoie contrat sign&eacute; + facture acquitt&eacute;e, une seule fois.</p>
   <div class="msg" id="msg"></div>
+  <!-- Lot A (10/11/2026) : animations publiées par un pro dont le virement est DÉCLARÉ (events.cfg.paiement.statut = 'declare') -->
+  <div class="card" id="declares" data-alerte-paiements style="display:none;border:2px solid #F59E0B;padding:12px 14px"></div>
   <div class="kpis">
     <div class="kpi"><span>Commandes</span><b id="kN">&mdash;</b></div>
     <div class="kpi"><span>En attente de paiement</span><b id="kA">&mdash;</b><small id="kL" class="late"></small></div>
@@ -110,7 +112,7 @@
   var demoNum = 2;
 
   function charger(){
-    if (DEMO) { if (!demo) demo = demoData(); data = demo; msg('Mode démo : données de test locales, aucune écriture en base.', 'info'); rendre(); return; }
+    if (DEMO) { if (!demo) demo = demoData(); data = demo; msg('Mode démo : données de test locales, aucune écriture en base.', 'info'); rendre(); chargerDeclares(); return; }
     fetch(SUPA + '/rest/v1/commandes_animation?select=' + COLS + '&order=created_at.desc&limit=1000', { headers: H() })
       .then(function(r){
         if (r.status === 401) { location.replace('/admin-connexion.html?next=' + encodeURIComponent('/admin-commandes-animation.html')); throw new Error('401'); }
@@ -118,8 +120,34 @@
         if (!r.ok) throw new Error('Lecture impossible (code ' + r.status + ').');
         return r.json();
       })
-      .then(function(rows){ data = rows || []; if (!data.length) msg('Aucune commande visible. Si des commandes existent, vérifiez que votre email figure dans public.flowin_super_admins.', 'info'); rendre(); chargerJournal(); })
+      .then(function(rows){ data = rows || []; if (!data.length) msg('Aucune commande visible. Si des commandes existent, vérifiez que votre email figure dans public.flowin_super_admins.', 'info'); rendre(); chargerJournal(); chargerDeclares(); })
       .catch(function(e){ if (String(e.message) !== '401') { msg(e.message, 'err'); $('rows').innerHTML = '<tr><td colspan="9" class="vide">—</td></tr>'; } });
+  }
+  /* Alerte « paiements à vérifier » : virements déclarés par les pros à la publication de leur animation. */
+  var declares = [], declaresParCmd = {};
+  function chargerDeclares(){
+    if (DEMO) { declares = [{ id: 'ev-demo-1', nom: '[Animation test]', pro_id: 'pro-demo', status: 'upcoming', paiement: { statut: 'declare', commande_id: 'AM-20261101-DEMO0003', montant_ttc: 534, offre: 'lancement', raison_sociale: '[Boutique test 3]', declare_le: new Date().toISOString() } }]; rendreDeclares(); return; }
+    fetch(SUPA + '/rest/v1/events?select=id,nom,pro_id,status,paiement:cfg->paiement&cfg->paiement->>statut=eq.declare&limit=500', { headers: H() })
+      .then(function(r){ return r.ok ? r.json() : []; })
+      .then(function(rows){ declares = rows || []; rendreDeclares(); rendre(); })
+      .catch(function(){});
+  }
+  function rendreDeclares(){
+    var box = $('declares'), h = '', i, n = 0; declaresParCmd = {};
+    for (i = 0; i < declares.length; i++) {
+      var e = declares[i], p = e.paiement || {}, c = null;
+      for (var k = 0; k < data.length; k++) { if (data[k].id === p.commande_id) { c = data[k]; break; } }
+      if (c && grp(c.statut) !== 'attente' && grp(c.statut) !== 'ko') continue;   /* déjà validé : plus d'alerte */
+      if (p.commande_id) declaresParCmd[p.commande_id] = p;
+      n++;
+      h += '<div style="padding:8px 0;border-top:1px solid var(--line);font-size:13.5px"><b>' + esc(p.raison_sociale || e.pro_id) + '</b> · animation « ' + esc(e.nom) + ' » · commande <b>' + esc(p.commande_id || '—') + '</b> · ' + eur(p.montant_ttc) + ' TTC · déclaré le ' + dh(p.declare_le) +
+        (p.commande_id ? ' <button type="button" class="btn line" data-voir="' + esc(p.commande_id) + '">Voir la commande</button>' : '') + '</div>';
+    }
+    if (!n) { box.style.display = 'none'; return; }
+    box.style.display = 'block';
+    box.innerHTML = '<div style="font-weight:800;font-size:15px;color:#92400E">' + n + ' paiement' + (n > 1 ? 's' : '') + ' à vérifier</div><div style="font-size:12.5px;color:var(--muted);margin:2px 0 4px">Virement déclaré par le pro : l\u2019animation est en ligne. Contrôlez la réception, puis « Marquer le virement reçu ».</div>' + h;
+    var bs = box.querySelectorAll('[data-voir]');
+    for (i = 0; i < bs.length; i++) bs[i].addEventListener('click', function(){ $('q').value = this.getAttribute('data-voir'); rendre(); });
   }
   function chargerJournal(){
     fetch(SUPA + '/rest/v1/commandes_animation_journal?select=commande_id,le,par,action&order=le.desc&limit=2000', { headers: H() })
@@ -152,9 +180,10 @@
       if (g2 === 'attente' || g2 === 'ko') acts += '<button type="button" class="btn" data-a="vir" data-id="' + esc(c.id) + '">Marquer le virement reçu</button>';
       if (g2 === 'payee' || g2 === 'docs') acts += '<button type="button" class="btn line" data-a="docs" data-id="' + esc(c.id) + '">Renvoyer les documents</button>';
       var retard = (g2 === 'attente' && jours(c.created_at) > JOURS) ? '<span class="retard">En attente depuis ' + jours(c.created_at) + ' j</span>' : '';
+      if (declaresParCmd[c.id]) retard += '<span class="retard" style="background:#FEF3C7;color:#92400E">Virement déclaré · à vérifier</span>';
       h += '<tr><td>' + dh(c.created_at) + retard + '</td><td><b>' + esc(c.id) + '</b>' + (c.commercial ? '<small>Commercial : ' + esc(c.commercial) + '</small>' : '') + '</td>' +
         '<td><b>' + esc(c.raison_sociale) + '</b><small>' + esc(c.ville) + ' · SIRET ' + esc(c.siret) + '</small><small>' + esc(c.contact_nom) + ' · ' + esc(c.email) + '</small></td>' +
-        '<td>' + (c.offre === 'mensuelle' ? 'Mensuelle · 3 mois min.' : 'Annuelle · 12 mois') + '<small>' + (c.kit === 'physique' ? 'Kit physique × ' + c.nb_boutiques : 'Kit digital') + (c.opt_quiz_qte ? ' · quiz' : '') + (c.opt_bonus_qte ? ' · bonus' : '') + (GAR && c.garantie ? ' · garantie' : '') + '<br>' + (c.type_commande === 'renouvellement' ? (GAR ? 'Renouvellement (sans garantie)' : 'Renouvellement') : 'Première souscription') + '</small></td>' +
+        '<td>' + (c.offre === 'mensuelle' ? 'Mensuelle · 3 mois min.' : c.offre === 'lancement' ? '1re année (lancement) · 12 mois' : 'Annuelle · 12 mois') + '<small>' + (c.kit === 'physique' ? 'Kit physique × ' + c.nb_boutiques : 'Kit digital') + (c.opt_quiz_qte ? ' · quiz' : '') + (c.opt_bonus_qte ? ' · bonus' : '') + (GAR && c.garantie ? ' · garantie' : '') + '<br>' + (c.type_commande === 'renouvellement' ? (GAR ? 'Renouvellement (sans garantie)' : 'Renouvellement') : 'Première souscription') + '</small></td>' +
         '<td>' + (c.mode_paiement === 'prelevement_sepa' ? 'Prélèvement SEPA' : 'Virement') + (c.paiement_valide_le ? '<small>Validé le ' + dh(c.paiement_valide_le) + '<br>par ' + esc(c.paiement_valide_par || c.paiement_source) + '</small>' : '') + '</td>' +
         '<td class="r"><b>' + eur(c.montant_ttc) + '</b><small>' + eur(c.montant_ht) + ' HT</small></td>' +
         '<td><span class="st ' + s[1] + '">' + esc(s[0]) + '</span>' + (c.documents_envoyes_le ? '<small>Envoyés le ' + dh(c.documents_envoyes_le) + (c.documents_envois > 1 ? ' (' + c.documents_envois + ' envois)' : '') + '</small>' : '') + '</td>' +

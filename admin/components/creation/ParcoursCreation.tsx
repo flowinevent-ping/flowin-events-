@@ -37,7 +37,7 @@
  * + se_lots, crm_retours (demandes adressees a Flowin). Aucune table nouvelle.
  */
 
-import { REGLEMENT, OFFRES_ANIMATION, referenceVirement, type CleOffreAnimation } from '@/lib/reglement'
+import { REGLEMENT, OFFRES_ANIMATION, OPTION_QUIZ_FLOWIN, OPTION_CUSTOMISATION, DELAI_CONTROLE_PAIEMENT, lienBonCommande, referenceVirement, type CleOffreAnimation } from '@/lib/reglement'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { supabase, supabasePublic } from '@/lib/supabase'
 import { creerAnimation, enregistrerDemandeQuiz, enregistrerDemandeSuperEvent } from '@/lib/pro'
@@ -326,6 +326,11 @@ export default function ParcoursCreation({ mode = 'pro', pro, banques, supers, p
   const [qrBrouillons, setQrBrouillons] = useState<{ nom: string; support: string; type: TypeQr }[]>([])
   const [offre, setOffre] = useState('')
   const [offreAnim, setOffreAnim] = useState<CleOffreAnimation>('lancement')
+  /* Options de la commande (Lot A) : quiz rediges par Flowin, customisation totale sur demande */
+  const [optQuizFlowin, setOptQuizFlowin] = useState(false)
+  const [optCustom, setOptCustom] = useState(false)
+  /* Pro (pas SA) qui publie une animation : commande + paiement avant la mise en ligne */
+  const avecCommande = !sa && !rejoindre && !estSuper
   /* Tarifs : grille a cocher (3 packs de nds-partenaire.html), pour PRESELECTIONNER la demande. Aucun prix invente, rien n'est facture. */
   const [packChoisi, setPackChoisi] = useState<string | null>(null)
   const packsSE = packsPourSuperEvent(se)
@@ -645,6 +650,9 @@ export default function ParcoursCreation({ mode = 'pro', pro, banques, supers, p
       })),
       regleRecompense: aUnInstant ? { mode: modeInstant, everyX, probabilite } : undefined,
       diffusionPhysique: diffPhysique, diffusionDigital: diffDigital, diffusionQrTracking: diffQr,
+      /* Lot A : le pro publie -> animation enregistree en attente de paiement (status 'pending'),
+         mise en ligne a la declaration du virement sur le bon de commande. Le SA cree sans paiement. */
+      paiement: avecCommande ? { offre: offreAnim, quizFlowin: optQuizFlowin, customisation: optCustom } : undefined,
     })
     if (!r.ok) { setEnvoi('echec'); setErreur(r.error ?? ''); return }
     const infoQr = r.eventId ? await enregistrerQr(r.eventId) : ''
@@ -718,7 +726,17 @@ export default function ParcoursCreation({ mode = 'pro', pro, banques, supers, p
       lotsNommes.length ? `À gagner : ${lotsNommes.map(l => l.nom.trim()).join(', ')}.` : '',
       lien ? `Participez ici : ${lien}` : '', '', 'À très vite !',
     ].filter((x, i, a) => x !== '' || a[i - 1] !== '').join('\n')
-    const titreFin = rejoindre ? (sa ? 'Station créée' : 'Demande envoyée') : estSuper ? 'Super event créé' : 'Animation créée'
+    const titreFin = rejoindre ? (sa ? 'Station créée' : 'Demande envoyée') : estSuper ? 'Super event créé' : avecCommande ? 'Animation enregistrée' : 'Animation créée'
+    /* Bon de commande pre-rempli : coordonnees du compte via le stockage local du site (meme cle que « Ma premiere fois »), jamais par l'adresse. */
+    const ouvrirBon = () => {
+      try {
+        window.localStorage.setItem('flowin_am_prefill', JSON.stringify({
+          raison: p.nom || '', adresse: p.adresse || '', cp: p.code_postal || '', ville: p.ville || '',
+          contact: p.contact || '', email: p.email || '', tel: p.tel || '', pro_id: p.id,
+        }))
+      } catch { /* stockage indisponible : le bon reprend la fiche du compte connecte */ }
+    }
+    const urlBon = fait.eventId ? lienBonCommande({ proId: p.id, offre: offreAnim, quizFlowin: optQuizFlowin, customisation: optCustom, eventId: fait.eventId }) : ''
     const sousTitreFin = rejoindre
       ? (sa ? `${nomCommerce.trim() || p.nom || 'Le pro'} est rattaché à ${se?.nom ?? 'l’opération'} : sa station est sur la carte.`
         : `Flowin valide votre participation à ${se?.nom ?? 'l’opération'} ${DELAI_VALIDATION} : votre station apparaîtra alors sur la carte.`)
@@ -726,7 +744,7 @@ export default function ParcoursCreation({ mode = 'pro', pro, banques, supers, p
       /* lib/pro.ts creerAnimation : l event est enregistre et jouable tout de
          suite ; seule la DIFFUSION demandee (QR imprime, reseaux) attend Flowin
          (cfg.diffusion_demandee.statut = 'en_attente_sa'). */
-      : sa ? `Animation créée pour ${p.nom ?? 'le pro'}.` : 'Votre animation est enregistrée et jouable dès maintenant. La diffusion demandée (QR imprimé, réseaux) est préparée par Flowin.'
+      : sa ? `Animation créée pour ${p.nom ?? 'le pro'}.` : 'Votre animation est enregistrée, en attente de paiement : elle passe en ligne dès que vous déclarez votre virement sur le bon de commande.'
     return (
       <div style={{ maxWidth: 820 }}>
         <style dangerouslySetInnerHTML={{ __html: PC_CSS }} />
@@ -769,17 +787,22 @@ export default function ParcoursCreation({ mode = 'pro', pro, banques, supers, p
                 <div style={{ fontWeight: 800, wordBreak: 'break-all', color: C.accent }}>{BASE}/rejoindre/{fait.superId}</div>
               </div>
             )}
-            {!sa && !rejoindre && !estSuper && fait.eventId && (
-              <div data-virement style={{ border: `1.5px solid ${C.accent}`, borderRadius: 14, padding: '12px 14px', marginBottom: 16, background: '#fff', fontSize: 13.5, lineHeight: 1.6 }}>
-                <b style={{ display: 'block', fontSize: 15 }}>Règlement par virement</b>
-                Offre {(OFFRES_ANIMATION.find(x => x.cle === offreAnim) || OFFRES_ANIMATION[1]).nom.toLowerCase()} · {(OFFRES_ANIMATION.find(x => x.cle === offreAnim) || OFFRES_ANIMATION[1]).prix} (tarif à confirmer).<br />
-                Bénéficiaire : {REGLEMENT.titulaire} · IBAN {REGLEMENT.iban} · BIC {REGLEMENT.bic}<br />
-                Référence à indiquer : <b>{referenceVirement(fait.eventId)}</b>
+            {avecCommande && fait.eventId && (
+              <div data-virement data-attente-paiement style={{ border: `1.5px solid ${C.accent}`, borderRadius: 14, padding: '12px 14px', marginBottom: 16, background: '#fff', fontSize: 13.5, lineHeight: 1.6 }}>
+                <span style={{ display: 'inline-block', fontSize: 11.5, fontWeight: 800, letterSpacing: '.04em', textTransform: 'uppercase', background: '#FEF3C7', color: '#92400E', borderRadius: 999, padding: '3px 10px', marginBottom: 6 }}>En attente de paiement</span>
+                <b style={{ display: 'block', fontSize: 15 }}>Dernière étape : votre bon de commande</b>
+                Offre {(OFFRES_ANIMATION.find(x => x.cle === offreAnim) || OFFRES_ANIMATION[0]).nom.toLowerCase()} · {(OFFRES_ANIMATION.find(x => x.cle === offreAnim) || OFFRES_ANIMATION[0]).prix}
+                {optQuizFlowin && <> · {OPTION_QUIZ_FLOWIN.nom} {offreAnim === 'lancement' ? '72,50 € HT la 1re année' : '145 € HT'}</>}
+                {optCustom && <> · {OPTION_CUSTOMISATION.nom} : {OPTION_CUSTOMISATION.prix.toLowerCase()}</>}.<br />
+                Signez le bon pré-rempli, réglez par virement à {REGLEMENT.titulaire} (IBAN {REGLEMENT.iban} · BIC {REGLEMENT.bic}), puis déclarez le virement : l’animation passe en ligne, Flowin contrôle la réception sous {DELAI_CONTROLE_PAIEMENT}.
+                <div style={{ marginTop: 10 }}>
+                  <a data-signer-bon href={urlBon} onClick={ouvrirBon} style={{ ...BTN, display: 'inline-block', textDecoration: 'none' }}>Signer mon bon de commande →</a>
+                </div>
               </div>
             )}
             {lien && (
               <>
-                <div style={{ fontSize: 15, fontWeight: 800, marginBottom: 4 }}>Le jeu est en ligne : vos QR tracés</div>
+                <div style={{ fontSize: 15, fontWeight: 800, marginBottom: 4 }}>{avecCommande ? 'Vos QR tracés (actifs dès la mise en ligne)' : 'Le jeu est en ligne : vos QR tracés'}</div>
                 <div style={{ fontSize: 12.5, ...MUTED, marginBottom: 12, lineHeight: 1.5 }}>
                   Même jeu, un QR par support : chaque QR est une station de jeu avec ses statistiques (onglet Trafic). Physique : 1 participation par jour ; digital : une seule fois par compte.
                 </div>
@@ -1325,8 +1348,8 @@ export default function ParcoursCreation({ mode = 'pro', pro, banques, supers, p
 
               {!sa && !rejoindre && !estSuper && (
                 <div data-reglement style={{ marginTop: 18, border: `1px solid ${C.bordure}`, borderRadius: 14, padding: 14, background: '#fff' }}>
-                  <div style={{ fontSize: 14, fontWeight: 800 }}>Votre offre</div>
-                  <div style={{ fontSize: 13, ...MUTED, margin: '3px 0 10px', lineHeight: 1.5 }}>Vous avez vu votre jeu : le règlement se fait maintenant, par virement. Tarifs à confirmer.</div>
+                  <div style={{ fontSize: 14, fontWeight: 800 }}>Nos offres</div>
+                  <div style={{ fontSize: 13, ...MUTED, margin: '3px 0 10px', lineHeight: 1.5 }}>Vous avez vu votre jeu : choisissez votre offre. À la publication, votre bon de commande est pré-rempli ; vous le signez et réglez par virement.</div>
                   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(150px,1fr))', gap: 8 }}>
                     {OFFRES_ANIMATION.map(o => (
                       <button key={o.cle} type="button" style={{ ...choix(offreAnim === o.cle), textAlign: 'left', minHeight: 64 }} onClick={() => setOffreAnim(o.cle)}>
@@ -1335,8 +1358,21 @@ export default function ParcoursCreation({ mode = 'pro', pro, banques, supers, p
                       </button>
                     ))}
                   </div>
+                  <div data-options style={{ fontSize: 13, fontWeight: 800, margin: '14px 0 6px' }}>Options</div>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(200px,1fr))', gap: 8 }}>
+                    <button type="button" data-opt="quiz-flowin" aria-pressed={optQuizFlowin} style={{ ...choix(optQuizFlowin), textAlign: 'left', minHeight: 64 }} onClick={() => setOptQuizFlowin(v => !v)}>
+                      <b style={{ display: 'block' }}>{optQuizFlowin ? '✓ ' : ''}{OPTION_QUIZ_FLOWIN.nom}</b>
+                      <span style={{ fontSize: 15, fontWeight: 800 }}>{offreAnim === 'lancement' ? '72,50 € HT la 1re année' : '145 € HT'}</span>
+                      <span style={{ display: 'block', fontSize: 13, ...MUTED }}>{OPTION_QUIZ_FLOWIN.detail}{offreAnim === 'lancement' ? ', -50 % la 1re année (145 € HT ensuite)' : ''}</span>
+                    </button>
+                    <button type="button" data-opt="customisation" aria-pressed={optCustom} style={{ ...choix(optCustom), textAlign: 'left', minHeight: 64 }} onClick={() => setOptCustom(v => !v)}>
+                      <b style={{ display: 'block' }}>{optCustom ? '✓ ' : ''}{OPTION_CUSTOMISATION.nom}</b>
+                      <span style={{ fontSize: 15, fontWeight: 800 }}>{OPTION_CUSTOMISATION.prix}</span>
+                      <span style={{ display: 'block', fontSize: 13, ...MUTED }}>{OPTION_CUSTOMISATION.detail}</span>
+                    </button>
+                  </div>
                   <div style={{ fontSize: 13, marginTop: 12, lineHeight: 1.6 }}>
-                    <b>Règlement par virement</b> à {REGLEMENT.titulaire} · IBAN {REGLEMENT.iban} · BIC {REGLEMENT.bic}. La référence de virement vous est donnée à la publication.
+                    <b>Règlement par virement</b> à {REGLEMENT.titulaire} · IBAN {REGLEMENT.iban} · BIC {REGLEMENT.bic} ; mandat SEPA possible pour la formule mensuelle. L’animation est enregistrée à la publication et passe en ligne dès que vous déclarez le virement.
                   </div>
                 </div>
               )}
@@ -1353,7 +1389,8 @@ export default function ParcoursCreation({ mode = 'pro', pro, banques, supers, p
                   ['Jeu', libelleModule(moduleActif)],
                   ...(sansLots ? [] : [['Lots', lotsNommes.map(l => `${l.nom.trim()} × ${l.quantite}`).join(' · ') || '—']]),
                   ...(estSuper ? [['Pros participants', participants.length ? String(participants.length) : 'aucun pour l’instant']] : []),
-                  ...(!sa && !rejoindre && !estSuper ? [['Offre', (() => { const o = OFFRES_ANIMATION.find(x => x.cle === offreAnim); return o ? `${o.nom} · ${o.prix}` : '—' })()]] : []),
+                  ...(avecCommande ? [['Offre', (() => { const o = OFFRES_ANIMATION.find(x => x.cle === offreAnim); return o ? `${o.nom} · ${o.prix}` : '—' })()],
+                    ['Options', [optQuizFlowin && `${OPTION_QUIZ_FLOWIN.nom} (${offreAnim === 'lancement' ? '72,50' : '145'} € HT)`, optCustom && `${OPTION_CUSTOMISATION.nom} (sur demande)`].filter(Boolean).join(' · ') || 'Aucune']] : []),
                   ...(!estSuper ? [['Diffusion', [diffPhysique && 'QR imprimé', diffDigital && 'lien réseaux'].filter(Boolean).join(' · ') || 'Aucune']] : []),
                   ...(qrPossibles ? [['QR tracés', `${QR_PAR_DEFAUT.length + qrBrouillons.length} (dont ${qrBrouillons.length} ajouté${qrBrouillons.length > 1 ? 's' : ''})`]] : []),
                   ...(aUnTirage ? [['Tirage', tirage.mode === 'auto' ? `Automatique le ${libelleDateTirage(localVersIso(tirage.date))}` : 'Manuel (un clic)'], ['Liste des gagnants', tirage.publier ? 'Publiée après le tirage' : 'Non publiée']] : []),

@@ -14,9 +14,11 @@
 (function (root) {
   'use strict';
 
-  var PRIX = { annuelle: 990, mensuelle: 110, kitPhysique: 149, optQuiz: 180, optBonus: 180, tva: 0.20 };
+  /* Grille unique (admin/lib/reglement.ts, Lot A du 10/11/2026) : 1re annee 445 HT (lancement -50 %), puis 990 HT / an
+     ou 110 HT / mois ; option quiz rediges par Flowin (30 questions + 5 bonus) 145 HT, 72,50 HT la 1re annee. */
+  var PRIX = { lancement: 445, annuelle: 990, mensuelle: 110, kitPhysique: 149, optQuiz: 145, optQuizLancement: 72.5, optBonus: 0, tva: 0.20 };
   var IBAN = 'FR76 1460 7003 3470 2211 6462 345', BIC = 'CCBPFRPPMAR';
-  var NOM_OFFRE = { annuelle: 'Formule annuelle Flowin, jeu d\'animation', mensuelle: 'Formule mensuelle Flowin, jeu d\'animation' };
+  var NOM_OFFRE = { lancement: 'Première année Flowin, jeu d\'animation (offre de lancement -50 %)', annuelle: 'Formule annuelle Flowin, jeu d\'animation', mensuelle: 'Formule mensuelle Flowin, jeu d\'animation' };
 
   function pad(n) { return (n < 10 ? '0' : '') + n; }
   function grp(s) { var out = '', c = 0; for (var i = s.length - 1; i >= 0; i--) { out = s.charAt(i) + out; c++; if (c % 3 === 0 && i > 0) out = ' ' + out; } return out; }
@@ -32,15 +34,16 @@
   /* Lignes et montants : la seule définition des prix côté navigateur et côté fonction edge. */
   function calcul(c) {
     var nb = Math.max(1, Math.min(200, parseInt(c.nb, 10) || 1)), quiz = Math.max(0, parseInt(c.quiz, 10) || 0), bonus = Math.max(0, parseInt(c.bonus, 10) || 0);
-    var lignes = [], abo = c.offre === 'mensuelle' ? PRIX.mensuelle : PRIX.annuelle;
-    if (c.offre === 'mensuelle') lignes.push({ lib: NOM_OFFRE.mensuelle + ', 1er mois', det: 'Engagement 3 mois minimum, puis ' + eur(PRIX.mensuelle) + ' HT par mois, résiliable chaque mois', q: 1, ht: abo });
+    var lignes = [], abo = c.offre === 'mensuelle' ? PRIX.mensuelle : (c.offre === 'lancement' ? PRIX.lancement : PRIX.annuelle);
+    if (c.offre === 'mensuelle') lignes.push({ lib: NOM_OFFRE.mensuelle + ', 1er mois', det: 'Prélèvement SEPA, reconduction tacite chaque mois, résiliable (CGV art. 6)', q: 1, ht: abo });
+    else if (c.offre === 'lancement') lignes.push({ lib: NOM_OFFRE.lancement, det: 'Première année à moitié prix, puis ' + eur(PRIX.annuelle) + ' HT par an ou ' + eur(PRIX.mensuelle) + ' HT par mois, reconduction tacite', q: 1, ht: abo });
     else lignes.push({ lib: NOM_OFFRE.annuelle, det: 'Quiz, roue, tombola, tirages, billets, stock, relances, mesure par support. Engagement 12 mois', q: 1, ht: abo });
     var kitHt = c.kit === 'physique' ? PRIX.kitPhysique * nb : 0;
     if (c.kit === 'physique') lignes.push({ lib: 'Kit physique imprimé', det: 'Par boutique : 1 support de caisse, 3 affiches A4, 3 macarons autocollants, ' + eur(PRIX.kitPhysique) + ' HT', q: nb, ht: kitHt });
     else lignes.push({ lib: 'Kit digital', det: 'Fichiers des affiches, macarons et support de caisse, QR inclus, à imprimer', q: 1, ht: 0 });
     var optHt = 0;
-    if (quiz > 0) { lignes.push({ lib: 'Option : quiz personnalisé', det: eur(PRIX.optQuiz) + ' HT par animation', q: quiz, ht: PRIX.optQuiz * quiz }); optHt += PRIX.optQuiz * quiz; }
-    if (bonus > 0) { lignes.push({ lib: 'Option : questions bonus', det: eur(PRIX.optBonus) + ' HT par sondage', q: bonus, ht: PRIX.optBonus * bonus }); optHt += PRIX.optBonus * bonus; }
+    /* Option quiz : forfait unique (30 questions quiz + 5 questions bonus) ; les questions bonus ne se vendent plus seules. */
+    if (quiz > 0) { var pq = c.offre === 'lancement' ? PRIX.optQuizLancement : PRIX.optQuiz; lignes.push({ lib: 'Option : quiz rédigés par Flowin', det: '30 questions quiz + 5 questions bonus, forfait ' + eur(PRIX.optQuiz) + ' HT' + (c.offre === 'lancement' ? ', -50 % la 1re année' : ''), q: 1, ht: pq }); optHt += pq; }
     var ht = abo + kitHt + optHt;
     var tva = Math.round(ht * PRIX.tva * 100) / 100;
     var aboTtc = Math.round(abo * (1 + PRIX.tva) * 100) / 100;
@@ -106,7 +109,7 @@
     T('Total TTC', tx, y + 6.2, 11, 'bold', ink); T(eur(t.ttc), W - M, y + 6.2, 12, 'bold', ink, 'right'); y += 16;
 
     T('ENGAGEMENT', x, y, 7.5, 'bold', teal); y += 5;
-    y = wrap(rec.offre === 'mensuelle' ? 'Formule mensuelle : engagement de 3 mois minimum (3 x ' + eur(PRIX.mensuelle) + ' HT), puis reconduction mois par mois, resiliable chaque mois avec le preavis prevu aux CGV. Engagement accepte expressement par le client.' : 'Formule annuelle : engagement de 12 mois, un seul paiement pour l\'annee.', x, y, 8.5, ink, CW, 4.2) + 3;
+    y = wrap(rec.offre === 'mensuelle' ? 'Formule mensuelle : ' + eur(PRIX.mensuelle) + ' HT par mois, prelevement SEPA, reconduction tacite chaque mois. Arret sur simple resiliation ou pour defaut de paiement (CGV art. 6).' : rec.offre === 'lancement' ? 'Premiere annee a ' + eur(PRIX.lancement) + ' HT (offre de lancement -50 %), puis reconduction tacite a ' + eur(PRIX.annuelle) + ' HT par an ou ' + eur(PRIX.mensuelle) + ' HT par mois. Resiliation en cours d\'annee : decompte au prorata des mensualites sur la base de ' + eur(PRIX.mensuelle) + ' HT par mois (CGV art. 6).' : 'Formule annuelle : engagement de 12 mois, un seul paiement pour l\'annee.', x, y, 8.5, ink, CW, 4.2) + 3;
 
     T('PAIEMENT', x, y, 7.5, 'bold', teal); y += 5;
     if (rec.mode_paiement === 'prelevement_sepa') {

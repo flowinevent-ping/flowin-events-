@@ -14,6 +14,10 @@
 //   { type: 'en_attente', jours, commandes: [{id, raison_sociale, montant_ttc, jours}] }  alerte quotidienne
 //                                            « commandes en attente de paiement depuis plus de X jours »
 //                                            (SQL alerte_commandes_en_attente, a planifier) -> email Flowin
+//   { type: 'paiement_declare', commande_id, event_id }  Lot A (10/11/2026) : le pro déclare son virement depuis le bon
+//                                            (publication de l'animation) -> email au pro « Paiement déclaré, contrôle
+//                                            sous 3 à 5 jours » + email Flowin « paiement à vérifier ». Commande RELUE en
+//                                            base ; envoi seulement si elle est encore en attente de paiement.
 //
 // Secrets (AUCUNE valeur ici) : RESEND_API_KEY, NOTIFY_TO (défaut flowinevent@gmail.com), NOTIFY_FROM.
 // SUPABASE_URL et SUPABASE_SERVICE_ROLE_KEY sont fournis automatiquement par Supabase aux fonctions edge.
@@ -118,6 +122,18 @@ Deno.serve(async (req: Request): Promise<Response> => {
           await rest("commandes_animation_journal", { method: "POST", body: JSON.stringify({ commande_id: id, par: "fonction notify-commande-animation", action: "accuse_envoye" }) });
         }
       }
+      return json({ ok: true });
+    }
+    if (type === "paiement_declare") {
+      const id = String(p.commande_id ?? ""); if (!/^AM-[0-9]{8}-[A-Z0-9]{8}$/.test(id)) return json({ error: "commande_id invalide" }, 422);
+      const r = await commande(id); if (!r) return json({ error: "commande introuvable" }, 404);
+      if (String((r as any).statut) !== "en_attente_paiement") return json({ ok: true, skipped: "commande deja traitee" });
+      const ev = String(p.event_id ?? "").slice(0, 100);
+      const sujetPro = `Paiement déclaré : contrôle sous 3 à 5 jours (commande ${esc(r.id)})`;
+      const htmlPro = `<div style="font-family:-apple-system,Segoe UI,Roboto,sans-serif;max-width:620px;margin:0 auto"><div style="background:#1B3A5C;border-radius:14px 14px 0 0;padding:18px 20px;color:#fff;font-size:17px;font-weight:800">Paiement déclaré, merci !</div><div style="background:#F4F6F9;border:1px solid #DCE3EC;border-top:none;padding:16px 20px;font-size:14px;line-height:1.6;color:#1B3A5C">Bonjour ${esc((r as any).contact_nom)},<br><br>Vous avez déclaré le virement de <b>${esc(eur((r as any).montant_ttc))} TTC</b> pour la commande <b>${esc(r.id)}</b>. Votre animation est en ligne.<br>Flowin contrôle la réception du virement <b>sous 3 à 5 jours</b> ; vous recevez ensuite votre contrat signé et votre facture acquittée.</div></div>`;
+      await envoyer(String((r as any).email), { sujet: sujetPro, html: htmlPro });
+      await envoyer(NOTIFY_TO, { sujet: `Paiement à vérifier : ${esc((r as any).raison_sociale)} (${esc(r.id)})`, html: `<div style="font-family:sans-serif;font-size:14px">Virement déclaré par le pro pour la commande <b>${esc(r.id)}</b> (${esc(eur((r as any).montant_ttc))} TTC)${ev ? `, animation ${esc(ev)}` : ""}. À contrôler puis « Marquer le virement reçu » dans /admin-commandes-animation.html.</div>` });
+      try { await rest("commandes_animation_journal", { method: "POST", body: JSON.stringify({ commande_id: id, par: "fonction notify-commande-animation", action: "paiement_declare" }) }); } catch (_) { /* action ajoutée par sql/2026-11-10-lot-a.sql */ }
       return json({ ok: true });
     }
     if (type === "paiement_valide") return await documents(String(p.record?.id ?? ""), false);
