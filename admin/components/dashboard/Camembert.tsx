@@ -9,8 +9,10 @@ export interface PartCamembert { valeur: string; n: number; id?: string }
 const PALETTE = ['#7C2D92', '#E0218A', '#F5A100', '#1D9E75', '#378ADD', '#cfc4d8', '#9d4edd', '#ff8fab']
 
 export function Camembert({
-  titre, parts, total, unite = '', onSlice,
-}: { titre: string; parts: PartCamembert[]; total?: number; unite?: string; onSlice?: (id: string) => void }) {
+  titre, parts, total, unite = '', onSlice, palette = PALETTE,
+}: { titre: string; parts: PartCamembert[]; total?: number; unite?: string; onSlice?: (id: string) => void
+  /** Espace pro (10/11) : palette sans violet (bleu animation, orange super event). */
+  palette?: string[] }) {
   const somme = total ?? parts.reduce((s, p) => s + p.n, 0)
   if (!somme) return null
 
@@ -20,7 +22,7 @@ export function Camembert({
     const long = (C * p.n) / somme
     const el = (
       <circle key={p.valeur} cx="100" cy="100" r={R} fill="none"
-        stroke={PALETTE[i % PALETTE.length]} strokeWidth={EP}
+        stroke={palette[i % palette.length]} strokeWidth={EP}
         strokeDasharray={`${long.toFixed(1)} ${(C - long).toFixed(1)}`}
         strokeDashoffset={-offset} transform="rotate(-90 100 100)" />
     )
@@ -46,7 +48,7 @@ export function Camembert({
                 onClick={clic}
                 title={clic ? 'Voir le détail de cette station' : undefined}
                 style={{ display: 'flex', alignItems: 'center', gap: 9, padding: '6px 0', borderBottom: i < parts.length - 1 ? '1px solid var(--sa-border)' : 'none', cursor: clic ? 'pointer' : 'default' }}>
-                <span style={{ width: 11, height: 11, borderRadius: 3, background: PALETTE[i % PALETTE.length], flex: 'none' }} />
+                <span style={{ width: 11, height: 11, borderRadius: 3, background: palette[i % palette.length], flex: 'none' }} />
                 <span style={{ flex: 1, fontSize: 12, fontWeight: 700 }}>{p.valeur}</span>
                 <span style={{ fontSize: 12, color: 'var(--sa-muted)' }}>{p.n}</span>
                 <span style={{ fontSize: 13, fontWeight: 800, color: '#3B5CC4', width: 46, textAlign: 'right' }}>

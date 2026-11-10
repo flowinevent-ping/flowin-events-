@@ -314,7 +314,7 @@ export default function Configurateur({ pro, banques }: { pro: ProConfigurateur;
   )
   if (ecran === 'jeu') contenu = (
     <>
-      <Titre t="Choisissez votre jeu" />
+      <Titre t="Choisissez votre jeu" s="Un seul jeu par animation. Pour un autre jeu, créez une autre animation." />
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
         {JEUX.map(j => (
           <button key={j.k} type="button" data-jeu={j.k} style={{ ...carte(jeu === j.k), textAlign: 'center' }}

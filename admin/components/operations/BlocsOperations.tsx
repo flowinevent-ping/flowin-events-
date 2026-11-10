@@ -26,7 +26,8 @@ import QrLiensEvent from '@/components/dashboard/QrLiensEvent'
 import ModalPartenaires from './ModalPartenaires'
 import { lireDroitsPro } from '@/lib/droitsPro'
 import ModalGererLots from './ModalGererLots'
-import { DiffusionStation, ExportMailchimp } from './DiffusionOperation'
+import { DiffusionStation, ExportMailchimp, lienJeuStation } from './DiffusionOperation'
+import RapportPro from '@/components/pro/RapportPro'
 import { BadgeTypeQr } from './QrTraces'
 import ReglageTirage from './ReglageTirage'
 import { fetchStatsQr, type StatQr } from '@/lib/qrTraces'
@@ -605,16 +606,25 @@ export function ContenuTracking({ op, proId, onStation, masquerGlobal }: {
     { v: femmes + hommes > 0 ? `${femmes} F · ${hommes} H` : '—', l: 'femmes · hommes' },
     { v: t.flashs, l: `flashs QR (${t.physique} physique, ${t.digital} digital)` },
   ]
+  /* Espace pro (spec du 10/11 soir) : rapport en carrousel -- flashs ET joueurs, Hommes/Femmes,
+     zone de chalandise en %, égaliseur, rappel de partage ; super event : flashs de tout l'événement. */
+  const st0 = op.stations[0]
   return (
     <>
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(140px,1fr))', gap: 8, marginBottom: 12 }}>
+      {masquerGlobal && (
+        <div style={{ marginBottom: 12 }}>
+          <RapportPro eventIds={op.stations.map(x => x.id)} superEventId={op.type === 'super' ? op.id : null} gagnants={op.gagnants.length}
+            lien={st0 ? lienJeuStation({ id: st0.id, module: String(st0.module || '') }) : null} />
+        </div>
+      )}
+      {!masquerGlobal && <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(140px,1fr))', gap: 8, marginBottom: 12 }}>
         {cles.map(c => (
           <div key={c.l} style={{ background: '#EEF2FB', border: '1px solid #D5DEF3', borderRadius: 14, padding: '12px 14px' }}>
             <div style={{ fontSize: 24, fontWeight: 900, color: ACC, lineHeight: 1.1 }}>{c.v}</div>
             <div style={{ fontSize: 12.5, fontWeight: 700, color: '#334155', marginTop: 2 }}>{c.l}</div>
           </div>
         ))}
-      </div>
+      </div>}
       <StatsParQr eventIds={op.stations.map(x => x.id)} />
       {origines.length > 0 && (
         <>

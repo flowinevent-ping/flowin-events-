@@ -1072,7 +1072,7 @@ export default function ParcoursCreation({ mode = 'pro', pro, banques, supers, p
                 ))}
               </div>
               <div style={{ display: 'flex', gap: 8, marginBottom: 16, flexWrap: 'wrap' }}>
-                {([['commerce', sa ? 'Il accueille une station de jeu' : 'J’accueille une station de jeu'], ['annonceur', sa ? 'Annonceur, sans station' : 'Je suis annonceur, sans station']] as const).map(([v, l]) => (
+                {([['commerce', sa ? 'Station jeu : il accueille le jeu' : 'Station jeu : j’accueille le jeu'], ['annonceur', sa ? 'Sponsor, sans station' : 'Sponsor, sans station']] as const).map(([v, l]) => (
                   <button key={v} style={{ ...choix(persona === v), padding: '10px 14px', fontWeight: 700, fontSize: 13 }} onClick={() => setPersona(v)}>{l}</button>
                 ))}
               </div>
