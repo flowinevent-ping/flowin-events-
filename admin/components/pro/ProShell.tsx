@@ -115,6 +115,25 @@ export default function ProShell({ proName, proId, active, children }: { proName
   /* Sans ?pro= dans l adresse : on retrouve le pro connecte et on recharge
      la meme page avec son identifiant. Personne de connecte : ecran de connexion. */
   const [sansPro, setSansPro] = useState<'cherche' | 'aucun' | null>(proId ? null : 'cherche')
+  /* 10/11 (bug « Charvolin ») : une session encore ouverte sur l'appareil appartient à un AUTRE pro
+     que celui de l'adresse -> on bascule sur le pro de la session (jamais l'espace d'un autre). */
+  useEffect(() => {
+    if (!proId) return
+    let fini = false
+    ;(async () => {
+      const { data } = await supabase.auth.getSession()
+      const uid = data.session?.user?.id
+      if (!uid) return
+      const { data: pro } = await supabase.from('pros').select('id').eq('auth_id', uid).maybeSingle()
+      if (!fini && pro?.id && pro.id !== proId) {
+        const u = new URL(window.location.href)
+        u.searchParams.set('pro', pro.id)
+        window.location.replace(u.toString())
+      }
+    })()
+    return () => { fini = true }
+  }, [proId])
+
   useEffect(() => {
     if (proId) return
     let fini = false
