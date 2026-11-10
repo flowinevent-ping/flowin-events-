@@ -151,3 +151,11 @@ Avant toute livraison, chaque texte est relu contre ce fichier (et la liste « i
 - L'animation du fichier client est **mieux qu'une simple relance email** pour donner des offres :
   elle demande de la **participation** et dynamise le jeu.
 - **Effet cadeau** : les gagnants peuvent **offrir leur lot** à quelqu'un d'autre.
+
+## Corrections de Romain (10/11, suite)
+- Dire **« l'impact du réseau local »** (pas « la force du réseau local »).
+- **Lots festival** : places de concert, places, invitations gratuites, goodies…
+- Le message n'est pas « jouer » : c'est **interagir** avec son public, sa communauté, ses futurs
+  clients ; **capter le flux des passants** ; **encourager le parrainage** pour la visibilité.
+- On **publie** un jeu (on ne le crée pas) : **« Publiez en quelques clics votre animation 100 %
+  automatisée. »** Aucune charge en plus : **aussi simple que coller une affiche, tout est géré ensuite.**

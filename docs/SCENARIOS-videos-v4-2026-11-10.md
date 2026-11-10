@@ -18,8 +18,8 @@ Sources : `docs/ARGUMENTAIRE-flowin-event.md` (dictées du 10/11), `docs/SYNTHES
 ## Film 1 — Flowin Animation · COMMERCE (30 s) · « Vos clients reviennent ? Vraiment ? »
 1. (0-2 s) Alex derrière son comptoir regarde la porte. « Vos clients reviennent ? Vraiment ? »
 2. (2-4 s) Alex envoie un email de relance : l'enveloppe tombe dans « Non lus ». « Une relance email ? Personne ne la lit. »
-3. (4-7 s) Alex pose un QR en vitrine et sur le comptoir, chrono « 5 min ». « Flowin : plug and play. Un QR, un jeu. »
-4. (7-10 s) Léa flashe, joue au quiz sur le commerce. « Vos clients jouent et découvrent votre métier, votre marque. »
+3. (4-7 s) Alex publie son jeu en quelques clics, puis colle l'affiche QR en vitrine. « Publiez votre animation en quelques clics. Aussi simple que coller une affiche. 100 % automatisée. »
+4. (7-10 s) Léa, passante, flashe et joue. « Captez le flux des passants. Interagissez avec vos futurs clients. »
 5. (10-12 s) Question bonus « Vous habitez à moins de 1 km ? » → graphique chez Alex. « Vous sondez votre public. »
 6. (12-15 s) Léa gagne : « Produit offert pour un achat ». Le contact de Léa entre dans le fichier d'Alex. « Votre fichier client grandit, même si vous n'en aviez pas. »
 7. (15-18 s) Léa offre son lot à Max (effet cadeau, paquet qui s'ouvre). « Le lot s'offre : un nouveau client arrive. »
@@ -39,8 +39,8 @@ Sources : `docs/ARGUMENTAIRE-flowin-event.md` (dictées du 10/11), `docs/SYNTHES
 
 ## Film 3 — Flowin Super Event · ORGANISATEUR (30 s) · « Votre événement mérite toute la ville. »
 1. (0-2 s) Sam devant sa scène, affiche à la main. « Votre événement mérite toute la ville. »
-2. (2-6 s) L'affiche se démultiplie : vitrines, réseaux sociaux des commerces, téléphones des clients. « Démultipliez votre communication avec la force du réseau local. »
-3. (6-9 s) AVANT : places, passes, goodies à gagner chez les commerçants. « Boostez la visibilité. Et la fréquentation. »
+2. (2-6 s) L'affiche se démultiplie : vitrines, réseaux sociaux des commerces, téléphones des clients. « Démultipliez votre communication avec l'impact du réseau local. »
+3. (6-9 s) AVANT : des lots festival à gagner chez les commerçants (places de concert, invitations, goodies…). « Interagissez avec votre public. Boostez la visibilité et la fréquentation. »
 4. (9-12 s) PENDANT : le site de l'événement devient station jeu, compteur de fréquentation. « Mesurez la fréquentation sur place. »
 5. (12-15 s) Questions bonus mobilité, RSE, sécurité → graphiques. « Un outil de communication. Et de sondage. »
 6. (15-18 s) Fichier des participants qui grandit ; parrainage récompensé : « prochaine date » partagée en chaîne. « Gardez le contact. Annoncez la prochaine date. »
@@ -61,7 +61,7 @@ Sources : `docs/ARGUMENTAIRE-flowin-event.md` (dictées du 10/11), `docs/SYNTHES
 
 ## Film 5 — Flowin Super Event · PARTICIPANT (20 s) · « Le festival commence dans ta ville. »
 1. (0-2 s) Léa voit l'affiche du festival chez un commerçant. « Le festival commence… chez ton commerçant. »
-2. (2-5 s) Elle joue, gagne une place de concert. « Avant : gagne ta place, tes goodies. »
+2. (2-5 s) Elle joue, gagne une place de concert. « Avant : gagne des lots festival : places, invitations, goodies. »
 3. (5-9 s) Carte : chasse aux trésors entre les stations. « Pendant : une chasse aux trésors dans la ville. »
 4. (9-12 s) Lots des commerces, lot spécial d'une boutique. « Des lots dans chaque commerce. »
 5. (12-15 s) Tirage au sort, Léa gagne. « Et un grand tirage. »
@@ -72,3 +72,13 @@ Sources : `docs/ARGUMENTAIRE-flowin-event.md` (dictées du 10/11), `docs/SYNTHES
 1. Les 5 scénarios (« film n°, plan n° + une phrase »).
 2. Lien de fin pour le participant (carte Flowin pas encore produite) : jeu de l'événement en cours ou page d'attente ?
 3. Avant production des films : planche des 4 personnages et une scène finie, pour validation.
+
+## Corrections de Romain (10/11) appliquées
+- « force du réseau local » → **« l'impact du réseau local »**.
+- Lots Super Event : **« lots festival »** (places de concert, places, invitations gratuites, goodies…).
+- Message : pas « jouez », mais **interagir avec son public, sa communauté, ses futurs clients ;
+  capter le flux des passants ; encourager le parrainage pour la visibilité**.
+- On ne crée pas un jeu, **on publie un jeu** : « Publiez en quelques clics votre animation 100 %
+  automatisée. » **Aucune charge** en plus pour l'organisateur ni le commerce : « aussi simple que coller
+  une affiche, tout est géré ensuite ». À reprendre dans les 5 films (plan de mise en place) et dans le
+  plan « interaction » de chaque film.
