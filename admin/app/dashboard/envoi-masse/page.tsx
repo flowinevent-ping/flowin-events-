@@ -36,7 +36,7 @@ function etatDe(t: GagnantRow): EtatGagnant {
 }
 
 export default function Page() {
-  const { joueurs } = useDashboard()
+  const { joueurs, partenaires } = useDashboard()
   const [canal, setCanal] = useState<'email' | 'whatsapp'>('email')
   const [waReferent, setWaReferent] = useState('')
   const [objet, setObjet] = useState('')
@@ -54,6 +54,21 @@ export default function Page() {
     gagnants.forEach(g => { if (g.joueur_id) (m[g.joueur_id] ??= new Set()).add(etatDe(g)) })
     return m
   }, [gagnants])
+
+  /* Romain (10/11) : pour un lot utilisé, afficher LE COMMERCE où il a été utilisé, et le lot. */
+  const lotsParJoueur = useMemo(() => {
+    const nomPt: Record<string, string> = {}
+    partenaires.forEach(p => { nomPt[p.id] = p.nom })
+    const m: Record<string, string[]> = {}
+    gagnants.forEach(g => {
+      if (!g.joueur_id) return
+      const chez = g.partenaire_id ? (nomPt[g.partenaire_id] || '') : ''
+      const etat = etatDe(g)
+      const lib = (etat === 'retire' ? 'Utilisé' : etat === 'confirme' ? 'Confirmé' : 'En attente') + (chez ? ' chez ' + chez : '') + (g.lot_nom ? ' · ' + g.lot_nom : '')
+      ;(m[g.joueur_id] ??= []).push(lib)
+    })
+    return m
+  }, [gagnants, partenaires])
 
   const sources = useMemo(() => {
     const vus = new Set<string>()
@@ -170,7 +185,8 @@ export default function Page() {
                   <thead>
                     <tr style={{ position: 'sticky', top: 0, background: 'var(--sa-card)' }}>
                       <th style={{ textAlign: 'left', padding: '7px 10px', fontSize: 10.5, color: 'var(--sa-muted)', textTransform: 'uppercase' }}>Nom</th>
-                      <th style={{ textAlign: 'left', padding: '7px 10px', fontSize: 10.5, color: 'var(--sa-muted)', textTransform: 'uppercase' }}>{canal === 'whatsapp' ? 'Téléphone' : 'Email'}</th>
+                      <th style={{ textAlign: 'left', padding: '7px 10px', fontSize: 10.5, color: 'var(--sa-muted)', textTransform: 'uppercase' }}>Email</th>
+                      <th style={{ textAlign: 'left', padding: '7px 10px', fontSize: 10.5, color: 'var(--sa-muted)', textTransform: 'uppercase' }}>Téléphone</th>
                       <th style={{ textAlign: 'left', padding: '7px 10px', fontSize: 10.5, color: 'var(--sa-muted)', textTransform: 'uppercase' }}>Code postal</th>
                       <th style={{ textAlign: 'left', padding: '7px 10px', fontSize: 10.5, color: 'var(--sa-muted)', textTransform: 'uppercase' }}>Ville</th>
                       <th style={{ textAlign: 'left', padding: '7px 10px', fontSize: 10.5, color: 'var(--sa-muted)', textTransform: 'uppercase' }}>Source</th>
@@ -184,11 +200,12 @@ export default function Page() {
                       return (
                         <tr key={j.id} style={{ borderTop: '1px solid var(--sa-border)' }}>
                           <td style={{ padding: '6px 10px' }}>{[j.prenom, j.nom].filter(Boolean).join(' ') || '—'}</td>
-                          <td style={{ padding: '6px 10px' }}>{canal === 'whatsapp' ? (j.tel ?? '—') : j.email}</td>
+                          <td style={{ padding: '6px 10px' }}>{j.email || '—'}</td>
+                          <td style={{ padding: '6px 10px', whiteSpace: 'nowrap' }}>{j.tel || '—'}</td>
                           <td style={{ padding: '6px 10px' }}>{j.code_postal ?? '—'}</td>
-                          <td style={{ padding: '6px 10px' }}>{j.ville ?? '—'}</td>
+                          <td style={{ padding: '6px 10px' }}>{j.ville || '—'}</td>
                           <td style={{ padding: '6px 10px' }}><code className="sa-code">{j.source ?? '—'}</code></td>
-                          <td style={{ padding: '6px 10px', fontSize: 11.5 }}>{lib}</td>
+                          <td style={{ padding: '6px 10px', fontSize: 11.5 }}>{lotsParJoueur[j.id]?.join(' ; ') || lib}</td>
                         </tr>
                       )
                     })}

@@ -220,13 +220,13 @@ export default function Sidebar() {
         { id: 'commandes-animation', label: 'Commandes Animation', href: '/admin-commandes-animation.html', external: true },
         { id: 'nds-bon-commande', label: 'Bons de commande & factures', href: '/dashboard/nds-bon-commande' },
         { id: 'facture-nds', label: 'Générer une facture', href: '/facture-nds.html', external: true },
-        { id: 'landing-page', label: 'Plaquettes, landing & outils', href: '/dashboard/landing-page' },
       ],
     },
     {
       group: 'Comm & outils',
       ton: 'out',
       items: [
+        { id: 'landing-page', label: 'Landing pages & outils commerciaux', href: '/dashboard/landing-page' },
         { id: 'envoi-masse', label: 'Envoi en masse', href: '/dashboard/envoi-masse' },
         { id: 'visite-guidee', label: 'Visite guidée Flowin', href: '/visite-guidee/index.html', nouvelOnglet: true },
         { id: 'pilotage', label: 'Pilotage', href: '/dashboard/pilotage' },
