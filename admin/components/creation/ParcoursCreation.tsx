@@ -338,7 +338,8 @@ export default function ParcoursCreation({ mode = 'pro', pro, banques, supers, p
   /* Paiement en attente pendant les tests (lib/reglement PAIEMENT_ACTIF) : publication directe, sans bon de commande. */
   const commande = avecCommande && PAIEMENT_ACTIF
   /* Logo obligatoire avant publication (Romain, 10/11/2026) : billets gagnants et jeu à ses couleurs. */
-  const logoManquant = avecCommande && !logoCommerce
+  /* 10/11/2026 (Romain, dernière décision) : le logo n'est PLUS bloquant ; le billet montre le nom du commerce tant qu'il n'y a pas de logo. */
+  const logoManquant = false
   /* Tarifs : grille a cocher (3 packs de nds-partenaire.html), pour PRESELECTIONNER la demande. Aucun prix invente, rien n'est facture. */
   const [packChoisi, setPackChoisi] = useState<string | null>(null)
   const packsSE = packsPourSuperEvent(se)
@@ -930,7 +931,7 @@ export default function ParcoursCreation({ mode = 'pro', pro, banques, supers, p
           {cartes.map(c => (
             <button key={c.t} className={`nop-carte${type === c.t ? ' nop-actif' : ''}`}
               style={{ ...choix(false), padding: '34px 26px 28px', background: '#fff', ['--acc' as string]: c.accent, ['--acc-tint' as string]: `${c.accent}17` } as React.CSSProperties}
-              onClick={() => { setType(c.t); setEtape(c.t === 'demande' ? 0 : 1); if (c.t === 'super' && module_ === 'spin') setModule(null) }}>
+              onClick={() => { if (mode === 'pro' && c.t === 'animation') { window.location.href = `/pro/nouvelle?pro=${encodeURIComponent(p.id)}&type=animation`; return } setType(c.t); setEtape(c.t === 'demande' ? 0 : 1); if (c.t === 'super' && module_ === 'spin') setModule(null) }}>
               <span className="nop-filet" />
               <div className="nop-halo"><Ico k={c.icone} size={32} /></div>
               <div style={{ fontSize: 18, fontWeight: 800 }}>{c.titre}</div>

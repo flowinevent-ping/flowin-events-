@@ -75,15 +75,12 @@ export default function Diffusion({ url, titre, sousTitre, compact = false, vign
     if (!url) return
     let vivant = true
     setErreur('')
-    import('qrcode')
-      .then(async mod => {
-        const QR = mod.default ?? mod
-        const [p, s] = await Promise.all([
-          QR.toDataURL(url, { width: 1024, margin: 2, errorCorrectionLevel: 'M' }),
-          QR.toString(url, { type: 'svg', width: 1024, margin: 2, errorCorrectionLevel: 'M' }),
-        ])
+    /* QR Flowin : marque « Flowin Animation » au centre, correction H (lib/qrLogo). */
+    import('@/lib/qrLogo')
+      .then(async m => {
+        const [p, s] = await Promise.all([m.qrFlowinPng(url, 1024), m.qrFlowinSvg(url, 1024)])
         if (!vivant) return
-        setQr({ url, png: p, svg: s as string })
+        setQr({ url, png: p, svg: s })
       })
       .catch(() => { if (vivant) setErreur("Le QR n'a pas pu être généré dans ce navigateur.") })
     return () => { vivant = false }

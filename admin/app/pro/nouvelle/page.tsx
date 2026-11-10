@@ -6,6 +6,7 @@ import ProShell from '@/components/pro/ProShell'
 import OptionDesactivee from '@/components/pro/OptionDesactivee'
 import { lireDroitsPro, peutOuvrirNouvelle } from '@/lib/droitsPro'
 import ParcoursCreation, { type ProNouvelle } from '@/components/creation/ParcoursCreation'
+import Configurateur, { type ProConfigurateur } from '@/components/creation/Configurateur'
 
 export const dynamic = 'force-dynamic'
 
@@ -52,6 +53,14 @@ export default async function Page({ searchParams }: { searchParams: { pro?: str
   }
   const t = searchParams.type
   const type = t === 'animation' || t === 'rejoindre' ? t : t === 'super' ? (droits.creer_super_event ? 'super' as const : 'demande' as const) : t === 'demande' ? 'demande' as const : null
+  /* Créer une animation : le configurateur en carrousel dicté par Romain le 10/11/2026 (components/creation/Configurateur). */
+  if (type === 'animation' && !searchParams.se) {
+    return (
+      <ProShell proName={p.nom ?? 'Mon établissement'} proId={proId} active="nouvelle">
+        <Configurateur pro={p as unknown as ProConfigurateur} banques={banques} />
+      </ProShell>
+    )
+  }
   return (
     <ProShell proName={p.nom ?? 'Mon établissement'} proId={proId} active="nouvelle">
       <ParcoursCreation

@@ -34,15 +34,18 @@ export const OFFRES_ANIMATION = [
 /** Option : quiz et questions bonus rédigés par Flowin (30 + 5), -50 % la première année. */
 export const OPTION_QUIZ_FLOWIN = { nom: 'Votre premier quiz rédigé par Flowin', detail: '30 questions + 5 questions bonus', prix: PRIX_ANIMATION.quizFlowin, prixLancement: PRIX_ANIMATION.quizFlowinLancement }
 /** Option : customisation totale (couleurs, thématique, jeu 100 % personnalisable, lancement de campagne), sur devis. */
+/** Kit physique imprimé, par boutique (public/bon-commande-pdf.js PRIX.kitPhysique). */
+export const PRIX_KIT_PHYSIQUE = 149
+
 export const OPTION_CUSTOMISATION = { nom: 'Customisation totale', detail: 'Couleurs, thématique, jeu 100 % personnalisable et modifiable, lancement de campagne', prix: 'Sur demande' }
 
 /** Délai annoncé au pro entre la déclaration du virement et son contrôle par Flowin. */
 export const DELAI_CONTROLE_PAIEMENT = '3 à 5 jours'
 
 /** Lien du bon de commande pré-rempli (public/bon-commande-animation.html) depuis la publication. */
-export const lienBonCommande = (o: { proId: string; offre: CleOffreAnimation; quizFlowin: boolean; customisation: boolean; eventId: string | null }) =>
+export const lienBonCommande = (o: { proId: string; offre: CleOffreAnimation; quizFlowin: boolean; customisation: boolean; eventId: string | null; kit?: 'digital' | 'physique' }) =>
   `/bon-commande-animation.html?pro=${encodeURIComponent(o.proId)}&offre=${o.offre}` +
-  (o.quizFlowin ? '&quizflowin=1' : '') + (o.customisation ? '&custom=1' : '') +
+  (o.quizFlowin ? '&quizflowin=1' : '') + (o.customisation ? '&custom=1' : '') + (o.kit === 'physique' ? '&kit=physique' : '') +
   (o.eventId ? `&ev=${encodeURIComponent(o.eventId)}` : '')
 
 export type CleOffreAnimation = typeof OFFRES_ANIMATION[number]['cle']

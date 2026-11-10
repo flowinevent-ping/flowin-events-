@@ -99,7 +99,11 @@ export interface CreationAnimation {
   /** Contenu propre au jeu (referentiel 3/4/5). */
   cfgJeu?: Record<string, unknown>
   /* `valeur` : montant affiche sur le billet (« Valeur du bon »). */
-  lots: { nom: string; quantite: number; valeur?: number; type: 'tirage' | 'instantane'; conditions: string }[]
+  lots: { nom: string; quantite: number; valeur?: number; type: 'tirage' | 'instantane'; conditions: string
+    /** Validité du lot gagné (configurateur 10/11/2026) : nombre de jours (lots.validite_jours), ou période du / au (cfg.lots). */
+    validiteJours?: number | null; validiteDu?: string | null; validiteAu?: string | null }[]
+  /** Identifiant décidé à l'avance (QR montrés avant la publication) ; sinon tiré ici. */
+  id?: string
   regleRecompense?: { mode: 'tousLesX' | 'aleatoire'; everyX: number; probabilite: number }
   diffusionPhysique: boolean
   diffusionDigital: boolean
@@ -109,8 +113,11 @@ export interface CreationAnimation {
    *  declare son virement sur le bon de commande (public/bon-commande-animation.html). Absent (Super Admin) : en ligne. */
   paiement?: { offre: string; quizFlowin: boolean; customisation: boolean }
 }
+/** Identifiant d'une nouvelle animation : ev-<pro>-<6 caractères>. */
+export const idAnimation = (proId: string) => 'ev-' + proId.replace(/^pro-/, '') + '-' + Math.random().toString(36).slice(2, 8)
+
 export async function creerAnimation(params: CreationAnimation): Promise<{ ok: boolean; eventId: string | null; error?: string }> {
-  const id = 'ev-' + params.proId.replace(/^pro-/, '') + '-' + Math.random().toString(36).slice(2, 8)
+  const id = params.id || idAnimation(params.proId)
   const premierLot = params.lots[0]
   const premierInstantane = params.lots.find(l => l.type === 'instantane')
   const { error } = await supabase.from('events').insert({
@@ -164,6 +171,8 @@ export async function creerAnimation(params: CreationAnimation): Promise<{ ok: b
       valeur_euros: l.valeur ?? null,
       conditions: l.conditions.trim() || null,
       note: l.type === 'instantane' ? 'Type : gain instantané' : 'Type : tirage au sort',
+      /* Colonne lots.validite_jours (sql/2026-11-10-tickets-animation.sql) : seulement si une durée est saisie. */
+      ...(l.validiteJours && l.validiteJours > 0 ? { validite_jours: Math.round(l.validiteJours) } : {}),
     })))
     if (eLots) {
       console.error('[creerAnimation] lots', eLots.message)
@@ -210,11 +219,27 @@ export interface DemandeQuizFlowin {
   jeu?: string
   dateD?: string | null
   dateF?: string | null
+  /** Configurateur (10/11/2026) : l'audit relevait que l'adresse et le SIRET manquaient à la demande. */
+  commerce?: string
+  siret?: string
+  adresse?: string
+  cp?: string
+  ville?: string
+  /** Ce que le commerce veut faire connaître ou sonder. */
+  objectif?: string
+  eventId?: string | null
+  bonus?: boolean
 }
 
 export async function enregistrerDemandeQuiz(d: DemandeQuizFlowin): Promise<{ ok: boolean; error?: string }> {
   const note = [
     `Thème souhaité : ${d.theme.trim() || '—'}`,
+    d.objectif?.trim() ? `À faire connaître / sonder : ${d.objectif.trim()}` : null,
+    d.bonus ? 'Jeu : quiz + questions bonus (sondage clients)' : null,
+    d.commerce?.trim() ? `Commerce : ${d.commerce.trim()}` : null,
+    d.siret?.trim() ? `SIRET : ${d.siret.trim()}` : null,
+    (d.adresse?.trim() || d.ville?.trim()) ? `Adresse : ${[d.adresse?.trim(), [d.cp?.trim(), d.ville?.trim()].filter(Boolean).join(' ')].filter(Boolean).join(', ')}` : null,
+    d.eventId ? `Event : ${d.eventId}` : null,
     d.animationNom?.trim() ? `Animation : ${d.animationNom.trim()}` : null,
     d.jeu ? `Jeu : ${d.jeu}` : null,
     (d.dateD || d.dateF) ? `Dates : ${d.dateD || '—'}${d.dateF ? ` → ${d.dateF}` : ''}` : null,
@@ -227,6 +252,8 @@ export async function enregistrerDemandeQuiz(d: DemandeQuizFlowin): Promise<{ ok
     contact_nom: d.contactNom.trim() || null,
     contact_tel: d.contactTel.trim() || null,
     contact_email: d.contactEmail.trim() || null,
+    ...(d.ville?.trim() ? { ville: d.ville.trim() } : {}),
+    ...(d.cp?.trim() ? { cp: d.cp.trim() } : {}),
     origine: 'pro-quiz-flowin',
     produit: 'Quiz réalisé par Flowin',
     etat: 'nouveau',

@@ -14,7 +14,7 @@ import { lireDroitsPro, peutOuvrirNouvelle } from '@/lib/droitsPro'
 export const metadata: Metadata = { title: 'Mes animations — Flowin Pro' }
 export const dynamic = 'force-dynamic'
 
-interface Props { searchParams: { pro?: string; ev?: string; type?: string; bienvenue?: string } }
+interface Props { searchParams: { pro?: string; ev?: string; type?: string; bienvenue?: string; quiz?: string } }
 
 const TYPES: { id: '' | 'event' | 'super'; label: string }[] = [
   { id: '', label: 'Toutes' },
@@ -53,9 +53,21 @@ export default async function ProAccueilPage({ searchParams }: Props) {
             Votre fiche est en cours de validation par l’équipe Flowin. En attendant, préparez la suite :
           </div>
           <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-            {peutCreer && <Link href={`/pro/nouvelle${q}`} style={{ ...BTN, padding: '10px 18px', fontSize: 13.5, textDecoration: 'none' }}>1. Créer ma première animation</Link>}
+            {peutCreer && <Link href={`/pro/nouvelle${q}${et}type=animation`} style={{ ...BTN, padding: '10px 18px', fontSize: 13.5, textDecoration: 'none' }}>1. Créer ma première animation</Link>}
             <Link href={`/pro/compte${q}${et}onglet=rib`} style={{ ...BTN2, padding: '9px 16px', fontSize: 13, textDecoration: 'none' }}>2. Mes coordonnées bancaires</Link>
             <Link href={`/pro/compte${q}${et}onglet=entreprise`} style={{ ...BTN2, padding: '9px 16px', fontSize: 13, textDecoration: 'none' }}>3. Vérifier ma fiche entreprise</Link>
+          </div>
+        </div>
+      )}
+      {searchParams.bienvenue === 'jeu' && (
+        /* Retour du configurateur (Romain, 10/11/2026) : 3 messages courts. Pas encore de page d'import CSV :
+           le lien mène à « Mes données » (contacts, export). */
+        <div data-bienvenue-jeu style={{ ...CARD, border: `1.5px solid ${C.violet}`, background: C.violetClair }}>
+          <div style={{ fontSize: 18, fontWeight: 900, marginBottom: 8 }}>Bienvenue dans votre espace Flowin</div>
+          <div style={{ display: 'grid', gap: 8, fontSize: 14, lineHeight: 1.45 }}>
+            {searchParams.quiz === '1' && <div>• Flowin vous recontacte sous 72 h avec votre quiz.</div>}
+            <div>• Votre QR code est utilisable dès maintenant sur vos supports : mesurez l’impact de chaque communication.</div>
+            <div>• Complétez votre profil : <Link href={`/pro/donnees${q}`} style={{ color: C.violet, fontWeight: 800 }}>importer votre fichier client</Link>, <Link href={`/pro/compte${q}${et}onglet=entreprise`} style={{ color: C.violet, fontWeight: 800 }}>ajouter votre logo</Link>.</div>
           </div>
         </div>
       )}
@@ -88,7 +100,7 @@ export default async function ProAccueilPage({ searchParams }: Props) {
         <div style={{ ...CARD, textAlign: 'center', padding: 26 }}>
           <div style={{ fontSize: 16, fontWeight: 800 }}>{ops.operations.length ? 'Aucune animation de ce type' : 'Aucune animation pour le moment'}</div>
           <div style={{ fontSize: 13.5, ...MUTED, margin: '6px 0 14px' }}>{peutCreer ? 'Créez votre animation ou rejoignez un super event.' : 'Vos animations apparaîtront ici. Pour en créer, contactez Flowin.'}</div>
-          {peutCreer && <Link href={`/pro/nouvelle${q}`} style={{ ...BTN, display: 'inline-block', textDecoration: 'none' }}>Commencer</Link>}
+          {peutCreer && <Link href={`/pro/nouvelle${q}${et}type=animation`} style={{ ...BTN, display: 'inline-block', textDecoration: 'none' }}>Commencer</Link>}
         </div>
       )}
 
