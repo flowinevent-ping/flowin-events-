@@ -9,9 +9,9 @@
 
 export const BASE_PROD = 'https://flowin-events.vercel.app'
 
-export type Public = 'commerce' | 'organisateur' | 'partenaire'
+export type Public = 'participant' | 'commerce' | 'organisateur' | 'partenaire'
 export type Statut = 'validé' | 'brouillon'
-export type TypeOutil = 'page' | 'plaquette' | 'document' | 'video' | 'parcours' | 'scenario'
+export type TypeOutil = 'page' | 'plaquette' | 'document' | 'video' | 'parcours' | 'scenario' | 'animation'
 
 export interface Outil {
   id: string
@@ -27,41 +27,60 @@ export interface Outil {
   canalDefaut?: string
   /** Vignette (videos). */
   vignette?: string
+  /** Animation video (lecteur dans le carrousel + page de lecture publique). */
+  animation?: {
+    format: 'vertical' | 'paysage'
+    /** Fichier video (admin/public/animations/<id>.mp4). Absent du depot tant que `pret` est faux. */
+    mp4: string
+    /** Version courte (second MP4). */
+    courte?: string
+    poster?: string
+    /** Vrai quand le MP4 est dans le depot ; sinon « Version de travail en préparation ». */
+    pret: boolean
+  }
   /** Seuls les outils explicitement valides par Romain sont partageables (copie, WhatsApp, email). */
   statut: Statut
   /** Vrai : le fichier n'est pas encore en ligne (video a venir) : ni lien, ni QR, ni apercu. */
   aVenir?: boolean
+  /** Ancienne version (animations v22) : visible seulement dans le filtre « Archives animations ». */
+  archive?: boolean
   /** Message WhatsApp / email d'accompagnement (court). */
   message: string
 }
 
 export const PUBLICS: { v: Public; label: string }[] = [
+  { v: 'participant', label: 'Participant' },
   { v: 'commerce', label: 'Commerce' },
   { v: 'organisateur', label: 'Organisateur' },
   { v: 'partenaire', label: 'Partenaire' },
 ]
 
 export const OUTILS: Outil[] = [
-  { statut: 'brouillon', id: 'film-v4-f1-commerce', titre: 'Film réseaux sociaux : Animation · commerce', public: ['commerce'], type: 'video', suivi: false,
-    description: 'Format TikTok / Instagram, vertical, muet avec sous-titres (version 15 s : f1-15s.mp4).',
-    chemin: '/videos/v4/f1-commerce.mp4',
-    message: 'Bonjour, découvrez Flowin Event en vidéo :' },
-  { statut: 'brouillon', id: 'film-v4-f2-participant-animation', titre: 'Film réseaux sociaux : Animation · participant', public: ['commerce'], type: 'video', suivi: false,
-    description: 'Format TikTok / Instagram, vertical, muet avec sous-titres (version 15 s : f2-15s.mp4).',
-    chemin: '/videos/v4/f2-participant-animation.mp4',
-    message: 'Bonjour, découvrez Flowin Event en vidéo :' },
-  { statut: 'brouillon', id: 'film-v4-f3-organisateur', titre: 'Film réseaux sociaux : Super Event · organisateur', public: ['organisateur'], type: 'video', suivi: false,
-    description: 'Format TikTok / Instagram, vertical, muet avec sous-titres (version 15 s : f3-15s.mp4).',
-    chemin: '/videos/v4/f3-organisateur.mp4',
-    message: 'Bonjour, découvrez Flowin Event en vidéo :' },
-  { statut: 'brouillon', id: 'film-v4-f4-commerce-super-event', titre: 'Film réseaux sociaux : Super Event · commerce', public: ['commerce'], type: 'video', suivi: false,
-    description: 'Format TikTok / Instagram, vertical, muet avec sous-titres (version 15 s : f4-15s.mp4).',
-    chemin: '/videos/v4/f4-commerce-super-event.mp4',
-    message: 'Bonjour, découvrez Flowin Event en vidéo :' },
-  { statut: 'brouillon', id: 'film-v4-f5-participant-super-event', titre: 'Film réseaux sociaux : Super Event · participant', public: ['organisateur'], type: 'video', suivi: false,
-    description: 'Format TikTok / Instagram, vertical, muet avec sous-titres (version 15 s : f5-15s.mp4).',
-    chemin: '/videos/v4/f5-participant-super-event.mp4',
-    message: 'Bonjour, découvrez Flowin Event en vidéo :' },
+  { statut: 'validé', id: 'film-v4-f1-commerce', titre: 'Film Animation · commerce', public: ['commerce'], type: 'animation', suivi: true, canalDefaut: 'video-commerce',
+    description: 'Pour les commerçants : vos clients reviennent ? Fin : « Je crée mon jeu » (inscription pro).',
+    chemin: '/animations/film-v4-f1-commerce.html',
+    animation: { format: 'vertical', mp4: '/videos/v4/f1-commerce.mp4', courte: '/videos/v4/f1-15s.mp4', poster: '/videos/v4/f1-commerce.jpg', pret: true },
+    message: 'Bonjour, découvrez Flowin Animation en vidéo :' },
+  { statut: 'validé', id: 'film-v4-f2-participant-animation', titre: 'Film Animation · participant', public: ['participant'], type: 'animation', suivi: true, canalDefaut: 'video-participant',
+    description: 'Pour les joueurs : jouer chez les commerces. Fin : « Je joue » (/jouer).',
+    chemin: '/animations/film-v4-f2-participant-animation.html',
+    animation: { format: 'vertical', mp4: '/videos/v4/f2-participant-animation.mp4', courte: '/videos/v4/f2-15s.mp4', poster: '/videos/v4/f2-participant-animation.jpg', pret: true },
+    message: 'Bonjour, une courte vidéo pour jouer avec Flowin :' },
+  { statut: 'validé', id: 'film-v4-f3-organisateur', titre: 'Film Super Event · organisateur', public: ['organisateur'], type: 'animation', suivi: true, canalDefaut: 'video-organisateur',
+    description: 'Pour les organisateurs : votre événement mérite toute la ville. Fin : plaquette Super Event, partie organisateur.',
+    chemin: '/animations/film-v4-f3-organisateur.html',
+    animation: { format: 'vertical', mp4: '/videos/v4/f3-organisateur.mp4', courte: '/videos/v4/f3-15s.mp4', poster: '/videos/v4/f3-organisateur.jpg', pret: true },
+    message: 'Bonjour, découvrez Flowin Super Event en vidéo :' },
+  { statut: 'validé', id: 'film-v4-f4-commerce-super-event', titre: 'Film Super Event · commerce', public: ['commerce', 'partenaire'], type: 'animation', suivi: true, canalDefaut: 'video-partenaire-se',
+    description: 'Pour les commerces : rejoindre un super event. Fin : demande de participation (/rejoindre).',
+    chemin: '/animations/film-v4-f4-commerce-super-event.html',
+    animation: { format: 'vertical', mp4: '/videos/v4/f4-commerce-super-event.mp4', courte: '/videos/v4/f4-15s.mp4', poster: '/videos/v4/f4-commerce-super-event.jpg', pret: true },
+    message: 'Bonjour, découvrez comment rejoindre un Super Event Flowin :' },
+  { statut: 'validé', id: 'film-v4-f5-participant-super-event', titre: 'Film Super Event · participant', public: ['participant'], type: 'animation', suivi: true, canalDefaut: 'video-participant-se',
+    description: 'Pour les joueurs : le festival commence chez ton commerçant. Fin : « Je joue » (page joueur Super Event).',
+    chemin: '/animations/film-v4-f5-participant-super-event.html',
+    animation: { format: 'vertical', mp4: '/videos/v4/f5-participant-super-event.mp4', courte: '/videos/v4/f5-15s.mp4', poster: '/videos/v4/f5-participant-super-event.jpg', pret: true },
+    message: 'Bonjour, une courte vidéo pour jouer au Super Event :' },
   { statut: 'brouillon', id: 'film-participant', titre: 'Film participant (scénarisé)', public: ['commerce', 'organisateur'], type: 'video', suivi: false,
     description: 'Flashe, joue, gagne, reviens : le jeu vu par le participant (34 s).',
     chemin: '/videos/flowin-film-participant.mp4',
@@ -190,6 +209,31 @@ export const OUTILS: Outil[] = [
     description: 'Carte des partenaires et des stations.',
     chemin: '/carte.html',
     message: 'Bonjour, voici la carte :' },
+  { statut: 'validé', archive: true, id: 'anim-participant-commerces', titre: 'Archive v22 · Animation participant (chez les commerces)', public: ['participant'], type: 'animation', suivi: true, canalDefaut: 'video-participant',
+    description: 'Vidéo de présentation pour les participants : jouer chez les commerces du quartier.',
+    chemin: '/animations/anim-participant-commerces.html',
+    animation: { format: 'vertical', mp4: '/animations/anim-participant-commerces.mp4', courte: '/animations/anim-participant-commerces-courte.mp4', poster: '/animations/anim-participant-commerces.jpg', pret: true },
+    message: 'Bonjour, une courte vidéo pour comprendre Flowin :' },
+  { statut: 'validé', archive: true, id: 'anim-commerce-plug-play', titre: 'Archive v22 · Animation commerce : Flowin, animation Plug & Play', public: ['commerce'], type: 'animation', suivi: true, canalDefaut: 'video-commerce',
+    description: 'Vidéo de présentation pour les commerçants : Flowin, l’animation Plug & Play.',
+    chemin: '/animations/anim-commerce-plug-play.html',
+    animation: { format: 'vertical', mp4: '/animations/anim-commerce-plug-play.mp4', courte: '/animations/anim-commerce-plug-play-courte.mp4', poster: '/animations/anim-commerce-plug-play.jpg', pret: true },
+    message: 'Bonjour, une courte vidéo pour comprendre Flowin :' },
+  { statut: 'validé', archive: true, id: 'anim-participant-super-event', titre: 'Archive v22 · Animation participant super event', public: ['participant'], type: 'animation', suivi: true, canalDefaut: 'video-participant-se',
+    description: 'Vidéo de présentation pour les participants d’un super event.',
+    chemin: '/animations/anim-participant-super-event.html',
+    animation: { format: 'vertical', mp4: '/animations/anim-participant-super-event.mp4', courte: '/animations/anim-participant-super-event-courte.mp4', poster: '/animations/anim-participant-super-event.jpg', pret: true },
+    message: 'Bonjour, une courte vidéo pour comprendre Flowin :' },
+  { statut: 'validé', archive: true, id: 'anim-organisateur', titre: 'Archive v22 · Animation organisateur', public: ['organisateur'], type: 'animation', suivi: true, canalDefaut: 'video-organisateur',
+    description: 'Vidéo de présentation pour les organisateurs de festival.',
+    chemin: '/animations/anim-organisateur.html',
+    animation: { format: 'vertical', mp4: '/animations/anim-organisateur.mp4', courte: '/animations/anim-organisateur-courte.mp4', poster: '/animations/anim-organisateur.jpg', pret: true },
+    message: 'Bonjour, une courte vidéo pour comprendre Flowin :' },
+  { statut: 'validé', archive: true, id: 'anim-commerces-sponsors', titre: 'Archive v22 · Animation commerces et sponsors (rejoindre un super event)', public: ['partenaire'], type: 'animation', suivi: true, canalDefaut: 'video-partenaire-se',
+    description: 'Vidéo de présentation pour les commerces et sponsors qui rejoignent un super event.',
+    chemin: '/animations/anim-commerces-sponsors.html',
+    animation: { format: 'vertical', mp4: '/animations/anim-commerces-sponsors.mp4', courte: '/animations/anim-commerces-sponsors-courte.mp4', poster: '/animations/anim-commerces-sponsors.jpg', pret: true },
+    message: 'Bonjour, une courte vidéo pour comprendre Flowin :' },
 ]
 
 /** Lien de production complet (jamais d'URL de preview). */
