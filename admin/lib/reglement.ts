@@ -9,9 +9,13 @@ export const REGLEMENT = {
 }
 
 export const OFFRES_ANIMATION = [
-  { cle: 'mensuelle', nom: 'Mensuelle', prix: '110 € HT / mois', detail: 'Engagement 3 mois minimum' },
-  { cle: 'annuelle', nom: 'Annuelle', prix: '990 € HT / an', detail: 'Engagement 12 mois' },
+  { cle: 'lancement', nom: 'Première année', prix: '445 € HT la 1re année', detail: 'Offre de lancement -50 %, puis 990 € HT / an' },
+  { cle: 'annuelle', nom: 'Annuelle', prix: '990 € HT / an', detail: 'Reconduction tacite, résiliable' },
+  { cle: 'mensuelle', nom: 'Mensuelle', prix: '110 € HT / mois', detail: 'Prélèvement SEPA, résiliable' },
 ] as const
+
+/** Option : quiz et questions bonus rédigés par Flowin (30 + 5), -50 % la première année. */
+export const OPTION_QUIZ_FLOWIN = { nom: 'Quiz rédigés par Flowin', detail: '30 questions quiz + 5 questions bonus', prix: 145, prixLancement: 72.5 }
 
 export type CleOffreAnimation = typeof OFFRES_ANIMATION[number]['cle']
 

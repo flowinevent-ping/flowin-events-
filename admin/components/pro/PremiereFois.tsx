@@ -580,17 +580,17 @@ export default function PremiereFois() {
             {fin.degrade && <div className="pf-aide">Certaines informations (forme juridique, produits, points de vente) seront complétées dans votre profil.</div>}
             <div className="pf-suite">
               <div className="pf-suite-l"><span className="pf-ic">✓</span><span><b>Inscription</b> : faite</span></div>
-              <div className="pf-suite-l"><span className="pf-ic">2</span><span><b>Offre, contrat et paiement</b> : votre bon de commande est pré-rempli</span></div>
+              <div className="pf-suite-l"><span className="pf-ic">2</span><span><b>Publiez votre animation</b> : l’offre et le règlement arrivent au moment de publier</span></div>
               <div className="pf-suite-l"><span className="pf-ic">3</span><span><b>Espace pro</b> : vos animations, vos lots, vos contacts</span></div>
             </div>
             <div className="pf-row" style={{ justifyContent: 'center', marginTop: 16 }}>
               {retour && (
                 <a className="pf-btn pf-grand" href={fin.session ? retour : `/pro/connexion?retour=${encodeURIComponent(retour)}`}>Reprendre ma demande pour le super event</a>
               )}
-              <a className={retour ? 'pf-btn2' : 'pf-btn pf-grand'} href={`/bon-commande-animation.html${selection ? `?${selection}` : ''}`}>Choisir mon offre et signer</a>
               {fin.session
-                ? <a className="pf-btn2" href={`/pro?pro=${encodeURIComponent(fin.proId)}&bienvenue=1`}>Plus tard : entrer dans mon espace pro</a>
-                : <a className="pf-btn2" href="/pro/connexion">Plus tard : me connecter</a>}
+                ? <a className={retour ? 'pf-btn2' : 'pf-btn pf-grand'} href={`/pro?pro=${encodeURIComponent(fin.proId)}&bienvenue=1`}>Entrer dans mon espace pro</a>
+                : <a className={retour ? 'pf-btn2' : 'pf-btn pf-grand'} href="/pro/connexion">Me connecter</a>}
+              <a className="pf-btn2" href="/validation/plaquette-animation-v3.html#offres">Découvrir nos offres</a>
             </div>
           </div>
         </main>

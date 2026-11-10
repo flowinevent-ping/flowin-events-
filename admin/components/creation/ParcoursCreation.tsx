@@ -325,7 +325,7 @@ export default function ParcoursCreation({ mode = 'pro', pro, banques, supers, p
   const diffQr = false /* remplace par les QR traces crees ci-dessous (lot QR) */
   const [qrBrouillons, setQrBrouillons] = useState<{ nom: string; support: string; type: TypeQr }[]>([])
   const [offre, setOffre] = useState('')
-  const [offreAnim, setOffreAnim] = useState<CleOffreAnimation>('annuelle')
+  const [offreAnim, setOffreAnim] = useState<CleOffreAnimation>('lancement')
   /* Tarifs : grille a cocher (3 packs de nds-partenaire.html), pour PRESELECTIONNER la demande. Aucun prix invente, rien n'est facture. */
   const [packChoisi, setPackChoisi] = useState<string | null>(null)
   const packsSE = packsPourSuperEvent(se)
