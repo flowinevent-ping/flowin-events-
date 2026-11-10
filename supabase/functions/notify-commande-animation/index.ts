@@ -32,8 +32,9 @@ import { emailAccuse, emailDocuments, emailFlowin, emailMensualite, esc, eur, pd
 
 const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY") || "";
 const NOTIFY_TO = Deno.env.get("NOTIFY_TO") || "flowinevent@gmail.com";
-// Décision Romain (10/11/2026) : aucun email aux clients pour l'instant. Tout email destiné à un client
-// est redirigé vers Flowin (NOTIFY_TO + flowinevent@gmail.com), sujet préfixé. ENVOI_CLIENT=oui pour réactiver.
+// Règle de Romain (10/11/2026) : bon de commande édité depuis le SUPER ADMIN (champ « commercial » rempli,
+// vente assistée) -> envoyé au pro. Rempli depuis la PLAQUETTE (pas de commercial) -> envoyé à Flowin, objet
+// au nom du commerce, Flowin le transmet ensuite depuis le super admin. ENVOI_CLIENT=oui : toujours au pro.
 const ENVOI_CLIENT = (Deno.env.get("ENVOI_CLIENT") || "") === "oui";
 const DEST_FLOWIN = Array.from(new Set([NOTIFY_TO, "flowinevent@gmail.com"]));
 const NOTIFY_FROM = Deno.env.get("NOTIFY_FROM") || "Flowin <onboarding@resend.dev>";
@@ -61,10 +62,10 @@ async function facture(filtre: string): Promise<Facture | null> {
 function b64(buf: ArrayBuffer): string {
   const u = new Uint8Array(buf); let s = ""; for (let i = 0; i < u.length; i += 0x8000) s += String.fromCharCode(...u.subarray(i, i + 0x8000)); return btoa(s);
 }
-async function envoyer(to: string, m: { sujet: string; html: string }, pj: Array<{ filename: string; content: string }> = []): Promise<string> {
+async function envoyer(to: string, m: { sujet: string; html: string }, pj: Array<{ filename: string; content: string }> = [], r?: Commande): Promise<string> {
   let dest = [to];
   if (to === NOTIFY_TO) dest = DEST_FLOWIN;
-  else if (!ENVOI_CLIENT) { dest = DEST_FLOWIN; m = { sujet: `[Non envoyé au client ${to}] ${m.sujet}`, html: m.html }; }
+  else if (!ENVOI_CLIENT && !(r && r.commercial)) { dest = DEST_FLOWIN; m = { sujet: `[${(r && (r.enseigne || r.raison_sociale)) || to}] ${m.sujet} (à transmettre au pro : ${to})`, html: m.html }; }
   const r = await fetch("https://api.resend.com/emails", {
     method: "POST", headers: { Authorization: `Bearer ${RESEND_API_KEY}`, "Content-Type": "application/json" },
     body: JSON.stringify({ from: NOTIFY_FROM, to: dest, subject: m.sujet, html: m.html, attachments: pj.length ? pj : undefined }),
@@ -90,7 +91,7 @@ async function documents(id: string, force: boolean): Promise<Response> {
     const resend = await envoyer(String(r.email), emailDocuments(r, f), [
       { filename: `contrat-flowin-${r.id}.pdf`, content: b64(pdfContrat(jsPDF, r)) },
       { filename: `facture-${f.numero}.pdf`, content: b64(pdfFacture(jsPDF, f)) },
-    ]);
+    ], r);
     await rpc("terminer_envoi_documents", { p_commande: id, p_ok: true, p_details: { resend, facture: f.numero, renvoi: force } });
     return json({ ok: true, facture: f.numero });
   } catch (e) {
@@ -121,12 +122,12 @@ Deno.serve(async (req: Request): Promise<Response> => {
       const id = String(p.record?.id ?? ""); if (!id) return json({ error: "no record" }, 422);
       const r = await commande(id); if (!r) return json({ error: "commande introuvable" }, 404);   // relue en base : on n'envoie pas ce que l'appelant affirme
       await envoyer(NOTIFY_TO, emailFlowin(r, type, p.ancien_statut));
-      if (type === "nouvelle_commande") {
+      if (type === "nouvelle_commande" && r.commercial) {
         const deja = await rest(`commandes_animation?id=eq.${encodeURIComponent(id)}&accuse_envoye_le=is.null&select=id`, {
           method: "PATCH", headers: { Prefer: "return=representation" }, body: JSON.stringify({ accuse_envoye_le: new Date().toISOString() }),
         });
         if (deja?.length) {
-          await envoyer(String(r.email), emailAccuse(r), [{ filename: `bon-commande-flowin-${r.id}.pdf`, content: b64(pdfContrat(jsPDF, r)) }]);
+          await envoyer(String(r.email), emailAccuse(r), [{ filename: `bon-commande-flowin-${r.id}.pdf`, content: b64(pdfContrat(jsPDF, r)) }], r);
           await rest("commandes_animation_journal", { method: "POST", body: JSON.stringify({ commande_id: id, par: "fonction notify-commande-animation", action: "accuse_envoye" }) });
         }
       }
@@ -146,7 +147,7 @@ Deno.serve(async (req: Request): Promise<Response> => {
       const id = String(p.commande_id ?? ""), num = String(p.facture_numero ?? "");
       const r = await commande(id); const f = await facture(`numero=eq.${encodeURIComponent(num)}&commande_id=eq.${encodeURIComponent(id)}`);
       if (!r || !f) return json({ error: "introuvable" }, 404);
-      await envoyer(String(r.email), emailMensualite(r, f), [{ filename: `facture-${f.numero}.pdf`, content: b64(pdfFacture(jsPDF, f)) }]);
+      await envoyer(String(r.email), emailMensualite(r, f), [{ filename: `facture-${f.numero}.pdf`, content: b64(pdfFacture(jsPDF, f)) }], r);
       return json({ ok: true });
     }
     return json({ error: "type inconnu" }, 422);
