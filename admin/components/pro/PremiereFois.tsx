@@ -251,7 +251,7 @@ export default function PremiereFois() {
     } else {
       /* 10/11 : une ancienne session (autre pro) ne doit jamais survivre à une nouvelle inscription. */
       try { const { data: ss } = await supabase.auth.getSession(); if (ss.session && ss.session.user.email?.toLowerCase() !== adresse.toLowerCase()) await supabase.auth.signOut() } catch { /* rien */ }
-      const { data: authData, error: authErr } = await supabase.auth.signUp({ email: adresse, password: fiche.motdepasse })
+      const { data: authData, error: authErr } = await supabase.auth.signUp({ email: adresse, password: fiche.motdepasse, options: { emailRedirectTo: `${typeof window !== 'undefined' ? window.location.origin : 'https://flowin-events.vercel.app'}/pro/connexion` } })
       if (authErr || !authData.user) {
         setErreur(messageAuth(authErr)); setEnvoi('error'); return
       }

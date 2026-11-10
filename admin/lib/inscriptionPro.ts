@@ -29,7 +29,7 @@ export async function inscrirePro(
     const { data: s } = await supabase.auth.getSession()
     aSession = !!s.session
   } else {
-    const { data: authData, error: authErr } = await supabase.auth.signUp({ email: adresse, password: fiche.motdepasse })
+    const { data: authData, error: authErr } = await supabase.auth.signUp({ email: adresse, password: fiche.motdepasse, options: { emailRedirectTo: `${typeof window !== 'undefined' ? window.location.origin : 'https://flowin-events.vercel.app'}/pro/connexion` } })
     if (authErr || !authData.user) return { ok: false, erreur: messageAuth(authErr) }
     if (Array.isArray(authData.user.identities) && authData.user.identities.length === 0) {
       const { data: conn, error: connErr } = await supabase.auth.signInWithPassword({ email: adresse, password: fiche.motdepasse })

@@ -86,3 +86,20 @@ Chaque lot : maquette ou captures avant / après sur la vraie app, validation, p
 ## Questions à Romain (réglées)
 1. Offre d'entrée : réglé, 445 € HT la première année.
 2. QR participant des films : réglé, la carte des commerces.
+
+## MÉGA BUG (10/11) — Flowin Révision branché sur le Supabase de Flowin Event
+- Constat (journaux d'authentification du projet « Flowin event » ywcqtupgoxfzkddqkztk) : des
+  inscriptions et connexions arrivent depuis **https://flowrevis.vercel.app** (l'application Flowin
+  Révision). Révision utilise donc la base et l'authentification de Flowin Event. L'email de
+  confirmation part de l'expéditeur par défaut Supabase (noreply@mail.app.supabase.io), avec le modèle
+  et l'adresse de site configurés pour Révision.
+- Un projet Supabase dédié existe pourtant : **flowin-revision** (moloagrmhrptbhodwwob).
+- Correctif côté Flowin Event (fait) : l'inscription précise l'adresse de retour
+  `flowin-events.vercel.app/pro/connexion`.
+- **À faire par Romain (tableau de bord, je n'y ai pas accès)** :
+  1. Projet Vercel de Révision : variables NEXT_PUBLIC_SUPABASE_URL / clé → projet flowin-revision.
+  2. Projet Supabase « Flowin event » > Authentication > URL Configuration : Site URL =
+     https://flowin-events.vercel.app ; Redirect URLs : flowin-events.vercel.app/** (retirer flowrevis).
+  3. Authentication > Email Templates : textes Flowin Event (confirmation, mot de passe oublié).
+  4. Authentication > SMTP : expéditeur Resend Flowin Event.
+  5. Comptes créés depuis Révision dans la base Flowin Event : à identifier et nettoyer (avec accord).
