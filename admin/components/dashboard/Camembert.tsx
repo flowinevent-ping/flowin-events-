@@ -6,7 +6,7 @@
  */
 export interface PartCamembert { valeur: string; n: number; id?: string }
 
-const PALETTE = ['#7C2D92', '#E0218A', '#F5A100', '#1D9E75', '#378ADD', '#cfc4d8', '#9d4edd', '#ff8fab']
+const PALETTE = ['#3B5CC4', '#C2410C', '#F5A100', '#1D9E75', '#0E7490', '#94A3B8', '#2B47A8', '#FB923C']  // sans violet (décision Romain)
 
 export function Camembert({
   titre, parts, total, unite = '', onSlice, palette = PALETTE,
