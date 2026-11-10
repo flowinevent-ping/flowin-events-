@@ -293,3 +293,6 @@ que sur instruction explicite de Romain.
   dans le super admin. **Email uniquement pour une relance.**
 - Durée de validité ; rappels **1 mois, 15 jours, 48 h** avant expiration.
 - **« En faire profiter un ami »** : envoyer le ticket à un ami (effet cadeau).
+
+## Exception Nuits du Sud 2026 (Romain, 10/11/2026)
+- Pas de date de péremption ni de refus en caisse pour les tickets Nuits du Sud 2026 (se-nds-2026), pour l'instant. Appliqué en base (date_limite_tirage renvoie null pour se-nds-2026).
