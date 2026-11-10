@@ -36,7 +36,7 @@
     var nb = Math.max(1, Math.min(200, parseInt(c.nb, 10) || 1)), quiz = Math.max(0, parseInt(c.quiz, 10) || 0), bonus = Math.max(0, parseInt(c.bonus, 10) || 0);
     var lignes = [], abo = c.offre === 'mensuelle' ? PRIX.mensuelle : (c.offre === 'lancement' ? PRIX.lancement : PRIX.annuelle);
     if (c.offre === 'mensuelle') lignes.push({ lib: NOM_OFFRE.mensuelle + ', 1er mois', det: 'Prélèvement SEPA, reconduction tacite chaque mois, résiliable (CGV art. 6)', q: 1, ht: abo });
-    else if (c.offre === 'lancement') lignes.push({ lib: NOM_OFFRE.lancement, det: 'Première année à moitié prix, puis ' + eur(PRIX.annuelle) + ' HT par an ou ' + eur(PRIX.mensuelle) + ' HT par mois, reconduction tacite', q: 1, ht: abo });
+    else if (c.offre === 'lancement') lignes.push({ lib: NOM_OFFRE.lancement, det: 'Votre premiere annee a -50 %, engagement 12 mois', q: 1, ht: abo });
     else lignes.push({ lib: NOM_OFFRE.annuelle, det: 'Quiz, roue, tombola, tirages, billets, stock, relances, mesure par support. Engagement 12 mois', q: 1, ht: abo });
     var kitHt = c.kit === 'physique' ? PRIX.kitPhysique * nb : 0;
     if (c.kit === 'physique') lignes.push({ lib: 'Kit physique imprimé', det: 'Par boutique : 1 support de caisse, 3 affiches A4, 3 macarons autocollants, ' + eur(PRIX.kitPhysique) + ' HT', q: nb, ht: kitHt });
@@ -125,11 +125,11 @@
       T('SATISFAIT OU REMBOURSE', x, y, 7.5, 'bold', teal); y += 5;
       y = wrap('Offre premiers adherents, formule annuelle : objectif de ' + (rec.garantie_clients_objectif || '-') + ' clients venus retirer leur lot en boutique sur 12 mois, avec au moins 4 animations (panier moyen declare : ' + (rec.panier_moyen ? eur(rec.panier_moyen) : '-') + ', flux journalier : ' + (rec.flux_journalier || '-') + '), donnees certifiees par ' + (rec.garantie_certifiee_par || '-') + ' le ' + (rec.garantie_certifiee_le ? fmtDateHeure(new Date(rec.garantie_certifiee_le)) : '-') + ', non modifiables. Conditions dans les CGV.', x, y, 8.5, ink, CW, 4.2) + 3;
     }
-    T('SIGNATURE ELECTRONIQUE', x, y, 7.5, 'bold', teal); y += 5;
+    T('VALIDATION EN LIGNE', x, y, 7.5, 'bold', teal); y += 5;
     if (signe) {
-      y = wrap('Signe electroniquement par ' + rec.signataire_nom + (rec.signataire_qualite ? ' (' + rec.signataire_qualite + ')' : '') + ' pour ' + rec.raison_sociale + ', le ' + fmtDateHeure(quand) + (rec.signature_horodatage ? ' (horodatage serveur)' : '') + (rec.signature_ip ? ', adresse IP ' + rec.signature_ip : '') + '. Case "Je signe electroniquement ce bon de commande" cochee ; CGV Flowin Animation acceptees (version ' + rec.cgv_version + ').', x, y, 8.5, ink, CW, 4.2);
+      y = wrap('Bon de commande valide en ligne par ' + rec.signataire_nom + (rec.signataire_qualite ? ' (' + rec.signataire_qualite + ')' : '') + ' pour ' + rec.raison_sociale + ', le ' + fmtDateHeure(quand) + (rec.signature_horodatage ? ' (horodatage serveur)' : '') + (rec.signature_ip ? ', adresse IP ' + rec.signature_ip : '') + '. Case "Je valide mon bon de commande" cochee ; CGV Flowin Animation acceptees (version ' + rec.cgv_version + ').', x, y, 8.5, ink, CW, 4.2);
     } else {
-      y = wrap('Document non signe (brouillon). La commande est formee a la signature electronique en ligne.', x, y, 8.5, mut, CW, 4.2);
+      y = wrap('Brouillon non valide. La commande est formee a la validation en ligne du bon de commande.', x, y, 8.5, mut, CW, 4.2);
     }
     y += 4;
     wrap('Conditions generales de vente Flowin, jeu d\'animation consultables sur flowin-events.vercel.app/cgv-animation-magasin.html. Les lots mis en jeu sont fournis par le client. Duree et renouvellement selon les CGV.', x, y, 7.5, mut, CW, 3.6);

@@ -42,11 +42,13 @@ export const lienQr = (eventId: string, module: string | null | undefined, sourc
 /** Pastille « permanent » : le QR ne change pas si on change de jeu. */
 export function BadgePermanent({ q }: { q: QrTrace }) {
   const ok = estPermanent(q)
+  /* Romain (10/11/2026) : aucune étiquette « ancien format » visible ; seuls les QR permanents portent une pastille. */
+  if (!ok) return null
   return (
     <span title={ok ? 'Le QR ne contient pas le jeu : vous pouvez changer de jeu sans le réimprimer.' : 'Le lien contient le jeu : ce QR changerait si vous changiez de jeu.'}
       style={{ fontSize: 10, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '.04em', padding: '2px 7px', borderRadius: 99, whiteSpace: 'nowrap',
         background: ok ? 'rgba(59,92,196,.1)' : 'rgba(245,158,11,.14)', color: ok ? '#3B5CC4' : '#B45309' }}>
-      {ok ? 'Permanent' : 'Ancien format'}
+      Permanent
     </span>
   )
 }
@@ -104,9 +106,11 @@ export function FormulaireQr({ onAjouter, occupe, libelle = '+ Créer le QR' }: 
 }
 
 /** Liste + creation des QR d un event. `grille` : tuiles (fin de creation). */
-export default function QrTraces({ eventId, module, titre, mode, grille = false, recharge = 0 }: {
+export default function QrTraces({ eventId, module, titre, mode, grille = false, recharge = 0, sansAjout = false }: {
   eventId: string; module: string | null | undefined; titre: string; mode: 'pro' | 'sa'
   grille?: boolean
+  /** Grille sans le formulaire « Ajouter un QR » (écran final de publication en carrousel). */
+  sansAjout?: boolean
   /** Incrementer pour forcer un rechargement (QR crees par l appelant). */
   recharge?: number
 }) {
@@ -167,13 +171,15 @@ export default function QrTraces({ eventId, module, titre, mode, grille = false,
                 <span style={{ fontSize: 13.5, fontWeight: 800 }}>{q.nom}</span><BadgeTypeQr type={q.type} />{jeu !== 'nds2026' && <BadgePermanent q={q} />}
               </div>
               <div style={{ fontSize: 11.5, color: MUT, margin: '3px 0 10px', lineHeight: 1.4 }}>{q.support ?? ''}{q.support ? ' · ' : ''}{REGLE_TYPE_QR[q.type]}</div>
-              <Diffusion compact url={urlDuQr(q, eventId, jeu)} titre={titre} qrNom={q.nom} support={q.support} code={q.code_court} ancienFormat={!estPermanent(q) && jeu !== 'nds2026'} sousTitre="Scannez pour jouer" />
+              <Diffusion compact url={urlDuQr(q, eventId, jeu)} titre={titre} qrNom={q.nom} support={q.support} code={q.code_court} ancienFormat={false} sousTitre="Scannez pour jouer" />
             </div>
           ))}
         </div>
+        {!sansAjout && <>
         <div style={{ fontSize: 13, fontWeight: 800, marginBottom: 6 }}>Ajouter un QR</div>
         <FormulaireQr onAjouter={ajouter} occupe={occupe} />
         {erreur && <div style={{ fontSize: 12, color: '#B45309', fontWeight: 700, marginTop: 6 }}>{erreur}</div>}
+        </>}
       </div>
     )
   }
@@ -208,7 +214,7 @@ export default function QrTraces({ eventId, module, titre, mode, grille = false,
             </div>
             {ouvert === cle && (
               <div style={{ padding: '10px 0 4px' }}>
-                <Diffusion compact url={url} titre={titre} qrNom={q.nom} support={q.support} code={q.code_court} ancienFormat={!estPermanent(q) && jeu !== 'nds2026'} sousTitre="Scannez pour jouer" />
+                <Diffusion compact url={url} titre={titre} qrNom={q.nom} support={q.support} code={q.code_court} ancienFormat={false} sousTitre="Scannez pour jouer" />
               </div>
             )}
           </div>

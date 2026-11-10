@@ -37,7 +37,8 @@
  * + se_lots, crm_retours (demandes adressees a Flowin). Aucune table nouvelle.
  */
 
-import { REGLEMENT, OFFRES_ANIMATION, OPTION_QUIZ_FLOWIN, OPTION_CUSTOMISATION, DELAI_CONTROLE_PAIEMENT, lienBonCommande, referenceVirement, type CleOffreAnimation } from '@/lib/reglement'
+import { REGLEMENT, OFFRES_ANIMATION, OPTION_QUIZ_FLOWIN, OPTION_CUSTOMISATION, lienBonCommande, referenceVirement, prixOptionQuiz, PAIEMENT_ACTIF, type CleOffreAnimation } from '@/lib/reglement'
+import { NavCarrousel, useGlisser } from '@/components/pro/Carrousel'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { supabase, supabasePublic } from '@/lib/supabase'
 import { creerAnimation, enregistrerDemandeQuiz, enregistrerDemandeSuperEvent } from '@/lib/pro'
@@ -152,7 +153,10 @@ export const PC_CSS = `.nop-carte{position:relative;overflow:hidden;display:flex
   .pc-grille{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:26px;align-items:start}
   @media (max-width:1020px){.pc-grille{grid-template-columns:minmax(0,1fr)}}
   .pc-qr{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
-  @media (max-width:720px){.pc-qr{grid-template-columns:1fr}}
+  /* Mobile : QR en carrousel horizontal (un QR par écran, glisser), pas en colonne à faire défiler. */
+  @media (max-width:720px){.pc-qr{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;gap:10px;scrollbar-width:none}.pc-qr::-webkit-scrollbar{display:none}.pc-qr > .pc-qr-tuile{flex:0 0 86%;scroll-snap-align:center}}
+  .pc-apercu-fin{display:none}
+  .pc-grille.pc-grille-fin{grid-template-columns:minmax(0,760px)}
   .pc-qr-tuile{background:#fff;border:1.5px solid ${C.bordure};border-radius:16px;padding:16px;text-align:center}
   .pc-aide{display:flex;align-items:center;gap:14px;background:#fff;border:1.5px solid ${C.bordure};border-radius:16px;padding:16px 18px;margin-top:22px;flex-wrap:wrap}
   .pc-aide .ico{width:42px;height:42px;border-radius:12px;background:rgba(14,165,233,.1);color:#0EA5E9;display:flex;align-items:center;justify-content:center;flex-shrink:0}
@@ -331,6 +335,10 @@ export default function ParcoursCreation({ mode = 'pro', pro, banques, supers, p
   const [optCustom, setOptCustom] = useState(false)
   /* Pro (pas SA) qui publie une animation : commande + paiement avant la mise en ligne */
   const avecCommande = !sa && !rejoindre && !estSuper
+  /* Paiement en attente pendant les tests (lib/reglement PAIEMENT_ACTIF) : publication directe, sans bon de commande. */
+  const commande = avecCommande && PAIEMENT_ACTIF
+  /* Logo obligatoire avant publication (Romain, 10/11/2026) : billets gagnants et jeu à ses couleurs. */
+  const logoManquant = avecCommande && !logoCommerce
   /* Tarifs : grille a cocher (3 packs de nds-partenaire.html), pour PRESELECTIONNER la demande. Aucun prix invente, rien n'est facture. */
   const [packChoisi, setPackChoisi] = useState<string | null>(null)
   const packsSE = packsPourSuperEvent(se)
@@ -344,6 +352,10 @@ export default function ParcoursCreation({ mode = 'pro', pro, banques, supers, p
   const [envoi, setEnvoi] = useState<'' | 'envoi' | 'echec'>('')
   /* Le motif de blocage de l ecran final ne s affiche qu apres un clic. */
   const [tenteFin, setTenteFin] = useState(false)
+  /* Publication en carrousel (10/11/2026, Romain) : un écran par idée (diffusion, QR, offre, option, récapitulatif). */
+  const [ecranFin, setEcranFin] = useState(0)
+  const [ecranFait, setEcranFait] = useState(0)
+  const glisserFin = useGlisser(sens => setEcranFin(k => Math.max(0, k + sens)))
   const [tenteEtape, setTenteEtape] = useState<Record<string, boolean>>({})
   const [erreur, setErreur] = useState('')
   const [fait, setFait] = useState<{ eventId: string | null; superId: string | null; info?: string } | null>(null)
@@ -514,6 +526,23 @@ export default function ParcoursCreation({ mode = 'pro', pro, banques, supers, p
   }
   const aUnInstant = !estSuper && !rejoindre && module_ !== 'spin' && lotsNommes.some(l => l.type === 'instantane')
 
+  /* Logo du commerce, ajouté à la publication s'il manque au profil : repris dans le jeu (cfg.logoUrl) et sur le billet. */
+  const [logoEnvoi, setLogoEnvoi] = useState('')
+  async function onLogoCommerce(e: React.ChangeEvent<HTMLInputElement>) {
+    const fichier = e.target.files?.[0]
+    e.target.value = ''
+    if (!fichier) return
+    setLogoEnvoi('envoi')
+    const redim = await redimensionnerImage(fichier).catch(() => fichier)
+    const res = await uploaderLogo(redim, `pros/${p.id || 'nouveau'}`)
+    if ('erreur' in res) { setLogoEnvoi(res.erreur); return }
+    setLogoEnvoi(''); setLogoCommerce(res.url)
+    /* Même stockage que « Mon profil » (EntrepriseForm : partenaires.image_url) : le billet gagnant le reprend. */
+    if (p.partenaire_id) {
+      const r = await supabase.from('partenaires').update({ image_url: res.url }).eq('id', p.partenaire_id)
+      if (r.error) setLogoEnvoi('Logo ajouté au jeu, mais pas encore à votre profil : réessayez depuis Mon profil.')
+    }
+  }
   async function onFichierLogo(e: React.ChangeEvent<HTMLInputElement>) {
     const fichier = e.target.files?.[0]
     e.target.value = ''
@@ -657,7 +686,7 @@ export default function ParcoursCreation({ mode = 'pro', pro, banques, supers, p
       diffusionPhysique: diffPhysique, diffusionDigital: diffDigital, diffusionQrTracking: diffQr,
       /* Lot A : le pro publie -> animation enregistree en attente de paiement (status 'pending'),
          mise en ligne a la declaration du virement sur le bon de commande. Le SA cree sans paiement. */
-      paiement: avecCommande ? { offre: offreAnim, quizFlowin: optQuizFlowin, customisation: optCustom } : undefined,
+      paiement: commande ? { offre: offreAnim, quizFlowin: optQuizFlowin, customisation: optCustom } : undefined,
     })
     if (!r.ok) { setEnvoi('echec'); setErreur(r.error ?? ''); return }
     const infoQr = r.eventId ? await enregistrerQr(r.eventId) : ''
@@ -731,13 +760,23 @@ export default function ParcoursCreation({ mode = 'pro', pro, banques, supers, p
       lotsNommes.length ? `À gagner : ${lotsNommes.map(l => l.nom.trim()).join(', ')}.` : '',
       lien ? `Participez ici : ${lien}` : '', '', 'À très vite !',
     ].filter((x, i, a) => x !== '' || a[i - 1] !== '').join('\n')
-    const titreFin = rejoindre ? (sa ? 'Station créée' : 'Demande envoyée') : estSuper ? 'Super event créé' : avecCommande ? 'Animation enregistrée' : 'Animation créée'
+    const titreFin = rejoindre ? (sa ? 'Station créée' : 'Demande envoyée') : estSuper ? 'Super event créé' : commande ? 'Animation enregistrée' : avecCommande ? 'Votre jeu est en ligne' : 'Animation créée'
+    /* Écran final d'une animation pro : carrousel (bon de commande, QR, annonce). */
+    const carFait = avecCommande && !!fait.eventId
+    const ecransFait = [...(commande ? ['bon'] : []), ...(lien ? ['qr', 'annonce'] : [])]
+    const iFait = Math.min(ecranFait, ecransFait.length - 1)
+    const montreFait = (k: string) => !carFait || ecransFait[iFait] === k
+    const offreFait = OFFRES_ANIMATION.find(x => x.cle === offreAnim) || OFFRES_ANIMATION[0]
     /* Bon de commande pre-rempli : coordonnees du compte via le stockage local du site (meme cle que « Ma premiere fois »), jamais par l'adresse. */
     const ouvrirBon = () => {
       try {
         window.localStorage.setItem('flowin_am_prefill', JSON.stringify({
           raison: p.nom || '', adresse: p.adresse || '', cp: p.code_postal || '', ville: p.ville || '',
           contact: p.contact || '', email: p.email || '', tel: p.tel || '', pro_id: p.id,
+          /* Bon de commande réduit aux champs utiles (Romain, 10/11/2026) : activité, lots et conditions repris du jeu configuré. */
+          activite: p.secteur || '',
+          lots: lotsNommes.map(l => `${l.nom.trim()}${Number(l.quantite) > 1 ? ` × ${l.quantite}` : ''}`).join(', '),
+          conditions_lots: Array.from(new Set(lotsNommes.map(l => l.conditions.trim()).filter(Boolean))).join(' ; '),
         }))
       } catch { /* stockage indisponible : le bon reprend la fiche du compte connecte */ }
     }
@@ -749,17 +788,19 @@ export default function ParcoursCreation({ mode = 'pro', pro, banques, supers, p
       /* lib/pro.ts creerAnimation : l event est enregistre et jouable tout de
          suite ; seule la DIFFUSION demandee (QR imprime, reseaux) attend Flowin
          (cfg.diffusion_demandee.statut = 'en_attente_sa'). */
-      : sa ? `Animation créée pour ${p.nom ?? 'le pro'}.` : 'Votre animation est enregistrée, en attente de paiement : elle passe en ligne dès que vous déclarez votre virement sur le bon de commande.'
+      : sa ? `Animation créée pour ${p.nom ?? 'le pro'}.` : commande ? 'Elle passe en ligne dès votre virement déclaré.' : 'Vos clients peuvent jouer.'
     return (
       <div style={{ maxWidth: 820 }}>
         <style dangerouslySetInnerHTML={{ __html: PC_CSS }} />
         <div style={{ ...CARD, padding: 0, overflow: 'hidden' }}>
-          <div style={{ background: `linear-gradient(180deg,${C.accent},${C.accentFonce})`, color: '#fff', padding: '26px 24px', position: 'relative', textAlign: 'center' }}>
+          {(!carFait || iFait === 0) && (
+          <div style={{ background: `linear-gradient(180deg,${C.accent},${C.accentFonce})`, color: '#fff', padding: carFait ? '12px 16px' : '26px 24px', position: 'relative', textAlign: 'center' }}>
             <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 4, background: C.filet }} />
             <div style={{ fontSize: 22, fontWeight: 800 }}>{titreFin}</div>
-            <div style={{ fontSize: 13.5, opacity: 0.9, marginTop: 4 }}>{sousTitreFin}</div>
+            <div style={{ fontSize: 13.5, opacity: 0.9, marginTop: 4, display: carFait && !commande ? 'none' : undefined }}>{sousTitreFin}</div>
           </div>
-          <div style={{ padding: 22 }}>
+          )}
+          <div style={{ padding: carFait ? 12 : 22 }}>
             {fait.info && <div style={{ fontSize: 13, color: '#B45309', fontWeight: 700, marginBottom: 14 }}>{fait.info}</div>}
             {rejoindre && visiteur && (
               <div data-compte-cree role="status" style={{ fontSize: 13, color: '#15803D', fontWeight: 700, marginBottom: 14, lineHeight: 1.5 }}>
@@ -792,28 +833,29 @@ export default function ParcoursCreation({ mode = 'pro', pro, banques, supers, p
                 <div style={{ fontWeight: 800, wordBreak: 'break-all', color: C.accent }}>{BASE}/rejoindre/{fait.superId}</div>
               </div>
             )}
-            {avecCommande && fait.eventId && (
-              <div data-virement data-attente-paiement style={{ border: `1.5px solid ${C.accent}`, borderRadius: 14, padding: '12px 14px', marginBottom: 16, background: '#fff', fontSize: 13.5, lineHeight: 1.6 }}>
-                <span style={{ display: 'inline-block', fontSize: 11.5, fontWeight: 800, letterSpacing: '.04em', textTransform: 'uppercase', background: '#FEF3C7', color: '#92400E', borderRadius: 999, padding: '3px 10px', marginBottom: 6 }}>En attente de paiement</span>
-                <b style={{ display: 'block', fontSize: 15 }}>Dernière étape : votre bon de commande</b>
-                Offre {(OFFRES_ANIMATION.find(x => x.cle === offreAnim) || OFFRES_ANIMATION[0]).nom.toLowerCase()} · {(OFFRES_ANIMATION.find(x => x.cle === offreAnim) || OFFRES_ANIMATION[0]).prix}
-                {optQuizFlowin && <> · {OPTION_QUIZ_FLOWIN.nom} {offreAnim === 'lancement' ? '72,50 € HT la 1re année' : '145 € HT'}</>}
-                {optCustom && <> · {OPTION_CUSTOMISATION.nom} : {OPTION_CUSTOMISATION.prix.toLowerCase()}</>}.<br />
-                Signez le bon pré-rempli, réglez par virement à {REGLEMENT.titulaire} (IBAN {REGLEMENT.iban} · BIC {REGLEMENT.bic}), puis déclarez le virement : l’animation passe en ligne, Flowin contrôle la réception sous {DELAI_CONTROLE_PAIEMENT}.
-                <div style={{ marginTop: 10 }}>
-                  <a data-signer-bon href={urlBon} onClick={ouvrirBon} style={{ ...BTN, display: 'inline-block', textDecoration: 'none' }}>Signer mon bon de commande →</a>
+            {carFait && montreFait('bon') && (
+              <div data-virement data-attente-paiement style={{ border: `1.5px solid ${C.accent}`, borderRadius: 14, padding: '14px 16px', marginBottom: 8, background: '#fff', fontSize: 14, lineHeight: 1.55 }}>
+                <span style={{ display: 'inline-block', fontSize: 11.5, fontWeight: 800, letterSpacing: '.04em', textTransform: 'uppercase', background: '#FEF3C7', color: '#92400E', borderRadius: 999, padding: '3px 10px', marginBottom: 8 }}>En attente de paiement</span>
+                <b style={{ display: 'block', fontSize: 17 }}>Dernière étape : votre bon de commande</b>
+                <div style={{ margin: '8px 0 2px' }}><b>{offreFait.nom}</b> · {offreFait.prix}</div>
+                {optQuizFlowin && <div>{OPTION_QUIZ_FLOWIN.nom} · {prixOptionQuiz(offreAnim)}</div>}
+                {optCustom && <div>{OPTION_CUSTOMISATION.nom} · {OPTION_CUSTOMISATION.prix.toLowerCase()}</div>}
+                <div style={{ ...MUTED, fontSize: 13, marginTop: 8 }}>Il est déjà rempli. Vous le validez, vous réglez par virement : votre jeu passe en ligne.</div>
+                <div style={{ marginTop: 12 }}>
+                  <a data-valider-bon href={urlBon} onClick={ouvrirBon} style={{ ...BTN, display: 'inline-block', textDecoration: 'none' }}>Valider mon bon de commande →</a>
                 </div>
               </div>
             )}
             {lien && (
               <>
-                <div style={{ fontSize: 15, fontWeight: 800, marginBottom: 4 }}>{avecCommande ? 'Vos QR tracés (actifs dès la mise en ligne)' : 'Le jeu est en ligne : vos QR tracés'}</div>
-                <div style={{ fontSize: 12.5, ...MUTED, marginBottom: 12, lineHeight: 1.5 }}>
-                  Même jeu, un QR par support : chaque QR est une station de jeu avec ses statistiques (onglet Trafic). Physique : 1 participation par jour ; digital : une seule fois par compte.
+                {montreFait('qr') && <>
+                <div style={{ fontSize: 15, fontWeight: 800, marginBottom: 4, display: carFait && !commande ? 'none' : undefined }}>{commande ? 'Vos QR (actifs dès la mise en ligne)' : avecCommande ? 'Vos QR' : 'Le jeu est en ligne : vos QR tracés'}</div>
+                <div style={{ fontSize: 12.5, ...MUTED, marginBottom: 12, lineHeight: 1.5, display: carFait ? 'none' : undefined }}>
+                  {carFait ? 'Un QR par support, avec ses statistiques.' : 'Même jeu, un QR par support : chaque QR est une station de jeu avec ses statistiques (onglet Trafic). Physique : 1 participation par jour ; digital : une seule fois par compte.'}
                 </div>
                 {fait.eventId && moduleActif && (
                   <div style={{ marginBottom: 18 }}>
-                    <QrTraces grille eventId={fait.eventId} module={moduleActif} titre={nomAffiche} mode={sa ? 'sa' : 'pro'} />
+                    <QrTraces grille sansAjout={carFait} eventId={fait.eventId} module={moduleActif} titre={nomAffiche} mode={sa ? 'sa' : 'pro'} />
                   </div>
                 )}
                 {aUnTirage && fait.eventId && (
@@ -822,7 +864,9 @@ export default function ParcoursCreation({ mode = 'pro', pro, banques, supers, p
                     {tirage.publier && <> La liste des gagnants sera publiée : <a href={lienListeGagnants(fait.eventId)} target="_blank" rel="noreferrer" style={{ color: C.accent, fontWeight: 700 }}>{BASE}{lienListeGagnants(fait.eventId)}</a></>}
                   </div>
                 )}
-                <div style={{ fontSize: 13, fontWeight: 800, margin: '18px 0 8px' }}>Le texte pour l’annoncer</div>
+                </>}
+                {montreFait('annonce') && <>
+                <div style={{ fontSize: 13, fontWeight: 800, margin: carFait ? '0 0 8px' : '18px 0 8px' }}>Le texte pour l’annoncer</div>
                 <textarea readOnly value={texte} style={{ ...CHAMP, minHeight: 150, resize: 'vertical' }} />
                 <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginTop: 10 }}>
                   <a style={{ ...BTN2, display: 'inline-block', textDecoration: 'none' }} target="_blank" rel="noreferrer"
@@ -830,10 +874,12 @@ export default function ParcoursCreation({ mode = 'pro', pro, banques, supers, p
                   <a style={{ ...BTN2, display: 'inline-block', textDecoration: 'none' }} target="_blank" rel="noreferrer" href={`https://wa.me/?text=${encodeURIComponent(texte)}`}>WhatsApp</a>
                   <button style={BTN2} onClick={() => navigator.clipboard?.writeText(texte)}>Copier (Instagram, SMS…)</button>
                 </div>
+                </>}
               </>
             )}
+            {carFait && ecransFait.length > 1 && <NavCarrousel n={ecransFait.length} i={iFait} setI={setEcranFait} />}
 
-            <BlocAide />
+            {!carFait && <BlocAide />}
 
             <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginTop: 22 }}>
               {sa ? (
@@ -963,7 +1009,7 @@ export default function ParcoursCreation({ mode = 'pro', pro, banques, supers, p
         <PastillesEtapes etapes={ETAPES} courante={etape - 1} onAller={i => aller(i + 1)} />
       </div>
 
-      <div className="pc-grille">
+      <div className={etape === FIN && avecCommande ? 'pc-grille pc-grille-fin' : 'pc-grille'}>
         <div style={CARD}>
 
           {/* ── 1. L'ANIMATION / LE SUPER EVENT ── */}
@@ -1302,9 +1348,17 @@ export default function ParcoursCreation({ mode = 'pro', pro, banques, supers, p
           {estSuper && etape === ETAPE_PROS && btnSuivant(FIN)}
 
           {/* ── FIN. DIFFUSION & RECAP ── */}
-          {etape === FIN && (
-            <>
-              <Titre t="Diffusion" s="Le QR et le lien du jeu sont créés automatiquement. Cochez ce que Flowin doit préparer en plus, et créez vos QR tracés." />
+          {etape === FIN && (() => {
+            /* Animation d'un pro : publication en carrousel. Les autres parcours gardent leur écran unique. */
+            const carFin = avecCommande
+            const ecransFin = ['diffusion', ...(qrPossibles ? ['qr'] : []), 'logo', ...(commande ? ['offres', 'options'] : []), 'recap']
+            const iFin = Math.min(ecranFin, ecransFin.length - 1)
+            const montre = (k: string) => !carFin || ecransFin[iFin] === k
+            const offreSel = OFFRES_ANIMATION.find(x => x.cle === offreAnim) || OFFRES_ANIMATION[0]
+            return (
+            <div {...(carFin ? glisserFin : {})} data-publication={carFin ? ecransFin[iFin] : undefined}>
+              {montre('diffusion') && <>
+              <Titre t="Diffusion" s={carFin ? 'Le QR et le lien du jeu sont créés pour vous. Flowin prépare en plus :' : 'Le QR et le lien du jeu sont créés automatiquement. Cochez ce que Flowin doit préparer en plus, et créez vos QR tracés.'} />
               {!estSuper && [
                 { v: diffPhysique, set: setDiffPhysique, t: 'QR code imprimé', s: 'Produit par Flowin, à afficher en magasin', i: 'shop' },
                 { v: diffDigital, set: setDiffDigital, t: 'Lien pour les réseaux', s: 'À coller dans les posts, emails et messages', i: 'instagram' },
@@ -1316,19 +1370,20 @@ export default function ParcoursCreation({ mode = 'pro', pro, banques, supers, p
                 </button>
               ))}
               {estSuper && <div style={{ fontSize: 13, ...MUTED, lineHeight: 1.5 }}>Chaque station reçoit son QR de jeu à la création ; le lien d’inscription des commerces est donné à la fin.</div>}
+              </>}
 
-              {qrPossibles && (
-                <div style={{ marginTop: 14, border: `1px solid ${C.bordure}`, borderRadius: 14, padding: 14, background: '#fff' }}>
-                  <div style={{ fontSize: 14, fontWeight: 800 }}>QR tracés — autant que vous voulez</div>
-                  <div style={{ fontSize: 12.5, ...MUTED, margin: '3px 0 10px', lineHeight: 1.5 }}>
-                    Un QR par support (vitrine, caisse, Facebook, Instagram…) : chacun est une station de jeu avec ses statistiques. Publiés dès la création, sans attente.
+              {qrPossibles && montre('qr') && (
+                <div style={{ marginTop: carFin ? 0 : 14, border: `1px solid ${C.bordure}`, borderRadius: 14, padding: 14, background: '#fff' }}>
+                  <div style={{ fontSize: carFin ? 18 : 14, fontWeight: 800 }}>{carFin ? 'Vos QR tracés' : 'QR tracés — autant que vous voulez'}</div>
+                  <div style={{ fontSize: 12.5, ...MUTED, margin: '3px 0 8px', lineHeight: 1.5, display: carFin ? 'none' : undefined }}>
+                    {carFin ? '' : 'Un QR par support (vitrine, caisse, Facebook, Instagram…) : chacun est une station de jeu avec ses statistiques. Publiés dès la création, sans attente.'}
                   </div>
                   {QR_PAR_DEFAUT.concat(qrBrouillons.map(q => ({ id: null, nom: q.nom, support: q.support, type: q.type, source_qr: '', publie: true }))).map((q, i) => {
                     const idxBrouillon = i - QR_PAR_DEFAUT.length
                     return (
                       <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '7px 0', borderTop: i ? `1px solid ${C.bordure}` : 'none', flexWrap: 'wrap' }}>
                         <b style={{ fontSize: 13 }}>{q.nom}</b><BadgeTypeQr type={q.type} />
-                        <span style={{ fontSize: 12, ...MUTED, flex: 1, minWidth: 160 }}>{q.support}{idxBrouillon < 0 ? ' · inclus par défaut' : ''} — {REGLE_TYPE_QR[q.type]}</span>
+                        <span style={{ fontSize: 12, ...MUTED, flex: 1, minWidth: 160 }}>{q.support}{idxBrouillon < 0 ? ' · inclus' : ''}{carFin ? '' : ` — ${REGLE_TYPE_QR[q.type]}`}</span>
                         {idxBrouillon >= 0 && (
                           <button aria-label={`Retirer ${q.nom}`} style={{ ...BTN2, padding: '6px 10px', color: '#B91C1C', display: 'inline-flex' }}
                             onClick={() => setQrBrouillons(l => l.filter((_, j) => j !== idxBrouillon))}><Ico k="trash" size={14} /></button>
@@ -1351,37 +1406,55 @@ export default function ParcoursCreation({ mode = 'pro', pro, banques, supers, p
 
               {rejoindre && !sa && <GrilleTarifs valeur={packChoisi} onChange={setPackChoisi} accent={ACCENT_SUPER} packs={packsSE} />}
 
-              {!sa && !rejoindre && !estSuper && (
-                <div data-reglement style={{ marginTop: 18, border: `1px solid ${C.bordure}`, borderRadius: 14, padding: 14, background: '#fff' }}>
-                  <div style={{ fontSize: 14, fontWeight: 800 }}>Nos offres</div>
-                  <div style={{ fontSize: 13, ...MUTED, margin: '3px 0 10px', lineHeight: 1.5 }}>Vous avez vu votre jeu : choisissez votre offre. À la publication, votre bon de commande est pré-rempli ; vous le signez et réglez par virement.</div>
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(150px,1fr))', gap: 8 }}>
-                    {OFFRES_ANIMATION.map(o => (
-                      <button key={o.cle} type="button" style={{ ...choix(offreAnim === o.cle), textAlign: 'left', minHeight: 64 }} onClick={() => setOffreAnim(o.cle)}>
-                        <b style={{ display: 'block' }}>{o.nom}</b><span style={{ fontSize: 15, fontWeight: 800 }}>{o.prix}</span>
-                        <span style={{ display: 'block', fontSize: 13, ...MUTED }}>{o.detail}</span>
+              {carFin && montre('logo') && (
+                <div data-logo>
+                  <Titre t="Votre logo" s="Il apparaît sur le jeu et sur les billets gagnants." />
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 14, border: `1.5px dashed ${C.bordureChamp}`, borderRadius: 16, padding: 16, background: '#fff' }}>
+                    <div style={{ width: 84, height: 84, borderRadius: 14, background: C.subtil, display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', flexShrink: 0 }}>
+                      {logoCommerce ? <img src={logoCommerce} alt="Votre logo" style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }} /> : <span style={{ fontSize: 11, ...MUTED, fontWeight: 700 }}>Aucun logo</span>}
+                    </div>
+                    <label style={{ ...BTN2, position: 'relative', display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+                      <Ico k="upload" size={14} />{logoEnvoi === 'envoi' ? 'Envoi…' : logoCommerce ? 'Changer' : 'Ajouter mon logo'}
+                      <input data-logo-fichier type="file" accept="image/png,image/jpeg,image/webp,image/svg+xml" style={{ position: 'absolute', inset: 0, opacity: 0, cursor: 'pointer' }} disabled={logoEnvoi === 'envoi'} onChange={onLogoCommerce} />
+                    </label>
+                  </div>
+                  {logoEnvoi && logoEnvoi !== 'envoi' && <div style={{ fontSize: 12.5, color: '#B45309', fontWeight: 700, marginTop: 8 }}>{logoEnvoi}</div>}
+                  {logoManquant && <div style={{ fontSize: 12.5, color: '#B45309', fontWeight: 700, marginTop: 10 }}>Ajoutez votre logo pour personnaliser vos billets.</div>}
+                </div>
+              )}
+              {commande && montre('offres') && (
+                <div data-reglement>
+                  <Titre t="Nos offres" s="Votre jeu est prêt. Choisissez votre offre." />
+                  <div style={{ display: 'grid', gap: 8 }}>
+                    {OFFRES_ANIMATION.map((o, k) => (
+                      <button key={o.cle} type="button" data-offre={o.cle} aria-pressed={offreAnim === o.cle} style={{ ...choix(offreAnim === o.cle), textAlign: 'left', minHeight: 64, position: 'relative' }} onClick={() => setOffreAnim(o.cle)}>
+                        {k === 0 && <span style={{ display: 'inline-block', fontSize: 10.5, fontWeight: 800, letterSpacing: '.06em', textTransform: 'uppercase', background: C.violet, color: '#fff', borderRadius: 999, padding: '2px 9px', marginBottom: 4 }}>Pour commencer</span>}
+                        <b style={{ display: 'block', fontSize: k === 0 ? 17 : 15 }}>{o.nom}</b><span style={{ fontSize: k === 0 ? 20 : 15, fontWeight: 900 }}>{o.prix}</span>
+                        <span style={{ display: 'block', fontSize: 12.5, ...MUTED }}>{o.detail}</span>
                       </button>
                     ))}
                   </div>
-                  <div data-options style={{ fontSize: 13, fontWeight: 800, margin: '14px 0 6px' }}>Options</div>
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(200px,1fr))', gap: 8 }}>
+                </div>
+              )}
+              {commande && montre('options') && (
+                <div data-options>
+                  <Titre t="Une option ?" s="Facultatif." />
+                  <div style={{ display: 'grid', gap: 8 }}>
                     <button type="button" data-opt="quiz-flowin" aria-pressed={optQuizFlowin} style={{ ...choix(optQuizFlowin), textAlign: 'left', minHeight: 64 }} onClick={() => setOptQuizFlowin(v => !v)}>
                       <b style={{ display: 'block' }}>{optQuizFlowin ? '✓ ' : ''}{OPTION_QUIZ_FLOWIN.nom}</b>
-                      <span style={{ fontSize: 15, fontWeight: 800 }}>{offreAnim === 'lancement' ? '72,50 € HT la 1re année' : '145 € HT'}</span>
-                      <span style={{ display: 'block', fontSize: 13, ...MUTED }}>{OPTION_QUIZ_FLOWIN.detail}{offreAnim === 'lancement' ? ', -50 % la 1re année (145 € HT ensuite)' : ''}</span>
+                      <span style={{ fontSize: 17, fontWeight: 900 }}>{prixOptionQuiz(offreAnim)}</span>
+                      <span style={{ display: 'block', fontSize: 12.5, ...MUTED }}>{OPTION_QUIZ_FLOWIN.detail}</span>
                     </button>
                     <button type="button" data-opt="customisation" aria-pressed={optCustom} style={{ ...choix(optCustom), textAlign: 'left', minHeight: 64 }} onClick={() => setOptCustom(v => !v)}>
                       <b style={{ display: 'block' }}>{optCustom ? '✓ ' : ''}{OPTION_CUSTOMISATION.nom}</b>
                       <span style={{ fontSize: 15, fontWeight: 800 }}>{OPTION_CUSTOMISATION.prix}</span>
-                      <span style={{ display: 'block', fontSize: 13, ...MUTED }}>{OPTION_CUSTOMISATION.detail}</span>
+                      <span style={{ display: 'block', fontSize: 12.5, ...MUTED }}>Couleurs, thème, jeu sur mesure</span>
                     </button>
-                  </div>
-                  <div style={{ fontSize: 13, marginTop: 12, lineHeight: 1.6 }}>
-                    <b>Règlement par virement</b> à {REGLEMENT.titulaire} · IBAN {REGLEMENT.iban} · BIC {REGLEMENT.bic} ; mandat SEPA possible pour la formule mensuelle. L’animation est enregistrée à la publication et passe en ligne dès que vous déclarez le virement.
                   </div>
                 </div>
               )}
-              <div style={{ fontSize: 14, fontWeight: 800, margin: '20px 0 8px' }}>Récapitulatif</div>
+              {montre('recap') && <>
+              {carFin ? <Titre t="Récapitulatif" s={commande ? 'Vous publiez, puis vous validez votre bon de commande et réglez par virement.' : 'Vous publiez : votre jeu passe en ligne.'} /> : <div style={{ fontSize: 14, fontWeight: 800, margin: '20px 0 8px' }}>Récapitulatif</div>}
               <div style={{ border: `1px solid ${C.bordure}`, borderRadius: 14, overflow: 'hidden' }}>
                 {([
                   ['Opération', titreParcours],
@@ -1394,12 +1467,12 @@ export default function ParcoursCreation({ mode = 'pro', pro, banques, supers, p
                   ['Jeu', libelleModule(moduleActif)],
                   ...(sansLots ? [] : [['Lots', lotsNommes.map(l => `${l.nom.trim()} × ${l.quantite}`).join(' · ') || '—']]),
                   ...(estSuper ? [['Pros participants', participants.length ? String(participants.length) : 'aucun pour l’instant']] : []),
-                  ...(avecCommande ? [['Offre', (() => { const o = OFFRES_ANIMATION.find(x => x.cle === offreAnim); return o ? `${o.nom} · ${o.prix}` : '—' })()],
-                    ['Options', [optQuizFlowin && `${OPTION_QUIZ_FLOWIN.nom} (${offreAnim === 'lancement' ? '72,50' : '145'} € HT)`, optCustom && `${OPTION_CUSTOMISATION.nom} (sur demande)`].filter(Boolean).join(' · ') || 'Aucune']] : []),
+                  ...(commande ? [['Offre', `${offreSel.nom} · ${offreSel.prix}`],
+                    ['Options', [optQuizFlowin && `Quiz rédigé par Flowin (${prixOptionQuiz(offreAnim)})`, optCustom && `${OPTION_CUSTOMISATION.nom} (sur demande)`].filter(Boolean).join(' · ') || 'Aucune']] : []),
                   ...(!estSuper ? [['Diffusion', [diffPhysique && 'QR imprimé', diffDigital && 'lien réseaux'].filter(Boolean).join(' · ') || 'Aucune']] : []),
                   ...(qrPossibles ? [['QR tracés', `${QR_PAR_DEFAUT.length + qrBrouillons.length} (dont ${qrBrouillons.length} ajouté${qrBrouillons.length > 1 ? 's' : ''})`]] : []),
                   ...(aUnTirage ? [['Tirage', tirage.mode === 'auto' ? `Automatique le ${libelleDateTirage(localVersIso(tirage.date))}` : 'Manuel (un clic)'], ['Liste des gagnants', tirage.publier ? 'Publiée après le tirage' : 'Non publiée']] : []),
-                ] as string[][]).map(([k, v], i) => (
+                ] as string[][]).filter(([k]) => !carFin || ['Nom', 'Dates', 'Jeu', 'Lots', 'Offre', 'Options', 'Diffusion'].indexOf(k) >= 0).map(([k, v], i) => (
                   <div key={k} style={{ display: 'flex', justifyContent: 'space-between', gap: 12, padding: '10px 14px', fontSize: 13.5, background: i % 2 ? '#fff' : C.subtil }}>
                     <span style={MUTED}>{k}</span><b style={{ textAlign: 'right' }}>{v}</b>
                   </div>
@@ -1438,20 +1511,38 @@ export default function ParcoursCreation({ mode = 'pro', pro, banques, supers, p
               )}
               {/* Comme PremiereFois (drapeau `tente`) : pas d erreur avant toute tentative. */}
               {bloque[FIN] && tenteFin && <div style={{ fontSize: 12.5, color: '#B45309', fontWeight: 700, marginTop: 12, textAlign: 'right' }}>{bloque[FIN]}</div>}
-              <div style={{ display: 'flex', justifyContent: 'space-between', gap: 10, marginTop: 20 }}>
-                <button style={BTN2} onClick={precedent}>← Précédent</button>
-                <button style={{ ...BTN, opacity: envoi === 'envoi' || (bloque[FIN] && tenteFin) ? 0.5 : 1 }} disabled={envoi === 'envoi'} onClick={() => { if (bloque[FIN]) { setTenteFin(true); return } envoyer() }}>
-                  {envoi === 'envoi' ? 'Enregistrement…'
-                    : rejoindre ? (sa ? 'Rattacher au super event' : 'Envoyer ma demande à Flowin')
-                    : estSuper ? 'Créer le super event'
-                    : sa ? 'Créer l’animation' : 'Publier mon animation'}
-                </button>
-              </div>
-            </>
-          )}
+              </>}
+              {(() => {
+                const publier = (
+                  <button data-publier style={{ ...BTN, opacity: envoi === 'envoi' || logoManquant || (bloque[FIN] && tenteFin) ? 0.5 : 1 }} disabled={envoi === 'envoi' || logoManquant} title={logoManquant ? 'Ajoutez votre logo pour personnaliser vos billets.' : undefined} onClick={() => { if (bloque[FIN]) { setTenteFin(true); return } envoyer() }}>
+                    {envoi === 'envoi' ? 'Enregistrement…'
+                      : rejoindre ? (sa ? 'Rattacher au super event' : 'Envoyer ma demande à Flowin')
+                      : estSuper ? 'Créer le super event'
+                      : sa ? 'Créer l’animation' : 'Publier mon animation'}
+                  </button>
+                )
+                return carFin
+                  ? <>
+                    {logoManquant && ecransFin[iFin] === 'recap' && <div data-logo-requis style={{ fontSize: 12.5, color: '#B45309', fontWeight: 700, marginTop: 12, textAlign: 'right' }}>Ajoutez votre logo pour personnaliser vos billets.</div>}
+                    {!PAIEMENT_ACTIF && ecransFin[iFin] === 'recap' && <div data-paiement-test style={{ fontSize: 11.5, ...MUTED, marginTop: 8, textAlign: 'right' }}>Paiement désactivé pendant la phase de test</div>}
+                    <NavCarrousel n={ecransFin.length} i={iFin} setI={setEcranFin} onAvant={precedent} dernier={publier} />
+                  </>
+                  : (
+                    <div style={{ display: 'flex', justifyContent: 'space-between', gap: 10, marginTop: 20 }}>
+                      <button style={BTN2} onClick={precedent}>← Précédent</button>
+                      {publier}
+                    </div>
+                  )
+              })()}
+            </div>
+            )
+          })()}
         </div>
 
-        <ApercuJeu module={moduleActif} eventId={stationApercu} saisie={saisie} titre="Aperçu en direct" />
+        {/* Publication en carrousel : l'aperçu (déjà vu pendant la configuration) laisse la place à l'écran. */}
+        <div className={etape === FIN && avecCommande ? 'pc-apercu-fin' : undefined}>
+          <ApercuJeu module={moduleActif} eventId={stationApercu} saisie={saisie} titre="Aperçu en direct" />
+        </div>
       </div>
     </div>
   )

@@ -34,6 +34,8 @@ import { retourSur } from '@/lib/retour'
 import { GARANTIE_ACTIVE } from '@/lib/flowinConfig'
 import PrecisionAutre from '@/components/creation/PrecisionAutre'
 import SelectActivite from '@/components/creation/SelectActivite'
+import Carrousel from './Carrousel'
+import { OFFRES_ANIMATION, OPTION_QUIZ_FLOWIN, prixOptionQuiz } from '@/lib/reglement'
 const CLE_BROUILLON = 'flowin.premiere-fois.v1'
 
 const ETAPES = [
@@ -117,6 +119,7 @@ export default function PremiereFois() {
   const [erreur, setErreur] = useState('')
   const [fin, setFin] = useState<{ proId: string; session: boolean; degrade: boolean } | null>(null)
   const [selection, setSelection] = useState('')
+  const [ecranAccueil, setEcranAccueil] = useState(0)
   const haut = useRef<HTMLDivElement>(null)
   /* Compte d'acces deja cree pendant cette visite (reprise apres un echec d'enregistrement de la fiche). */
   /* Retour vers une demande en cours (parcours « rejoindre un super event » sans compte) : ?retour=/rejoindre?... */
@@ -335,17 +338,41 @@ export default function PremiereFois() {
               </div>
             </div>
           )}
-          <div className="pf-kicker">Ma première fois</div>
-          <h1 className="pf-h1">Votre commerce, <span>animé</span> en quelques minutes.</h1>
-          <p className="pf-lead">Créez votre espace pro Flowin : un QR, un jeu, des lots, et vos clients reviennent. Sans application à installer, ni pour vous ni pour eux.</p>
-          <ul className="pf-promesses">
-            <li><span className="pf-ic">1</span><div><b>Vous vous présentez</b><br />Votre SIRET suffit : l’annuaire officiel remplit le reste.</div></li>
-            <li><span className="pf-ic">2</span><div><b>Vous créez votre accès</b><br />Un email, un mot de passe, et votre espace est ouvert.</div></li>
-            <li><span className="pf-ic">3</span><div><b>Vous créez votre animation</b><br />Jeu, lots, QR par support : vous voyez votre jeu avant de payer.</div></li>
-            <li><span className="pf-ic">4</span><div><b>Vous publiez</b><br />Offre annuelle ou mensuelle, règlement par virement à la publication.</div></li>
-          </ul>
+          {/* Accueil en carrousel (Romain, 10/11/2026) : d'abord « Tester Flowin », puis seulement les offres mensuelle et annuelle. */}
+          <Carrousel nom="Découvrir Flowin" i={ecranAccueil} setI={setEcranAccueil}
+            dernier={<button className="pf-btn" onClick={() => allerA(0)}>C’est parti</button>}
+            ecrans={[
+              { cle: 'promesse', contenu: (<>
+                <div className="pf-kicker">Ma première fois</div>
+                <h1 className="pf-h1">Votre commerce, <span>animé</span> en quelques minutes.</h1>
+                <ul className="pf-promesses">
+                  <li><span className="pf-ic">1</span><div><b>Vous vous présentez</b><br />Votre SIRET suffit.</div></li>
+                  <li><span className="pf-ic">2</span><div><b>Vous configurez votre jeu</b><br />Jeu, lots, QR : vous le voyez avant de payer.</div></li>
+                  <li><span className="pf-ic">3</span><div><b>Vous payez pour le mettre en ligne</b><br />Par virement, en un scan.</div></li>
+                </ul>
+              </>) },
+              { cle: 'tester', contenu: (
+                <div className="pf-offre pf-offre-1" data-offre="lancement">
+                  <span className="pf-offre-tag">Pour commencer</span>
+                  <div className="pf-offre-n">{OFFRES_ANIMATION[0].nom}</div>
+                  <div className="pf-offre-p">{OFFRES_ANIMATION[0].prix}</div>
+                  <div className="pf-offre-d">{OFFRES_ANIMATION[0].detail}. Toutes les fonctions.</div>
+                  <div className="pf-offre-o"><b>{OPTION_QUIZ_FLOWIN.nom}</b><span>{prixOptionQuiz('lancement')}</span></div>
+                </div>
+              ) },
+              { cle: 'offres', contenu: (<>
+                <div className="pf-kicker">Nos autres offres</div>
+                {OFFRES_ANIMATION.filter(o => o.cle !== 'lancement').map(o => (
+                  <div key={o.cle} className="pf-offre" data-offre={o.cle}>
+                    <div className="pf-offre-n">{o.nom}</div>
+                    <div className="pf-offre-p">{o.prix}</div>
+                    <div className="pf-offre-d">{o.detail}</div>
+                  </div>
+                ))}
+                <div className="pf-offre-o"><b>{OPTION_QUIZ_FLOWIN.nom}</b><span>{prixOptionQuiz('annuelle')}</span></div>
+              </>) },
+            ]} />
           {selection && <div className="pf-info">Votre sélection : <b>{resumeSelection(selection)}</b>. Elle sera reprise dans votre bon de commande.</div>}
-          <button className="pf-btn pf-grand" onClick={() => allerA(0)}>C’est parti</button>
           <div className="pf-note">Environ 3 minutes · {ETAPES.length} étapes · vous pouvez revenir en arrière à tout moment</div>
         </main>
       )}
@@ -553,7 +580,7 @@ export default function PremiereFois() {
                 <label className="pf-label" htmlFor="pf-mdp2">Confirmez le mot de passe *</label>
                 <input id="pf-mdp2" className="pf-in" type={voirMdp ? 'text' : 'password'} autoComplete="new-password" value={confirmation} onChange={e => setConfirmation(e.target.value)} />
                 {err('confirmation')}
-                <div className="pf-aide" style={{ marginTop: 12 }}>Ensuite : choix de votre offre{selection ? ` (${resumeSelection(selection)})` : ''}, contrat et paiement sur votre bon de commande, déjà rempli avec ces informations.</div>
+                <div className="pf-aide" style={{ marginTop: 12 }}>Ensuite : vous configurez votre jeu, puis vous validez votre bon de commande, déjà rempli.</div>
                 {erreur && <div className="pf-err" style={{ marginTop: 12 }}>{erreur} {/existe déjà/.test(erreur) && <Link href="/pro/connexion" className="pf-lien">Se connecter</Link>}</div>}
               </>
             )}
@@ -580,7 +607,7 @@ export default function PremiereFois() {
             {fin.degrade && <div className="pf-aide">Certaines informations (forme juridique, produits, points de vente) seront complétées dans votre profil.</div>}
             <div className="pf-suite">
               <div className="pf-suite-l"><span className="pf-ic">✓</span><span><b>Inscription</b> : faite</span></div>
-              <div className="pf-suite-l"><span className="pf-ic">2</span><span><b>Publiez votre animation</b> : l’offre et le règlement arrivent au moment de publier</span></div>
+              <div className="pf-suite-l"><span className="pf-ic">2</span><span><b>Configurez votre jeu</b>, puis réglez pour le mettre en ligne</span></div>
               <div className="pf-suite-l"><span className="pf-ic">3</span><span><b>Espace pro</b> : vos animations, vos lots, vos contacts</span></div>
             </div>
             <div className="pf-row" style={{ justifyContent: 'center', marginTop: 16 }}>
@@ -620,6 +647,16 @@ const CSS = `
 .pf-top{display:flex;align-items:center;gap:10px;padding:14px 16px;max-width:1100px;margin:0 auto}
 .pf-logo{font-size:22px;font-weight:900;letter-spacing:-.02em;color:var(--fl-encre);text-decoration:none}
 .pf-logo em{color:var(--fl-bleu);font-style:normal}
+.pf-offre{border:1.5px solid var(--fl-trait);border-radius:18px;background:#fff;padding:16px 18px;margin-top:10px}
+.pf-offre-1{border:2px solid #3B5CC4;padding:22px 20px;margin-top:0}
+.pf-offre-tag{display:inline-block;background:#3B5CC4;color:#fff;font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;border-radius:999px;padding:3px 10px}
+.pf-offre-n{font-size:20px;font-weight:900;margin-top:8px}
+.pf-offre-1 .pf-offre-n{font-size:26px}
+.pf-offre-p{font-size:22px;font-weight:900;color:#3B5CC4;margin-top:2px}
+.pf-offre-1 .pf-offre-p{font-size:30px}
+.pf-offre-d{font-size:14px;color:var(--fl-texte-2);margin-top:4px}
+.pf-offre-o{display:flex;justify-content:space-between;gap:10px;align-items:center;border-top:1px dashed var(--fl-trait);margin-top:14px;padding-top:12px;font-size:14px}
+.pf-offre-o span{font-weight:900;white-space:nowrap}
 .pf-badge{font-size:10.5px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--fl-violet);background:var(--fl-violet-clair);border-radius:99px;padding:4px 9px}
 .pf-lien{color:var(--fl-bleu);font-weight:700;font-size:13.5px;text-decoration:none}
 .pf-col{max-width:600px;margin:0 auto;padding:8px 16px 48px}

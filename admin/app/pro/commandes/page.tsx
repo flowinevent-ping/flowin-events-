@@ -18,7 +18,7 @@ export default async function Page({ searchParams }: { searchParams: { pro?: str
   return (
     <ProShell proName={nom} proId={proId} active="commandes">
       <h1 style={H1}>Mes commandes et factures</h1>
-      <div style={{ ...SUB, marginBottom: 14 }}>Vos commandes, vos contrats signés et vos factures, avec leur état de paiement.</div>
+      <div style={{ ...SUB, marginBottom: 14 }}>Vos commandes, vos bons de commande et vos factures, avec leur état de paiement.</div>
       {proId ? <HistoriqueCommandes proId={proId} /> : null}
     </ProShell>
   )

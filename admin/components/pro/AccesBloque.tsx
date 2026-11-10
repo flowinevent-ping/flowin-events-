@@ -6,6 +6,7 @@
  * tout seul des que le paiement est valide (virement : validation par l'equipe Flowin).
  */
 import LienBonCommande from './LienBonCommande'
+import QrVirement from './QrVirement'
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { CHARTE_PRO as C } from '@/lib/charte'
@@ -21,8 +22,8 @@ export default function AccesBloque({ proId }: { proId: string }) {
   return (
     <div style={{ ...CARD, maxWidth: 640, padding: 24 }}>
       <div style={{ fontSize: 11, fontWeight: 800, letterSpacing: '.14em', textTransform: 'uppercase', color: C.violet }}>Espace pro</div>
-      <div style={{ fontSize: 22, fontWeight: 900, letterSpacing: '-.01em', margin: '6px 0 8px' }}>Votre espace s’ouvre dès que votre paiement est validé</div>
-      <div style={{ fontSize: 14, ...MUTED, lineHeight: 1.6 }}>Votre compte est créé. Pour ouvrir vos animations, vos lots et vos contacts, il reste à valider le paiement de votre commande. Le prélèvement SEPA est validé automatiquement ; un virement est validé par l’équipe Flowin dès réception.</div>
+      <div style={{ fontSize: 22, fontWeight: 900, letterSpacing: '-.01em', margin: '6px 0 8px' }}>Votre espace s’ouvre dès votre paiement</div>
+      <div style={{ fontSize: 14, ...MUTED, lineHeight: 1.6 }}>Votre compte est créé. Il reste à régler votre commande.</div>
 
       {c === undefined && <div style={{ fontSize: 13.5, ...MUTED, marginTop: 14 }}>Recherche de votre commande…</div>}
       {c && (
@@ -32,17 +33,17 @@ export default function AccesBloque({ proId }: { proId: string }) {
             <Pastille s={statutAffiche(c)} />
           </div>
           {virer > 0 && c.mode_paiement === 'virement' && (
-            <div style={{ fontSize: 13, marginTop: 10, lineHeight: 1.7 }}>
-              Virement de <b>{eur(virer)} TTC</b> à l’ordre de <b>{VIREMENT.titulaire}</b><br />
-              IBAN <b style={{ fontFamily: 'ui-monospace,Menlo,monospace' }}>{VIREMENT.iban}</b> · BIC <b style={{ fontFamily: 'ui-monospace,Menlo,monospace' }}>{VIREMENT.bic}</b><br />
-              Référence à rappeler : <b style={{ fontFamily: 'ui-monospace,Menlo,monospace' }}>{c.id}</b>
+            <div style={{ marginTop: 12 }}>
+              <div style={{ fontSize: 13.5, fontWeight: 800, marginBottom: 8 }}>Virement de {eur(virer)} TTC</div>
+              <QrVirement montant={virer} reference={c.id} taille={180} />
+              <div style={{ fontSize: 12, ...MUTED, marginTop: 6 }}>BIC {VIREMENT.bic}</div>
             </div>
           )}
         </div>
       )}
       {c === null && (
         <div style={{ marginTop: 16 }}>
-          <LienBonCommande proId={proId} style={{ ...BTN, display: 'inline-block', textDecoration: 'none' }}>Choisir mon offre et signer</LienBonCommande>
+          <LienBonCommande proId={proId} style={{ ...BTN, display: 'inline-block', textDecoration: 'none' }}>Valider mon bon de commande</LienBonCommande>
         </div>
       )}
       <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginTop: 18 }}>

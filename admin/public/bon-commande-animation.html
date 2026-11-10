@@ -4,12 +4,12 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Bon de commande Flowin, jeu d'animation</title>
-<meta name="description" content="Bon de commande en ligne Flowin, jeu d'animation : formule, signature électronique, paiement par virement ou prélèvement SEPA.">
+<meta name="description" content="Bon de commande en ligne Flowin, jeu d'animation : offre, validation en ligne, paiement par virement ou prélèvement SEPA.">
 <link rel="stylesheet" href="/flowin-tokens.css">
 <style>
   :root{
     --ink:var(--fl-encre); --ink2:#2C4A6B; --muted:var(--fl-texte-2); --faint:#8A97A8;
-    --teal:var(--fl-violet); --tealD:var(--fl-violet-texte); --tealL:var(--fl-violet-clair); --blue:var(--fl-bleu); --green:var(--fl-bleu);
+    --teal:#3B5CC4; --tealD:#2C4797; --tealL:#E3E9F8; /* espace pro : bleu #3B5CC4, plus de violet (Romain) */ --blue:var(--fl-bleu); --green:var(--fl-bleu);
     --mint:#F4F6F9; --sky:var(--fl-bleu-clair); --off:#F4F6F9; --cream:#F4F6F9;
     --paper:var(--fl-papier); --line:var(--fl-trait); --white:#fff; --err:var(--fl-ko); --hl:#E3E9F8;
   }
@@ -23,14 +23,15 @@
   .flowin-topbar .flowin-topbar-brand{font-size:14px;font-weight:800;white-space:nowrap}
   .flowin-topbar .flowin-topbar-brand b{color:#3B5CC4}
 
-  .wrap{max-width:880px;margin:0 auto;padding:24px 16px 60px}
+  .wrap{max-width:880px;margin:0 auto;padding:14px 16px 24px}
   .doc{background:var(--white);border:1px solid var(--line);border-radius:22px;overflow:hidden;box-shadow:0 18px 50px -30px rgba(27,58,92,.3)}
 
   /* En-tête : signature de marque */
-  .head{position:relative;display:flex;justify-content:space-between;align-items:center;gap:20px;padding:26px 32px;background:var(--cream,#FFF6EC);overflow:hidden;border-bottom:1px solid var(--line)}
+  .head{position:relative;display:flex;justify-content:space-between;align-items:center;gap:20px;padding:14px 32px;background:var(--cream,#FFF6EC);overflow:hidden;border-bottom:1px solid var(--line)}
   .head svg.paint{position:absolute;left:170px;bottom:-60px;width:190px;height:190px;pointer-events:none;opacity:.95}
   .brand-sig{display:flex;flex-direction:column;align-items:flex-start;position:relative;z-index:1}
-  .logo{font-weight:900;letter-spacing:-.03em;line-height:1;font-size:46px;color:var(--ink)}
+  .logo{font-weight:900;letter-spacing:-.03em;line-height:1;font-size:34px;color:var(--ink)}
+  .head svg.paint,.ss-eyebrow,.ss-pill{display:none}
   .logo em{font-style:normal;color:var(--blue)}
   .ss-eyebrow{font-size:10.5px;font-weight:800;letter-spacing:.24em;text-transform:uppercase;color:rgba(27,58,92,.6);margin-top:14px}
   .ss-pill{display:inline-block;margin-top:10px;background:var(--teal);color:#fff;font-weight:800;font-size:12.5px;padding:8px 20px;border-radius:100px}
@@ -47,7 +48,7 @@
   .sec-h .n{width:28px;height:28px;border-radius:50%;background:var(--teal);color:#fff;font-size:13px;font-weight:900;display:flex;align-items:center;justify-content:center;flex:none}
   .sec-h h2{font-size:18px;font-weight:900;letter-spacing:-.01em}
   .eng{display:inline-block;margin-top:8px;font-size:11.5px;font-weight:900;color:var(--blue);background:#E3E9F8;border-radius:100px;padding:3px 10px}
-  .badge-top{position:absolute;top:-10px;left:14px;background:#E0368C;color:#fff;font-size:10px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;padding:2px 9px;border-radius:100px}
+  .badge-top{position:absolute;top:-10px;left:14px;background:#3B5CC4;color:#fff;font-size:10px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;padding:2px 9px;border-radius:100px}
   .eco{font-size:12.5px;font-weight:700;color:var(--muted);margin-top:10px}
   .eco b{color:var(--tealD)}
   .engbox{margin-top:12px;border:1.5px solid var(--blue);background:#F5F7FD;border-radius:14px;padding:12px 14px}
@@ -165,7 +166,7 @@
   .paybox b{color:var(--ink)}
   .paybox .iban{font-variant-numeric:tabular-nums;letter-spacing:.03em}
   .chk{display:flex;align-items:flex-start;gap:10px;font-size:13.5px;font-weight:700;cursor:pointer;line-height:1.45;color:var(--ink)}
-  .chk input{width:20px;height:20px;flex:none;accent-color:#7A4FE0;margin-top:1px}
+  .chk input{width:20px;height:20px;flex:none;accent-color:#3B5CC4;margin-top:1px}
   .chk a{color:var(--tealD);font-weight:800}
   .chk.err{color:var(--err)}
 
@@ -174,7 +175,7 @@
   .sign .clock b{color:var(--ink);font-variant-numeric:tabular-nums}
 
   .actions{display:flex;gap:12px;flex-wrap:wrap;align-items:center;margin-top:24px}
-  .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;font-weight:800;font-size:15px;color:#fff;background:var(--teal);border:none;border-radius:100px;padding:15px 26px;cursor:pointer;text-decoration:none;box-shadow:0 12px 26px -14px rgba(122,79,224,.6)}
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;font-weight:800;font-size:15px;color:#fff;background:var(--teal);border:none;border-radius:100px;padding:15px 26px;cursor:pointer;text-decoration:none;box-shadow:0 12px 26px -14px rgba(59,92,196,.6)}
   .btn[disabled]{opacity:.55;cursor:default}
   .btn.ghost{background:#fff;color:var(--tealD);border:1.5px solid var(--teal);box-shadow:none}
   .btn.dark{background:var(--teal)}
@@ -214,6 +215,59 @@
     .actions .btn{width:100%}
   }
 [data-garantie][hidden]{display:none!important}
+  /* Carrousel (Romain, 10/11/2026) : un écran par idée, Précédent / Suivant, points, glisser sur mobile. */
+  .choices.c1{grid-template-columns:1fr;gap:10px}
+  .c1 .choice{padding:12px 14px}
+  .c1 .choice .cp{margin-top:4px;font-size:18px}
+  .car .slide{display:none;margin-top:0}
+  .car .slide.on{display:block;animation:carIn .25s ease}
+  @keyframes carIn{from{opacity:0;transform:translateX(12px)}to{opacity:1;transform:none}}
+  .cnav{margin-top:18px}
+  .cdots{display:flex;justify-content:center;gap:8px;margin-bottom:12px}
+  .cdots button{width:9px;height:9px;border-radius:9px;border:none;padding:0;background:#CBD5E2;cursor:pointer;transition:width .2s}
+  .cdots button.on{width:22px;background:#3B5CC4}
+  .cbtns{display:flex;justify-content:space-between;gap:10px}
+  .cbtns .btn{padding:13px 22px}
+  .cbtns .cprev[hidden],.cbtns .cnext[hidden]{display:none}
+  .f textarea{width:100%;font-size:15px;color:var(--ink);background:#fff;border:1.5px solid var(--line);border-radius:12px;padding:11px 12px;outline:none;resize:vertical;font-family:inherit}
+  .f textarea:focus{border-color:var(--teal)}
+  .f.err textarea{border-color:var(--err);background:#fff6f7}
+  .qrv{text-align:center}
+  .qrv-img{width:210px;height:210px;margin:0 auto;padding:8px;background:#fff;border:1px solid var(--line);border-radius:14px}
+  .qrv-img img,.qrv-img canvas{width:100%!important;height:100%!important;display:block}
+  .qrv-t{font-size:14px;font-weight:900;margin-top:10px}
+  .qrv-s{font-size:12px;color:var(--muted);font-weight:600}
+  .copies{display:grid;gap:6px;margin-top:12px}
+  .cop{display:flex;align-items:center;justify-content:space-between;gap:10px;width:100%;background:#fff;border:1.5px solid var(--line);border-radius:12px;padding:8px 12px;cursor:pointer;text-align:left;color:var(--ink);font-family:inherit}
+  .cop small{display:block;font-size:11px;font-weight:800;color:var(--muted)}
+  .cop b{font-size:14px;font-family:ui-monospace,Menlo,monospace;overflow-wrap:anywhere}
+  .cop em{font-style:normal;font-size:12.5px;font-weight:800;color:#3B5CC4;white-space:nowrap}
+  .cop.ok em{color:#15803D}
+  @media (max-width:700px){
+    .flowin-topbar{padding:8px 16px}
+    .wrap{padding:8px 8px 16px}
+    .head{flex-direction:row;align-items:center;padding:10px 16px;gap:10px}
+    .head svg.paint,.ss-eyebrow,.ss-pill,.doc-sub{display:none}
+    .logo{font-size:24px}
+    .doc-meta{text-align:right}
+    .doc-type{font-size:15px}
+    .doc-num{margin-top:2px;font-size:11px}
+    .body{padding:14px 16px 16px}
+    .sec-h{margin-bottom:10px}
+    .sec-h h2{font-size:17px}
+    .grid{gap:10px}
+    .f input,.f select,.f textarea{padding:9px 11px}
+    .legal{display:none}
+    html.car-fin .legal{display:block;padding:8px 16px;font-size:9.5px}
+    .thanks h2{font-size:24px}
+    .thanks p{font-size:13px;margin-top:4px}
+    #merci table.recap td small{display:none}
+    #merci .trow{padding:7px 14px}
+    .qrv-img{width:190px;height:190px}
+    .actions{margin-top:14px;gap:8px}
+    .actions .btn{padding:12px 18px}
+    .cbtns .btn{width:auto;flex:1 1 0}
+  }
 </style>
 </head>
 <body>
@@ -235,10 +289,10 @@
     </div>
   </div>
 
-  <!-- ================= FORMULAIRE ================= -->
+  <!-- ================= FORMULAIRE (carrousel : un écran par idée, Romain 10/11/2026) ================= -->
   <div class="body" id="form">
 
-    <div class="sec">
+    <div class="sec" style="display:none" aria-hidden="true">
       <div class="parties">
         <div class="party">
           <div class="ttl">Prestataire</div>
@@ -253,62 +307,80 @@
       </div>
     </div>
 
-    <div class="banner info" id="prefillInfo" style="display:none">Informations reprises de votre inscription &laquo;&nbsp;Ma premi&egrave;re fois&nbsp;&raquo;. V&eacute;rifiez-les et compl&eacute;tez ce qui manque.</div>
-    <div class="sec">
-      <div class="sec-h"><span class="n">1</span><h2>Vos informations</h2></div>
+    <div class="car" id="carForm">
+    <div class="slide sec" data-ecran="entreprise">
+      <div class="sec-h"><span class="n">1</span><h2>Votre entreprise</h2></div>
+      <div class="banner info" id="prefillInfo" style="display:none;margin:0 0 12px">Repris de votre profil. V&eacute;rifiez.</div>
       <div class="grid">
         <div class="f" data-f="raison"><label for="f_raison">Raison sociale <i>*</i></label><input id="f_raison" autocomplete="organization"><div class="em">Indiquez la raison sociale.</div></div>
-        <div class="f"><label for="f_enseigne">Enseigne <small>(si diff&eacute;rente)</small></label><input id="f_enseigne" autocomplete="off"></div>
-        <div class="f" data-f="siret"><label for="f_siret">SIRET <i>*</i> <small>(14 chiffres)</small></label><input id="f_siret" inputmode="numeric" autocomplete="off" placeholder="Votre num&eacute;ro SIRET"><div class="em">Le SIRET compte 14 chiffres.</div></div>
-        <div class="f" data-f="nb"><label for="f_nb">Nombre de boutiques <i>*</i></label>
-          <div class="stepper"><button type="button" id="nbMinus" aria-label="Moins">&minus;</button><input id="f_nb" inputmode="numeric" value="1" aria-label="Nombre de boutiques"><button type="button" id="nbPlus" aria-label="Plus">+</button></div>
-          <div class="em">Au moins une boutique.</div></div>
+        <div class="f" data-f="siret"><label for="f_siret">SIRET <i>*</i></label><input id="f_siret" inputmode="numeric" autocomplete="off" placeholder="14 chiffres"><div class="em">Le SIRET compte 14 chiffres.</div></div>
+        <div class="f full" data-f="activite"><label for="f_activite">Objet de l&rsquo;entreprise <i>*</i></label><input id="f_activite" autocomplete="off" placeholder="Ex. : boulangerie, p&acirc;tisserie"><div class="em">Indiquez votre activit&eacute;.</div></div>
         <div class="f full" data-f="adresse"><label for="f_adresse">Adresse <i>*</i></label><input id="f_adresse" autocomplete="street-address"><div class="em">Indiquez l&rsquo;adresse.</div></div>
         <div class="f full"><div class="row2">
           <div class="f" data-f="cp" style="margin:0"><label for="f_cp">Code postal <i>*</i></label><input id="f_cp" inputmode="numeric" autocomplete="postal-code" maxlength="5"><div class="em">5 chiffres.</div></div>
           <div class="f" data-f="ville" style="margin:0"><label for="f_ville">Ville <i>*</i></label><input id="f_ville" autocomplete="address-level2"><div class="em">Indiquez la ville.</div></div>
         </div></div>
-        <div class="f" data-f="contact"><label for="f_contact">Contact (pr&eacute;nom et nom) <i>*</i></label><input id="f_contact" autocomplete="name"><div class="em">Indiquez le nom du contact.</div></div>
-        <div class="f"><label for="f_fonction">Fonction <small>(facultatif)</small></label><input id="f_fonction" autocomplete="organization-title"></div>
-        <div class="f" data-f="email"><label for="f_email">Email <i>*</i></label><input id="f_email" type="email" inputmode="email" autocomplete="email"><div class="em">Email invalide.</div></div>
-        <div class="f" data-f="tel"><label for="f_tel">T&eacute;l&eacute;phone <i>*</i></label><input id="f_tel" type="tel" inputmode="tel" autocomplete="tel"><div class="em">Indiquez un t&eacute;l&eacute;phone.</div></div>
-        <div class="f"><label for="f_commercial">Commercial <small>(code vendeur)</small></label><input id="f_commercial" autocomplete="off" placeholder="ex. : code de votre conseiller"></div>
-        <div class="f full"><label>Votre logo <small>(facultatif, pour vos supports)</small></label>
-          <label class="logo-drop" for="f_logo"><div class="prev" id="logoPrev">Aucun logo</div><div><b id="logoTxt">Ajouter votre logo</b><span>PNG, JPG ou SVG. Il sera repris sur vos affiches et votre jeu.</span></div><input id="f_logo" type="file" accept="image/png,image/jpeg,image/svg+xml,image/webp"></label>
-        </div>
+        <input type="hidden" id="f_enseigne"><input type="hidden" id="f_fonction"><input type="hidden" id="f_commercial"><input type="hidden" id="f_contact">
       </div>
     </div>
 
-    <div class="sec">
-      <div class="sec-h"><span class="n">2</span><h2>Votre formule</h2></div>
-      <div class="choices" id="offerChoices">
-        <button type="button" class="choice sel" data-offre="lancement"><span class="badge-top">Offre de lancement -50&nbsp;%</span><span class="ck"></span><div class="cn">Premi&egrave;re ann&eacute;e</div><div class="cd">Quiz, roue, tombola, tirages, billets, stock, relances, mesure par support. Puis 990 &euro; HT / an ou 110 &euro; HT / mois, reconduction tacite.</div><div class="cp">445 &euro; <small>HT la 1re ann&eacute;e</small></div><span class="eng">Engagement 12 mois</span></button>
-        <button type="button" class="choice" data-offre="annuelle"><span class="ck"></span><div class="cn">Formule annuelle</div><div class="cd">La m&ecirc;me offre, un seul paiement pour l&rsquo;ann&eacute;e. Reconduction tacite, r&eacute;siliable.</div><div class="cp">990 &euro; <small>HT / an</small></div><span class="eng">Engagement 12 mois</span></button>
-        <button type="button" class="choice" data-offre="mensuelle"><span class="ck"></span><div class="cn">Formule mensuelle</div><div class="cd">La m&ecirc;me offre, pr&eacute;lev&eacute;e chaque mois (mandat SEPA). Reconduction tacite ; apr&egrave;s 3 mois, r&eacute;siliable chaque mois.</div><div class="cp">110 &euro; <small>HT / mois</small></div><span class="eng">Engagement 3 mois minimum</span></button>
+    <div class="slide sec" data-ecran="vous">
+      <div class="sec-h"><span class="n">2</span><h2>Vous</h2></div>
+      <div class="grid">
+        <div class="f" data-f="prenom"><label for="f_prenom">Pr&eacute;nom <i>*</i></label><input id="f_prenom" autocomplete="given-name"><div class="em">Indiquez votre pr&eacute;nom.</div></div>
+        <div class="f" data-f="nomc"><label for="f_nomc">Nom <i>*</i></label><input id="f_nomc" autocomplete="family-name"><div class="em">Indiquez votre nom.</div></div>
+        <div class="f" data-f="tel"><label for="f_tel">T&eacute;l&eacute;phone <i>*</i></label><input id="f_tel" type="tel" inputmode="tel" autocomplete="tel"><div class="em">Indiquez un t&eacute;l&eacute;phone.</div></div>
+        <div class="f" data-f="email"><label for="f_email">Email <i>*</i></label><input id="f_email" type="email" inputmode="email" autocomplete="email"><div class="em">Email invalide.</div></div>
       </div>
-      <p class="eco">Premi&egrave;re ann&eacute;e &agrave; moiti&eacute; prix : 445 &euro; HT au lieu de 990 &euro; HT. Ensuite, 12 &times; 110 &euro; = 1&nbsp;320 &euro; HT par an en mensuel, contre 990 &euro; HT en annuel : <b>330 &euro; HT d&rsquo;&eacute;conomie</b> avec la formule annuelle.</p>
+    </div>
+
+    <div class="slide sec" data-ecran="lots">
+      <div class="sec-h"><span class="n">3</span><h2>Vos lots</h2></div>
+      <div class="grid">
+        <div class="f full" data-f="lots"><label for="f_lots">Lots propos&eacute;s <i>*</i></label><textarea id="f_lots" rows="3" placeholder="Ex. : 10 caf&eacute;s offerts, 1 panier garni"></textarea><div class="em">Indiquez au moins un lot.</div></div>
+        <div class="f full" data-f="conditions"><label for="f_conditions">Conditions d&rsquo;utilisation des lots <i>*</i></label><textarea id="f_conditions" rows="3" placeholder="Ex. : valable 1 mois, sur pr&eacute;sentation du ticket, pour tout achat"></textarea><div class="em">Indiquez les conditions.</div></div>
+      </div>
+      <div class="hint">Les lots sont fournis par votre commerce.</div>
+    </div>
+
+    <div class="slide sec" data-ecran="offre">
+      <div class="sec-h"><span class="n">4</span><h2>Votre offre</h2></div>
+      <div class="choices c1" id="offerChoices">
+        <button type="button" class="choice sel" data-offre="lancement"><span class="badge-top">Pour commencer</span><span class="ck"></span><div class="cn">Votre premi&egrave;re ann&eacute;e &agrave; -50&nbsp;%</div><div class="cp">445 &euro; <small>HT</small></div><div class="cd">Engagement 12 mois.</div></button>
+        <button type="button" class="choice" data-offre="mensuelle"><span class="ck"></span><div class="cn">Mensuelle</div><div class="cp">110 &euro; <small>HT / mois</small></div><div class="cd">Pr&eacute;l&egrave;vement SEPA. 3 mois minimum.</div></button>
+        <button type="button" class="choice" data-offre="annuelle"><span class="ck"></span><div class="cn">Annuelle</div><div class="cp">990 &euro; <small>HT / an</small></div><div class="cd">Un seul paiement. Engagement 12 mois.</div></button>
+      </div>
       <div class="engbox" id="engBox" style="display:none">
-        <label class="chk" id="engRow" style="margin:0"><input type="checkbox" id="engChk"><span>J&rsquo;ai bien not&eacute; que la formule mensuelle comporte un <b>engagement de 3 mois minimum</b> (3 &times; 110 &euro; HT), puis qu&rsquo;elle est r&eacute;siliable chaque mois selon le pr&eacute;avis des CGV.</span></label>
+        <label class="chk" id="engRow" style="margin:0"><input type="checkbox" id="engChk"><span>J&rsquo;ai not&eacute; l&rsquo;engagement de <b>3 mois minimum</b>.</span></label>
       </div>
-      <div class="subh">Vos supports <span style="font-weight:700;color:var(--muted)">(au choix)</span></div>
-      <div class="choices" id="kitChoices">
-        <button type="button" class="choice sel" data-kit="digital"><span class="ck"></span><div class="cn">Kit digital</div><div class="cd">Les fichiers des affiches, macarons et support de caisse, QR de jeu inclus, &agrave; imprimer vous-m&ecirc;me.</div><div class="cp">0 &euro;</div></button>
-        <button type="button" class="choice" data-kit="physique"><span class="ck"></span><div class="cn">Kit physique imprim&eacute;</div><div class="cd">Par boutique : 1 support de caisse, 3 affiches A4, 3 macarons autocollants, livr&eacute;s pr&ecirc;ts &agrave; poser. Pour <span id="kitNb">1 boutique</span>.</div><div class="cp">149 &euro; <small>HT par boutique</small></div></button>
+    </div>
+
+    <div class="slide sec" data-ecran="supports">
+      <div class="sec-h"><span class="n">5</span><h2>Vos supports</h2></div>
+      <div class="choices c1" id="kitChoices">
+        <button type="button" class="choice sel" data-kit="digital"><span class="ck"></span><div class="cn">Kit digital</div><div class="cd">Affiches et QR &agrave; imprimer vous-m&ecirc;me.</div><div class="cp">0 &euro;</div></button>
+        <button type="button" class="choice" data-kit="physique"><span class="ck"></span><div class="cn">Kit imprim&eacute;</div><div class="cd">Support de caisse, 3 affiches, 3 macarons. Pour <span id="kitNb">1 boutique</span>.</div><div class="cp">149 &euro; <small>HT par boutique</small></div></button>
       </div>
-      <div class="subh">Options <span style="font-weight:700;color:var(--muted)">(facultatives)</span></div>
-      <div class="choices">
-        <div class="choice" id="optQuiz" role="button" tabindex="0"><span class="ck"></span><div class="cn">Quiz r&eacute;dig&eacute;s par Flowin</div><div class="cd">30 questions quiz + 5 questions bonus, r&eacute;dig&eacute;es pour votre commerce.</div><div class="cp" id="optQuizPrix">145 &euro; <small>HT, forfait</small></div>
+      <div class="f" data-f="nb" style="margin-top:12px"><label for="f_nb">Nombre de boutiques</label>
+        <div class="stepper"><button type="button" id="nbMinus" aria-label="Moins">&minus;</button><input id="f_nb" inputmode="numeric" value="1" aria-label="Nombre de boutiques"><button type="button" id="nbPlus" aria-label="Plus">+</button></div>
+        <div class="em">Au moins une boutique.</div></div>
+    </div>
+
+    <div class="slide sec" data-ecran="option">
+      <div class="sec-h"><span class="n">6</span><h2>Une option&nbsp;?</h2></div>
+      <div class="choices c1">
+        <div class="choice" id="optQuiz" role="button" tabindex="0"><span class="ck"></span><div class="cn">Votre premier quiz r&eacute;dig&eacute; par Flowin</div><div class="cd">30 questions + 5 questions bonus.</div><div class="cp" id="optQuizPrix">145 &euro; <small>HT</small></div>
           <div class="opt-qty" hidden style="display:none">Animations <span class="stepper"><button type="button" data-q="quiz" data-d="-1">&minus;</button><input id="qQuiz" value="1" inputmode="numeric" aria-label="Nombre d'&eacute;v&eacute;nements"><button type="button" data-q="quiz" data-d="1">+</button></span></div></div>
-        <!-- Questions bonus : incluses dans l'option quiz Flowin (5 questions bonus) depuis le Lot A du 10/11/2026 ; plus vendues seules. Carte gardée masquée. -->
-        <div class="choice" id="optBonus" role="button" tabindex="0" hidden style="display:none"><span class="ck"></span><div class="cn">Questions bonus</div><div class="cd">Votre sondage sur mesure : avis client, sensibilisation.</div><div class="cp">180 &euro; <small>HT</small></div>
+        <!-- Questions bonus : incluses dans l'option quiz Flowin depuis le Lot A du 10/11/2026 ; plus vendues seules. Carte gardée masquée. -->
+        <div class="choice" id="optBonus" role="button" tabindex="0" hidden style="display:none"><span class="ck"></span><div class="cn">Questions bonus</div><div class="cd">Votre sondage sur mesure.</div><div class="cp">180 &euro; <small>HT</small></div>
           <div class="opt-qty">Sondages <span class="stepper"><button type="button" data-q="bonus" data-d="-1">&minus;</button><input id="qBonus" value="1" inputmode="numeric" aria-label="Nombre de sondages"><button type="button" data-q="bonus" data-d="1">+</button></span></div></div>
       </div>
-      <div class="choice sel" id="optCustom" hidden style="cursor:default"><span class="ck"></span><div class="cn">Customisation totale</div><div class="cd">Couleurs, th&eacute;matique, jeu 100&nbsp;% personnalisable et modifiable, lancement de campagne. Flowin vous adresse un devis s&eacute;par&eacute;.</div><div class="cp">Sur demande</div></div>
+      <div class="choice sel" id="optCustom" hidden style="cursor:default;margin-top:12px"><span class="ck"></span><div class="cn">Customisation totale</div><div class="cd">Sur devis s&eacute;par&eacute;.</div><div class="cp">Sur demande</div></div>
       <div class="guarbox" id="guarBox" data-garantie hidden>
         <span class="gtag">Offre sp&eacute;ciale premiers adh&eacute;rents &middot; formule annuelle</span>
         <div class="gprinc" id="garTxt">Satisfait ou rembours&eacute; : sur 12 mois, avec au moins 4 animations, si le nombre de clients venus retirer leur lot en boutique n&rsquo;atteint pas l&rsquo;objectif fix&eacute; avec votre panier moyen, Flowin vous rembourse la diff&eacute;rence (hors part digitale). <a href="/cgv-animation-magasin.html" target="_blank" rel="noopener">Conditions d&eacute;taill&eacute;es dans les CGV</a>.</div>
         <div class="gd" id="garMens" style="display:none;font-size:13px;font-weight:700">La garantie satisfait ou rembours&eacute; est r&eacute;serv&eacute;e &agrave; la <b>formule annuelle</b>. <a href="#" id="garToAn">Passer en formule annuelle</a> pour en b&eacute;n&eacute;ficier.</div>
-        <div class="gd" id="garRenouv" style="display:none;font-size:13px;font-weight:700">La garantie satisfait ou rembours&eacute; est r&eacute;serv&eacute;e aux <b>premiers adh&eacute;rents</b>, &agrave; la <b>premi&egrave;re souscription annuelle</b> ; elle ne s&rsquo;applique pas aux renouvellements. Votre dossier correspond &agrave; un renouvellement : elle n&rsquo;est pas disponible.</div>
+        <div class="gd" id="garRenouv" style="display:none;font-size:13px;font-weight:700">La garantie satisfait ou rembours&eacute; est r&eacute;serv&eacute;e aux <b>premiers adh&eacute;rents</b>, &agrave; la <b>premi&egrave;re souscription annuelle</b> ; elle ne s&rsquo;applique pas aux renouvellements.</div>
         <div class="gstate" id="garEtat"></div>
         <button type="button" class="btn gbtn" id="garBtn">Je veux b&eacute;n&eacute;ficier du satisfait ou rembours&eacute;</button>
         <label class="chk" id="garRow" style="margin-top:12px"><input type="checkbox" id="garChk"><span>J&rsquo;adh&egrave;re &agrave; l&rsquo;offre satisfait ou rembours&eacute;</span></label>
@@ -318,108 +390,108 @@
         </div>
         <div class="gx" id="garX"></div>
       </div>
-      <div class="hint">Les lots mis en jeu sont fournis par votre commerce.</div>
     </div>
 
-    <div class="sec">
-      <div class="sec-h"><span class="n">3</span><h2>R&eacute;capitulatif</h2></div>
+    <div class="slide sec" data-ecran="recap">
+      <div class="sec-h"><span class="n">7</span><h2>R&eacute;capitulatif</h2></div>
       <table class="recap"><thead><tr><th>D&eacute;signation</th><th class="r">Qt&eacute;</th><th class="r">Montant HT</th></tr></thead><tbody id="recapBody"></tbody></table>
       <div class="totals">
         <div class="trow"><span>Total HT</span><b id="tHT">&mdash;</b></div>
         <div class="trow"><span>TVA 20 %</span><b id="tTVA">&mdash;</b></div>
-        <div class="trow ttc"><span>Total TTC &middot; &agrave; payer &agrave; la commande</span><b id="tTTC">&mdash;</b></div>
+        <div class="trow ttc"><span>Total TTC</span><b id="tTTC">&mdash;</b></div>
         <div class="suite" id="tSuite"></div>
       </div>
     </div>
 
-    <div class="sec" id="secPay">
-      <div class="sec-h"><span class="n">4</span><h2>Paiement</h2></div>
-      <div class="choices" id="payChoices">
-        <button type="button" class="choice sel" data-pay="virement"><span class="ck"></span><div class="cn">Virement bancaire</div><div class="cd">Vous r&eacute;glez par virement &agrave; r&eacute;ception du bon de commande. La commande est enregistr&eacute;e en attente de paiement.</div></button>
-        <button type="button" class="choice" data-pay="prelevement_sepa" id="paySepa"><span class="ck"></span><div class="cn">Pr&eacute;l&egrave;vement SEPA</div><div class="cd">Mandat sign&eacute; en ligne chez GoCardless, notre prestataire de paiement. Flowin ne voit jamais votre IBAN.</div><span class="soon" id="sepaSoon">V&eacute;rification&hellip;</span></button>
+    <div class="slide sec" id="secPay" data-ecran="paiement">
+      <div class="sec-h"><span class="n">8</span><h2>Paiement</h2></div>
+      <div class="choices c1" id="payChoices">
+        <button type="button" class="choice sel" data-pay="virement"><span class="ck"></span><div class="cn">Virement bancaire</div><div class="cd">Un QR &agrave; scanner avec votre banque, juste apr&egrave;s.</div></button>
+        <button type="button" class="choice" data-pay="prelevement_sepa" id="paySepa"><span class="ck"></span><div class="cn">Pr&eacute;l&egrave;vement SEPA</div><div class="cd">Mandat en ligne chez GoCardless.</div><span class="soon" id="sepaSoon">V&eacute;rification&hellip;</span></button>
       </div>
       <div class="paybox" id="boxVirement">
-        Titulaire : <b>BAITA EURL</b><br>
-        IBAN : <b class="iban">FR76 1460 7003 3470 2211 6462 345</b><br>
-        BIC : <b>CCBPFRPPMAR</b><br>
-        R&eacute;f&eacute;rence &agrave; rappeler : <b id="payRef">&mdash;</b>
+        <b>BAITA EURL</b> &middot; IBAN <b class="iban">FR76 1460 7003 3470 2211 6462 345</b><br>
+        R&eacute;f&eacute;rence : <b id="payRef">&mdash;</b>
       </div>
       <div class="paybox" id="boxSepa" style="display:none">
-        <b id="sepaLbl">Pr&eacute;l&egrave;vement de l&rsquo;offre annuelle</b> : <span id="sepaAbo">&mdash;</span> TTC.<br>
-        Apr&egrave;s validation, vous &ecirc;tes redirig&eacute; vers la page s&eacute;curis&eacute;e GoCardless pour signer votre mandat SEPA.
-        <label class="chk" style="margin-top:10px"><input type="checkbox" id="sepaReste" checked><span>Pr&eacute;lever aussi le kit et les options (<span id="sepaResteMt">0 &euro;</span> TTC). Sinon, ils sont &agrave; r&eacute;gler par virement.</span></label>
+        <b id="sepaLbl">Pr&eacute;l&egrave;vement de l&rsquo;offre annuelle</b> : <span id="sepaAbo">&mdash;</span> TTC.
+        <label class="chk" style="margin-top:10px"><input type="checkbox" id="sepaReste" checked><span>Pr&eacute;lever aussi le kit et les options (<span id="sepaResteMt">0 &euro;</span> TTC).</span></label>
       </div>
-      <div class="banner warn" id="sepaOff" style="display:none">Le pr&eacute;l&egrave;vement en ligne est bient&ocirc;t disponible. En attendant, choisissez le virement : la commande est enregistr&eacute;e tout de suite.</div>
+      <div class="banner warn" id="sepaOff" style="display:none">Pr&eacute;l&egrave;vement bient&ocirc;t disponible. Choisissez le virement.</div>
     </div>
 
-    <div class="sec">
-      <div class="sec-h"><span class="n">5</span><h2>Conditions et signature</h2></div>
-      <label class="chk" id="cgvRow"><input type="checkbox" id="cgvChk"><span>J&rsquo;ai lu et j&rsquo;accepte les <a href="/cgv-animation-magasin.html" target="_blank" rel="noopener">conditions g&eacute;n&eacute;rales de vente Flowin Animation</a></span></label>
-      <div class="sign" style="margin-top:14px">
-        <div class="grid">
-          <div class="f" data-f="signataire"><label for="f_signataire">Nom du signataire <i>*</i></label><input id="f_signataire" autocomplete="name"><div class="em">Indiquez le nom du signataire.</div></div>
-          <div class="f"><label for="f_qualite">Qualit&eacute; <small>(g&eacute;rant, directeur&hellip;)</small></label><input id="f_qualite" autocomplete="organization-title"></div>
-        </div>
-        <label class="chk" id="signRow" style="margin-top:14px"><input type="checkbox" id="signChk"><span>Je signe &eacute;lectroniquement ce bon de commande et je m&rsquo;engage &agrave; r&eacute;gler le montant indiqu&eacute;.</span></label>
-        <div class="clock">Date et heure de signature : <b id="clock">&mdash;</b> <span>(enregistr&eacute;es &agrave; la validation)</span></div>
+    <div class="slide sec" data-ecran="validation">
+      <div class="sec-h"><span class="n">9</span><h2>Validation</h2></div>
+      <div class="sign">
+        <div class="f" data-f="signataire"><label for="f_signataire">Votre nom <i>*</i></label><input id="f_signataire" autocomplete="name"><div class="em">Indiquez votre nom.</div></div>
+        <input type="hidden" id="f_qualite">
+        <label class="chk" id="cgvRow" style="margin-top:14px"><input type="checkbox" id="cgvChk"><span>J&rsquo;accepte les <a href="/cgv-animation-magasin.html" target="_blank" rel="noopener">conditions g&eacute;n&eacute;rales de vente</a>.</span></label>
+        <label class="chk" id="signRow" style="margin-top:12px"><input type="checkbox" id="signChk"><span>Je valide mon bon de commande et je m&rsquo;engage &agrave; r&eacute;gler <b id="valMt">le montant indiqu&eacute;</b>.</span></label>
+        <div class="clock">Date et heure de validation : <b id="clock">&mdash;</b></div>
       </div>
+      <div class="actions">
+        <button type="button" class="btn" id="submitBtn">Valider mon bon de commande</button>
+        <button type="button" class="btn ghost" id="pdfBtn">Bon de commande en PDF</button>
+      </div>
+      <div class="status" id="status" role="status" aria-live="polite"></div>
     </div>
-
-    <div class="actions">
-      <button type="button" class="btn" id="submitBtn">Valider et signer ma commande</button>
-      <button type="button" class="btn ghost" id="pdfBtn">T&eacute;l&eacute;charger le bon en PDF</button>
     </div>
-    <div class="status" id="status" role="status" aria-live="polite"></div>
   </div>
 
-  <!-- ================= MERCI ================= -->
+  <!-- ================= MERCI (carrousel) ================= -->
   <div class="body" id="merci">
-    <div class="thanks">
-      <h2 id="mTitle">Merci, votre commande <em>est enregistr&eacute;e</em>.</h2>
-      <p id="mSub">Bon de commande n&deg; <b id="mNum">&mdash;</b>, sign&eacute; le <b id="mDate">&mdash;</b>.</p>
-    </div>
-    <div class="banner warn" id="mOffline" style="display:none">Pas de r&eacute;seau pour l&rsquo;instant : votre commande est gard&eacute;e sur cet appareil et sera transmise automatiquement d&egrave;s le retour de la connexion. Gardez cette page ouverte ou rouvrez-la plus tard.</div>
-    <div class="banner warn" id="mEchec" style="display:none"><b>Votre commande est sign&eacute;e, mais elle n&rsquo;a pas pu &ecirc;tre transmise automatiquement</b> (enregistrement en ligne en cours d&rsquo;activation). Rien n&rsquo;est perdu, terminez en deux gestes :<br>1. <a href="#" id="mEchecPdf">T&eacute;l&eacute;chargez votre bon sign&eacute; (PDF)</a> ;<br>2. <a href="#" id="mEchecMail">envoyez-le &agrave; Flowin par email</a> (message pr&eacute;-rempli, joignez le PDF).<br>R&eacute;glez ensuite par virement avec les coordonn&eacute;es ci-dessous. Votre commande est aussi gard&eacute;e sur cet appareil et sera renvoy&eacute;e automatiquement d&egrave;s que le service sera actif.</div>
-    <div class="banner info" id="mSepaInfo" style="display:none"></div>
-    <div class="sec">
-      <div class="sec-h"><span class="n">1</span><h2>R&eacute;capitulatif</h2></div>
-      <table class="recap"><thead><tr><th>D&eacute;signation</th><th class="r">Qt&eacute;</th><th class="r">Montant HT</th></tr></thead><tbody id="mRecap"></tbody></table>
-      <div class="totals">
-        <div class="trow"><span>Total HT</span><b id="mHT">&mdash;</b></div>
-        <div class="trow"><span>TVA 20 %</span><b id="mTVA">&mdash;</b></div>
-        <div class="trow ttc"><span>Total TTC &middot; pay&eacute; &agrave; la commande</span><b id="mTTC">&mdash;</b></div>
-        <div class="suite" id="mSuite"></div>
+    <div class="car" id="carMerci">
+    <div class="slide" data-ecran="valide">
+      <div class="thanks">
+        <h2 id="mTitle">Bon de commande <em>valid&eacute;</em>.</h2>
+        <p id="mSub">N&deg; <b id="mNum">&mdash;</b>, valid&eacute; le <b id="mDate">&mdash;</b>.</p>
+      </div>
+      <div class="banner warn" id="mOffline" style="display:none">Pas de r&eacute;seau : votre commande est gard&eacute;e sur cet appareil et partira au retour de la connexion.</div>
+      <div class="banner warn" id="mEchec" style="display:none"><b>Votre bon est valid&eacute; mais n&rsquo;a pas pu &ecirc;tre transmis.</b> <a href="#" id="mEchecPdf">T&eacute;l&eacute;chargez le PDF</a> puis <a href="#" id="mEchecMail">envoyez-le &agrave; Flowin</a>.</div>
+      <div class="banner info" id="mSepaInfo" style="display:none"></div>
+      <div class="sec" style="margin-top:14px">
+        <table class="recap"><thead><tr><th>D&eacute;signation</th><th class="r">Qt&eacute;</th><th class="r">Montant HT</th></tr></thead><tbody id="mRecap"></tbody></table>
+        <div class="totals">
+          <div class="trow"><span>Total HT</span><b id="mHT">&mdash;</b></div>
+          <div class="trow"><span>TVA 20 %</span><b id="mTVA">&mdash;</b></div>
+          <div class="trow ttc"><span>Total TTC</span><b id="mTTC">&mdash;</b></div>
+          <div class="suite" id="mSuite"></div>
+        </div>
       </div>
     </div>
-    <div class="sec" id="mVirement">
-      <div class="sec-h"><span class="n">2</span><h2>R&egrave;glement par virement</h2></div>
-      <div class="paybox">
-        Montant : <b id="mVirMt">&mdash;</b> TTC<br>
-        Titulaire : <b>BAITA EURL</b><br>
-        IBAN : <b class="iban">FR76 1460 7003 3470 2211 6462 345</b><br>
-        BIC : <b>CCBPFRPPMAR</b><br>
-        R&eacute;f&eacute;rence &agrave; rappeler : <b id="mRef">&mdash;</b>
+    <div class="slide sec" id="mVirement" data-ecran="virement">
+      <div class="sec-h"><span class="n">&euro;</span><h2>Votre virement</h2></div>
+      <div class="qrv">
+        <div class="qrv-img" id="mQrVir" aria-label="QR de virement"></div>
+        <div class="qrv-t">Scannez avec l&rsquo;application de votre banque</div>
+        <div class="qrv-s">B&eacute;n&eacute;ficiaire, IBAN, montant et r&eacute;f&eacute;rence se remplissent seuls.</div>
       </div>
+      <div class="copies">
+        <button type="button" class="cop" data-copie="iban"><span><small>IBAN &middot; BAITA EURL</small><b class="iban">FR76 1460 7003 3470 2211 6462 345</b></span><em>Copier</em></button>
+        <button type="button" class="cop" data-copie="montant"><span><small>Montant TTC</small><b id="mVirMt">&mdash;</b></span><em>Copier</em></button>
+        <button type="button" class="cop" data-copie="ref"><span><small>R&eacute;f&eacute;rence</small><b id="mRef">&mdash;</b></span><em>Copier</em></button>
+      </div>
+      <div class="hint">BIC CCBPFRPPMAR</div>
     </div>
-    <div class="sec" id="mDeclare" style="display:none" data-declaration>
-      <div class="sec-h"><span class="n">&#10003;</span><h2>Votre animation</h2></div>
-      <div class="banner warn" id="mDeclAttente"><b>Animation enregistr&eacute;e, en attente de paiement.</b> Elle passe en ligne d&egrave;s que vous d&eacute;clarez votre virement.</div>
-      <label class="chk" id="mDeclRow"><input type="checkbox" id="mDeclChk"><span>J&rsquo;ai effectu&eacute; le virement de <b id="mDeclMt">&mdash;</b> TTC avec la r&eacute;f&eacute;rence <b id="mDeclRef">&mdash;</b>.</span></label>
-      <div class="actions" style="margin-top:10px"><button type="button" class="btn" id="mDeclBtn">J&rsquo;ai effectu&eacute; le virement</button></div>
+    <div class="slide sec" id="mDeclare" data-ecran="declaration" data-declaration>
+      <div class="sec-h"><span class="n">&#10003;</span><h2>Mettre en ligne</h2></div>
+      <div class="banner warn" id="mDeclAttente" style="margin-top:0"><b>Animation en attente de paiement.</b> Elle passe en ligne d&egrave;s votre virement d&eacute;clar&eacute;.</div>
+      <label class="chk" id="mDeclRow" style="margin-top:14px"><input type="checkbox" id="mDeclChk"><span>J&rsquo;ai fait le virement de <b id="mDeclMt">&mdash;</b> TTC, r&eacute;f&eacute;rence <b id="mDeclRef">&mdash;</b>.</span></label>
+      <div class="actions" style="margin-top:12px"><button type="button" class="btn" id="mDeclBtn">J&rsquo;ai effectu&eacute; le virement</button></div>
       <div class="banner info" id="mDeclOk" style="display:none"></div>
     </div>
-    <div class="mgar" id="mGarantie" data-garantie hidden style="display:none"><div id="mGarTxt"></div><button type="button" class="btn" id="mGarBtn">Je veux b&eacute;n&eacute;ficier du satisfait ou rembours&eacute;</button></div>
-    <div class="sec">
-      <div class="sec-h"><span class="n" id="mStepsN">3</span><h2>Les prochaines &eacute;tapes</h2></div>
+    <div class="slide sec" data-ecran="suite">
+      <div class="mgar" id="mGarantie" data-garantie hidden style="display:none"><div id="mGarTxt"></div><button type="button" class="btn" id="mGarBtn">Je veux b&eacute;n&eacute;ficier du satisfait ou rembours&eacute;</button></div>
+      <div class="sec-h"><span class="n" id="mStepsN">&rarr;</span><h2>La suite</h2></div>
       <ol class="steps" id="mSteps"></ol>
+      <div class="actions">
+        <a class="btn ghost js-inscr" id="mEspace" href="/pro/inscription">Cr&eacute;er mon espace pro</a>
+        <button type="button" class="btn ghost" id="mPdf">Mon bon de commande (PDF)</button>
+        <button type="button" class="btn" id="mGc" style="display:none">Valider mon mandat de pr&eacute;l&egrave;vement</button>
+      </div>
+      <div class="status" id="mStatus" role="status" aria-live="polite"></div>
     </div>
-    <div class="actions">
-      <button type="button" class="btn dark" id="mPdf">T&eacute;l&eacute;charger le bon sign&eacute; en PDF</button>
-      <button type="button" class="btn" id="mGc" style="display:none">Signer mon mandat de pr&eacute;l&egrave;vement</button>
-      <a class="btn ghost js-inscr" id="mEspace" href="/pro/inscription">Cr&eacute;er mon espace pro</a>
-      <a class="btn ghost" href="/plaquette-animation-magasin.html">Retour &agrave; la plaquette</a>
     </div>
-    <div class="status" id="mStatus" role="status" aria-live="polite"></div>
   </div>
 
   <!-- ================= DEMARCHE GARANTIE (lien de l'email) ================= -->
@@ -468,6 +540,7 @@
 <script src="/flowin-config.js"></script>
 <script src="/nds/vendor/jspdf.umd.min.js"></script>
 <script src="/bon-commande-pdf.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script>
 (function(){
   /* INTERRUPTEUR CENTRAL (flowin-config.js) : offre « satisfait ou remboursé » suspendue tant que GARANTIE_ACTIVE n'est pas true.
@@ -488,6 +561,10 @@
   /* Grille unique : admin/lib/reglement.ts (Lot A, 10/11/2026) ; même valeurs que /bon-commande-pdf.js */
   var PRIX = (window.FlowinBonPDF && window.FlowinBonPDF.PRIX) || { lancement: 445, annuelle: 990, mensuelle: 110, kitPhysique: 149, optQuiz: 145, optQuizLancement: 72.5, optBonus: 0, tva: 0.20 };
   var DELAI_CONTROLE = '3 à 5 jours';
+  /* Paiement en attente pendant la phase de test : même interrupteur que admin/lib/reglement.ts (PAIEMENT_ACTIF).
+     false = la publication met le jeu en ligne sans passer ici ; si la page est ouverte, une note discrète le rappelle. */
+  var PAIEMENT_ACTIF = false;
+  if (!PAIEMENT_ACTIF && qs('ev')) { (function(){ var n = document.createElement('div'); n.className = 'hint'; n.style.textAlign = 'center'; n.textContent = 'Paiement d\u00e9sactiv\u00e9 pendant la phase de test'; var f = $('form'); if (f) f.insertBefore(n, f.firstChild); })(); }
   var IBAN = 'FR76 1460 7003 3470 2211 6462 345', BIC = 'CCBPFRPPMAR';
   var LS_FILE = 'flowin_am_file_attente', LS_DERNIERE = 'flowin_am_derniere';
   var EMAIL_FLOWIN = 'flowinevent@gmail.com';
@@ -526,6 +603,45 @@
     }
     var el = $('headPaint'); if (el) el.innerHTML = tache(62, '#C9D5F4', 7, 20, 0) + tache(44, '#E2D8FA', 3, -40, 30);
   })();
+
+  /* ---------- Carrousel (Romain, 10/11/2026 : « carrousel, pas de scroll ») ----------
+     Écrans .slide d'un conteneur .car ; un écran marqué data-off="1" est sauté. Points, Précédent / Suivant,
+     glisser du doigt. avantSuivant(ecran) peut bloquer l'avance (vérification des champs de l'écran). */
+  function Carrousel(root, opts){
+    var slides = root.querySelectorAll('.slide'), i = 0, self = this;
+    var nav = document.createElement('div'); nav.className = 'cnav';
+    nav.innerHTML = '<div class="cdots"></div><div class="cbtns"><button type="button" class="btn ghost cprev">\u2190 Pr\u00e9c\u00e9dent</button><button type="button" class="btn cnext">Suivant \u2192</button></div>';
+    root.appendChild(nav);
+    var dots = nav.querySelector('.cdots'), prev = nav.querySelector('.cprev'), next = nav.querySelector('.cnext');
+    function actifs(){ var a = []; for (var k = 0; k < slides.length; k++) if (slides[k].getAttribute('data-off') !== '1') a.push(k); return a; }
+    function pos(){ var a = actifs(); for (var k = 0; k < a.length; k++) if (a[k] === i) return k; return 0; }
+    self.maj = function(){
+      var a = actifs(); if (a.indexOf(i) < 0) i = a.length ? a[0] : 0;
+      var p = pos(), h = '';
+      for (var k = 0; k < slides.length; k++) slides[k].className = slides[k].className.replace(/ on/g, '') + (k === i ? ' on' : '');
+      for (var d = 0; d < a.length; d++) h += '<button type="button" data-i="' + a[d] + '" aria-label="\u00c9cran ' + (d + 1) + ' sur ' + a.length + '"' + (d === p ? ' class="on" aria-current="true"' : '') + '></button>';
+      dots.innerHTML = h;
+      prev.hidden = p === 0; next.hidden = p >= a.length - 1;
+      nav.style.display = a.length > 1 ? '' : 'none';
+      if (opts && opts.surChange) opts.surChange(p, a.length, slides[i]);
+    };
+    self.aller = function(k){ i = k; self.maj(); try { window.scrollTo(0, 0); } catch (e) {} };
+    self.avancer = function(s){
+      var a = actifs(), p = pos(), q = p + s;
+      if (q < 0 || q >= a.length) return;
+      if (s > 0 && opts && opts.avantSuivant && !opts.avantSuivant(slides[i])) return;
+      self.aller(a[q]);
+    };
+    self.allerVers = function(el){ for (var k = 0; k < slides.length; k++) if (slides[k].contains(el)) { self.aller(k); return; } };
+    prev.addEventListener('click', function(){ self.avancer(-1); });
+    next.addEventListener('click', function(){ self.avancer(1); });
+    dots.addEventListener('click', function(e){ var t = e.target; if (!t || !t.getAttribute || t.getAttribute('data-i') === null) return; var k = parseInt(t.getAttribute('data-i'), 10); if (k > i && opts && opts.avantSuivant && !opts.avantSuivant(slides[i])) return; self.aller(k); });
+    var x0 = null;
+    root.addEventListener('touchstart', function(e){ var t = e.target; x0 = (t && t.closest && t.closest('input,textarea,select')) ? null : e.touches[0].clientX; }, { passive: true });
+    root.addEventListener('touchend', function(e){ if (x0 === null) return; var dx = e.changedTouches[0].clientX - x0; x0 = null; if (Math.abs(dx) > 50) self.avancer(dx < 0 ? 1 : -1); }, { passive: true });
+    self.maj();
+  }
+  var carForm = null, carMerci = null;
 
   /* ---------- État ---------- */
   var st = { offre: 'lancement', custom: false, ev: null, renouv: false, nb: 1, kit: 'digital', quiz: 0, bonus: 0, garantie: false, certif: null, pay: 'virement', gcDispo: false, logo: null };
@@ -566,10 +682,11 @@
     var kits = document.querySelectorAll('#kitChoices .choice');
     for (var kk = 0; kk < kits.length; kk++) kits[kk].className = 'choice' + (kits[kk].getAttribute('data-kit') === st.kit ? ' sel' : '');
     $('engBox').style.display = st.offre === 'mensuelle' ? 'block' : 'none';
-    var suite = st.offre === 'mensuelle' ? 'Puis ' + eur(PRIX.mensuelle) + ' HT (' + eur(Math.round(PRIX.mensuelle * (1 + PRIX.tva) * 100) / 100) + ' TTC) par mois, reconduction tacite, engagement 3 mois minimum.'
-      : st.offre === 'lancement' ? 'Engagement 12 mois. Puis ' + eur(PRIX.annuelle) + ' HT par an ou ' + eur(PRIX.mensuelle) + ' HT par mois, reconduction tacite.' : 'Engagement 12 mois, reconduction tacite.';
-    if (st.custom) suite += ' Customisation totale : sur demande, devis séparé.';
-    $('optQuizPrix').innerHTML = st.offre === 'lancement' ? '72,50 &euro; <small>HT la 1re ann&eacute;e</small> <s style="font-size:12px;color:var(--muted)">145 &euro;</s>' : '145 &euro; <small>HT, forfait</small>';
+    /* Romain (10/11/2026) : rien sur l'année suivante au moment de la commande (les CGV gardent les conditions). */
+    var suite = st.offre === 'mensuelle' ? 'Chaque mois, 3 mois minimum.' : 'Engagement 12 mois.';
+    if (st.custom) suite += ' Customisation : sur devis.';
+    $('optQuizPrix').innerHTML = st.offre === 'lancement' ? '72,50 &euro; <small>HT</small> <s style="font-size:12px;color:var(--muted)">145 &euro;</s>' : '145 &euro; <small>HT</small>';
+    if ($('valMt')) $('valMt').textContent = eur(t.ttc) + ' TTC';
     var oc = $('optCustom'); oc.hidden = !st.custom; oc.style.display = st.custom ? '' : 'none';
     $('tSuite').textContent = suite; $('mSuite').textContent = suite;
     $('kitNb').textContent = st.nb + ' boutique' + (st.nb > 1 ? 's' : '');
@@ -589,7 +706,8 @@
     $('garGrid').style.display = eligible && st.certif ? 'grid' : 'none';
     var X = eligible ? clientsGarantie() : null, gx = $('garX');
     if (X) { gx.style.display = 'block'; gx.innerHTML = 'Flowin doit vous apporter <b>' + X + ' clients</b> sur 12 mois.'; } else gx.style.display = 'none';
-    if (t.ttc <= 0) { st.pay = 'aucun'; $('secPay').style.display = 'none'; } else { if (st.pay === 'aucun') st.pay = 'virement'; $('secPay').style.display = 'block'; }
+    if (t.ttc <= 0) { st.pay = 'aucun'; $('secPay').setAttribute('data-off', '1'); } else { if (st.pay === 'aucun') st.pay = 'virement'; $('secPay').removeAttribute('data-off'); }
+    if (carForm) carForm.maj();
     $('optQuiz').className = 'choice' + (st.quiz > 0 ? ' sel' : '');
     $('optBonus').className = 'choice' + (st.bonus > 0 ? ' sel' : '');
     if (st.quiz > 0) $('qQuiz').value = st.quiz;
@@ -614,9 +732,24 @@
     var nm = raison ? esc(raison) + (ens && ens !== raison ? ' <span style="font-weight:700;color:var(--muted)">(' + esc(ens) + ')</span>' : '') : '<span class="todo">Raison sociale \u00e0 compl\u00e9ter</span>';
     var cpv = (cp + ' ' + ville).replace(/^\s+|\s+$/g, '');
     var adr = ad && cpv ? ad + ', ' + cpv : (ad || cpv);
-    var contact = v('f_contact') ? v('f_contact') + (v('f_fonction') ? ' (' + v('f_fonction') + ')' : '') : '';
+    composerContact();
+    var contact = v('f_contact');
     $('clNom').innerHTML = nm;
     $('clLn').innerHTML = ligne('Adresse', adr) + ligne('SIRET', v('f_siret')) + ligne('Boutiques', String(st.nb)) + ligne('Contact', contact) + ligne('Email', v('f_email')) + ligne('T\u00e9l.', v('f_tel'));
+  }
+
+  /* Prénom + nom -> contact (colonne contact_nom de la commande) ; le nom sert aussi pour la validation. */
+  function trim(x){ return String(x || '').replace(/^\s+|\s+$/g, ''); }
+  function composerContact(){
+    var c = trim(trim(($('f_prenom') || {}).value) + ' ' + trim(($('f_nomc') || {}).value));
+    if ($('f_contact')) $('f_contact').value = c;
+    var sg = $('f_signataire'); if (sg && !sg.getAttribute('data-touche')) sg.value = c;
+    return c;
+  }
+  function eclaterContact(c){
+    c = trim(c); if (!c) return;
+    var i = c.indexOf(' ');
+    remplirVides({ f_prenom: i > 0 ? c.slice(0, i) : c, f_nomc: i > 0 ? c.slice(i + 1) : '' });
   }
 
   /* ---------- Préremplissage depuis la plaquette ---------- */
@@ -648,7 +781,9 @@
   (function(){
     var pf = lsGet('flowin_am_prefill');
     if (!pf || typeof pf !== 'object') return;
-    var map = { f_raison: pf.raison, f_enseigne: pf.enseigne, f_siret: pf.siret, f_adresse: pf.adresse, f_cp: pf.cp, f_ville: pf.ville, f_contact: pf.contact, f_fonction: pf.fonction, f_email: pf.email, f_tel: pf.tel, f_commercial: pf.commercial, f_signataire: pf.contact, f_qualite: pf.fonction };
+    var map = { f_raison: pf.raison, f_enseigne: pf.enseigne, f_siret: pf.siret, f_adresse: pf.adresse, f_cp: pf.cp, f_ville: pf.ville, f_fonction: pf.fonction, f_email: pf.email, f_tel: pf.tel, f_commercial: pf.commercial, f_qualite: pf.fonction,
+      f_activite: pf.activite, f_lots: pf.lots, f_conditions: pf.conditions_lots, f_prenom: pf.prenom, f_nomc: pf.nom_contact };
+    if (pf.contact && !pf.prenom) eclaterContact(pf.contact);
     var rempli = 0;
     for (var k in map) {
       if (!map.hasOwnProperty(k)) continue;
@@ -708,27 +843,9 @@
       .catch(function(){ if (fini) return; fini = true; clearTimeout(to); setGc(false); });
   })();
 
-  /* Logo : redimensionné dans le navigateur (512 px max) pour rester léger */
-  $('f_logo').addEventListener('change', function(){
-    var file = this.files && this.files[0]; if (!file) return;
-    if (file.size > 8 * 1024 * 1024) { $('logoTxt').textContent = 'Fichier trop lourd (8 Mo maximum)'; return; }
-    var rd = new FileReader();
-    rd.onload = function(){
-      var img = new Image();
-      img.onload = function(){
-        var w = img.naturalWidth || 512, h = img.naturalHeight || 512, m = Math.max(w, h), k = m > 512 ? 512 / m : 1;
-        var cv = document.createElement('canvas'); cv.width = Math.max(1, Math.round(w * k)); cv.height = Math.max(1, Math.round(h * k));
-        try { cv.getContext('2d').drawImage(img, 0, 0, cv.width, cv.height); st.logo = cv.toDataURL('image/png'); } catch (e) { st.logo = rd.result; }
-        $('logoPrev').innerHTML = '<img alt="Logo" src="' + st.logo + '">';
-        $('logoTxt').textContent = file.name.slice(0, 60);
-      };
-      img.onerror = function(){ $('logoTxt').textContent = 'Image illisible, essayez un autre fichier'; };
-      img.src = rd.result;
-    };
-    rd.readAsDataURL(file);
-  });
+  /* Logo : retiré du bon de commande (Romain, 10/11/2026) ; il se met plus tard dans « Mon profil ». st.logo reste null. */
 
-  /* Horloge de signature */
+  /* Horloge de validation */
   function tickClock(){ $('clock').textContent = fmtDateHeure(new Date()); }
   tickClock(); setInterval(tickClock, 15000);
 
@@ -738,15 +855,19 @@
     for (var i = 0; i < fs.length; i++) fs[i].addEventListener('input', function(){ var q = this.closest ? this.closest('.f[data-f]') : null; if (q) q.className = q.className.replace(/ err/g, ''); });
     $('cgvChk').addEventListener('change', function(){ if (this.checked) $('cgvRow').className = 'chk'; });
     $('signChk').addEventListener('change', function(){ if (this.checked) $('signRow').className = 'chk'; });
+    $('f_signataire').addEventListener('input', function(){ this.setAttribute('data-touche', '1'); });
   })();
 
   /* ---------- Validation ---------- */
   function val(id){ var e = $(id); return e ? String(e.value || '').replace(/^\s+|\s+$/g, '') : ''; }
   function setErr(name, on){ var e = document.querySelector('.f[data-f="' + name + '"]'); if (!e) return; if (on) { if (e.className.indexOf(' err') < 0) e.className += ' err'; } else e.className = e.className.replace(/ err/g, ''); }
   function status(msg, cls){ var s = $('status'); s.textContent = msg; s.className = 'status ' + (cls || ''); }
-  function valider(avecSignature){
+  /* scope : écran du carrousel à vérifier avant « Suivant » (sinon tout le bon). */
+  function valider(avecSignature, scope){
     var first = null, ok = true;
-    function check(name, cond){ setErr(name, !cond); if (!cond) { ok = false; if (!first) first = document.querySelector('.f[data-f="' + name + '"]'); } }
+    composerContact();
+    function dans(el){ return !scope || (el && scope.contains(el)); }
+    function check(name, cond){ var el = document.querySelector('.f[data-f="' + name + '"]'); if (!dans(el)) return; setErr(name, !cond); if (!cond) { ok = false; if (!first) first = el; } }
     var siret = val('f_siret').replace(/\s/g, '');
     check('raison', val('f_raison').length > 1);
     check('siret', /^[0-9]{14}$/.test(siret));
@@ -754,20 +875,24 @@
     check('adresse', val('f_adresse').length > 3);
     check('cp', /^[0-9]{5}$/.test(val('f_cp')));
     check('ville', val('f_ville').length > 1);
-    check('contact', val('f_contact').length > 1);
+    check('activite', val('f_activite').length > 1);
+    check('prenom', val('f_prenom').length > 0);
+    check('nomc', val('f_nomc').length > 0);
+    check('lots', val('f_lots').length > 1);
+    check('conditions', val('f_conditions').length > 1);
     check('email', /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(val('f_email')));
     check('tel', val('f_tel').replace(/[^0-9+]/g, '').length >= 8);
     var pm = val('f_panier'), pmv = parseFloat(pm.replace(',', '.'));
     check('panier', !st.garantie || (!isNaN(pmv) && pmv > 0 && !!st.certif));
     check('flux', !st.garantie || !!$('f_flux').value);
-    if (st.offre === 'mensuelle' && !$('engChk').checked) { ok = false; $('engBox').className = 'engbox err'; if (!first) first = $('engBox'); } else $('engBox').className = 'engbox';
-    if (avecSignature) {
+    if (dans($('engBox'))) { if (st.offre === 'mensuelle' && !$('engChk').checked) { ok = false; $('engBox').className = 'engbox err'; if (!first) first = $('engBox'); } else $('engBox').className = 'engbox'; }
+    if (avecSignature && dans($('signRow'))) {
       check('signataire', val('f_signataire').length > 1);
       var cgv = $('cgvChk').checked, sg = $('signChk').checked;
       $('cgvRow').className = 'chk' + (cgv ? '' : ' err'); $('signRow').className = 'chk' + (sg ? '' : ' err');
       if (!cgv || !sg) { ok = false; if (!first) first = cgv ? $('signRow') : $('cgvRow'); }
     }
-    if (!ok && first && first.scrollIntoView) first.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    if (!ok && first) { if (carForm && !scope) carForm.allerVers(first); if (first.querySelector) { var inp = first.querySelector('input,textarea'); if (inp && inp.focus) { try { inp.focus(); } catch (e) {} } } }
     return ok;
   }
 
@@ -866,16 +991,15 @@
   function etapes(rec, horsLigne){
     var t = calc(), h = [];
     if (rec.mode_paiement === 'prelevement_sepa') {
-      h.push('<b>Signez votre mandat SEPA</b> sur la page s\u00e9curis\u00e9e GoCardless (si ce n\u2019est pas d\u00e9j\u00e0 fait)' + (rec.offre === 'mensuelle' ? ' : ' + eur(t.aboTtc) + ' TTC pr\u00e9lev\u00e9s chaque mois.' : '.'));
+      h.push('<b>Validez votre mandat SEPA</b> sur la page s\u00e9curis\u00e9e GoCardless (si ce n\u2019est pas d\u00e9j\u00e0 fait)' + (rec.offre === 'mensuelle' ? ' : ' + eur(t.aboTtc) + ' TTC pr\u00e9lev\u00e9s chaque mois.' : '.'));
       if (!rec.prelevement_inclut_reste && t.resteTtc > 0) h.push('<b>Réglez le kit et les options par virement</b> (' + eur(t.resteTtc) + ' TTC), référence ' + esc(rec.id) + '.');
     } else if (rec.mode_paiement === 'virement') {
-      h.push('<b>R\u00e9glez ' + eur(t.ttc) + ' TTC par virement</b> avec la r\u00e9f\u00e9rence ' + esc(rec.id) + '.' + (rec.offre === 'mensuelle' ? ' Puis ' + eur(t.aboTtc) + ' TTC chaque mois.' : ' Votre commande passe en \u00ab pay\u00e9e \u00bb \u00e0 r\u00e9ception.'));
-      h.push('<b>L\u2019\u00e9quipe Flowin prend contact avec vous dans la journ\u00e9e</b> pour valider votre inscription et la r\u00e9ception du paiement. Votre espace pro s\u2019ouvre d\u00e8s cette validation.');
+      h.push('<b>R\u00e9glez ' + eur(t.ttc) + ' TTC par virement</b>, r\u00e9f\u00e9rence ' + esc(rec.id) + '.');
+      h.push(st.ev ? '<b>D\u00e9clarez votre virement</b> : votre jeu passe en ligne.' : '<b>Flowin vous appelle dans la journ\u00e9e</b> pour ouvrir votre espace.');
     }
     if (GAR && rec.garantie) h.push('<b>Satisfait ou rembours\u00e9</b> : objectif de ' + (rec.garantie_clients_objectif || '\u2014') + ' clients venus retirer leur lot sur 12 mois, avec au moins 4 animations.');
-    h.push('<b>Flowin vous contacte</b> pour préparer votre animation : lots, questions, couleurs' + (rec.logo ? '' : ', logo') + '.');
-    h.push(rec.kit === 'physique' ? '<b>Votre kit est en préparation</b> : macarons, affiches et support de caisse pour ' + rec.nb_boutiques + ' boutique' + (rec.nb_boutiques > 1 ? 's' : '') + '.' : '<b>Vous recevez votre kit digital</b> : les fichiers des affiches et macarons à imprimer.');
-    h.push('<b>Vous collez, ils flashent, vous mesurez</b> : vos accès au tableau de bord vous sont envoyés par email.');
+    h.push(rec.kit === 'physique' ? '<b>Votre kit imprimé part en préparation.</b>' : '<b>Vos affiches et QR</b> sont dans votre espace pro.');
+    h.push('<b>Vous affichez, ils jouent, vous mesurez.</b>');
     var o = ''; for (var i = 0; i < h.length; i++) o += '<li><span>' + h[i] + '</span></li>';
     return o;
   }
@@ -883,21 +1007,22 @@
     opts = opts || {};
     var t = calc();
     document.body.className = 'done';
+    document.documentElement.className = document.documentElement.className.replace(/ ?car-fin/g, '');
     $('mNum').textContent = rec.id;
     $('mDate').textContent = rec.signature_horodatage_client ? fmtDateHeure(new Date(rec.signature_horodatage_client)) : '—';
     $('mRecap').innerHTML = recapHtml(t);
     $('mHT').textContent = eur(t.ht); $('mTVA').textContent = eur(t.tva); $('mTTC').textContent = eur(t.ttc);
     var virMt = rec.mode_paiement === 'aucun' ? 0 : (rec.mode_paiement === 'virement' ? t.ttc : (rec.prelevement_inclut_reste ? 0 : t.resteTtc));
-    $('mVirement').style.display = virMt > 0 ? 'block' : 'none';
+    if (virMt > 0) $('mVirement').removeAttribute('data-off'); else $('mVirement').setAttribute('data-off', '1');
     $('mVirMt').textContent = eur(virMt); $('mRef').textContent = rec.id;
-    $('mStepsN').textContent = virMt > 0 ? '3' : '2';
+    qrVirement(virMt, rec.id);
     $('mSteps').innerHTML = etapes(rec, opts.horsLigne);
     majRappelGarantie(rec, opts);
     $('mOffline').style.display = opts.horsLigne ? 'block' : 'none';
     $('mEchec').style.display = opts.echec ? 'block' : 'none';
     if (opts.echec) {
-      $('mTitle').innerHTML = 'Votre commande <em>est sign&eacute;e</em>.';
-      var corps = 'Bonjour,\n\nVoici mon bon de commande Flowin, jeu d\'animation sign\u00e9 (PDF joint).\n\nN\u00b0 ' + rec.id + '\nSoci\u00e9t\u00e9 : ' + rec.raison_sociale + ' (SIRET ' + rec.siret + ')\nFormule : ' + NOM_OFFRE[rec.offre] + ' (engagement ' + rec.engagement_mois + ' mois)\nSupports : ' + (rec.kit === 'physique' ? 'kit physique, ' + rec.nb_boutiques + ' boutique(s)' : 'kit digital') + '\nTotal \u00e0 la commande : ' + eur(rec.montant_ttc) + ' TTC\nPaiement : ' + (rec.mode_paiement === 'prelevement_sepa' ? 'pr\u00e9l\u00e8vement SEPA' : 'virement') + '\nSign\u00e9 par ' + rec.signataire_nom + ' le ' + fmtDateHeure(new Date(rec.signature_horodatage_client)) + '\nContact : ' + rec.contact_nom + ', ' + rec.email + ', ' + rec.tel + '\n';
+      $('mTitle').innerHTML = 'Bon de commande <em>valid&eacute;</em>.';
+      var corps = 'Bonjour,\n\nVoici mon bon de commande Flowin, jeu d\'animation valid\u00e9 (PDF joint).\n\nN\u00b0 ' + rec.id + '\nSoci\u00e9t\u00e9 : ' + rec.raison_sociale + ' (SIRET ' + rec.siret + ')\nFormule : ' + NOM_OFFRE[rec.offre] + ' (engagement ' + rec.engagement_mois + ' mois)\nSupports : ' + (rec.kit === 'physique' ? 'kit physique, ' + rec.nb_boutiques + ' boutique(s)' : 'kit digital') + '\nTotal \u00e0 la commande : ' + eur(rec.montant_ttc) + ' TTC\nPaiement : ' + (rec.mode_paiement === 'prelevement_sepa' ? 'pr\u00e9l\u00e8vement SEPA' : 'virement') + '\nValid\u00e9 par ' + rec.signataire_nom + ' le ' + fmtDateHeure(new Date(rec.signature_horodatage_client)) + '\nContact : ' + rec.contact_nom + ', ' + rec.email + ', ' + rec.tel + '\n';
       $('mEchecMail').setAttribute('href', 'mailto:' + EMAIL_FLOWIN + '?subject=' + encodeURIComponent('Bon de commande ' + rec.id + ' - ' + rec.raison_sociale) + '&body=' + encodeURIComponent(corps));
       $('mEchecPdf').onclick = function(e){ e.preventDefault(); pdf(rec, true); };
     }
@@ -905,10 +1030,11 @@
     if (opts.sepaMsg) { info.style.display = 'block'; info.innerHTML = opts.sepaMsg; } else info.style.display = 'none';
     $('mGc').style.display = opts.gcRetry ? 'inline-flex' : 'none';
     preparerDeclaration(rec, virMt);
+    if (carMerci) { carMerci.maj(); carMerci.aller(0); }
     if (PRO_ID || rec.pro_id) { var esp = $('mEspace'); esp.className = 'btn'; esp.setAttribute('href', lienEspacePro(rec.pro_id)); esp.textContent = 'Accéder à mon espace pro'; try { window.localStorage.removeItem('flowin_am_prefill'); } catch (e) {} }
     window.scrollTo(0, 0);
     $('mPdf').onclick = function(){ if (!pdf(rec, true)) { $('mStatus').textContent = 'Le générateur PDF n’a pas pu se charger.'; $('mStatus').className = 'status err'; } };
-    $('mGc').onclick = function(){ var b = this; b.disabled = true; lancerGoCardless(rec, $('mStatus')).catch(function(){ b.disabled = false; $('mStatus').textContent = 'Le prélèvement n’est pas disponible pour le moment : réglez par virement avec les coordonnées ci-dessus.'; $('mStatus').className = 'status err'; $('mVirement').style.display = 'block'; $('mVirMt').textContent = eur(t.ttc); }); };
+    $('mGc').onclick = function(){ var b = this; b.disabled = true; lancerGoCardless(rec, $('mStatus')).catch(function(){ b.disabled = false; $('mStatus').textContent = 'Le prélèvement n’est pas disponible pour le moment : réglez par virement avec les coordonnées ci-dessus.'; $('mStatus').className = 'status err'; montrerVirement(t.ttc, rec.id); }); };
   }
 
   /* ---------- Publication depuis l'espace pro (?ev=) : animation en attente -> déclaration du virement -> en ligne ----------
@@ -932,6 +1058,8 @@
       pay.quiz_flowin = rec.opt_quiz_qte > 0; pay.customisation = !!st.custom; pay.montant_ttc = calc().ttc;
       pay.raison_sociale = rec.raison_sociale; pay.email = rec.email;
       pay.signe_le = rec.signature_horodatage_client;
+      /* Champs du bon réduit (Romain, 10/11/2026) gardés avec l'animation (jsonb, aucune colonne ajoutée). */
+      pay.activite = val('f_activite') || null; pay.lots_proposes = val('f_lots') || null; pay.conditions_lots = val('f_conditions') || null;
       pay.statut = declare ? 'declare' : 'signe';
       if (declare) pay.declare_le = new Date().toISOString();
       nv.paiement = pay;
@@ -943,10 +1071,35 @@
       }).then(function(r){ if (!r.ok) throw new Error('http ' + r.status); return true; });
     });
   }
+  /* QR de virement SEPA (norme EPC069-12) : l'application bancaire préremplit bénéficiaire, IBAN, montant, référence. */
+  function payloadEpc(mt, ref){
+    return ['BCD', '002', '1', 'SCT', BIC, 'BAITA EURL', IBAN.replace(/\s/g, ''), mt > 0 ? 'EUR' + (Math.round(mt * 100) / 100).toFixed(2) : '', '', '', String(ref || '').slice(0, 140)].join('\n');
+  }
+  var copies = { iban: IBAN.replace(/\s/g, ''), montant: '', ref: '' };
+  function qrVirement(mt, ref){
+    copies.montant = (Math.round(mt * 100) / 100).toFixed(2).replace('.', ','); copies.ref = ref;
+    var el = $('mQrVir'); if (!el) return;
+    el.innerHTML = '';
+    if (!(mt > 0) || !window.QRCode) return;
+    try { new window.QRCode(el, { text: payloadEpc(mt, ref), width: 400, height: 400, correctLevel: window.QRCode.CorrectLevel.M }); } catch (e) { el.innerHTML = ''; }
+  }
+  function montrerVirement(mt, ref){
+    $('mVirement').removeAttribute('data-off'); $('mVirMt').textContent = eur(mt); qrVirement(mt, ref || copies.ref);
+    if (carMerci) carMerci.maj();
+  }
+  (function(){
+    var bs = document.querySelectorAll('.cop');
+    for (var i = 0; i < bs.length; i++) bs[i].addEventListener('click', function(){
+      var b = this, v = copies[b.getAttribute('data-copie')] || '';
+      function ok(){ b.className = 'cop ok'; b.querySelector('em').textContent = 'Copi\u00e9'; setTimeout(function(){ b.className = 'cop'; b.querySelector('em').textContent = 'Copier'; }, 1600); }
+      try { if (navigator.clipboard && navigator.clipboard.writeText) { navigator.clipboard.writeText(v).then(ok, function(){}); return; } } catch (e) {}
+      try { var ta = document.createElement('textarea'); ta.value = v; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta); ok(); } catch (e2) {}
+    });
+  })();
   function preparerDeclaration(rec, virMt){
     var box = $('mDeclare'); if (!box) return;
-    if (!st.ev || rec.mode_paiement !== 'virement') { box.style.display = 'none'; return; }
-    box.style.display = 'block';
+    if (!st.ev || rec.mode_paiement !== 'virement') { box.setAttribute('data-off', '1'); return; }
+    box.removeAttribute('data-off');
     $('mDeclMt').textContent = eur(virMt); $('mDeclRef').textContent = rec.id;
     $('mDeclBtn').onclick = function(){
       var b = this, ok = $('mDeclOk');
@@ -966,7 +1119,7 @@
           (PRO_ID || rec.pro_id ? ' <a href="/pro/historique?pro=' + encodeURIComponent(PRO_ID || rec.pro_id) + '&op=' + encodeURIComponent('ev:' + st.ev) + '">Ouvrir mon animation</a>' : '');
       }, function(){
         b.disabled = false; ok.className = 'banner warn';
-        ok.textContent = 'La déclaration n’a pas pu être enregistrée. Réessayez dans un instant ; votre commande, elle, est bien signée.';
+        ok.textContent = 'La déclaration n’a pas pu être enregistrée. Réessayez dans un instant ; votre bon de commande, lui, est bien validé.';
       });
     };
   }
@@ -1002,7 +1155,7 @@
         status('Commande enregistrée. Redirection vers GoCardless…', 'ok');
         lancerGoCardless(rec, $('status')).catch(function(){
           afficherMerci(rec, { gcRetry: true, sepaMsg: 'Votre commande est enregistrée, mais la page de prélèvement n’a pas pu s’ouvrir. Réessayez avec le bouton ci-dessous, ou réglez par virement.' });
-          $('mVirement').style.display = 'block'; $('mVirMt').textContent = eur(calc().ttc);
+          montrerVirement(calc().ttc, rec.id);
         });
       } else {
         afficherMerci(rec, {});
@@ -1015,13 +1168,13 @@
         if (e.http === 404 || e.http >= 500) { var fq = fileAttente(); fq.push(rec); lsSet(LS_FILE, fq); }
         if (rec.mode_paiement === 'prelevement_sepa') rec.mode_paiement = 'virement';
         afficherMerci(rec, { echec: true });
-        $('mVirement').style.display = 'block'; $('mVirMt').textContent = eur(rec.montant_ttc);
+        montrerVirement(calc().ttc, rec.id);
         return;
       }
       /* Hors ligne : on garde la commande sur l'appareil et on l'enverra au retour du réseau */
       var f = fileAttente(); f.push(rec);
       if (!lsSet(LS_FILE, f)) { btn.disabled = false; status('Pas de réseau. Réessayez dès que la connexion revient.', 'err'); return; }
-      afficherMerci(rec, { horsLigne: true, gcRetry: rec.mode_paiement === 'prelevement_sepa', sepaMsg: rec.mode_paiement === 'prelevement_sepa' ? 'Le mandat de prélèvement se signe en ligne : utilisez le bouton ci-dessous dès que le réseau revient.' : '' });
+      afficherMerci(rec, { horsLigne: true, gcRetry: rec.mode_paiement === 'prelevement_sepa', sepaMsg: rec.mode_paiement === 'prelevement_sepa' ? 'Le mandat de prélèvement se valide en ligne : utilisez le bouton ci-dessous dès que le réseau revient.' : '' });
     });
   }
 
@@ -1032,19 +1185,19 @@
     var memo = lsGet(LS_DERNIERE);
     if (!memo || !memo.rec || memo.rec.id !== cid) {
       document.body.className = 'done';
-      $('mNum').textContent = cid; $('mVirement').style.display = 'none';
-      $('mTitle').innerHTML = retour === 'gocardless' ? 'Merci, votre mandat <em>est signé</em>.' : 'Prélèvement <em>non finalisé</em>.';
+      $('mNum').textContent = cid; $('mVirement').setAttribute('data-off', '1'); if (carMerci) carMerci.maj();
+      $('mTitle').innerHTML = retour === 'gocardless' ? 'Merci, votre mandat <em>est validé</em>.' : 'Prélèvement <em>non finalisé</em>.';
       $('mSub').innerHTML = 'Commande n° <b>' + esc(cid) + '</b>. Flowin vous confirme la suite par email.';
       return;
     }
     st.offre = memo.st.offre === 'mensuelle' ? 'mensuelle' : 'annuelle'; $('engChk').checked = !!memo.st.eng; st.garantie = !!memo.st.garantie; st.certif = memo.st.certif || null; st.nb = memo.st.nb; st.kit = memo.st.kit; st.quiz = memo.st.quiz; st.bonus = memo.st.bonus;
     ID = memo.rec.id; render();
     if (retour === 'gocardless') {
-      afficherMerci(memo.rec, { sepaMsg: '<b>Mandat SEPA signé.</b> GoCardless le transmet à votre banque ; le prélèvement apparaîtra sur votre relevé sous quelques jours ouvrés. Vous recevez une notification de GoCardless avant chaque prélèvement.' });
-      $('mTitle').innerHTML = 'Merci, votre mandat <em>est signé</em>.';
+      afficherMerci(memo.rec, { sepaMsg: '<b>Mandat SEPA validé.</b> GoCardless le transmet à votre banque ; le prélèvement apparaîtra sur votre relevé sous quelques jours ouvrés. Vous recevez une notification de GoCardless avant chaque prélèvement.' });
+      $('mTitle').innerHTML = 'Merci, votre mandat <em>est validé</em>.';
     } else {
-      afficherMerci(memo.rec, { gcRetry: true, sepaMsg: 'Le mandat n’a pas été signé. Votre commande reste enregistrée : réessayez, ou réglez par virement.' });
-      $('mVirement').style.display = 'block'; $('mVirMt').textContent = eur(calc().ttc);
+      afficherMerci(memo.rec, { gcRetry: true, sepaMsg: 'Le mandat n’a pas été validé. Votre commande reste enregistrée : réessayez, ou réglez par virement.' });
+      montrerVirement(calc().ttc, memo.rec.id);
       $('mTitle').innerHTML = 'Prélèvement <em>non finalisé</em>.';
     }
   })();
@@ -1075,7 +1228,7 @@
     gm.mode = mode; gm.commande = commande || null; gm.saisie = null; gm.fait = fait || null;
     try { gmRetour = document.activeElement; } catch (e) { gmRetour = null; }
     $('gm_panier').value = mode === 'bon' ? val('f_panier') : ''; $('gm_flux').value = mode === 'bon' ? $('f_flux').value : '';
-    $('gm_nom').value = mode === 'bon' ? val('f_contact') : ''; $('gm_ok').checked = false;
+    $('gm_nom').value = mode === 'bon' ? composerContact() : ''; $('gm_ok').checked = false;
     gmErr('gmErr1', false); gmErr('gmErr2', false); $('gmCert').disabled = false;
     gmStep(1); $('gModal').hidden = false;
     setTimeout(function(){ try { $('gm_panier').focus(); } catch (e) {} }, 30);
@@ -1137,7 +1290,7 @@
   });
   $('gmFin').addEventListener('click', function(){
     fermerDemarche();
-    if (gm.mode === 'bon') { var g = $('guarBox'); if (g && g.scrollIntoView) g.scrollIntoView({ behavior: 'smooth', block: 'center' }); }
+    if (gm.mode === 'bon') { var g = $('guarBox'); if (g && carForm) carForm.allerVers(g); }
   });
 
   /* Rappel sur la page de confirmation (commande enregistrée sans la garantie) */
@@ -1201,24 +1354,30 @@
     if (em && /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(em)) remplirVides({ f_email: em });
     var sess = sessionPro();
     if (!sess || !window.fetch || location.protocol === 'file:') { renderClient(); return; }
-    var cols = 'id,nom,nom_commercial,siret,adresse,code_postal,ville,contact,role_contact,email,tel,nb_points_vente';
+    var cols = 'id,nom,nom_commercial,siret,adresse,code_postal,ville,contact,role_contact,email,tel,nb_points_vente,secteur';
     var url = SUPA + '/rest/v1/pros?select=' + cols + '&auth_id=eq.' + encodeURIComponent(sess.user.id) + (qs('pro') && /^[a-z0-9-]{3,80}$/.test(qs('pro')) ? '&id=eq.' + encodeURIComponent(qs('pro')) : '') + '&limit=1';
     fetch(url, { headers: { 'apikey': KEY, 'Authorization': 'Bearer ' + sess.access_token } })
       .then(function(r){ return r.ok ? r.json() : []; })
       .then(function(rows){
         var f = rows && rows[0]; if (!f) return;
         var n = remplirVides({ f_raison: f.nom, f_enseigne: f.nom_commercial, f_siret: String(f.siret || '').replace(/\s/g, ''), f_adresse: f.adresse, f_cp: f.code_postal, f_ville: f.ville,
-          f_contact: f.contact, f_fonction: f.role_contact, f_email: f.email, f_tel: f.tel });
+          f_fonction: f.role_contact, f_email: f.email, f_tel: f.tel, f_activite: f.secteur });
+        eclaterContact(f.contact);
         var nb = parseInt(f.nb_points_vente, 10); if (nb > 0 && !qs('boutiques')) st.nb = clampInt(nb, 1, 200);
         if (f.id && /^[a-z0-9-]{3,80}$/.test(String(f.id))) PRO_ID = String(f.id);
         var siret = val('f_siret').replace(/\s/g, ''); if (siret) setErr('siret', !/^[0-9]{14}$/.test(siret));
-        if (n || nb > 0) { var b = $('prefillInfo'); if (b) { b.textContent = 'Informations reprises de votre compte. Vérifiez-les et complétez ce qui manque : tout reste modifiable.'; b.style.display = 'block'; } }
+        if (n || nb > 0) { var b = $('prefillInfo'); if (b) { b.textContent = 'Repris de votre profil. Vérifiez.'; b.style.display = 'block'; } }
         render(); verifierClient();
       })
       .catch(function(){});
   })();
   $('form').addEventListener('input', renderClient); $('form').addEventListener('change', renderClient);
 
+  carForm = new Carrousel($('carForm'), {
+    avantSuivant: function(ecran){ return valider(false, ecran); },
+    surChange: function(p, n){ var h = document.documentElement; h.className = h.className.replace(/ ?car-fin/g, '') + (p >= n - 1 ? ' car-fin' : ''); }
+  });
+  carMerci = new Carrousel($('carMerci'));
   render();
 })();
 </script>

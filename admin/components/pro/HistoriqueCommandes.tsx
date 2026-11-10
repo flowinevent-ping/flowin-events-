@@ -18,6 +18,7 @@ import {
   type CommandeAnimation, type StatutAffiche, LIBELLE_PAIEMENT, LIBELLE_STATUT, NOM_OFFRE, VIREMENT,
   chargerCommandes, dateFr, dateHeureFr, eur, lignesCommande, montantAVirer, statutAffiche,
 } from '@/lib/commandesPro'
+import QrVirement from './QrVirement'
 import LienBonCommande from './LienBonCommande'
 import { telechargerContrat, telechargerFacture } from '@/lib/pdfCommande'
 import type { Facture } from '@/lib/documentsAnimation'
@@ -51,7 +52,6 @@ export default function HistoriqueCommandes({ proId }: { proId: string }) {
   const [message, setMessage] = useState('')
   const [ouvert, setOuvert] = useState<string | null>(null)
   const [info, setInfo] = useState<Record<string, string>>({})
-  const [copie, setCopie] = useState('')
 
   const recharger = useCallback(async () => {
     const r = await chargerCommandes(proId)
@@ -60,10 +60,6 @@ export default function HistoriqueCommandes({ proId }: { proId: string }) {
   }, [proId])
   useEffect(() => { recharger() }, [recharger])
 
-  async function copier(txt: string, cle: string) {
-    try { await navigator.clipboard.writeText(txt); setCopie(cle) } catch { setCopie('') }
-    setTimeout(() => setCopie(''), 2000)
-  }
   async function pdf(c: CommandeAnimation, f?: Facture) {
     setInfo(i => ({ ...i, [c.id]: '' }))
     try {
@@ -95,7 +91,7 @@ export default function HistoriqueCommandes({ proId }: { proId: string }) {
     return (
       <div style={CARD}>
         <div style={{ fontSize: 16, fontWeight: 900 }}>Historique bientôt disponible</div>
-        <div style={{ fontSize: 13.5, ...MUTED, marginTop: 6, lineHeight: 1.55 }}>Cette page affichera vos commandes, vos contrats signés et vos factures dès l’ouverture du service de commande en ligne. Rien n’est perdu : vos commandes passées sont conservées.</div>
+        <div style={{ fontSize: 13.5, ...MUTED, marginTop: 6, lineHeight: 1.55 }}>Cette page affichera vos commandes, vos bons de commande et vos factures dès l’ouverture du service de commande en ligne. Rien n’est perdu : vos commandes passées sont conservées.</div>
       </div>
     )
   }
@@ -105,8 +101,8 @@ export default function HistoriqueCommandes({ proId }: { proId: string }) {
     return (
       <div style={{ ...CARD, textAlign: 'center', padding: 28 }}>
         <div style={{ fontSize: 17, fontWeight: 900 }}>Aucune commande pour le moment</div>
-        <div style={{ fontSize: 13.5, ...MUTED, margin: '6px 0 16px' }}>Choisissez votre offre et signez votre bon de commande pour ouvrir votre espace.</div>
-        <LienBonCommande proId={proId} style={{ ...BTN, display: 'inline-block', textDecoration: 'none' }}>Choisir mon offre et signer</LienBonCommande>
+        <div style={{ fontSize: 13.5, ...MUTED, margin: '6px 0 16px' }}>Choisissez votre offre et validez votre bon de commande.</div>
+        <LienBonCommande proId={proId} style={{ ...BTN, display: 'inline-block', textDecoration: 'none' }}>Valider mon bon de commande</LienBonCommande>
       </div>
     )
   }
@@ -165,12 +161,12 @@ export default function HistoriqueCommandes({ proId }: { proId: string }) {
                       <div style={LIGNE}><span style={MUTED}>Mode de paiement</span><b>{LIBELLE_PAIEMENT[c.mode_paiement] ?? c.mode_paiement}</b></div>
                       <div style={LIGNE}><span style={MUTED}>Statut</span><Pastille s={s} /></div>
                       <div style={LIGNE}><span style={MUTED}>Souscription</span><b>{c.type_commande === 'renouvellement' ? 'Renouvellement' : 'Première souscription'}</b></div>
-                      <div style={LIGNE}><span style={MUTED}>Signé le</span><b>{dateHeureFr(c.signature_horodatage ?? c.created_at)}</b></div>
+                      <div style={LIGNE}><span style={MUTED}>Validé le</span><b>{dateHeureFr(c.signature_horodatage ?? c.created_at)}</b></div>
                       {c.paiement_valide_le && <div style={LIGNE}><span style={MUTED}>Paiement validé le</span><b>{dateFr(c.paiement_valide_le)}</b></div>}
                       {(factures[c.id] ?? []).map(f => <div key={f.numero} style={LIGNE}><span style={MUTED}>{f.objet === 'mensualite' ? 'Facture mensualité' : 'Facture'}</span><b>{f.numero}</b></div>)}
 
                       <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginTop: 14 }}>
-                        <button style={{ ...BTN2, padding: '10px 16px', fontSize: 13 }} onClick={() => pdf(c)}>Contrat signé (PDF)</button>
+                        <button style={{ ...BTN2, padding: '10px 16px', fontSize: 13 }} onClick={() => pdf(c)}>Bon de commande (PDF)</button>
                         {(factures[c.id] ?? []).map(f => (
                           <button key={f.numero} style={{ ...BTN2, padding: '10px 16px', fontSize: 13 }} onClick={() => pdf(c, f)}>{f.objet === 'mensualite' ? 'Mensualité' : 'Facture'} {f.numero} (PDF)</button>
                         ))}
@@ -183,14 +179,10 @@ export default function HistoriqueCommandes({ proId }: { proId: string }) {
 
                   {(s === 'attente' || s === 'a_reprendre') && virer > 0 && (
                     <div style={{ background: C.violetClair, borderRadius: 14, padding: '14px 16px' }}>
-                      <div style={{ fontSize: 14, fontWeight: 900, marginBottom: 6 }}>Régler par virement : {eur(virer)} TTC</div>
-                      {[['Titulaire', VIREMENT.titulaire], ['IBAN', VIREMENT.iban], ['BIC', VIREMENT.bic], ['Référence à rappeler', c.id]].map(([k, v]) => (
-                        <div key={k} style={{ display: 'flex', gap: 10, alignItems: 'center', padding: '5px 0', fontSize: 13 }}>
-                          <span style={{ minWidth: 128, ...MUTED, fontWeight: 700 }}>{k}</span>
-                          <b style={{ fontFamily: k === 'IBAN' || k === 'BIC' || k === 'Référence à rappeler' ? 'ui-monospace,Menlo,monospace' : 'inherit', wordBreak: 'break-all' }}>{v}</b>
-                          {k !== 'Titulaire' && <button onClick={() => copier(v, c.id + k)} style={{ all: 'unset', cursor: 'pointer', color: C.bleu, fontWeight: 800, fontSize: 12 }}>{copie === c.id + k ? 'Copié' : 'Copier'}</button>}
-                        </div>
-                      ))}
+                      <div style={{ fontSize: 14, fontWeight: 900, marginBottom: 8 }}>Régler par virement : {eur(virer)} TTC</div>
+                      {/* QR de virement SEPA + copier en un clic (Romain, 10/11/2026). */}
+                      <div style={{ maxWidth: 360 }}><QrVirement montant={virer} reference={c.id} taille={180} /></div>
+                      <div style={{ fontSize: 12, ...MUTED, marginTop: 6 }}>BIC {VIREMENT.bic}</div>
                       <div style={{ display: 'flex', gap: 10, alignItems: 'center', flexWrap: 'wrap', marginTop: 10 }}>
                         {c.mode_paiement === 'virement' && <button style={{ ...BTN, padding: '10px 18px', fontSize: 13.5 }} onClick={() => relancer(c)}>J’ai fait le virement : prévenir Flowin</button>}
                         {c.relance_paiement_at && <span style={{ fontSize: 12, ...MUTED }}>Dernier rappel : {dateHeureFr(c.relance_paiement_at)}</span>}
@@ -199,7 +191,7 @@ export default function HistoriqueCommandes({ proId }: { proId: string }) {
                   )}
                   {(s === 'attente' || s === 'a_reprendre') && c.mode_paiement === 'prelevement_sepa' && (
                     <div style={{ background: C.violetClair, borderRadius: 14, padding: '14px 16px', fontSize: 13.5, lineHeight: 1.55 }}>
-                      <b>Prélèvement SEPA en cours.</b> Signez le mandat sur la page GoCardless ; le paiement est validé automatiquement et votre espace s’ouvre aussitôt.
+                      <b>Prélèvement SEPA en cours.</b> Validez le mandat sur la page GoCardless : votre espace s’ouvre aussitôt.
                       {virer > 0 && <div style={{ marginTop: 6 }}>Le kit et les options ({eur(virer)} TTC) sont à régler par virement avec la référence <b>{c.id}</b>.</div>}
                     </div>
                   )}
