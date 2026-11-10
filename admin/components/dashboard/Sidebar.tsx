@@ -79,7 +79,7 @@ const ICON_BY_ID: Record<string, string> = {
   'theme-parcours': 'layout',
   'demandes-rattachement': 'handshake',
   'facture-nds': 'receipt', commercial: 'receipt', 'visite-guidee': 'globe',
-  roadmap: 'map', parametres: 'settings', maintenance: 'wrench', controle: 'check',
+  roadmap: 'map', parametres: 'settings', maintenance: 'wrench', controle: 'check', 'emails-connexion': 'mail',
 }
 function SbIcon({ id }: { id: string }) {
   const p = ICON_PATHS[ICON_BY_ID[id]]
@@ -238,6 +238,7 @@ export default function Sidebar() {
         { id: 'roadmap', label: 'Feuille de route', href: '/dashboard/roadmap' },
         { id: 'parametres', label: 'Paramètres', href: '/dashboard/parametres' },
         { id: 'controle', label: 'Contrôle', href: '/dashboard/controle' },
+        { id: 'emails-connexion', label: 'Emails de connexion', href: '/dashboard/emails-connexion' },
         { id: 'maintenance', label: 'Maintenance', href: '/dashboard/maintenance' },
       ],
     },
