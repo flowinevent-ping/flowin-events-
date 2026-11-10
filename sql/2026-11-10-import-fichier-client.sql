@@ -1,3 +1,10 @@
+-- APPLIQUÉ EN PRODUCTION le 10/11/2026 (migration import_fichier_client_pro_2026_11_10), VERSION ADAPTÉE :
+-- au lieu de créer contacts_importes_pro, l'import écrit dans la table EXISTANTE clients_commerce
+-- (fichier client du commerce, déjà lue par crm_pro), avec source 'import' et deux colonnes ajoutées
+-- optin / optin_date (consentement donné AU commerce). crm_pro de production conservé, + optin de clients_commerce.
+-- Le joueur importé est créé avec optin global = false (le consentement ne vaut que pour ce commerce).
+-- Le texte ci-dessous est la PREMIÈRE PROPOSITION, NON appliquée telle quelle : ne pas la rejouer.
+
 -- ============================================================================
 -- sql/2026-11-10-import-fichier-client.sql
 -- IMPORT DU FICHIER CLIENT DANS L'ESPACE PRO (registre L13, 10/11/2026).
