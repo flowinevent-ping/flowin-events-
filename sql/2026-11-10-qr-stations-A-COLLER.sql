@@ -1,3 +1,4 @@
+-- APPLIQUÉ en production le 10/11/2026 (migrations qr_stations_colonnes_2026_11_10 + qr_stations_origine_acces_2026_11_10, version sans DROP). Vérifié : QR super admin (cree_par sa), QR pro (cree_par pro, visible par le pro, refus sur l'animation d'un autre), liens /q/<code> -> 302 vers le jeu avec la source.
 -- QR codes : à coller dans Supabase > SQL Editor, puis cliquer « Run ». Sans risque, rejouable.
 alter table public.qr_stations add column if not exists support text;
 alter table public.qr_stations add column if not exists type_qr text;
