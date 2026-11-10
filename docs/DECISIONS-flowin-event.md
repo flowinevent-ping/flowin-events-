@@ -262,3 +262,9 @@ que sur instruction explicite de Romain.
   l'écran quiz (question bonus → graphique).
 - À retirer : le « théâtre » devant la ville (incompréhensible), les arcs en pointillés, les halos
   lumineux, les bonhommes (mauvaise qualité).
+
+## Communication et prix (10/11/2026, Romain)
+- **Pas d'envoi d'email ni de SMS** pour l'instant : tout passe par l'application de jeu Flowin.
+  Pas de campagne d'acquisition : on travaille sur l'existant et le flux capté, en local.
+- Piste prix : 1re année 99 € HT/an ; **2e année éventuellement 99 €/mois**, avec envoi d'**offres
+  flash** instantanées aux clients de proximité. (Réflexion en cours, non tranchée.)
