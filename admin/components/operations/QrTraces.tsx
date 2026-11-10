@@ -18,11 +18,12 @@ import { useEffect, useState } from 'react'
 import Diffusion from '@/components/dashboard/Diffusion'
 import {
   SUPPORTS_QR, typeParDefaut, fetchQrTraces, avecDefauts, creerQrTrace, publierQrTrace, renommerQrTrace, archiverQrTrace,
-  assurerQrParDefaut, changerJeuStation, urlDuQr, estPermanent,
+  assurerQrParDefaut, changerJeuStation, urlDuQr, estPermanent, QR_INCLUS,
   type QrTrace, type TypeQr,
 } from '@/lib/qrTraces'
 import { lienAncien } from '@/lib/qrPermalien'
 import { libelleModule } from '@/lib/operations'
+import { PictoSupport, PictoQr } from './PictoSupport'
 
 /* Jeux proposables derriere un QR (hors Nuits du Sud). Memes identifiants que events.module. */
 const JEUX_CHANGEABLES = ['quiz', 'quizsolo', 'quizmaster', 'spin', 'tombola', 'vote']
@@ -86,11 +87,20 @@ export function FormulaireQr({ onAjouter, occupe, libelle = '+ Créer le QR' }: 
   }
   return (
     <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
-      <input style={{ ...champ, flex: '2 1 180px' }} placeholder="Nom du QR — ex. Vitrine rue principale" value={nom} onChange={e => setNom(e.target.value)} aria-label="Nom du QR" />
-      <select style={{ ...champ, flex: '1 1 150px' }} value={support} aria-label="Support"
-        onChange={e => { setSupport(e.target.value); setType(typeParDefaut(e.target.value)) }}>
-        {SUPPORTS_QR.map(s => <option key={s.v} value={s.v}>{s.v}</option>)}
-      </select>
+      <input style={{ ...champ, flex: '1 1 100%' }} placeholder="Intitulé — ex. Arrière de bus · campagne salle de sport" value={nom} onChange={e => setNom(e.target.value)} aria-label="Intitulé du QR" />
+      <div role="radiogroup" aria-label="Type de support" data-tuiles-support style={{ flex: '1 1 100%', display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(76px,1fr))', gap: 6 }}>
+        {SUPPORTS_QR.map(s => {
+          const on = support === s.v
+          return (
+            <button key={s.v} type="button" role="radio" aria-checked={on} data-support-tuile={s.p}
+              onClick={() => { setSupport(s.v); setType(typeParDefaut(s.v)) }}
+              style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3, padding: '7px 4px', borderRadius: 10, cursor: 'pointer', fontFamily: 'inherit',
+                border: `2px solid ${on ? 'var(--sa-accent, #3B5CC4)' : BRD}`, background: on ? '#EEF2FB' : '#fff', color: '#0F172A', fontSize: 10.5, fontWeight: 800, lineHeight: 1.15, textAlign: 'center' }}>
+              <PictoSupport k={s.p} taille={30} />{s.v}
+            </button>
+          )
+        })}
+      </div>
       <div style={{ display: 'inline-flex', border: `1.5px solid ${BRD}`, borderRadius: 8, overflow: 'hidden' }} role="radiogroup" aria-label="Type de QR">
         {(['physique', 'digital'] as const).map(t => (
           <button key={t} type="button" role="radio" aria-checked={type === t} onClick={() => setType(t)}
@@ -176,6 +186,15 @@ export default function QrTraces({ eventId, module, titre, mode, grille = false,
   const tous = tousAvecArchives.filter(q => !q.archive_le)
   /* Cote pro, un QR masque par le SA n apparait plus. */
   const visibles = mode === 'sa' ? tous : tous.filter(q => q.publie)
+  /* Piste de prix (non tranchée) : 2 QR de tracking inclus (hors QR par défaut), les suivants
+     sont signalés « QR supplémentaire ». Informatif seulement : rien n'est bloqué ni facturé. */
+  const crees = tous.filter(q => !q.parDefaut)
+  const supplementaires = crees.slice(QR_INCLUS).map(q => q.source_qr)
+  const compteur = (
+    <div data-qr-inclus style={{ fontSize: 11.5, fontWeight: 800, color: '#1B3A5C', margin: '4px 0 6px' }}>
+      {QR_INCLUS} QR inclus · {crees.length} créé{crees.length > 1 ? 's' : ''}{supplementaires.length ? ` · ${supplementaires.length} supplémentaire${supplementaires.length > 1 ? 's' : ''} (option, prix à définir)` : ''}
+    </div>
+  )
 
   if (grille) {
     return (
@@ -184,7 +203,7 @@ export default function QrTraces({ eventId, module, titre, mode, grille = false,
           {visibles.map(q => (
             <div key={q.source_qr} className="pc-qr-tuile">
               <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
-                <span style={{ fontSize: 13.5, fontWeight: 800 }}>{q.nom}</span><BadgeTypeQr type={q.type} />{jeu !== 'nds2026' && <BadgePermanent q={q} />}
+                <PictoQr support={q.support} source={q.source_qr} taille={26} /><span style={{ fontSize: 13.5, fontWeight: 800 }}>{q.nom}</span><BadgeTypeQr type={q.type} />{jeu !== 'nds2026' && <BadgePermanent q={q} />}
               </div>
               <div style={{ fontSize: 11.5, color: MUT, margin: '3px 0 10px', lineHeight: 1.4 }}>{q.support ?? ''}{q.support ? ' · ' : ''}{REGLE_TYPE_QR[q.type]}</div>
               <Diffusion compact url={urlDuQr(q, eventId, jeu)} titre={titre} qrNom={q.nom} support={q.support} code={q.code_court} ancienFormat={false} sousTitre="Scannez pour jouer" />
@@ -193,6 +212,7 @@ export default function QrTraces({ eventId, module, titre, mode, grille = false,
         </div>
         {!sansAjout && <>
         <div style={{ fontSize: 13, fontWeight: 800, marginBottom: 6 }}>Ajouter un QR</div>
+        {compteur}
         <FormulaireQr onAjouter={ajouter} occupe={occupe} />
         {erreur && <div style={{ fontSize: 12, color: '#B45309', fontWeight: 700, marginTop: 6 }}>{erreur}</div>}
         </>}
@@ -202,7 +222,7 @@ export default function QrTraces({ eventId, module, titre, mode, grille = false,
 
   return (
     <div style={{ marginTop: 12 }}>
-      <div style={{ fontSize: 11.5, fontWeight: 800, marginBottom: 4 }}>QR tracés — un QR par support</div>
+      <div style={{ fontSize: 11.5, fontWeight: 800, marginBottom: 4 }}>QR tracés — un QR par support de communication</div>
       <div style={{ fontSize: 11, color: MUT, marginBottom: 6 }}>
         Chaque QR est une station de jeu avec ses propres statistiques (onglet Trafic). Il est utilisable dès sa création.
       </div>
@@ -212,6 +232,7 @@ export default function QrTraces({ eventId, module, titre, mode, grille = false,
         return (
           <div key={cle} style={{ padding: '6px 0', borderTop: `1px solid ${BRD}` }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
+              <PictoQr support={q.support} source={q.source_qr} taille={34} />
               <Diffusion vignette={44} url={url} titre={q.nom} />
               <div style={{ flex: 1, minWidth: 140 }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
@@ -227,6 +248,7 @@ export default function QrTraces({ eventId, module, titre, mode, grille = false,
                   <BadgeTypeQr type={q.type} />
                   {jeu !== 'nds2026' && <BadgePermanent q={q} />}
                   {q.parDefaut && <span style={{ fontSize: 10.5, color: MUT }}>par défaut</span>}
+                  {supplementaires.indexOf(q.source_qr) >= 0 && <span data-qr-supplementaire style={{ fontSize: 10, fontWeight: 800, padding: '2px 7px', borderRadius: 99, background: 'rgba(194,65,12,.1)', color: '#C2410C', whiteSpace: 'nowrap' }}>QR supplémentaire (option, prix à définir)</span>}
                   {!q.publie && <span style={{ fontSize: 10.5, fontWeight: 800, color: '#B45309' }}>masqué au pro</span>}
                 </div>
                 <div style={{ fontSize: 10.5, color: MUT }}>{q.support ? `${q.support} · ` : ''}{q.code_court ? `réf. ${q.code_court}` : `?source=${q.source_qr}`}</div>
@@ -264,6 +286,7 @@ export default function QrTraces({ eventId, module, titre, mode, grille = false,
         </div>
       )}
       <div style={{ marginTop: 8 }}>
+        {compteur}
         <FormulaireQr onAjouter={ajouter} occupe={occupe} />
         {erreur && <div style={{ fontSize: 12, color: '#B45309', fontWeight: 700, marginTop: 6 }}>{erreur}</div>}
       </div>

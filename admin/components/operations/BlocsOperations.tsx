@@ -29,6 +29,7 @@ import ModalGererLots from './ModalGererLots'
 import { DiffusionStation, ExportMailchimp, lienJeuStation } from './DiffusionOperation'
 import RapportPro from '@/components/pro/RapportPro'
 import { BadgeTypeQr } from './QrTraces'
+import { EgaliseurQr } from './PictoSupport'
 import ReglageTirage from './ReglageTirage'
 import { fetchStatsQr, type StatQr } from '@/lib/qrTraces'
 import { ContenuCrm, ContenuReponses } from './DataOperation'
@@ -693,6 +694,7 @@ function StatsParQr({ eventIds }: { eventIds: string[] }) {
   return (
     <>
       <div style={{ fontSize: 11, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '.05em', color: MUT, margin: '12px 0 2px' }}>Par QR — chaque QR est une station de jeu</div>
+      <div style={{ margin: '6px 0 8px' }}><EgaliseurQr lignes={lignes} titre={null} compact /></div>
       {lignes.map(l => (
         <div key={l.source || '-'} style={{ ...ligne, padding: '6px 0' }}>
           <span style={{ flex: 1, minWidth: 140, fontSize: 12.5, fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>

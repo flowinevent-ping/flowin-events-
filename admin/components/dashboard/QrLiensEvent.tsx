@@ -6,6 +6,7 @@ import {
   type LienEphemere,
 } from '@/lib/dashboard'
 import QrTraces from '@/components/operations/QrTraces'
+import { EgaliseurQrEvents } from '@/components/operations/PictoSupport'
 import { BASE_CANONIQUE } from '@/lib/qrPermalien'
 
 /** Bloc QR traces + liens ephemeres pour un event donne, dans l'onglet QR & Liens de la fiche Pro. */
@@ -39,6 +40,7 @@ export default function QrLiensEvent({ eventId, eventNom, module }: { eventId: s
 
       {/* QR traces (lot QR, 31/10) : memes QR, meme ecran que cote pro, publies
           des leur creation ; le SA peut en masquer un. */}
+      <EgaliseurQrEvents eventIds={[eventId]} titre="Flashs par support" compact />
       <QrTraces eventId={eventId} module={module} titre={eventNom} mode="sa" />
 
       <div style={{ fontSize: 11, fontWeight: 800, textTransform: 'uppercase', color: 'var(--sa-muted)', margin: '16px 0 6px' }}>

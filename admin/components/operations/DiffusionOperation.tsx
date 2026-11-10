@@ -19,6 +19,7 @@ import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase'
 import { libelleDates, type DonneesOperation } from '@/lib/operations'
 import QrTraces from './QrTraces'
+import { EgaliseurQrEvents } from './PictoSupport'
 import { BASE_CANONIQUE } from '@/lib/qrPermalien'
 import Diffusion from '@/components/dashboard/Diffusion'
 
@@ -127,6 +128,7 @@ export function DiffusionStation({ op, s, mode }: { op: DonneesOperation; s: Sta
 
           <Diffusion compact ancienFormat url={url} titre={s.nom} sousTitre="Scannez pour jouer" />
 
+          <EgaliseurQrEvents eventIds={[s.id]} titre="Flashs par support" compact />
           <QrTraces eventId={s.id} module={s.module} titre={s.nom} mode={mode} />
         </div>
       )}

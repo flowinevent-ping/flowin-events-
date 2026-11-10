@@ -259,6 +259,7 @@ export default function CrmPro({ proId, proNom, contacts, erreur, operations, op
                       <td style={td} onClick={e => e.stopPropagation()}><input type="checkbox" checked={sel.has(c.joueur_id)} onChange={() => basculer(c.joueur_id)} /></td>
                       <td style={td}>
                         <div style={{ fontWeight: 800 }}>{`${c.prenom ?? ''} ${c.nom ?? ''}`.trim() || '—'}</div>
+                        {c.offert_par && <div data-offert-par style={{ fontSize: 11.5, fontWeight: 800, color: '#C2410C' }}>Offert par {c.offert_par}</div>}
                         <div style={{ fontSize: 11.5, color: C.attenue }}>{[c.code_postal, c.ville].filter(Boolean).join(' ') || '—'}</div>
                       </td>
                       <td style={td}>

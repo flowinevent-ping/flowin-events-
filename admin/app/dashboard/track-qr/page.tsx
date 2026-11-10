@@ -10,6 +10,7 @@ import { useDashboard } from '@/contexts/DashboardContext'
 import { PageHeader, SectionHeader, EmptyState } from '@/components/dashboard/DashboardUI'
 import { Camembert } from '@/components/dashboard/Camembert'
 import { CourbeQuotidienne } from '@/components/dashboard/CourbeQuotidienne'
+import { EgaliseurQrSuperEvent } from '@/components/operations/PictoSupport'
 import { fetchTrackQr, fetchTrackQrQuotidien, fetchSuperEvents, superEventParDefaut, libelleSource, type TrackQr, type TrackQrJour, type SuperEvent } from '@/lib/nds'
 
 export default function Page() {
@@ -94,6 +95,9 @@ export default function Page() {
                 />
               </>
             )}
+
+            <SectionHeader>Flashs par support de communication</SectionHeader>
+            <EgaliseurQrSuperEvent superEventId={se} titre={null} />
 
             <SectionHeader>Origine des visiteurs</SectionHeader>
             <div style={{ marginBottom: 20 }}>

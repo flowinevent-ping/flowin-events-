@@ -17,6 +17,7 @@ import QRCode from 'qrcode'
 import { supabase } from '@/lib/supabase'
 import { Camembert } from '@/components/dashboard/Camembert'
 import Carrousel from '@/components/pro/Carrousel'
+import { EgaliseurQrEvents } from '@/components/operations/PictoSupport'
 import type { StatsOperation } from '@/lib/operations'
 
 const BLEU = '#3B5CC4'
@@ -151,6 +152,12 @@ export default function RapportPro({ eventIds, superEventId, contacts, gagnants,
           {gagnants != null && <Tuile c={ORANGE} v={gagnants} l="gagnants" />}
         </div>
         <div style={{ fontSize: 11.5, color: MUT, marginTop: 8 }}>Un flash est une ouverture du QR ; un joueur est compté une fois.</div>
+      </div>
+    ) },
+    { cle: 'supports', contenu: (
+      <div data-slide="supports" style={{ background: '#fff', border: '1px solid #E2E8F0', borderRadius: 16, padding: 16 }}>
+        <EgaliseurQrEvents eventIds={eventIds} titre="D’où viennent vos flashs" cadre={false} />
+        <div style={{ fontSize: 11.5, color: MUT, marginTop: 8 }}>Un QR par support : même jeu, mêmes lots ; vous voyez quelle pub vous amène du monde.</div>
       </div>
     ) },
     { cle: 'genre', contenu: (

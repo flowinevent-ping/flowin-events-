@@ -1,6 +1,7 @@
 import { supabase } from '@/lib/supabase'
 import type { QrStation } from '@/lib/dashboard'
 import { lienAncien, lienPermanent } from '@/lib/qrPermalien'
+import { libelleSource } from '@/lib/nds'
 
 /**
  * QR TRACES = STATIONS DE JEU (lot QR, 31/10).
@@ -23,16 +24,45 @@ import { lienAncien, lienPermanent } from '@/lib/qrPermalien'
 
 export type TypeQr = 'physique' | 'digital'
 
-export const SUPPORTS_QR: { v: string; digital: boolean }[] = [
-  { v: 'Entrée / vitrine', digital: false },
-  { v: 'Caisse', digital: false },
-  { v: 'Facebook', digital: true },
-  { v: 'Instagram', digital: true },
-  { v: 'TikTok', digital: true },
-  { v: 'Snapchat', digital: true },
-  { v: 'Support publicitaire', digital: false },
-  { v: 'Autre', digital: false },
+/** Types de support a pictogramme (Romain, 10/11/2026 soir : « QR = métrique de chaque support »).
+ *  `p` = cle du pictogramme (components/operations/PictoSupport). Les reseaux sociaux sont digitaux. */
+export const SUPPORTS_QR: { v: string; digital: boolean; p: string }[] = [
+  { v: 'Bus / transport', digital: false, p: 'bus' },
+  { v: 'Instagram', digital: true, p: 'instagram' },
+  { v: 'Facebook', digital: true, p: 'facebook' },
+  { v: 'TikTok', digital: true, p: 'tiktok' },
+  { v: 'Affiche', digital: false, p: 'affiche' },
+  { v: 'Flyer', digital: false, p: 'flyer' },
+  { v: 'Ticket de caisse', digital: false, p: 'ticket' },
+  { v: 'Vitrine / comptoir', digital: false, p: 'vitrine' },
+  { v: 'Site web', digital: false, p: 'site' },
+  { v: 'Presse / magazine', digital: false, p: 'presse' },
+  { v: 'Radio', digital: false, p: 'radio' },
+  { v: 'Autre', digital: false, p: 'autre' },
 ]
+/** Anciens libelles encore en base -> pictogramme. */
+const PICTO_ANCIENS: Record<string, string> = {
+  'Entrée / vitrine': 'vitrine', 'Caisse': 'ticket', 'Snapchat': 'autre', 'Support publicitaire': 'affiche',
+}
+/** Cle de pictogramme d un support (texte libre tolere). */
+export function pictoDuSupport(support: string | null | undefined, source?: string | null): string {
+  const s = support || ''
+  const t = SUPPORTS_QR.find(x => x.v === s)
+  if (t) return t.p
+  if (PICTO_ANCIENS[s]) return PICTO_ANCIENS[s]
+  const k = (s + ' ' + (source || '')).toLowerCase()
+  if (k.indexOf('bus') >= 0 || k.indexOf('tram') >= 0) return 'bus'
+  if (k.indexOf('insta') >= 0) return 'instagram'
+  if (k.indexOf('facebook') >= 0) return 'facebook'
+  if (k.indexOf('tiktok') >= 0) return 'tiktok'
+  if (k.indexOf('magasin') >= 0 || k.indexOf('vitrine') >= 0) return 'vitrine'
+  if (k.indexOf('caisse') >= 0) return 'ticket'
+  if (k.indexOf('affiche') >= 0 || k.indexOf('tracking') >= 0) return 'affiche'
+  if (k.indexOf('flyer') >= 0) return 'flyer'
+  return 'autre'
+}
+/** Piste de prix (non tranchee) : 2 QR de tracking inclus, au-dela « QR supplementaire ». Informatif. */
+export const QR_INCLUS = 2
 export const typeParDefaut = (support: string): TypeQr =>
   (SUPPORTS_QR.find(s => s.v === support)?.digital ? 'digital' : 'physique')
 
@@ -61,9 +91,9 @@ export const estPermanent = (q: QrTrace): boolean => !!q.code_court
 /** Les 3 QR donnes a la fin de la creation, corriges selon la convention :
  *  le QR reseaux est DIGITAL (`reseaux-instagram`, plus `instagram`). */
 export const QR_PAR_DEFAUT: QrTrace[] = [
-  { id: null, nom: 'En magasin', support: 'Entrée / vitrine', type: 'physique', source_qr: 'magasin', publie: true, parDefaut: true },
+  { id: null, nom: 'En magasin', support: 'Vitrine / comptoir', type: 'physique', source_qr: 'magasin', publie: true, parDefaut: true },
   { id: null, nom: 'Réseaux sociaux', support: 'Instagram', type: 'digital', source_qr: 'reseaux-instagram', publie: true, parDefaut: true },
-  { id: null, nom: 'Tracking', support: 'Support publicitaire', type: 'physique', source_qr: 'tracking', publie: true, parDefaut: true },
+  { id: null, nom: 'Tracking', support: 'Affiche', type: 'physique', source_qr: 'tracking', publie: true, parDefaut: true },
 ]
 
 export const estDigital = (source: string | null | undefined) => !!source && source.indexOf('reseaux-') === 0
@@ -170,7 +200,7 @@ export async function publierQrTrace(id: string, publie: boolean): Promise<boole
    Meme mecanique que les stations NDS : flash = ligne visites sans etape
    portant la source ; partie = ligne participations portant source_qr ;
    joueurs = joueurs distincts. Les lignes sans source sont « Lien principal ». */
-export interface StatQr { source: string; nom: string; type: TypeQr; flashs: number; parties: number; joueurs: number }
+export interface StatQr { source: string; nom: string; type: TypeQr; flashs: number; parties: number; joueurs: number; support?: string | null }
 
 export async function fetchStatsQr(eventIds: string[]): Promise<StatQr[]> {
   if (!eventIds.length) return []
@@ -182,13 +212,19 @@ export async function fetchStatsQr(eventIds: string[]): Promise<StatQr[]> {
     const noms = new Map<string, QrTrace>()
     QR_PAR_DEFAUT.forEach(q => noms.set(q.source_qr, q))
     ;((qrsRows ?? []) as LigneQr[]).forEach(r => noms.set(r.source_qr, versQrTrace(r)))
-    return (rpc.data as { source: string | null; flashs: number; parties: number; joueurs: number }[]).map(r => {
+    const rows = (rpc.data as { source: string | null; flashs: number; parties: number; joueurs: number }[]).slice()
+    /* Les QR enregistres apparaissent meme a zero (le pro voit qu'ils existent). */
+    ;((qrsRows ?? []) as LigneQr[]).forEach(r => {
+      if (!r.archive_le && !rows.some(x => (x.source || '') === r.source_qr)) rows.push({ source: r.source_qr, flashs: 0, parties: 0, joueurs: 0 })
+    })
+    return rows.map(r => {
       const k = r.source || ''
       const q = noms.get(k)
       return {
         source: k,
-        nom: k === '' ? 'Lien principal (sans QR tracé)' : q ? q.nom : k === 'parrainage' ? 'Parrainage' : k,
+        nom: k === '' ? 'Lien principal (sans QR tracé)' : q ? q.nom : libelleSource(k),
         type: q ? q.type : estDigital(k) ? 'digital' as const : 'physique' as const,
+        support: q ? q.support : null,
         flashs: Number(r.flashs) || 0, parties: Number(r.parties) || 0, joueurs: Number(r.joueurs) || 0,
       }
     }).sort((x, y) => y.flashs + y.parties - (x.flashs + x.parties))
@@ -223,8 +259,9 @@ export async function fetchStatsQr(eventIds: string[]): Promise<StatQr[]> {
     const q = noms.get(k)
     out.push({
       source: k,
-      nom: k === '' ? 'Lien principal (sans QR tracé)' : q ? q.nom : k === 'parrainage' ? 'Parrainage' : k,
+      nom: k === '' ? 'Lien principal (sans QR tracé)' : q ? q.nom : libelleSource(k),
       type: q ? q.type : estDigital(k) ? 'digital' : 'physique',
+      support: q ? q.support : null,
       flashs: v.flashs, parties: v.parties, joueurs: v.joueurs.size,
     })
   })

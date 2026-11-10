@@ -15,7 +15,8 @@ import { creerAnimation, enregistrerDemandeQuiz, enregistrerDemandeKit, idAnimat
 import type { Banque, QuestionQuiz } from '@/lib/banques'
 import { creerBanque, enregistrerBanque, nouvelleQuestionQuiz } from '@/lib/banques'
 import { GABARIT_MODULE } from '@/lib/gabarit'
-import { creerQrTrace, slugQr, type TypeQr } from '@/lib/qrTraces'
+import { creerQrTrace, slugQr, QR_INCLUS, type TypeQr } from '@/lib/qrTraces'
+import { PictoSupport } from '@/components/operations/PictoSupport'
 import { lienAncien } from '@/lib/qrPermalien'
 import { qrFlowinPng } from '@/lib/qrLogo'
 import { cfgDepuisTirage } from '@/components/operations/ReglageTirage'
@@ -48,14 +49,18 @@ const EXEMPLES_LOTS = [
   { t: 'Produit offert', nom: 'Un produit offert', cond: 'Pour tout achat en magasin' },
 ]
 /** Supports de diffusion : ceux des QR tracés (lib/qrTraces SUPPORTS_QR), un QR par support coché. */
-const SUPPORTS: { k: string; t: string; support: string; type: TypeQr }[] = [
-  { k: 'magasin', t: 'En magasin', support: 'Entrée / vitrine', type: 'physique' },
-  { k: 'caisse', t: 'À la caisse', support: 'Caisse', type: 'physique' },
-  { k: 'affiche', t: 'Affiche', support: 'Support publicitaire', type: 'physique' },
-  { k: 'instagram', t: 'Instagram', support: 'Instagram', type: 'digital' },
-  { k: 'facebook', t: 'Facebook', support: 'Facebook', type: 'digital' },
-  { k: 'tiktok', t: 'TikTok', support: 'TikTok', type: 'digital' },
-  { k: 'site', t: 'Site internet', support: 'Autre', type: 'digital' },
+const SUPPORTS: { k: string; t: string; support: string; type: TypeQr; p: string }[] = [
+  { k: 'magasin', t: 'En magasin', support: 'Vitrine / comptoir', type: 'physique', p: 'vitrine' },
+  { k: 'caisse', t: 'Ticket de caisse', support: 'Ticket de caisse', type: 'physique', p: 'ticket' },
+  { k: 'affiche', t: 'Affiche', support: 'Affiche', type: 'physique', p: 'affiche' },
+  { k: 'flyer', t: 'Flyer', support: 'Flyer', type: 'physique', p: 'flyer' },
+  { k: 'bus', t: 'Bus / transport', support: 'Bus / transport', type: 'physique', p: 'bus' },
+  { k: 'instagram', t: 'Instagram', support: 'Instagram', type: 'digital', p: 'instagram' },
+  { k: 'facebook', t: 'Facebook', support: 'Facebook', type: 'digital', p: 'facebook' },
+  { k: 'tiktok', t: 'TikTok', support: 'TikTok', type: 'digital', p: 'tiktok' },
+  { k: 'site', t: 'Site web', support: 'Site web', type: 'physique', p: 'site' },
+  { k: 'presse', t: 'Presse / magazine', support: 'Presse / magazine', type: 'physique', p: 'presse' },
+  { k: 'radio', t: 'Radio', support: 'Radio', type: 'physique', p: 'radio' },
 ]
 const lotVide = (): LotC => ({ id: 'l' + Math.random().toString(36).slice(2, 8), nom: '', quantite: 10, conditions: '', validite: 'sans', jours: 30, du: '', au: '' })
 const eur = (n: number) => n.toLocaleString('fr-FR', { minimumFractionDigits: n % 1 ? 2 : 0, maximumFractionDigits: 2 }) + ' €'
@@ -401,7 +406,7 @@ export default function Configurateur({ pro, banques }: { pro: ProConfigurateur;
       <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
         {SUPPORTS.map(s => {
           const on = supports.indexOf(s.k) >= 0
-          return <button key={s.k} type="button" data-support={s.k} aria-pressed={on} style={puce(on)} onClick={() => setSupports(l => on ? l.filter(x => x !== s.k) : l.concat([s.k]))}>{on ? '✓ ' : ''}{s.t}</button>
+          return <button key={s.k} type="button" data-support={s.k} aria-pressed={on} style={{ ...puce(on), display: 'inline-flex', alignItems: 'center', gap: 6, padding: '5px 12px 5px 6px' }} onClick={() => setSupports(l => on ? l.filter(x => x !== s.k) : l.concat([s.k]))}><span style={{ background: '#fff', borderRadius: 8, display: 'inline-flex' }}><PictoSupport k={s.p} taille={24} /></span>{s.t}</button>
         })}
       </div>
       <div style={{ display: 'flex', gap: 10, overflowX: 'auto', marginTop: 14, paddingBottom: 4, scrollbarWidth: 'none' }}>
@@ -412,6 +417,7 @@ export default function Configurateur({ pro, banques }: { pro: ProConfigurateur;
           </div>
         ))}
       </div>
+      <div data-qr-inclus style={{ fontSize: 12.5, fontWeight: 700, marginTop: 8, ...MUTED }}>{QR_INCLUS} QR inclus{supportsChoisis.length > QR_INCLUS ? ` · ${supportsChoisis.length - QR_INCLUS} QR supplémentaire${supportsChoisis.length - QR_INCLUS > 1 ? 's' : ''} (option, prix à définir)` : ''}</div>
     </>
   )
   if (ecran === 'kit') contenu = (

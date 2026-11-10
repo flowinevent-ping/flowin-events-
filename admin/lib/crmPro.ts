@@ -15,6 +15,8 @@ export interface ContactPro {
   origines: string[]; operations: OperationContact[]
   nb_parties: number; nb_tickets: number; nb_gains: number; lots: string[]
   premiere: string | null; derniere: string | null
+  /** Ticket offert : prenom du donneur (clients_commerce.parrain_id, RPC crm_parrains_pro). */
+  offert_par?: string | null
 }
 
 /** Message en francais pour une erreur de lecture du CRM (jamais le texte technique de la base). */
@@ -43,6 +45,14 @@ export async function fetchCrmProDetail(proId: string, opts?: { sa?: boolean }):
     origines: c.origines ?? [], operations: c.operations ?? [], lots: c.lots ?? [],
     nb_parties: Number(c.nb_parties ?? 0), nb_tickets: Number(c.nb_tickets ?? 0), nb_gains: Number(c.nb_gains ?? 0),
   }))
+  /* Ticket offert (offrir_ticket_ami_contact) : le beneficiaire entre au fichier avec parrain_id
+     = le donneur, qui y est aussi. On affiche « Offert par <prénom> ». Silencieux sans la RPC. */
+  const par = await supabase.rpc('crm_parrains_pro', { p_pro: proId })
+  if (!par.error && Array.isArray(par.data) && par.data.length) {
+    const m = new Map<string, string | null>()
+    ;(par.data as { joueur_id: string; parrain_prenom: string | null }[]).forEach(r => m.set(r.joueur_id, r.parrain_prenom))
+    contacts.forEach(c => { if (m.has(c.joueur_id)) c.offert_par = m.get(c.joueur_id) || 'un ami' })
+  }
   return { contacts, erreur: null }
 }
 
