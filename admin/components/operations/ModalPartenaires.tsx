@@ -165,7 +165,7 @@ export default function ModalPartenaires({ op, onClose, onChange }: { op: Donnee
               <input type="file" accept="image/png,image/jpeg,image/webp,image/svg+xml" onChange={choisirFichier} data-champ-logo />
             </div>
           </div>
-          <button onClick={ajouter} disabled={envoi} data-valider-partenaire style={{ ...BTN, background: '#7A4FE0', color: '#fff', opacity: envoi ? .6 : 1 }}>{envoi ? 'Enregistrement…' : 'Ajouter le partenaire'}</button>
+          <button onClick={ajouter} disabled={envoi} data-valider-partenaire style={{ ...BTN, background: 'var(--sa-accent, #3B5CC4)', color: '#fff', opacity: envoi ? .6 : 1 }}>{envoi ? 'Enregistrement…' : 'Ajouter le partenaire'}</button>
         </div>
       </div>
     </div>

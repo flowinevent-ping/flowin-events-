@@ -368,7 +368,10 @@ export default function ParcoursCreation({ mode = 'pro', pro, banques, supers, p
       }
       if (p.partenaire_id) {
         const { data } = await supabase.from('partenaires').select('image_url').eq('id', p.partenaire_id).maybeSingle()
-        setLogoCommerce(((data as { image_url: string | null } | null)?.image_url) ?? null)
+        const urlLogo = ((data as { image_url: string | null } | null)?.image_url) ?? null
+        setLogoCommerce(urlLogo)
+        /* Audit 10/11 (6a) : le logo du profil commerce pre-remplit le master du jeu (modifiable ensuite). */
+        if (urlLogo) setMaster(m => (m.perso.commerce && m.perso.commerce.logoUrl) ? m : { ...m, perso: { ...m.perso, commerce: { ...(m.perso.commerce || {}), logoUrl: urlLogo } } })
       }
     })()
   }, [p.id, p.partenaire_id])
@@ -533,8 +536,8 @@ export default function ParcoursCreation({ mode = 'pro', pro, banques, supers, p
   const saisie = useMemo(() => ({
     nom: rejoindre ? (nomCommerce || (estFeteHautMoyenPays(seId) ? FHMP_DEMO.nom : '')) : nom,
     lots: lotsNommes.map(l => ({ nom: l.nom, quantite: l.quantite, valeur: l.valeur, conditions: l.conditions })),
-    cfg: rejoindre ? cfgApercuDemo(seId) : { ...cfgContenu, ...cfgPresentation, ...(estSuper && logoUrl.trim() ? { logoUrl: logoUrl.trim() } : {}) },
-  }), [rejoindre, nomCommerce, nom, lotsNommes, cfgContenu, cfgPresentation, estSuper, logoUrl, seId])
+    cfg: rejoindre ? cfgApercuDemo(seId) : { ...cfgContenu, ...cfgPresentation, ...(estSuper && logoUrl.trim() ? { logoUrl: logoUrl.trim() } : !estSuper && logoCommerce ? { logoUrl: logoCommerce } : {}) },
+  }), [rejoindre, nomCommerce, nom, lotsNommes, cfgContenu, cfgPresentation, estSuper, logoUrl, logoCommerce, seId])
   /* Station montree : celle du super event rejoint ; sinon la demo du module. */
   const stationApercu = rejoindre ? (se?.station ?? null) : null
 
@@ -642,6 +645,8 @@ export default function ParcoursCreation({ mode = 'pro', pro, banques, supers, p
         ...(module_ === 'vote' ? { voteItems: cfgJeu.voteItems ?? [] } : {}),
         ...(aUnTirage ? cfgDepuisTirage(tirage) : {}),
         ...cfgPresentation,
+        /* Audit 10/11 (6a) : le logo du commerce (fiche partenaire) est repris dans le jeu (ParcoursHero lit cfg.logoUrl). */
+        ...(logoCommerce ? { logoUrl: logoCommerce } : {}),
       },
       lots: lotsNommes.map(l => ({
         nom: l.nom.trim(), quantite: Number(l.quantite) || 1, valeur: Number(l.valeur) || 0,

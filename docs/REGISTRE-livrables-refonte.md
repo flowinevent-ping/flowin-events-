@@ -64,3 +64,6 @@ fois) → L3 → L4 → L5 (vidéos tournées sur les écrans finis, pour ne pas
 | L14 | **Calcul de tenue / coût des emails** (10/11) | Si chaque commerce envoie ~1 000 emails/mois (annonces + ~30 emails de lots) : le système actuel tient-il ? sinon coût par commerce. | À faire (après les vidéos) |
 | L15 | **5 films réseaux sociaux** (10/11) | Scénarios V4 corrigés : commerce, participant (Animation) ; organisateur, commerce, participant (Super Event). Priorité n° 1. | En cours |
 | L16 | **Parcours pro, publication d'animation, joueur** (10/11) | Plan en 8 lots : `docs/PLAN-parcours-pro-joueur-2026-11-10.md`. | Plan à valider |
+
+## Point au 10/11 (soir)
+- Audit des travaux demandés : `docs/audit-2026-11-10/AUDIT-travaux-demandes-2026-11-10.md` (plan + lots A-H : 14 faits, 22 partiels, 10 pas faits). Essai en vrai sur 30 pages : aucun plantage, aucun lien cassé, aucune page au-delà de 3,2 s ni de 300 kB. Corrigé : logo du commerce repris dans le jeu publié ; violets restants de l'espace pro passés au bleu. À décider par Romain : accès par l'adresse `?pro=` sans connexion (sécurité), couleur du super admin.

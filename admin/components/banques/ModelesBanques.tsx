@@ -14,7 +14,7 @@ import type { Banque, QuestionBonus, QuestionQuiz } from '@/lib/banques'
 import { remplacer } from '@/lib/banquesModeles/resoudre'
 
 const BORD = '#e5e1ea'
-const ACCENT = '#7A4FE0'
+const ACCENT = '#3B5CC4'
 
 /** Enonce d un modele pour l apercu : les {variables} montrent leur placeholder « a completer ». */
 function enonceApercu(q: QuestionQuiz): string {

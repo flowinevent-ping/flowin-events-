@@ -33,7 +33,7 @@ const btn: React.CSSProperties = {
   border: `1.5px solid ${BRD}`, background: '#fff', color: '#0F172A', fontSize: 12, fontWeight: 700,
   cursor: 'pointer', textDecoration: 'none', fontFamily: 'inherit', whiteSpace: 'nowrap',
 }
-const btnP: React.CSSProperties = { ...btn, background: '#7A4FE0', borderColor: '#7A4FE0', color: '#fff' }
+const btnP: React.CSSProperties = { ...btn, background: 'var(--sa-accent, #3B5CC4)', borderColor: 'var(--sa-accent, #3B5CC4)', color: '#fff' }
 const champ: React.CSSProperties = { border: `1.5px solid ${BRD}`, borderRadius: 8, padding: '7px 10px', fontSize: 13, fontFamily: 'inherit', background: '#fff', boxSizing: 'border-box' }
 
 /** Ancien format (jeu dans l'URL). Les QR a imprimer passent par `urlDuQr` (lien permanent /q/<code>). */
@@ -92,7 +92,7 @@ export function FormulaireQr({ onAjouter, occupe, libelle = '+ Créer le QR' }: 
       <div style={{ display: 'inline-flex', border: `1.5px solid ${BRD}`, borderRadius: 8, overflow: 'hidden' }} role="radiogroup" aria-label="Type de QR">
         {(['physique', 'digital'] as const).map(t => (
           <button key={t} type="button" role="radio" aria-checked={type === t} onClick={() => setType(t)}
-            style={{ border: 'none', padding: '7px 11px', fontSize: 12, fontWeight: 800, fontFamily: 'inherit', cursor: 'pointer', background: type === t ? '#7A4FE0' : '#fff', color: type === t ? '#fff' : '#0F172A' }}>
+            style={{ border: 'none', padding: '7px 11px', fontSize: 12, fontWeight: 800, fontFamily: 'inherit', cursor: 'pointer', background: type === t ? 'var(--sa-accent, #3B5CC4)' : '#fff', color: type === t ? '#fff' : '#0F172A' }}>
             {t === 'physique' ? 'Physique' : 'Digital'}
           </button>
         ))}

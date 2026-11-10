@@ -37,7 +37,7 @@ import { Ico } from '@/lib/proicons'
 export type Mode = 'sa' | 'pro'
 export type OngletOperation = 'stations' | 'lots' | 'gagnants' | 'comm' | 'contrat' | 'qr' | 'tracking' | 'crm'
 
-const ACC = 'var(--sa-accent, #7A4FE0)'
+const ACC = 'var(--sa-accent, #3B5CC4)'
 const MUT = 'var(--sa-muted, #64748B)'
 const BRD = 'var(--sa-border, #E2E8F0)'
 const SUBT = 'var(--sa-subtle, #F8FAFC)'
@@ -48,7 +48,7 @@ export const btn: React.CSSProperties = {
   fontSize: 12, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit', color: 'inherit',
   textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: 5, whiteSpace: 'nowrap',
 }
-export const btnPrimaire: React.CSSProperties = { ...btn, background: '#7A4FE0', borderColor: '#7A4FE0', color: '#fff' }
+export const btnPrimaire: React.CSSProperties = { ...btn, background: 'var(--sa-accent, #3B5CC4)', borderColor: 'var(--sa-accent, #3B5CC4)', color: '#fff' }
 
 export function Vide({ children }: { children: React.ReactNode }) {
   return <div style={{ fontSize: 12.5, color: MUT, padding: '6px 0' }}>{children}</div>
@@ -59,7 +59,7 @@ function Pastille({ ton, children }: { ton: 'ok' | 'warn' | 'neutre' | 'acc'; ch
     ok: ['rgba(34,197,94,.12)', '#15803D'],
     warn: ['rgba(245,158,11,.13)', '#B45309'],
     neutre: [SUBT, MUT],
-    acc: ['rgba(122,79,224,.11)', '#7A4FE0'],
+    acc: ['rgba(59,92,196,.11)', 'var(--sa-accent, #3B5CC4)'],
   }[ton]
   return <span style={{ display: 'inline-flex', alignItems: 'center', fontSize: 10.5, fontWeight: 800, borderRadius: 99, padding: '3px 9px', background: c[0], color: c[1], whiteSpace: 'nowrap' }}>{children}</span>
 }
@@ -271,7 +271,7 @@ function LigneGagnant({ g, op, partenaireNom, partenaireEmail, onConfirmer, masq
           <div style={{ fontSize: 11, color: MUT }}><Ico k="bell" size={13} style={{ marginRight: 5, verticalAlign: -2 }} />Relancé le {new Date(relanceAt).toLocaleDateString('fr-FR')}</div>
         )}
       </div>
-      <span style={{ fontFamily: 'ui-monospace,Menlo,monospace', fontSize: 11.5, fontWeight: 700, color: '#7A4FE0' }}>{g.ticketCode ?? '—'}</span>
+      <span style={{ fontFamily: 'ui-monospace,Menlo,monospace', fontSize: 11.5, fontWeight: 700, color: 'var(--sa-accent, #3B5CC4)' }}>{g.ticketCode ?? '—'}</span>
       <Pastille ton={g.etat === 'a_confirmer' ? 'warn' : 'ok'}>{g.etat === 'retire' ? '✓ Utilisé' : g.etat === 'confirme' ? '✓ Confirmé' : 'À appeler'}</Pastille>
       {/* Un seul langage de statut (Retiré/À retirer, pastille ci-dessus) --
           la distinction stock n apparait QUE si elle revele une anomalie. */}

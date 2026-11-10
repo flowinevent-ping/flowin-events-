@@ -19,7 +19,7 @@ export default function CopierCommune({ source, proId, lienBase, lienSuffixe = '
   return (
     <div>
       <button type="button" data-copier={source.id} disabled={etat === 'busy'} onClick={copier}
-        style={{ border: '1.5px solid #efe9f2', background: '#fff', color: '#7A4FE0', borderRadius: 9, padding: '6px 12px', fontSize: 12.5, fontWeight: 800, cursor: 'pointer', fontFamily: 'inherit' }}>{etat === 'busy' ? 'Copie…' : 'Copier dans mes banques'}</button>
+        style={{ border: '1.5px solid #E3E8EF', background: '#fff', color: '#3B5CC4', borderRadius: 9, padding: '6px 12px', fontSize: 12.5, fontWeight: 800, cursor: 'pointer', fontFamily: 'inherit' }}>{etat === 'busy' ? 'Copie…' : 'Copier dans mes banques'}</button>
       {etat === 'echec' && <div role="alert" style={{ fontSize: 12, color: '#B91C1C', marginTop: 4 }}>Copie impossible (droit ou réseau).</div>}
     </div>
   )

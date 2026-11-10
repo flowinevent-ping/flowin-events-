@@ -18,7 +18,7 @@ import { Camembert } from '@/components/dashboard/Camembert'
 
 const BRD = 'var(--sa-border, #E2E8F0)'
 const MUT = 'var(--sa-muted, #64748B)'
-const ACC = '#7A4FE0'
+const ACC = 'var(--sa-accent, #3B5CC4)'
 const btn: React.CSSProperties = {
   display: 'inline-flex', alignItems: 'center', gap: 5, padding: '6px 11px', borderRadius: 8,
   border: `1.5px solid ${BRD}`, background: '#fff', color: '#0F172A', fontSize: 12, fontWeight: 700,

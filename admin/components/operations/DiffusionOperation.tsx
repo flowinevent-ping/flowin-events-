@@ -33,7 +33,7 @@ const btn: React.CSSProperties = {
   border: `1.5px solid ${BRD}`, background: '#fff', color: '#0F172A', fontSize: 12, fontWeight: 700,
   cursor: 'pointer', textDecoration: 'none', fontFamily: 'inherit', whiteSpace: 'nowrap',
 }
-const btnP: React.CSSProperties = { ...btn, background: '#7A4FE0', borderColor: '#7A4FE0', color: '#fff' }
+const btnP: React.CSSProperties = { ...btn, background: '#3B5CC4', borderColor: '#3B5CC4', color: '#fff' }
 const zone: React.CSSProperties = {
   width: '100%', minHeight: 92, border: `1.5px solid ${BRD}`, borderRadius: 10, padding: '9px 11px',
   fontSize: 13, fontFamily: 'inherit', boxSizing: 'border-box', resize: 'vertical',

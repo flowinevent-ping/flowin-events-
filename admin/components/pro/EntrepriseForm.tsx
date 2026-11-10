@@ -105,10 +105,10 @@ export default function EntrepriseForm({ initial, avecFicheEntreprise = false }:
     <>
       {p.partenaire_id && (
         <div style={{ ...CARD, display: 'flex', gap: 18, alignItems: 'center', marginBottom: 14 }}>
-          <div style={{ width: 96, height: 96, flexShrink: 0, borderRadius: 16, border: '2px dashed #E3E8EF', background: '#faf8fb', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
+          <div style={{ width: 96, height: 96, flexShrink: 0, borderRadius: 16, border: '2px dashed #E3E8EF', background: '#F8FAFC', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
             {f.image_url
               ? <img src={f.image_url} alt="" style={{ width: '100%', height: '100%', objectFit: 'contain' }} onError={() => setF(x => ({ ...x, image_url: null }))} />
-              : <span style={{ fontSize: 34, fontWeight: 900, color: '#c9bfd0' }}>{(p.nom ?? '?').trim().charAt(0).toUpperCase()}</span>}
+              : <span style={{ fontSize: 34, fontWeight: 900, color: '#B8C4D6' }}>{(p.nom ?? '?').trim().charAt(0).toUpperCase()}</span>}
           </div>
           <div style={{ flex: 1, minWidth: 220 }}>
             <span style={lbl}>Logo de l&apos;établissement</span>

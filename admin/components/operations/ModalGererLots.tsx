@@ -47,7 +47,7 @@ const BRD = 'var(--sa-border, #E2E8F0)'
 const MUT = 'var(--sa-muted, #64748B)'
 const SUBT = 'var(--sa-subtle, #F8FAFC)'
 const CARDBG = 'var(--sa-card, #FFFFFF)'
-const ACC = 'var(--sa-accent, #7A4FE0)'
+const ACC = 'var(--sa-accent, #3B5CC4)'
 const BASE = BASE_CANONIQUE
 
 interface LotLigne {

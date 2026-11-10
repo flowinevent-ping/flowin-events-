@@ -22,7 +22,7 @@ export interface ConfigTirage { mode: 'manuel' | 'auto'; date: string; publier: 
 
 const BRD = 'var(--sa-border, #E2E8F0)'
 const MUT = 'var(--sa-muted, #64748B)'
-const ACC = '#7A4FE0'
+const ACC = '#3B5CC4'
 
 /** ISO -> valeur d un <input type="datetime-local"> (heure locale). */
 export function isoVersLocal(iso: string | null | undefined): string {
@@ -71,7 +71,7 @@ export function tirageDepuisCfg(cfg: Record<string, unknown> | null | undefined)
 
 const choix = (on: boolean): React.CSSProperties => ({
   flex: '1 1 200px', textAlign: 'left', padding: '10px 12px', borderRadius: 10, cursor: 'pointer', fontFamily: 'inherit',
-  border: `1.5px solid ${on ? ACC : BRD}`, background: on ? 'rgba(122,79,224,.06)' : '#fff', color: '#0F172A',
+  border: `1.5px solid ${on ? ACC : BRD}`, background: on ? 'rgba(59,92,196,.06)' : '#fff', color: '#0F172A',
 })
 
 /** Formulaire controle (utilise tel quel dans le parcours de creation). */

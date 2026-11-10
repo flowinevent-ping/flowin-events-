@@ -22,7 +22,7 @@ const QTES = [10, 25, 50, 100]
 function puce(on: boolean): React.CSSProperties {
   return {
     display: 'inline-flex', alignItems: 'center', gap: 6, padding: '8px 14px', borderRadius: 100, cursor: 'pointer', fontFamily: 'inherit',
-    fontWeight: 700, fontSize: 13.5, border: `1.5px solid ${on ? C.violet : C.bordureChamp}`, background: on ? C.violetClair : '#fff', color: on ? '#5B34C2' : C.texte,
+    fontWeight: 700, fontSize: 13.5, border: `1.5px solid ${on ? C.violet : C.bordureChamp}`, background: on ? C.violetClair : '#fff', color: on ? '#2B47A8' : C.texte,
   }
 }
 const pas: React.CSSProperties = { width: 46, height: 46, borderRadius: 14, border: `1.5px solid ${C.bordureChamp}`, background: '#fff', color: C.texte, cursor: 'pointer', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'inherit' }
@@ -102,7 +102,7 @@ export function RecapLots({ lots, achat, tirage }: { lots: LotSaisie[]; achat: b
       <div style={{ fontSize: 13, ...MUTED, margin: '4px 0 10px' }}>{n.length} lot{n.length > 1 ? 's' : ''} · {total} unités · {achat ? 'avec' : 'sans'} obligation d’achat{tirage ? ` · tirage ${tirage}` : ''}</div>
       {n.map(l => (
         <div key={l.id} style={{ display: 'flex', gap: 12, alignItems: 'center', border: `1.5px solid ${C.bordure}`, borderRadius: 18, padding: '12px 14px', marginBottom: 8, background: '#fff' }}>
-          <span style={{ width: 52, height: 52, borderRadius: 16, background: l.valeur > 0 ? '#fff' : C.violetClair, border: l.valeur > 0 ? '1.5px solid #F59E0B' : 'none', color: l.valeur > 0 ? '#8a5e12' : '#5B34C2', display: 'inline-flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', fontWeight: 900, lineHeight: 1, flexShrink: 0 }}>
+          <span style={{ width: 52, height: 52, borderRadius: 16, background: l.valeur > 0 ? '#fff' : C.violetClair, border: l.valeur > 0 ? '1.5px solid #F59E0B' : 'none', color: l.valeur > 0 ? '#8a5e12' : '#2B47A8', display: 'inline-flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', fontWeight: 900, lineHeight: 1, flexShrink: 0 }}>
             <span style={{ fontSize: 19 }}>{l.valeur > 0 ? l.valeur : 1}</span><span style={{ fontSize: 9, letterSpacing: '.08em', marginTop: 3 }}>{l.valeur > 0 ? '€' : 'LOT'}</span>
           </span>
           <span style={{ flex: 1, minWidth: 0 }}>
