@@ -9,6 +9,7 @@
  */
 
 import { useEffect, useState } from 'react'
+import { estDemo } from '@/lib/demo'
 import { supabase } from '@/lib/supabase'
 import { SECTEURS_PRO, SECTEUR_AUTRE, lireSecteurAutre, lireActivite, nettoyerPrecision, tagsAvecSecteurAutre } from '@/lib/proCreation'
 import SelectActivite from '@/components/creation/SelectActivite'
@@ -36,6 +37,10 @@ export default function EntrepriseForm({ initial, avecFicheEntreprise = false }:
   const [autre, setAutre] = useState(lireSecteurAutre(initial.tags))
   const [activite, setActivite] = useState(lireActivite(initial.tags))
   const [uploadEnCours, setUploadEnCours] = useState(false)
+  /* 10/11 (controle) : un clic avant l'hydratation ne faisait rien (« Enregistrer ne fait rien »). */
+  const [pret, setPret] = useState(false)
+  useEffect(() => { setPret(true) }, [])
+  useEffect(() => { if (etat !== 'ok') return; const t = setTimeout(() => setEtat(''), 4500); return () => clearTimeout(t) }, [etat])
   const [uploadErreur, setUploadErreur] = useState('')
 
   useEffect(() => {
@@ -104,13 +109,13 @@ export default function EntrepriseForm({ initial, avecFicheEntreprise = false }:
   return (
     <>
       {p.partenaire_id && (
-        <div style={{ ...CARD, display: 'flex', gap: 18, alignItems: 'center', marginBottom: 14 }}>
+        <div style={{ ...CARD, display: 'flex', gap: 18, alignItems: 'center', flexWrap: 'wrap', marginBottom: 14 }}>
           <div style={{ width: 96, height: 96, flexShrink: 0, borderRadius: 16, border: '2px dashed #E3E8EF', background: '#F8FAFC', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
             {f.image_url
               ? <img src={f.image_url} alt="" style={{ width: '100%', height: '100%', objectFit: 'contain' }} onError={() => setF(x => ({ ...x, image_url: null }))} />
               : <span style={{ fontSize: 34, fontWeight: 900, color: '#B8C4D6' }}>{(p.nom ?? '?').trim().charAt(0).toUpperCase()}</span>}
           </div>
-          <div style={{ flex: 1, minWidth: 220 }}>
+          <div style={{ flex: 1, minWidth: 0 }}>
             <span style={lbl}>Logo de l&apos;établissement</span>
             <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
               <label style={{ background: uploadEnCours ? '#E3E8EF' : ACC, color: uploadEnCours ? '#5a6b80' : '#fff', border: 'none', borderRadius: 10, padding: '9px 16px', fontWeight: 800, fontSize: 13, cursor: uploadEnCours ? 'default' : 'pointer', fontFamily: 'inherit' }}>
@@ -118,7 +123,7 @@ export default function EntrepriseForm({ initial, avecFicheEntreprise = false }:
                 <input type="file" accept="image/png,image/jpeg,image/webp,image/svg+xml" style={{ display: 'none' }}
                   disabled={uploadEnCours} onChange={onFichierLogo} />
               </label>
-              <input style={{ ...inp, flex: 1, minWidth: 180, marginBottom: 0 }} placeholder="ou coller une URL https://…/logo.png"
+              <input style={{ ...inp, flex: '1 1 100%', minWidth: 0, width: '100%', boxSizing: 'border-box', marginBottom: 0 }} placeholder="ou coller une URL https://…/logo.png"
                 value={f.image_url ?? ''} onChange={e => { setF(x => ({ ...x, image_url: e.target.value })); setEtat('') }} />
             </div>
             {uploadErreur && <div style={{ fontSize: 12, color: '#B45309', marginTop: 6, fontWeight: 700 }}>{uploadErreur}</div>}
@@ -126,7 +131,21 @@ export default function EntrepriseForm({ initial, avecFicheEntreprise = false }:
           </div>
         </div>
       )}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(280px,1fr))', gap: 14 }}>
+      {/* 10/11 (règle Romain : carrousel, jamais de longue page) : sur téléphone, les trois blocs
+          défilent latéralement (une carte à la fois), le bouton Enregistrer reste visible. */}
+      <style dangerouslySetInnerHTML={{ __html: `
+        .ent-carrousel { display: grid; grid-template-columns: repeat(auto-fit,minmax(280px,1fr)); gap: 14px; }
+        .ent-glisser { display: none; }
+        @media (max-width: 860px) {
+          .ent-carrousel { display: flex; overflow-x: auto; scroll-snap-type: x mandatory; gap: 12px; padding-bottom: 6px; -webkit-overflow-scrolling: touch; }
+          .ent-carrousel > div { flex: 0 0 86%; scroll-snap-align: start; max-height: 58dvh; overflow-y: auto; box-sizing: border-box; }
+          .ent-glisser { display: block; font-size: 12.5px; color: #5a6b80; font-weight: 700; margin: 0 0 8px; }
+          .ent-actions { position: sticky; bottom: 70px; z-index: 6; background: #F4F6F9; padding: 8px 0; }
+          .ent-actions button { width: 100%; }
+        }
+      ` }} />
+      <div className="ent-glisser">Faites glisser : établissement, fiche entreprise, contact et liens.</div>
+      <div className="ent-carrousel">
         <div style={CARD}>
           {champ('nom', 'Établissement *')}
           <label>
@@ -179,13 +198,20 @@ export default function EntrepriseForm({ initial, avecFicheEntreprise = false }:
           )}
         </div>
       </div>
-      <div style={{ display: 'flex', gap: 10, alignItems: 'center', marginTop: 14 }}>
-        <button onClick={enregistrer} disabled={etat === 'envoi'}
-          style={{ background: ACC, color: '#fff', border: 'none', borderRadius: 12, padding: '12px 22px', fontWeight: 800, fontSize: 14, cursor: 'pointer', fontFamily: 'inherit' }}>
+      <div className="ent-actions" style={{ display: 'flex', gap: 10, alignItems: 'center', marginTop: 14 }}>
+        <button onClick={enregistrer} disabled={!pret || etat === 'envoi'}
+          style={{ background: ACC, color: '#fff', border: 'none', borderRadius: 12, padding: '12px 22px', minHeight: 48, fontWeight: 800, fontSize: 15, cursor: pret ? 'pointer' : 'wait', opacity: pret ? 1 : 0.7, fontFamily: 'inherit' }}>
           {etat === 'envoi' ? 'Enregistrement…' : 'Enregistrer'}
         </button>
-        {etat === 'ok' && <span style={{ fontSize: 13, color: '#15803D', fontWeight: 700 }}>Coordonnées enregistrées.</span>}
-        {etat === 'ko' && <span role="alert" style={{ fontSize: 13, color: '#B45309', fontWeight: 700 }}>{messageKo || 'Enregistrement impossible. Réessayez dans un instant.'}</span>}
+      </div>
+      {/* Retour toujours visible (bandeau fixe au-dessus de la barre du bas), y compris en mode démo. */}
+      {(etat === 'ok' || etat === 'ko') && (
+        <div role={etat === 'ko' ? 'alert' : 'status'} onClick={() => setEtat('')}
+          style={{ position: 'fixed', left: 16, right: 16, bottom: 86, zIndex: 50, maxWidth: 520, margin: '0 auto', borderRadius: 14, padding: '14px 18px', fontSize: 14.5, fontWeight: 700, color: '#fff', background: etat === 'ok' ? '#15803D' : '#B45309', boxShadow: '0 10px 30px rgba(27,58,92,.25)', cursor: 'pointer' }}>
+          {etat === 'ok' ? (estDemo() ? 'Mode démo : modifications prises en compte pour la visite, rien n’est enregistré.' : 'Coordonnées enregistrées.') : (messageKo || 'Enregistrement impossible. Réessayez dans un instant.')}
+        </div>
+      )}
+      <div>
       </div>
     </>
   )

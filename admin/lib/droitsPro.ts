@@ -49,13 +49,30 @@ export function colonneDroitsPresente(pro: unknown): boolean {
 }
 
 /** Lecture des droits d'un pro (serveur ou navigateur). Colonne absente / erreur : valeurs par defaut. */
+/* 10/11 (controle) : la colonne pros.droits manque tant que sql/06 n'est pas applique ; chaque
+   ecran relancait la meme requete en erreur 400 (jusqu'a 5 fois par page). Dans le navigateur, une
+   colonne absente (42703) est retenue pour la session et la lecture en cours est partagee. */
+let colonneAbsente = false
+const enCours = new Map<string, Promise<DroitsPro>>()
 export async function lireDroitsPro(proId: string): Promise<DroitsPro> {
-  if (!proId) return { ...DROITS_DEFAUT }
-  try {
-    const { data, error } = await supabaseVivant.from('pros').select('droits').eq('id', proId).maybeSingle()
-    if (error || !data) return { ...DROITS_DEFAUT }
-    return droitsEffectifs((data as { droits?: unknown }).droits)
-  } catch { return { ...DROITS_DEFAUT } }
+  const navigateur = typeof window !== 'undefined'
+  if (navigateur && !colonneAbsente) { try { colonneAbsente = window.sessionStorage.getItem('flowin-droits-absent') === '1' } catch { /* rien */ } }
+  if (!proId || colonneAbsente) return { ...DROITS_DEFAUT }
+  const deja = navigateur ? enCours.get(proId) : undefined
+  if (deja) return deja.then(d => ({ ...d }))
+  const p = (async () => {
+    try {
+      const { data, error } = await supabaseVivant.from('pros').select('droits').eq('id', proId).maybeSingle()
+      if (error && navigateur && (error.code === '42703' || /droits/.test(error.message || ''))) {
+        colonneAbsente = true
+        try { window.sessionStorage.setItem('flowin-droits-absent', '1') } catch { /* rien */ }
+      }
+      if (error || !data) return { ...DROITS_DEFAUT }
+      return droitsEffectifs((data as { droits?: unknown }).droits)
+    } catch { return { ...DROITS_DEFAUT } }
+  })()
+  if (navigateur) { enCours.set(proId, p); setTimeout(() => enCours.delete(proId), 30000) }
+  return p
 }
 
 /** L'espace « Nouvelle animation » a-t-il au moins une porte ouverte ? */

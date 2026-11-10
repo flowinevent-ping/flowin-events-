@@ -593,8 +593,42 @@ export function ContenuTracking({ op, proId, onStation, masquerGlobal }: {
   if (s === undefined) return <Vide>Chargement…</Vide>
   if (s === null) return <Vide>Tracking indisponible.</Vide>
   const t = s.totaux
+  /* 10/11 (controle qualite) : rapport d'activite lisible -- chiffres cles d'abord
+     (personnes venues, parties, gains, genre, origine), le detail ensuite, replie. */
+  const sexe = s.stats?.sexe ?? []
+  const nSexe = (re: RegExp) => sexe.filter(x => re.test(x.valeur || '')).reduce((n, x) => n + x.n, 0)
+  const femmes = nSexe(/^f/i), hommes = nSexe(/^(h|m)/i)
+  const cles: { v: React.ReactNode; l: string }[] = [
+    { v: t.joueurs, l: 'personnes venues' },
+    { v: t.parties, l: 'parties jouées' },
+    { v: op.gagnants.length, l: 'gains attribués' },
+    { v: femmes + hommes > 0 ? `${femmes} F · ${hommes} H` : '—', l: 'femmes · hommes' },
+    { v: t.flashs, l: `flashs QR (${t.physique} physique, ${t.digital} digital)` },
+  ]
   return (
     <>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(140px,1fr))', gap: 8, marginBottom: 12 }}>
+        {cles.map(c => (
+          <div key={c.l} style={{ background: '#EEF2FB', border: '1px solid #D5DEF3', borderRadius: 14, padding: '12px 14px' }}>
+            <div style={{ fontSize: 24, fontWeight: 900, color: ACC, lineHeight: 1.1 }}>{c.v}</div>
+            <div style={{ fontSize: 12.5, fontWeight: 700, color: '#334155', marginTop: 2 }}>{c.l}</div>
+          </div>
+        ))}
+      </div>
+      <StatsParQr eventIds={op.stations.map(x => x.id)} />
+      {origines.length > 0 && (
+        <>
+          <div style={{ fontSize: 11, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '.05em', color: MUT, margin: '12px 0 2px' }}>Origine des personnes venues</div>
+          {origines.map(o => (
+            <div key={o.source} style={{ ...ligne, padding: '5px 0' }}>
+              <span style={{ flex: 1, fontSize: 13 }}>{libelleSource(o.source)}</span>
+              <b style={{ fontSize: 13 }}>{o.n}</b>
+            </div>
+          ))}
+        </>
+      )}
+      <details style={{ marginTop: 14 }}>
+        <summary style={{ cursor: 'pointer', minHeight: 44, display: 'flex', alignItems: 'center', fontWeight: 800, fontSize: 14, color: ACC }}>Voir le détail (fréquentation, âge, stations, réponses)</summary>
       {op.type === 'super' && s.global && !masquerGlobal && (
         <>
           <div style={{ fontSize: 11, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '.05em', color: MUT, marginBottom: 4 }}>Toute l’opération — toutes stations</div>
@@ -611,13 +645,6 @@ export function ContenuTracking({ op, proId, onStation, masquerGlobal }: {
           {op.stations.length > 1 ? 'Vos stations' : 'Votre station'}
         </div>
       )}
-      <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 8 }}>
-        <Mini v={t.flashs} l="flashs QR" />
-        <Mini v={t.physique} l="dont physique" />
-        <Mini v={t.digital} l="dont digital" />
-        <Mini v={t.parties} l="parties" />
-        <Mini v={t.joueurs} l="joueurs" />
-      </div>
       {s.stats && <StatsUniformes st={s.stats} />}
       <div style={{ fontSize: 11, color: MUT, marginBottom: 4 }}>
         Un flash est une ouverture du QR, pas une personne. {op.type === 'super' ? 'Période officielle de l’opération.' : 'Tout l’historique de l’animation.'}
@@ -633,20 +660,9 @@ export function ContenuTracking({ op, proId, onStation, masquerGlobal }: {
           {onStation && <span style={{ color: ACC, fontWeight: 800, fontSize: 12 }}>→</span>}
         </div>
       ))}
-      <StatsParQr eventIds={op.stations.map(x => x.id)} />
-      {origines.length > 0 && (
-        <>
-          <div style={{ fontSize: 11, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '.05em', color: MUT, margin: '12px 0 2px' }}>Source d’arrivée — visiteurs identifiés</div>
-          {origines.map(o => (
-            <div key={o.source} style={{ ...ligne, padding: '5px 0' }}>
-              <span style={{ flex: 1, fontSize: 12.5 }}>{libelleSource(o.source)}</span>
-              <b style={{ fontSize: 12.5 }}>{o.n}</b>
-            </div>
-          ))}
-        </>
-      )}
       <div style={{ fontSize: 11, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '.05em', color: MUT, margin: '14px 0 6px' }}>Réponses aux questions</div>
       <ContenuReponses op={op} />
+      </details>
     </>
   )
 }

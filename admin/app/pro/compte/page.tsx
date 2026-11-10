@@ -34,17 +34,18 @@ export default async function Page({ searchParams }: { searchParams: { pro?: str
   return (
     <ProShell proName={p.nom ?? 'Mon établissement'} proId={proId} active="compte">
       <h1 style={H1}>Mon profil</h1>
-      <div style={{ ...SUB, marginBottom: 14 }}>Votre entreprise, vos coordonnées bancaires, vos factures, vos lots et vos questions.</div>
-      <div style={{ display: 'flex', gap: 6, marginBottom: 16, flexWrap: 'wrap' }}>
+      <div style={{ ...SUB, marginBottom: 12 }}>Entreprise, RIB, factures, lots et questions.</div>
+      {/* 10/11 : une seule ligne d'onglets qui défile (plus de pavé sur trois lignes), cibles de 44 px. */}
+      <div style={{ display: 'flex', gap: 6, marginBottom: 14, overflowX: 'auto', WebkitOverflowScrolling: 'touch', paddingBottom: 4 }}>
         {ONGLETS.map(o => (
           <Link key={o.id} href={`/pro/compte${qo}onglet=${o.id}`}
-            style={{ borderRadius: 50, padding: '9px 18px', fontWeight: 800, fontSize: 13.5, textDecoration: 'none',
+            style={{ borderRadius: 50, padding: '0 18px', minHeight: 44, display: 'inline-flex', alignItems: 'center', whiteSpace: 'nowrap', flexShrink: 0, fontWeight: 800, fontSize: 14, textDecoration: 'none',
               background: onglet === o.id ? C.degrade : '#fff', color: onglet === o.id ? '#fff' : C.accent, border: onglet === o.id ? 'none' : `1.5px solid ${C.bordureChamp}` }}>
             {o.label}
           </Link>
         ))}
         <Link href={`/pro/commandes${q}`}
-          style={{ borderRadius: 50, padding: '9px 18px', fontWeight: 800, fontSize: 13.5, textDecoration: 'none', background: '#fff', color: C.accent, border: `1.5px solid ${C.bordureChamp}` }}>
+          style={{ borderRadius: 50, padding: '0 18px', minHeight: 44, display: 'inline-flex', alignItems: 'center', whiteSpace: 'nowrap', flexShrink: 0, fontWeight: 800, fontSize: 14, textDecoration: 'none', background: '#fff', color: C.accent, border: `1.5px solid ${C.bordureChamp}` }}>
           Commandes et factures
         </Link>
       </div>

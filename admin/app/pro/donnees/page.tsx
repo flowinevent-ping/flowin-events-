@@ -16,7 +16,7 @@ export const dynamic = 'force-dynamic'
 const ONGLETS = [
   { id: 'crm', label: 'Contacts' },
   { id: 'gagnants', label: 'Gagnants & tirage' },
-  { id: 'trafic', label: 'Trafic par support' },
+  { id: 'trafic', label: 'Rapports d’activité' },
 ] as const
 type Onglet = (typeof ONGLETS)[number]['id']
 const ALIAS: Record<string, Onglet> = { contacts: 'crm', tracking: 'trafic', tirage: 'gagnants' }
@@ -48,16 +48,16 @@ export default async function Page({ searchParams }: { searchParams: { pro?: str
       <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap', marginBottom: 12 }}>
         <div style={{ flex: 1, minWidth: 200 }}>
           <h1 style={H1}>Mes contacts &amp; stats</h1>
-          <div style={SUB}>Fichier client, gagnants et trafic par support, pour toutes vos animations.</div>
+          <div style={SUB}>Contacts, gagnants et rapports d’activité.</div>
         </div>
         <Link data-lien-import href={`/pro/donnees/import${proId ? `?pro=${encodeURIComponent(proId)}` : ''}`}
-          style={{ ...BTN, padding: '10px 18px', fontSize: 13.5, textDecoration: 'none' }}>Importer votre fichier client</Link>
+          style={{ ...BTN, padding: '0 18px', minHeight: 44, display: 'inline-flex', alignItems: 'center', fontSize: 14, textDecoration: 'none' }}>Importer votre fichier client</Link>
       </div>
       <div style={{ display: 'flex', gap: 10, alignItems: 'center', flexWrap: 'wrap', marginBottom: 16 }}>
-        <div style={{ display: 'flex', gap: 4, background: '#fff', border: `1px solid ${C.bordure}`, borderRadius: 14, padding: 5 }}>
+        <div style={{ display: 'flex', gap: 4, background: '#fff', border: `1px solid ${C.bordure}`, borderRadius: 14, padding: 5, overflowX: 'auto', maxWidth: '100%' }}>
           {ONGLETS.map(o => (
             <Link key={o.id} href={lien(o.id, cle || undefined)}
-              style={{ borderRadius: 10, padding: '8px 16px', fontWeight: 800, fontSize: 13.5, textDecoration: 'none',
+              style={{ borderRadius: 10, padding: '0 16px', minHeight: 44, display: 'inline-flex', alignItems: 'center', whiteSpace: 'nowrap', fontWeight: 800, fontSize: 14, textDecoration: 'none',
                 background: onglet === o.id ? C.degrade : 'transparent', color: onglet === o.id ? '#fff' : C.texte }}>
               {o.label}
             </Link>
@@ -81,7 +81,7 @@ export default async function Page({ searchParams }: { searchParams: { pro?: str
 
       {onglet !== 'crm' && opChoisie && (
         <>
-          <Link href={lien(onglet)} style={{ fontSize: 13, fontWeight: 800, color: C.accent, textDecoration: 'none', display: 'inline-block', marginBottom: 10 }}>← Toutes les animations</Link>
+          <Link href={lien(onglet)} style={{ fontSize: 14, fontWeight: 800, color: C.accent, textDecoration: 'none', display: 'inline-flex', alignItems: 'center', minHeight: 44, marginBottom: 6 }}>← Toutes les animations</Link>
           {onglet === 'gagnants' && <GagnantsClient initial={ops} cle={cle} titre={false} />}
           {onglet === 'trafic' && <OngletOperationsPro initial={ops} onglet="tracking" prefixeStation="/pro/super/" cle={cle} />}
         </>

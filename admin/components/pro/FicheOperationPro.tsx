@@ -57,7 +57,7 @@ export default function FicheOperationPro({ initial, cle, onglet: ongletInitial,
   }
 
   const chiffre = (v: number | string, l: string) => (
-    <div style={{ flex: '0 1 150px', background: 'rgba(255,255,255,.12)', borderRadius: 12, padding: '7px 12px' }}>
+    <div style={{ background: 'rgba(255,255,255,.14)', borderRadius: 12, padding: '7px 12px' }}>
       <div style={{ fontSize: 19, fontWeight: 800, lineHeight: 1.1 }}>{v}</div>
       <div style={{ fontSize: 11, fontWeight: 700, opacity: 0.85 }}>{l}</div>
     </div>
@@ -65,7 +65,7 @@ export default function FicheOperationPro({ initial, cle, onglet: ongletInitial,
 
   return (
     <div>
-      <a href={`/pro${q}`} style={{ fontSize: 13, fontWeight: 700, color: C.accent, textDecoration: 'none' }}>← Mes animations</a>
+      <a href={`/pro${q}`} style={{ display: 'inline-flex', alignItems: 'center', minHeight: 44, fontSize: 14, fontWeight: 700, color: C.accent, textDecoration: 'none' }}>← Mes animations</a>
 
       {/* Bandeau de l operation */}
       <div style={{ borderRadius: 20, overflow: 'hidden', marginTop: 10, background: `linear-gradient(135deg,${teinte1},${teinte2})`, color: '#fff', position: 'relative', boxShadow: '0 12px 30px rgba(27,58,92,.18)' }}>
@@ -84,7 +84,7 @@ export default function FicheOperationPro({ initial, cle, onglet: ongletInitial,
             {libelleDates(op.dateD, op.dateF)} · {libelleModule(st?.module)}
             {op.type === 'super' ? ` · ${op.stations.length > 1 ? `${op.stations.length} stations` : `station : ${st?.nom ?? '—'}`}` : ''}
           </div>
-          <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginTop: 11 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(130px,1fr))', gap: 8, marginTop: 11, maxWidth: 720 }}>
             {chiffre(parties, op.type === 'super' ? 'parties sur votre station' : 'parties')}
             {chiffre(lotsTotal, 'lots engagés')}
             {chiffre(op.gagnants.length, 'gagnants')}
@@ -98,7 +98,7 @@ export default function FicheOperationPro({ initial, cle, onglet: ongletInitial,
         <div style={{ display: 'flex', gap: 6, overflowX: 'auto', background: '#fff', border: `1px solid ${C.bordure}`, borderRadius: 14, padding: 5 }}>
           {ONGLETS_OP.map(o => (
             <button key={o.id} data-onglet={o.id} aria-current={onglet === o.id ? 'page' : undefined} onClick={() => changer(o.id)}
-              style={{ border: 'none', borderRadius: 12, padding: '8px 13px', fontWeight: 800, fontSize: 13, cursor: 'pointer', whiteSpace: 'nowrap', fontFamily: 'inherit',
+              style={{ border: 'none', borderRadius: 12, padding: '8px 14px', minHeight: 44, fontWeight: 800, fontSize: 14, cursor: 'pointer', whiteSpace: 'nowrap', fontFamily: 'inherit',
                 background: onglet === o.id ? C.degrade : 'transparent', color: onglet === o.id ? '#fff' : C.texte }}>
               {libelleOnglet(o.id, o.label, op.type)}
             </button>

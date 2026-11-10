@@ -197,6 +197,15 @@
   }, true);
 
   /* ---------- Remplissage automatique (valeurs Démo) ---------- */
+  function imageDejaPresente(el) {
+    var n = el.parentNode, k, imgs, j;
+    for (k = 0; k < 5 && n && n.querySelectorAll; k++) {
+      imgs = n.querySelectorAll('img');
+      for (j = 0; j < imgs.length; j++) { if (imgs[j].getAttribute('src') && imgs[j].naturalWidth > 0) return true; }
+      n = n.parentNode;
+    }
+    return false;
+  }
   function visible(el) { return !!(el.offsetWidth || el.offsetHeight || el.getClientRects().length); }
   function indice(el) {
     var t = [el.name, el.id, el.placeholder, el.getAttribute('autocomplete'), el.getAttribute('aria-label'), el.getAttribute('inputmode')], lab = '';
@@ -256,6 +265,7 @@
       ty = String(el.type || '').toLowerCase();
       if (ty === 'file') {
         if (el.getAttribute('data-demo') || (el.files && el.files.length) || String(el.accept || '').indexOf('image') < 0) continue;
+        if (imageDejaPresente(el)) continue; /* 10/11 : un logo deja affiche n'est jamais remplace par l'image de demo */
         try { var dt = new DataTransfer(); dt.items.add(fichierDemo()); el.files = dt.files; el.setAttribute('data-demo', '1'); el.dispatchEvent(new Event('change', { bubbles: true })); n++; } catch (e) { /* navigateur ancien */ }
         continue;
       }
@@ -326,6 +336,10 @@
     a.style.cssText = 'color:#F28C28;text-decoration:underline;pointer-events:auto';
     b.appendChild(a);
     document.body.appendChild(b);
+    /* 10/11 (controle) : le bandeau ne masque plus le haut de la page (barre de l'espace pro). */
+    document.body.className += ' flowin-demo';
+    document.body.style.paddingTop = '24px';
+    document.documentElement.style.setProperty('--flowin-demo-h', '24px');
   }
   /* Apres l'hydratation de React (sinon un noeud en trop dans <body> casse l'hydratation). */
   W.addEventListener('load', function () { setTimeout(bandeau, 300); setInterval(bandeau, 1500); });

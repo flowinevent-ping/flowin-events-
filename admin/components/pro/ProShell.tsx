@@ -159,7 +159,7 @@ export default function ProShell({ proName, proId, active, children }: { proName
   }, [proId])
 
   const sidebar = (
-    <aside className="pro-sidebar" style={{ width: 256, flexShrink: 0, background: C.carte, borderRight: `1px solid ${C.bordure}`, color: C.texte, padding: '22px 14px', height: '100dvh', overflowY: 'auto' }}>
+    <aside className="pro-sidebar" style={{ width: 256, flexShrink: 0, background: C.carte, borderRight: `1px solid ${C.bordure}`, color: C.texte, padding: '22px 14px', height: 'calc(100dvh - var(--flowin-demo-h, 0px))', boxSizing: 'border-box', overflowY: 'auto' }}>
       <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 3, background: C.filet }} />
       <div style={{ padding: '4px 8px 18px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         {/* Logo texte de la landing : « Flow » encre + « in » bleu. */}
@@ -177,7 +177,7 @@ export default function ProShell({ proName, proId, active, children }: { proName
         const on = n.key === actif
         return (
           <Link key={n.key} href={`${n.route}${q}`} data-nav={n.key} onClick={() => setOpen(false)} style={{ textDecoration: 'none' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 11, padding: '9px 10px', marginBottom: 5, borderRadius: 14, background: on ? C.violetClair : 'transparent', color: on ? C.violetFonce : C.texte }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 11, padding: '9px 10px', minHeight: 48, boxSizing: 'border-box', marginBottom: 5, borderRadius: 14, background: on ? C.violetClair : 'transparent', color: on ? C.violetFonce : C.texte }}>
               <span style={{ width: 34, height: 34, borderRadius: 11, background: on ? C.violet : C.fond, color: on ? '#fff' : C.accent, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}><Icon k={n.icon} /></span>
               <span style={{ flex: 1, minWidth: 0 }}>
                 <span style={{ display: 'block', fontSize: 14, fontWeight: 800 }}>{n.label}</span>
@@ -195,7 +195,7 @@ export default function ProShell({ proName, proId, active, children }: { proName
       {navBas.map(n => {
         const on = n.key === actif
         return (
-          <Link key={n.key} href={`${n.route}${q}`} data-nav={n.key} style={{ textDecoration: 'none', flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3, padding: '9px 4px 8px', color: on ? C.violetFonce : C.attenue }}>
+          <Link key={n.key} href={`${n.route}${q}`} data-nav={n.key} style={{ textDecoration: 'none', flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3, padding: '9px 4px 8px', minHeight: 56, boxSizing: 'border-box', color: on ? C.violetFonce : C.attenue }}>
             <span style={{ color: on ? C.violet : C.attenue }}><Icon k={n.icon} /></span>
             <span style={{ fontSize: 11.5, fontWeight: 800, lineHeight: 1.1, textAlign: 'center' }}>{LIBELLE_COURT[n.key] ?? n.label}</span>
           </Link>
@@ -205,13 +205,14 @@ export default function ProShell({ proName, proId, active, children }: { proName
   )
 
   return (
-    <div className={`pro-shell${open ? ' open' : ''}`} style={{ display: 'flex', minHeight: '100dvh', background: C.fond, fontFamily: POLICE_PRO, fontSize: 14, color: C.texte }}>
+    <div className={`pro-shell${open ? ' open' : ''}`} style={{ display: 'flex', minHeight: 'calc(100dvh - var(--flowin-demo-h, 0px))', background: C.fond, fontFamily: POLICE_PRO, fontSize: 14, color: C.texte }}>
       {/* Jetons de theme communs (accent violet) : public/flowin-theme.css */}
       <link rel="stylesheet" href="/flowin-theme.css" />
       <style dangerouslySetInnerHTML={{ __html: `
         :root { ${VARIABLES_CSS} ${VARIABLES_PRO_CSS} --sa-border:${C.bordure}; --sa-muted:${C.attenue}; --sa-text:${C.texte}; --sa-subtle:${C.subtil}; --sa-card:#fff; --sa-accent:${C.accent}; }
         .pro-shell input, .pro-shell select, .pro-shell textarea, .pro-shell button { font-family: ${POLICE_PRO}; }
         .pro-sidebar { position: sticky; top: 0; }
+        body.flowin-demo .pro-sidebar { top: 24px; }
         .fl-logo { font-size: 22px; font-weight: 800; letter-spacing: -.045em; color: var(--fl-encre); line-height: 1; }
         .fl-logo em { color: var(--fl-bleu); font-style: normal; }
         .pro-drawer-backdrop, .pro-bottom-nav, .pro-hamburger { display: none; }

@@ -75,23 +75,36 @@ export default async function ProAccueilPage({ searchParams }: Props) {
       )}
       <AlerteLotsRetires partenaireId={ops.partenaire?.id ?? null} />
       <CompteurMensuel proId={proId} />
-      <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap', marginBottom: 12 }}>
+      {/* 10/11 (controle) : action principale en premier, actions secondaires sur une ligne qui défile,
+          cibles de 44 px, noms d'animation lisibles en entier sur téléphone. */}
+      <style dangerouslySetInnerHTML={{ __html: `
+        .pro-rangee { display: flex; gap: 8px; overflow-x: auto; -webkit-overflow-scrolling: touch; padding-bottom: 4px; margin-bottom: 12px; }
+        .pro-rangee > a { flex-shrink: 0; white-space: nowrap; min-height: 44px; box-sizing: border-box; display: inline-flex; align-items: center; }
+        .pro-accueil .sa-kb-chip { min-height: 40px; display: inline-flex; align-items: center; padding: 0 14px; font-size: 13px; }
+        @media (max-width: 860px) {
+          .pro-accueil .sa-kb-ligne { flex-wrap: wrap; }
+          .pro-accueil .sa-kb-nom { white-space: normal; overflow: visible; flex-basis: calc(100% - 40px); }
+        }
+      ` }} />
+      <div style={{ display: 'flex', alignItems: 'flex-end', gap: 10, flexWrap: 'wrap', marginBottom: 10 }}>
         <div style={{ flex: 1, minWidth: 200 }}>
           <h1 style={H1}>Mes animations</h1>
-          <div style={SUB}>En cours, à venir, passées — par mois.</div>
+          <div style={SUB}>En cours, à venir, passées.</div>
         </div>
-        <Link href={`/pro/historique${q}`} style={{ ...BTN2, padding: '10px 18px', fontSize: 13.5, textDecoration: 'none' }}>Historique</Link>
-        <Link href={`/pro/parcours${q}`} style={{ ...BTN2, padding: '10px 18px', fontSize: 13.5, textDecoration: 'none' }}>Aperçu mobile</Link>
-        {peutRejoindre && <Link href={`/pro/rejoindre${q}`} data-rejoindre style={{ ...BTN2, padding: '10px 18px', fontSize: 13.5, textDecoration: 'none' }}>Rejoindre un Super Event</Link>}
-        {peutCreer && <Link href={`/pro/nouvelle${q}${et}type=animation`} style={{ ...BTN, padding: '11px 20px', fontSize: 14, textDecoration: 'none' }}>+ Nouvelle animation</Link>}
+      </div>
+      <div className="pro-rangee">
+        {peutCreer && <Link href={`/pro/nouvelle${q}${et}type=animation`} style={{ ...BTN, padding: '0 20px', fontSize: 14.5, textDecoration: 'none' }}>+ Nouvelle animation</Link>}
+        {peutRejoindre && <Link href={`/pro/rejoindre${q}`} data-rejoindre style={{ ...BTN2, padding: '0 18px', fontSize: 14, textDecoration: 'none' }}>Rejoindre un Super Event</Link>}
+        <Link href={`/pro/historique${q}`} style={{ ...BTN2, padding: '0 18px', fontSize: 14, textDecoration: 'none' }}>Historique</Link>
+        <Link href={`/pro/parcours${q}`} style={{ ...BTN2, padding: '0 18px', fontSize: 14, textDecoration: 'none' }}>Aperçu mobile</Link>
       </div>
 
-      <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 16 }}>
+      <div className="pro-rangee" style={{ marginBottom: 14 }}>
         {TYPES.map(t => {
           const on = (t.id || null) === type
           return (
             <Link key={t.id || 'toutes'} href={`/pro${q}${t.id ? `${et}type=${t.id}` : ''}`}
-              style={{ borderRadius: 50, padding: '7px 15px', fontWeight: 800, fontSize: 13, textDecoration: 'none',
+              style={{ borderRadius: 50, padding: '0 16px', fontWeight: 800, fontSize: 14, textDecoration: 'none',
                 background: on ? C.degrade : '#fff', color: on ? '#fff' : C.accent, border: on ? 'none' : `1.5px solid ${C.bordureChamp}` }}>
               {t.label}
             </Link>
@@ -107,15 +120,16 @@ export default async function ProAccueilPage({ searchParams }: Props) {
         </div>
       )}
 
+      <div className="pro-accueil">
       <GrilleOperations groupes={groupes} vignette={op => (
         <Vignette op={op} href={lien(op.cle)} liens={[
-          { label: 'Lots', href: lien(op.cle, 'lots') },
+          { label: 'QR et diffusion', href: lien(op.cle, 'diffusion') },
+          { label: 'Rapport', href: lien(op.cle, 'trafic') },
           { label: 'Gagnants', href: lien(op.cle, 'gagnants') },
-          { label: 'Contacts', href: lien(op.cle, 'crm') },
-          { label: 'Trafic par QR', href: lien(op.cle, 'trafic') },
-          { label: 'Bons', href: lien(op.cle, 'bons') },
+          { label: 'Lots', href: lien(op.cle, 'lots') },
         ]} />
       )} />
+      </div>
     </ProShell>
   )
 }

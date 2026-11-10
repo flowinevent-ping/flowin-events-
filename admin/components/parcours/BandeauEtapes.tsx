@@ -10,7 +10,7 @@
 export type TeinteEtapes = 'event' | 'super' | 'pro'
 
 export const COULEURS_ETAPES: Record<TeinteEtapes, [string, string]> = {
-  event: ['#9B7BEA', '#7A4FE0'],
+  event: ['#5A78D6', '#3B5CC4'], // 10/11 : bleu Flowin (violet retiré, règle Romain)
   super: ['#FF8A14', '#C2410C'],
   pro: ['#3B7DE0', '#2746A6'],
 }

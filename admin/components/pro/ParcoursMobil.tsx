@@ -138,7 +138,7 @@ export default function ParcoursMobil({ events = [], showTitle = true }: { event
                   const id = x.id === '@jeu' && ev ? x.jeu(ev.module) : x.id
                   const on = ecran === id
                   return (
-                    <button key={x.id} onClick={() => setEcran(id)} style={{ padding: '7px 13px', borderRadius: 100, cursor: 'pointer', fontFamily: 'inherit', fontWeight: 700, fontSize: 12.5, border: `1.5px solid ${on ? C.violet : C.bordureChamp}`, background: on ? C.violetClair : '#fff', color: on ? '#5B34C2' : C.texte }}>{x.t}</button>
+                    <button key={x.id} onClick={() => setEcran(id)} style={{ padding: '7px 13px', borderRadius: 100, cursor: 'pointer', fontFamily: 'inherit', fontWeight: 700, fontSize: 12.5, border: `1.5px solid ${on ? C.violet : C.bordureChamp}`, background: on ? C.violetClair : '#fff', color: on ? '#2B47A8' : C.texte }}>{x.t}</button>
                   )
                 })}
               </div>
