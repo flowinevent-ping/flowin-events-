@@ -58,7 +58,7 @@
   function construire(J, rec, opts) {
     opts = opts || {};
     var signe = !!opts.signe;
-    function S(t) { return String(t == null ? '' : t).replace(/[  ]/g, ' ').replace(/€/g, 'EUR').replace(/[‘’]/g, "'").replace(/[“”«»]/g, '"').replace(/[–—]/g, '-').replace(/·/g, '-'); }
+    function S(t) { return String(t == null ? '' : t).replace(/[\u202f\u00a0]/g, ' ').replace(/€/g, 'EUR').replace(/[‘’]/g, "'").replace(/[“”«»]/g, '"').replace(/[–—]/g, '-').replace(/·/g, '-'); }
     var doc = new J({ unit: 'mm', format: 'a4', orientation: 'portrait' });
     var W = 210, M = 15, x = M, y = 18, CW = W - 2 * M;
     var ink = [27, 58, 92], mut = [90, 107, 128], mag = [59, 92, 196], teal = [91, 52, 194];
@@ -102,6 +102,13 @@
       y = wrap(l.det, x, y + 4.3, 7.8, mut, CW - 60, 3.6) + 2;
       doc.line(x, y - 1.5, W - M, y - 1.5); y += 3.5;
     }
+    /* Activite, lots proposes, conditions des lots (bon reduit, Romain 10/11/2026) : imprimes s'ils sont renseignes. */
+    var infos = [['ACTIVITE', rec.activite], ['LOTS PROPOSES', rec.lots_proposes], ['CONDITIONS DES LOTS', rec.conditions_lots]];
+    for (var k = 0; k < infos.length; k++) {
+      if (!infos[k][1] || !String(infos[k][1]).replace(/\s+/g, '')) continue;
+      T(infos[k][0], x, y, 7.5, 'bold', teal); y = wrap(infos[k][1], x + 42, y, 8.5, ink, CW - 42, 4) + 1.5;
+    }
+    if (rec.activite || rec.lots_proposes || rec.conditions_lots) { doc.line(x, y - 1, W - M, y - 1); y += 4; }
     var tx = W - M - 70;
     T('Total HT', tx, y, 9.5, 'normal', mut); T(eur(t.ht), W - M, y, 9.5, 'bold', ink, 'right'); y += 5.5;
     T('TVA 20 %', tx, y, 9.5, 'normal', mut); T(eur(t.tva), W - M, y, 9.5, 'bold', ink, 'right'); y += 2.5;

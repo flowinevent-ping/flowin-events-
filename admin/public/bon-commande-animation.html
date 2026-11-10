@@ -910,6 +910,7 @@
       garantie_certifiee_le: st.garantie && st.certif ? st.certif.le : null, garantie_certifiee_par: st.garantie && st.certif ? st.certif.par : null,
       logo: st.logo, kit: st.kit, opt_quiz_qte: st.quiz, opt_bonus_qte: st.bonus,
       commercial: val('f_commercial') || null,
+      activite: val('f_activite') || null, lots_proposes: val('f_lots') || null, conditions_lots: val('f_conditions') || null,
       montant_abonnement_ht: t.abo, montant_kit_ht: t.kit, montant_options_ht: t.opt,
       montant_ht: t.ht, montant_tva: t.tva, montant_ttc: t.ttc,
       mode_paiement: t.ttc > 0 ? st.pay : 'aucun', prelevement_inclut_reste: st.pay === 'prelevement_sepa' ? !!$('sepaReste').checked : false,

@@ -54,7 +54,9 @@ export default async function Page({ searchParams }: { searchParams: { pro?: str
   const t = searchParams.type
   const type = t === 'animation' || t === 'rejoindre' ? t : t === 'super' ? (droits.creer_super_event ? 'super' as const : 'demande' as const) : t === 'demande' ? 'demande' as const : null
   /* Créer une animation : le configurateur en carrousel dicté par Romain le 10/11/2026 (components/creation/Configurateur). */
-  if (type === 'animation' && !searchParams.se) {
+  /* 10/11/2026 : plus de page de choix intermédiaire. Sans type, le pro qui peut créer arrive
+     directement dans le configurateur ; « Rejoindre un Super Event » a son entrée de menu et sa carte. */
+  if ((type === 'animation' || (type === null && droits.creer_animation)) && !searchParams.se) {
     return (
       <ProShell proName={p.nom ?? 'Mon établissement'} proId={proId} active="nouvelle">
         <Configurateur pro={p as unknown as ProConfigurateur} banques={banques} />
@@ -62,7 +64,7 @@ export default async function Page({ searchParams }: { searchParams: { pro?: str
     )
   }
   return (
-    <ProShell proName={p.nom ?? 'Mon établissement'} proId={proId} active="nouvelle">
+    <ProShell proName={p.nom ?? 'Mon établissement'} proId={proId} active={type === 'rejoindre' || searchParams.se ? 'rejoindre' : 'nouvelle'}>
       <ParcoursCreation
         pro={p} banques={banques} supers={supers} packs={packs} droits={droits}
         typeInitial={searchParams.se ? 'rejoindre' : type} seInitial={searchParams.se ?? null}

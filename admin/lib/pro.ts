@@ -173,6 +173,9 @@ export async function creerAnimation(params: CreationAnimation): Promise<{ ok: b
       note: l.type === 'instantane' ? 'Type : gain instantané' : 'Type : tirage au sort',
       /* Colonne lots.validite_jours (sql/2026-11-10-tickets-animation.sql) : seulement si une durée est saisie. */
       ...(l.validiteJours && l.validiteJours > 0 ? { validite_jours: Math.round(l.validiteJours) } : {}),
+      /* Période « du … au … » (sql/2026-11-10-finitions.sql) : appliquée aux billets par date_limite_tirage / valider_lot. */
+      ...(l.validiteDu ? { valide_du: l.validiteDu } : {}),
+      ...(l.validiteAu ? { valide_au: l.validiteAu } : {}),
     })))
     if (eLots) {
       console.error('[creerAnimation] lots', eLots.message)
@@ -260,6 +263,43 @@ export async function enregistrerDemandeQuiz(d: DemandeQuizFlowin): Promise<{ ok
     note,
   })
   if (error) { console.error('[enregistrerDemandeQuiz]', error.message); return { ok: false, error: error.message } }
+  return { ok: true }
+}
+
+/**
+ * DEMANDE D'IMPRESSION DU KIT PHYSIQUE (configurateur, 10/11/2026) : envoyée à Flowin
+ * même quand PAIEMENT_ACTIF=false, par la même file que la demande de quiz (crm_retours,
+ * origine « pro-kit-physique »), avec coordonnées, SIRET, adresse et nombre de boutiques.
+ */
+export async function enregistrerDemandeKit(d: {
+  proId: string; proNom: string; nbBoutiques: number
+  contactNom: string; contactTel: string; contactEmail: string
+  siret?: string; adresse?: string; cp?: string; ville?: string
+  eventId?: string | null; animationNom?: string
+}): Promise<{ ok: boolean; error?: string }> {
+  const nb = Math.max(1, Math.round(d.nbBoutiques || 1))
+  const note = [
+    `Impression du kit physique : ${nb} boutique${nb > 1 ? 's' : ''} (support de caisse, 3 affiches, 3 macarons par boutique)`,
+    d.proNom.trim() ? `Commerce : ${d.proNom.trim()}` : null,
+    d.siret?.trim() ? `SIRET : ${d.siret.trim()}` : null,
+    (d.adresse?.trim() || d.ville?.trim()) ? `Adresse : ${[d.adresse?.trim(), [d.cp?.trim(), d.ville?.trim()].filter(Boolean).join(' ')].filter(Boolean).join(', ')}` : null,
+    d.eventId ? `Event : ${d.eventId}` : null,
+    d.animationNom?.trim() ? `Animation : ${d.animationNom.trim()}` : null,
+    `Pro : ${d.proId}`,
+  ].filter(Boolean).join('\n')
+  const { error } = await supabase.from('crm_retours').insert({
+    enseigne: d.proNom || d.proId,
+    contact_nom: d.contactNom.trim() || null,
+    contact_tel: d.contactTel.trim() || null,
+    contact_email: d.contactEmail.trim() || null,
+    ...(d.ville?.trim() ? { ville: d.ville.trim() } : {}),
+    ...(d.cp?.trim() ? { cp: d.cp.trim() } : {}),
+    origine: 'pro-kit-physique',
+    produit: 'Impression du kit physique',
+    etat: 'nouveau',
+    note,
+  })
+  if (error) { console.error('[enregistrerDemandeKit]', error.message); return { ok: false, error: error.message } }
   return { ok: true }
 }
 

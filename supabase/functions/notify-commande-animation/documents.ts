@@ -248,6 +248,9 @@ export function emailFlowin(r: Commande, type: string, ancien?: string): { sujet
     ["Formule", esc(FORMULES[String(r.offre)] ?? r.offre)], ["Supports", r.kit === "physique" ? "Kit physique × " + esc(r.nb_boutiques) : "Kit digital"],
     ["Total TTC", eur(r.montant_ttc)], ["Paiement", r.mode_paiement === "prelevement_sepa" ? "Prélèvement SEPA" : "Virement"],
     ["Souscription", r.type_commande === "renouvellement" ? (garantieActive() ? "Renouvellement (pas de garantie)" : "Renouvellement") : "Première souscription"],
+    ...(r.activite ? [["Activité", esc(r.activite)] as [string, string]] : []),
+    ...(r.lots_proposes ? [["Lots proposés", esc(r.lots_proposes)] as [string, string]] : []),
+    ...(r.conditions_lots ? [["Conditions des lots", esc(r.conditions_lots)] as [string, string]] : []),
     ...(garantieActive() ? [["Garantie", r.garantie ? "Oui, objectif " + esc(r.garantie_clients_objectif) + " clients" : "Non"] as [string, string]] : []),
   ];
   const t = lignes.map(([k, v]) => `<tr><td style="padding:4px 10px 4px 0;color:#5a6b80;font-size:13px">${k}</td><td style="padding:4px 0;font-size:14px;font-weight:700">${v}</td></tr>`).join("");

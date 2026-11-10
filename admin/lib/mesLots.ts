@@ -33,13 +33,19 @@ export interface MonLot {
   /** Date limite (ISO) : colonne dédiée si présente, sinon fin de l'animation. */
   valableJusquAu: string | null
   offertLe: string | null
+  /** Animation d'origine (lien d'invitation à jouer). */
+  eventId?: string | null
+  /** Billet reçu d'un ami (offert_a_joueur_id = moi). */
+  recu?: boolean
+  /** Billet que j'ai offert : il est dans le Flowin de mon ami, plus dans le mien. */
+  donne?: boolean
 }
 
 interface TirRow {
   id: string | number; event_id: string | null; super_event_id: string | null; partenaire_id: string | null
   lot_nom: string | null; lot_valeur: number | null; ticket_code: string | null; retrait_token: string | null
   retire_at: string | null; notifie_at: string | null; statut: string | null; created_at: string | null
-  valable_jusqu_au?: string | null; offert_le?: string | null
+  valable_jusqu_au?: string | null; offert_le?: string | null; joueur_id?: string | null; offert_a_joueur_id?: string | null
 }
 
 const COLS = 'id,event_id,super_event_id,partenaire_id,lot_nom,lot_valeur,ticket_code,retrait_token,retire_at,notifie_at,statut,created_at'
@@ -77,8 +83,13 @@ export function lienQr(token: string): string {
 
 export async function chargerMesLots(joueurId: string): Promise<MonLot[]> {
   /* Colonnes optionnelles d'abord ; repli sans elles si le SQL n'est pas appliqué. */
-  let r: { data: unknown[] | null; error: unknown } = await supabase.from('tirages').select(COLS + ',valable_jusqu_au,offert_le')
-    .eq('joueur_id', joueurId).order('created_at', { ascending: false }).limit(200)
+  /* Billets gagnés ET billets offerts par un ami (offert_a_joueur_id, sql/2026-11-10-finitions.sql). */
+  let r: { data: unknown[] | null; error: unknown } = await supabase.from('tirages').select(COLS + ',valable_jusqu_au,offert_le,joueur_id,offert_a_joueur_id')
+    .or(`joueur_id.eq.${joueurId},offert_a_joueur_id.eq.${joueurId}`).order('created_at', { ascending: false }).limit(200)
+  if (r.error) {
+    r = await supabase.from('tirages').select(COLS + ',valable_jusqu_au,offert_le')
+      .eq('joueur_id', joueurId).order('created_at', { ascending: false }).limit(200)
+  }
   if (r.error) {
     r = await supabase.from('tirages').select(COLS)
       .eq('joueur_id', joueurId).order('created_at', { ascending: false }).limit(200)
@@ -116,7 +127,9 @@ export async function chargerMesLots(joueurId: string): Promise<MonLot[]> {
       id: String(t.id), commerce, commerceCle: t.partenaire_id || t.event_id || commerce,
       operation: s ? s.nom : null, type: t.super_event_id ? 'super' : 'animation',
       lot: t.lot_nom || 'Lot', valeur: t.lot_valeur, ticketCode: t.ticket_code, token: t.retrait_token,
-      etat, gagneLe: t.created_at, valableJusquAu: valable, offertLe: t.offert_le || null,
+      etat, gagneLe: t.created_at, valableJusquAu: valable, offertLe: t.offert_le || null, eventId: t.event_id,
+      recu: !!t.offert_a_joueur_id && t.offert_a_joueur_id === joueurId && t.joueur_id !== joueurId,
+      donne: !!t.offert_a_joueur_id && t.offert_a_joueur_id !== joueurId,
     } as MonLot
   })
 }
@@ -124,4 +137,45 @@ export async function chargerMesLots(joueurId: string): Promise<MonLot[]> {
 /** Note « offert à un ami » côté serveur (RPC du SQL du 10/11). Sans le SQL : rien, le partage marche quand même. */
 export async function noterOffert(token: string): Promise<void> {
   try { await supabase.rpc('offrir_ticket_ami', { p_token: token }) } catch { /* SQL pas encore appliqué */ }
+}
+
+/**
+ * « En faire profiter un ami » (Romain, 10/11/2026) : RPC security definer offrir_ticket_ami_contact.
+ * Ami déjà inscrit (e-mail ou téléphone connu) : notification dans son Flowin et billet dans son /moi -> 'notifie'.
+ * Sinon : 'invite' (message WhatsApp avec le lien du billet et l'invitation à s'inscrire).
+ * Dans les deux cas, l'ami entre dans le fichier client du commerce (source « parrainage »).
+ * La réponse ne dit rien d'autre : ni nom, ni identifiant.
+ */
+export type ResultatAmi = { ok: boolean; resultat?: 'notifie' | 'invite'; raison?: string }
+export async function offrirAmi(token: string, joueurId: string, prenom: string, contact: string): Promise<ResultatAmi> {
+  const { data, error } = await supabase.rpc('offrir_ticket_ami_contact', { p_token: token, p_joueur_id: joueurId, p_prenom: prenom, p_contact: contact })
+  if (error) return { ok: false, raison: 'reseau' }
+  const d = (data || {}) as { ok?: boolean; resultat?: 'notifie' | 'invite'; raison?: string }
+  return d.ok && d.resultat ? { ok: true, resultat: d.resultat } : { ok: false, raison: d.raison || 'inconnu' }
+}
+
+/** Lien d'invitation : jouer chez le même commerce, sinon la carte des commerces. */
+export function lienInvitation(eventId: string | null | undefined): string {
+  const o = typeof window !== 'undefined' ? window.location.origin : 'https://flowin-events.vercel.app'
+  return eventId ? o + '/jouer?ev=' + encodeURIComponent(eventId) : o + '/carte-commerces'
+}
+
+/** Notifications « cadeau » non vues (lot offert par un ami). */
+export interface Cadeau { id: string; tirage_id: number; lot_nom: string | null; created_at: string; vu_le: string | null }
+export async function chargerCadeaux(joueurId: string): Promise<Cadeau[]> {
+  const { data, error } = await supabase.rpc('mes_cadeaux', { p_joueur_id: joueurId })
+  if (error) return []
+  return ((data || []) as Cadeau[]).filter(c => !c.vu_le)
+}
+export async function marquerCadeauxVus(joueurId: string, ids: string[]): Promise<void> {
+  if (!ids.length) return
+  try { await supabase.rpc('marquer_notifications_vues', { p_joueur_id: joueurId, p_ids: ids }) } catch { /* */ }
+}
+
+/** Relances du commerce (palier « relance », RPC pro_relancer_lots) non vues, via mes_notifications. */
+export interface Relance { id: string; tirage_id: number; lot_nom: string | null; vu_le: string | null; palier: string }
+export async function chargerRelances(joueurId: string): Promise<Relance[]> {
+  const { data, error } = await supabase.rpc('mes_notifications', { p_joueur_id: joueurId })
+  if (error) return []
+  return ((data || []) as Relance[]).filter(n => n.palier === 'relance' && !n.vu_le)
 }

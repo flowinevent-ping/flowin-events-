@@ -36,7 +36,9 @@ interface NavItem { key: string; label: string; sous: string; icon: string; rout
    gagnants, trafic, CRM et contrat. */
 const NAV: NavItem[] = [
   { key: 'operations', label: 'Mes animations', sous: 'Animations et super events', icon: 'calendar', route: '/pro' },
-  { key: 'nouvelle', label: 'Nouvelle animation', sous: 'Créer ou rejoindre', icon: 'join', route: '/pro/nouvelle' },
+  /* 10/11/2026 : « Nouvelle animation » ouvre directement le configurateur ; rejoindre un super event a sa propre entrée. */
+  { key: 'nouvelle', label: 'Nouvelle animation', sous: 'Configurer mon jeu', icon: 'join', route: '/pro/nouvelle' },
+  { key: 'rejoindre', label: 'Rejoindre un Super Event', sous: 'Opérations collectives', icon: 'star', route: '/pro/rejoindre' },
   { key: 'scanner', label: 'Scanner un billet', sous: 'Remise des lots au téléphone', icon: 'scan', route: '/pro/scanner' },
   { key: 'donnees', label: 'Mes contacts & stats', sous: 'Fichier client, trafic par support', icon: 'users', route: '/pro/donnees' },
   { key: 'compte', label: 'Mon profil', sous: 'Entreprise, RIB, factures, lots', icon: 'shop', route: '/pro/compte' },
@@ -45,7 +47,7 @@ const NAV: NavItem[] = [
 const RANGEMENT: Record<string, string> = {
   accueil: 'operations', events: 'operations', super: 'operations', parcours: 'operations', operation: 'operations',
   lots: 'operations', com: 'operations',
-  jeu: 'nouvelle', rejoindre: 'nouvelle', historique: 'operations',
+  jeu: 'nouvelle', historique: 'operations',
   crm: 'donnees', gagnants: 'donnees', tracking: 'donnees',
   entreprise: 'compte', contrat: 'compte', banques: 'compte', commandes: 'compte',
 }
@@ -91,7 +93,9 @@ export default function ProShell({ proName, proId, active, children }: { proName
     lireDroitsPro(proId).then(d => { if (!fini) setDroits(d) })
     return () => { fini = true }
   }, [proId])
-  const navVisible = NAV.filter(n => n.key !== 'nouvelle' || peutOuvrirNouvelle(droits))
+  const navVisible = NAV.filter(n => n.key === 'rejoindre' ? droits.rejoindre_super_event : (n.key !== 'nouvelle' || peutOuvrirNouvelle(droits)))
+  /* Barre basse mobile : 5 entrées au plus (390 px) ; « Rejoindre » reste dans le menu et sur l'accueil. */
+  const navBas = navVisible.filter(n => n.key !== 'rejoindre')
 
   /* ACCES CONDITIONNE AU PAIEMENT (31/10) : un compte cree par « Ma premiere fois » reste
      « en_attente » jusqu'a la validation du paiement (virement valide par le SA, SEPA par le
@@ -188,7 +192,7 @@ export default function ProShell({ proName, proId, active, children }: { proName
 
   const barreBasse = (
     <nav className="pro-bottom-nav" style={{ display: 'none' }}>
-      {navVisible.map(n => {
+      {navBas.map(n => {
         const on = n.key === actif
         return (
           <Link key={n.key} href={`${n.route}${q}`} data-nav={n.key} style={{ textDecoration: 'none', flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3, padding: '9px 4px 8px', color: on ? C.violetFonce : C.attenue }}>

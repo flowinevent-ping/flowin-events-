@@ -2,8 +2,8 @@
 import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabase'
 import { Ico } from '@/lib/proicons'
-import MesLots from '@/components/joueur/MesLots'
-import { chargerMesLots, joursRestants, palierRappel, type MonLot } from '@/lib/mesLots'
+import MesLots, { LIBELLE_NOTIF } from '@/components/joueur/MesLots'
+import { chargerMesLots, chargerCadeaux, chargerRelances, marquerCadeauxVus, joursRestants, palierRappel, type MonLot, type Cadeau, type Relance } from '@/lib/mesLots'
 
 type Joueur = { id: string; prenom?: string | null; nom?: string | null; email?: string | null }
 type Ticket = { event_id: string | null; super_event_id: string | null }
@@ -20,6 +20,9 @@ export default function MonComptePage() {
   const [seNames, setSeNames] = useState<Record<string, string>>({})
   const [lots, setLots] = useState<MonLot[]>([])
   const [ecran, setEcran] = useState<'lots' | 'tickets'>('lots')
+  /* Lot offert par un ami (notification in-app, palier « cadeau »). */
+  const [cadeaux, setCadeaux] = useState<Cadeau[]>([])
+  const [relances, setRelances] = useState<Relance[]>([])
 
   useEffect(() => {
     let local: { id?: string } | null = null
@@ -34,6 +37,8 @@ export default function MonComptePage() {
         chargerMesLots(jid).catch(() => [] as MonLot[]),
       ])
       setLots(ml)
+      chargerCadeaux(jid).then(setCadeaux).catch(() => { /* */ })
+      chargerRelances(jid).then(setRelances).catch(() => { /* */ })
       setJoueur((jr.data as Joueur) ?? { id: jid })
       const tkRows = (tk.data ?? []) as Ticket[]
       const gaRows = (ga.data ?? []) as Gain[]
@@ -68,7 +73,7 @@ export default function MonComptePage() {
     }, {} as Record<string, { se: string; total: number; commerces: Record<string, number> }>)
   )
 
-  const wrap: React.CSSProperties = { minHeight: '100dvh', background: '#f1ede6', fontFamily: 'system-ui, sans-serif', color: '#141a26', paddingBottom: 40 }
+  const wrap: React.CSSProperties = { minHeight: '100dvh', boxSizing: 'border-box', background: '#f1ede6', fontFamily: 'system-ui, sans-serif', color: '#141a26', paddingBottom: 40 }
   const card: React.CSSProperties = { maxWidth: 540, margin: '0 auto', padding: '0 18px' }
 
   if (loading) {
@@ -96,7 +101,7 @@ export default function MonComptePage() {
     lot: g.libelle || 'Lot', valeur: null, ticketCode: g.code, token: null, etat: g.utilise ? 'utilise' : 'a_utiliser',
     gagneLe: null, valableJusquAu: null, offertLe: null,
   } as MonLot)))
-  const gainsActifs = tousLots.filter(l => l.etat === 'a_utiliser' || l.etat === 'a_confirmer')
+  const gainsActifs = tousLots.filter(l => !l.donne && (l.etat === 'a_utiliser' || l.etat === 'a_confirmer'))
   /* Rappel in-app le plus proche (1 mois / 15 j / 48 h). */
   const urgent = tousLots.filter(l => l.etat === 'a_utiliser' && palierRappel(joursRestants(l.valableJusquAu)))
     .sort((a, b) => (joursRestants(a.valableJusquAu) ?? 999) - (joursRestants(b.valableJusquAu) ?? 999))[0]
@@ -128,7 +133,18 @@ export default function MonComptePage() {
       </div>
 
       <div style={card}>
-        {urgent && (
+        {cadeaux.length > 0 && (
+          <button data-cadeau-banniere onClick={() => { setEcran('lots'); marquerCadeauxVus(joueur.id, cadeaux.map(c => c.id)); setCadeaux([]) }} style={{ display: 'flex', alignItems: 'center', gap: 8, width: '100%', marginTop: 16, background: '#E7F8EE', color: '#0B6E50', border: 'none', borderRadius: 14, padding: '12px 14px', fontSize: 13.5, fontWeight: 800, textAlign: 'left', cursor: 'pointer' }}>
+            <Ico k="gift" size={16} />{LIBELLE_NOTIF.cadeau(cadeaux[0].lot_nom)}
+          </button>
+        )}
+        {/* Une seule bannière à la fois (pas de scroll à 390 px) : cadeau, puis relance du commerce, puis expiration. */}
+        {relances.length > 0 && cadeaux.length === 0 && (
+          <button data-relance-banniere onClick={() => { setEcran('lots'); marquerCadeauxVus(joueur.id, relances.map(c => c.id)); setRelances([]) }} style={{ display: 'flex', alignItems: 'center', gap: 8, width: '100%', marginTop: 16, background: '#EFF3FE', color: '#2746A6', border: 'none', borderRadius: 14, padding: '12px 14px', fontSize: 13.5, fontWeight: 800, textAlign: 'left', cursor: 'pointer' }}>
+            <Ico k="bell" size={16} />{LIBELLE_NOTIF.relance(relances[0].lot_nom)}
+          </button>
+        )}
+        {urgent && cadeaux.length === 0 && relances.length === 0 && (
           <button data-rappel-banniere onClick={() => setEcran('lots')} style={{ display: 'flex', alignItems: 'center', gap: 8, width: '100%', marginTop: 16, background: '#FEF3C7', color: '#92400E', border: 'none', borderRadius: 14, padding: '12px 14px', fontSize: 13.5, fontWeight: 800, textAlign: 'left', cursor: 'pointer' }}>
             <Ico k="bell" size={16} />Ton lot chez {urgent.commerce} expire bientôt
           </button>
@@ -137,7 +153,7 @@ export default function MonComptePage() {
           <button style={ongl(ecran === 'lots')} onClick={() => setEcran('lots')}><Ico k="gift" size={14} style={{ marginRight: 5, verticalAlign: -2 }} />Mes lots</button>
           <button style={ongl(ecran === 'tickets')} onClick={() => setEcran('tickets')}><Ico k="ticket" size={14} style={{ marginRight: 5, verticalAlign: -2 }} />Mes tickets</button>
         </div>
-        {ecran === 'lots' && <MesLots lots={tousLots} />}
+        {ecran === 'lots' && <MesLots lots={tousLots} joueurId={joueur.id} onChange={() => { chargerMesLots(joueur.id).then(setLots).catch(() => { /* */ }) }} />}
         {ecran === 'tickets' && (<>
         {/* Mes tickets par opération */}
         {parOperation.length === 0 && (

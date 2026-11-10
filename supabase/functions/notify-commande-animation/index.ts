@@ -41,7 +41,7 @@ const NOTIFY_FROM = Deno.env.get("NOTIFY_FROM") || "Flowin <onboarding@resend.de
 const SUPA_URL = Deno.env.get("SUPABASE_URL") || "";
 const SERVICE = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || "";
 
-const COLS = "id,statut,type_commande,offre,enseigne,prelevement_inclut_reste,engagement_mois,engagement_accepte,raison_sociale,siret,adresse,cp,ville,contact_nom,contact_fonction,email,tel,nb_boutiques,commercial,kit,opt_quiz_qte,opt_bonus_qte,montant_abonnement_ht,montant_kit_ht,montant_options_ht,montant_ht,montant_tva,montant_ttc,mode_paiement,garantie,garantie_clients_objectif,garantie_certifiee_le,garantie_certifiee_par,panier_moyen,flux_journalier,cgv_version,signataire_nom,signataire_qualite,signature_horodatage,signature_ip,facture_numero,documents_envoyes_le";
+const COLS = "id,statut,type_commande,offre,enseigne,prelevement_inclut_reste,engagement_mois,engagement_accepte,raison_sociale,siret,adresse,cp,ville,contact_nom,contact_fonction,email,tel,nb_boutiques,commercial,kit,opt_quiz_qte,opt_bonus_qte,montant_abonnement_ht,montant_kit_ht,montant_options_ht,montant_ht,montant_tva,montant_ttc,mode_paiement,garantie,garantie_clients_objectif,garantie_certifiee_le,garantie_certifiee_par,panier_moyen,flux_journalier,cgv_version,signataire_nom,signataire_qualite,signature_horodatage,signature_ip,facture_numero,documents_envoyes_le,activite,lots_proposes,conditions_lots";
 
 function json(body: unknown, status = 200): Response {
   return new Response(JSON.stringify(body), { status, headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*", "Access-Control-Allow-Headers": "authorization, apikey, content-type" } });
@@ -66,12 +66,12 @@ async function envoyer(to: string, m: { sujet: string; html: string }, pj: Array
   let dest = [to];
   if (to === NOTIFY_TO) dest = DEST_FLOWIN;
   else if (!ENVOI_CLIENT && !(r && r.commercial)) { dest = DEST_FLOWIN; m = { sujet: `[${(r && (r.enseigne || r.raison_sociale)) || to}] ${m.sujet} (à transmettre au pro : ${to})`, html: m.html }; }
-  const r = await fetch("https://api.resend.com/emails", {
+  const res = await fetch("https://api.resend.com/emails", {
     method: "POST", headers: { Authorization: `Bearer ${RESEND_API_KEY}`, "Content-Type": "application/json" },
     body: JSON.stringify({ from: NOTIFY_FROM, to: dest, subject: m.sujet, html: m.html, attachments: pj.length ? pj : undefined }),
   });
-  const j = await r.json().catch(() => ({}));
-  if (!r.ok) throw new Error(`resend ${r.status} ${JSON.stringify(j).slice(0, 200)}`);
+  const j = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(`resend ${res.status} ${JSON.stringify(j).slice(0, 200)}`);
   return String(j.id ?? "");
 }
 

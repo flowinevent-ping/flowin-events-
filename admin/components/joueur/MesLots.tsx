@@ -3,16 +3,23 @@
 /**
  * MES LOTS — carrousel (une carte = un lot), groupé par commerce (pastilles).
  * Règles d'interface : carrousel, peu de texte. Rappels in-app 1 mois / 15 j / 48 h.
- * « En faire profiter un ami » : partage du lien du billet (partage natif,
- * WhatsApp, e-mail). Le billet reste valable pour l'ami : le commerce le valide
- * avec son code PIN, et le lot est déstocké comme d'habitude (valider_lot).
+ * « En faire profiter un ami » (Romain, 10/11/2026) : prénom + téléphone ou e-mail. Ami inscrit :
+ * notification dans son Flowin, billet dans son /moi. Sinon : WhatsApp (billet + invitation).
+ * Dans les deux cas l'ami entre dans le fichier client du commerce (parrainage). Le commerce
+ * valide le billet avec son code PIN, déstockage habituel (valider_lot).
  */
 import { useEffect, useMemo, useRef, useState } from 'react'
 import QRCode from 'qrcode'
 import { Ico } from '@/lib/proicons'
-import { type MonLot, joursRestants, palierRappel, dateCourte, lienBillet, lienQr, noterOffert } from '@/lib/mesLots'
+import { type MonLot, joursRestants, palierRappel, dateCourte, lienBillet, lienQr, offrirAmi, lienInvitation } from '@/lib/mesLots'
 
 const BLEU = '#2746A6'
+
+/** Libellés des notifications in-app (joueur_notifications.palier). */
+export const LIBELLE_NOTIF: Record<'cadeau' | 'relance', (lot: string | null) => string> = {
+  cadeau: lot => `Un ami t’offre ${lot ? `« ${lot} »` : 'un lot'} !`,
+  relance: lot => `Le commerce te rappelle ton lot${lot ? ` « ${lot} »` : ''}`,
+}
 
 const ETAT: Record<MonLot['etat'], { txt: string; fg: string; bg: string }> = {
   a_utiliser: { txt: 'À utiliser', fg: '#fff', bg: '#0B6E50' },
@@ -39,36 +46,59 @@ function Rappel({ lot }: { lot: MonLot }) {
   )
 }
 
-function FeuilleAmi({ lot, onClose }: { lot: MonLot; onClose: () => void }) {
+function FeuilleAmi({ lot, joueurId, onClose, onOffert }: { lot: MonLot; joueurId: string | null; onClose: () => void; onOffert: () => void }) {
+  const [prenom, setPrenom] = useState('')
+  const [contact, setContact] = useState('')
+  const [etat, setEtat] = useState<'' | 'envoi' | 'notifie' | 'invite'>('')
+  const [err, setErr] = useState('')
   const url = lot.token ? lienBillet(lot.token) : ''
-  const texte = `Je t’offre mon lot « ${lot.lot} » chez ${lot.commerce}. Montre ce billet au commerce :`
-  const [copie, setCopie] = useState(false)
-  const noter = () => { if (lot.token) noterOffert(lot.token) }
-  const partager = async () => {
-    const nav = navigator as Navigator & { share?: (d: ShareData) => Promise<void> }
-    if (nav.share) { try { await nav.share({ title: 'Un cadeau pour toi', text: texte, url }); noter(); onClose() } catch { /* annulé */ } }
-    else { try { await navigator.clipboard.writeText(url); setCopie(true); noter() } catch { /* */ } }
+  const chiffres = contact.replace(/\D/g, '')
+  const valide = prenom.trim().length > 0 && (contact.indexOf('@') > 0 || chiffres.length >= 9)
+  const envoyer = async () => {
+    if (!lot.token || !joueurId || !valide) return
+    setEtat('envoi'); setErr('')
+    const r = await offrirAmi(lot.token, joueurId, prenom.trim(), contact.trim())
+    if (!r.ok || !r.resultat) { setEtat(''); setErr(r.raison === 'contact' ? 'Téléphone ou e-mail invalide.' : r.raison === 'soi' ? 'C’est ton propre compte.' : 'Envoi impossible. Réessaie.'); return }
+    setEtat(r.resultat as 'notifie' | 'invite'); onOffert()
   }
+  /* Ami non inscrit : WhatsApp avec le billet et l'invitation à rejoindre Flowin. */
+  const texte = `${prenom.trim() || 'Salut'}, je t’offre mon lot « ${lot.lot} » chez ${lot.commerce} ! Ton billet : ${url}\nInscris-toi sur Flowin pour le garder et jouer toi aussi : ${lienInvitation(lot.eventId)}`
+  const wa = `https://wa.me/${chiffres.length >= 9 && contact.indexOf('@') < 0 ? (chiffres.length === 10 && chiffres.charAt(0) === '0' ? '33' + chiffres.slice(1) : chiffres) : ''}?text=${encodeURIComponent(texte)}`
   const b: React.CSSProperties = { display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, width: '100%', padding: '14px', borderRadius: 13, fontWeight: 800, fontSize: 15, textDecoration: 'none', border: 'none', cursor: 'pointer', boxSizing: 'border-box' }
+  const champ: React.CSSProperties = { width: '100%', padding: '13px 14px', borderRadius: 12, border: '1.5px solid #d8dce5', fontSize: 16, boxSizing: 'border-box', fontFamily: 'inherit' }
   return (
     <div role="dialog" aria-label="En faire profiter un ami" onClick={onClose} style={{ position: 'fixed', inset: 0, background: 'rgba(20,26,38,.45)', display: 'flex', alignItems: 'flex-end', justifyContent: 'center', zIndex: 50 }}>
-      <div onClick={e => e.stopPropagation()} style={{ background: '#fff', width: '100%', maxWidth: 480, borderRadius: '22px 22px 0 0', padding: '22px 18px 26px', boxSizing: 'border-box' }}>
-        <div style={{ fontSize: 18, fontWeight: 800, marginBottom: 4 }}>Offrir ce lot</div>
-        <div style={{ fontSize: 13.5, color: '#5a6071', marginBottom: 16 }}>Ton ami montre le billet au commerce. Une seule utilisation.</div>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-          <button onClick={partager} style={{ ...b, background: BLEU, color: '#fff' }}><Ico k="link" size={16} />{copie ? 'Lien copié' : 'Partager'}</button>
-          <a href={`https://wa.me/?text=${encodeURIComponent(texte + ' ' + url)}`} target="_blank" rel="noreferrer" onClick={noter} style={{ ...b, background: '#E7F8EE', color: '#0B6E50' }}><Ico k="phone" size={16} />WhatsApp</a>
-          <a href={`mailto:?subject=${encodeURIComponent('Un cadeau pour toi')}&body=${encodeURIComponent(texte + '\n' + url)}`} onClick={noter} style={{ ...b, background: '#EFF3FE', color: BLEU }}><Ico k="mail" size={16} />E-mail</a>
-          <button onClick={onClose} style={{ ...b, background: 'transparent', color: '#5a6071' }}>Fermer</button>
-        </div>
+      <div data-feuille-ami onClick={e => e.stopPropagation()} style={{ background: '#fff', width: '100%', maxWidth: 480, borderRadius: '22px 22px 0 0', padding: '22px 18px 26px', boxSizing: 'border-box' }}>
+        {etat === 'notifie' ? (<>
+          <div data-ami-resultat="notifie" style={{ fontSize: 18, fontWeight: 800, marginBottom: 6 }}>C’est offert !</div>
+          <div style={{ fontSize: 14, color: '#5a6071', marginBottom: 16 }}>{prenom.trim()} le retrouve dans son Flowin.</div>
+          <button onClick={onClose} style={{ ...b, background: BLEU, color: '#fff' }}>Fermer</button>
+        </>) : etat === 'invite' ? (<>
+          <div data-ami-resultat="invite" style={{ fontSize: 18, fontWeight: 800, marginBottom: 6 }}>Envoie-lui son billet</div>
+          <div style={{ fontSize: 14, color: '#5a6071', marginBottom: 16 }}>{prenom.trim()} n’a pas encore Flowin : il reçoit le billet et l’invitation.</div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+            <a data-ami-whatsapp href={wa} target="_blank" rel="noreferrer" style={{ ...b, background: '#0B6E50', color: '#fff' }}><Ico k="phone" size={16} />Envoyer par WhatsApp</a>
+            <button onClick={onClose} style={{ ...b, background: 'transparent', color: '#5a6071' }}>Fermer</button>
+          </div>
+        </>) : (<>
+          <div style={{ fontSize: 18, fontWeight: 800, marginBottom: 4 }}>Offrir ce lot</div>
+          <div style={{ fontSize: 13.5, color: '#5a6071', marginBottom: 14 }}>Une seule utilisation, par ton ami.</div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+            <input data-ami-prenom style={champ} placeholder="Prénom de ton ami" value={prenom} onChange={e => setPrenom(e.target.value)} autoComplete="off" />
+            <input data-ami-contact style={champ} placeholder="Son téléphone ou son e-mail" value={contact} onChange={e => setContact(e.target.value)} inputMode="email" autoComplete="off" />
+            {err && <div style={{ fontSize: 13, fontWeight: 700, color: '#991B1B' }}>{err}</div>}
+            <button data-ami-envoyer disabled={!valide || etat === 'envoi' || !joueurId} onClick={envoyer} style={{ ...b, background: BLEU, color: '#fff', opacity: valide && joueurId ? 1 : 0.5 }}><Ico k="gift" size={16} />{etat === 'envoi' ? 'Envoi…' : 'Offrir'}</button>
+            <button onClick={onClose} style={{ ...b, background: 'transparent', color: '#5a6071', padding: 8 }}>Annuler</button>
+          </div>
+        </>)}
       </div>
     </div>
   )
 }
 
 function Carte({ lot, onAmi }: { lot: MonLot; onAmi: () => void }) {
-  const e = ETAT[lot.etat]
-  const actif = lot.etat === 'a_utiliser'
+  const e = lot.donne && lot.etat === 'a_utiliser' ? { txt: 'Offert', fg: BLEU, bg: '#EFF3FE' } : ETAT[lot.etat]
+  const actif = lot.etat === 'a_utiliser' && !lot.donne
   return (
     <div data-lot={lot.id} style={{ scrollSnapAlign: 'center', flex: '0 0 86%', maxWidth: 380, background: '#fff', borderRadius: 22, padding: '18px 17px', boxShadow: '0 4px 16px rgba(20,26,38,.08)', boxSizing: 'border-box', opacity: actif || lot.etat === 'a_confirmer' ? 1 : 0.75 }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8 }}>
@@ -82,7 +112,8 @@ function Carte({ lot, onAmi }: { lot: MonLot; onAmi: () => void }) {
         {lot.valableJusquAu ? `Valable jusqu’au ${dateCourte(lot.valableJusquAu)}` : 'Validité : [à compléter par le commerce]'}
       </div>
       <Rappel lot={lot} />
-      {lot.offertLe && <div style={{ fontSize: 12.5, fontWeight: 800, color: BLEU, marginTop: 8 }}><Ico k="gift" size={13} style={{ marginRight: 5, verticalAlign: -2 }} />Offert à un ami</div>}
+      {lot.recu && <div data-recu style={{ fontSize: 12.5, fontWeight: 800, color: '#0B6E50', marginTop: 8 }}><Ico k="gift" size={13} style={{ marginRight: 5, verticalAlign: -2 }} />Offert par un ami</div>}
+      {lot.offertLe && !lot.recu && <div style={{ fontSize: 12.5, fontWeight: 800, color: BLEU, marginTop: 8 }}><Ico k="gift" size={13} style={{ marginRight: 5, verticalAlign: -2 }} />Offert à un ami</div>}
       {actif && lot.token && (
         <div style={{ marginTop: 14 }}>
           <Qr url={lienQr(lot.token)} />
@@ -104,7 +135,7 @@ function Carte({ lot, onAmi }: { lot: MonLot; onAmi: () => void }) {
   )
 }
 
-export default function MesLots({ lots }: { lots: MonLot[] }) {
+export default function MesLots({ lots, joueurId = null, onChange }: { lots: MonLot[]; joueurId?: string | null; onChange?: () => void }) {
   const [filtre, setFiltre] = useState<string>('tous')
   const [ami, setAmi] = useState<MonLot | null>(null)
   const [idx, setIdx] = useState(0)
@@ -149,7 +180,7 @@ export default function MesLots({ lots }: { lots: MonLot[] }) {
           {visibles.map((l, i) => <span key={l.id} style={{ width: i === idx ? 18 : 7, height: 7, borderRadius: 7, background: i === idx ? BLEU : '#cfd3dc', transition: 'width .2s' }} />)}
         </div>
       )}
-      {ami && <FeuilleAmi lot={ami} onClose={() => setAmi(null)} />}
+      {ami && <FeuilleAmi lot={ami} joueurId={joueurId} onClose={() => { setAmi(null); if (onChange) onChange() }} onOffert={() => { /* rechargé à la fermeture */ }} />}
     </div>
   )
 }

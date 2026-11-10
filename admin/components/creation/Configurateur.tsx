@@ -4,14 +4,14 @@
  * CONFIGURATEUR DU JEU (pro) — parcours dicté par Romain le 10/11/2026, un écran = une idée, carrousel sans scroll :
  *   coordonnées (sauté si connues) · jeu · configuration du quiz (je rédige / Flowin rédige) · demande à Flowin
  *   · lots qui font revenir · supports + QR · kit · récapitulatif (Modifier) · prix · « Valider mon bon de commande ».
- * Écritures (rien de nouveau en base) : pros (coordonnées), events + lots (creerAnimation, lots.validite_jours),
- * qr_stations (creerQrTrace), crm_retours (enregistrerDemandeQuiz), banques (questions à écrire après).
+ * Écritures : pros (coordonnées), events + lots (creerAnimation, lots.validite_jours, lots.valide_du / valide_au),
+ * qr_stations (creerQrTrace), crm_retours (enregistrerDemandeQuiz, enregistrerDemandeKit — même avec PAIEMENT_ACTIF=false), banques (questions à écrire après).
  * PAIEMENT_ACTIF=false : validation sans paiement, le jeu passe en ligne ; true : bon de commande pré-rempli + virement.
  * Le logo n'est plus bloquant (Romain, 10/11) : le billet montre le nom du commerce tant qu'il n'y a pas de logo.
  */
 import { useEffect, useMemo, useState, type CSSProperties, type ReactNode } from 'react'
 import { supabase } from '@/lib/supabase'
-import { creerAnimation, enregistrerDemandeQuiz, idAnimation } from '@/lib/pro'
+import { creerAnimation, enregistrerDemandeQuiz, enregistrerDemandeKit, idAnimation } from '@/lib/pro'
 import type { Banque, QuestionQuiz } from '@/lib/banques'
 import { creerBanque, enregistrerBanque, nouvelleQuestionQuiz } from '@/lib/banques'
 import { GABARIT_MODULE } from '@/lib/gabarit'
@@ -138,6 +138,7 @@ export default function Configurateur({ pro, banques }: { pro: ProConfigurateur;
 
   /* 7. Kit */
   const [kit, setKit] = useState<'digital' | 'physique'>('digital')
+  const [nbBoutiques, setNbBoutiques] = useState(1)
 
   /* Écrans */
   const ecrans = useMemo(() => {
@@ -178,7 +179,7 @@ export default function Configurateur({ pro, banques }: { pro: ProConfigurateur;
 
   /* Prix (offre de bienvenue -50 %, grille unique lib/reglement) */
   const quizFlowin = estQuiz && voie === 'flowin'
-  const totalHt = PRIX_ANIMATION.lancement + (quizFlowin ? PRIX_ANIMATION.quizFlowinLancement : 0) + (kit === 'physique' ? PRIX_KIT_PHYSIQUE : 0)
+  const totalHt = PRIX_ANIMATION.lancement + (quizFlowin ? PRIX_ANIMATION.quizFlowinLancement : 0) + (kit === 'physique' ? PRIX_KIT_PHYSIQUE * nbBoutiques : 0)
 
   /* Validation */
   const [envoi, setEnvoi] = useState<'' | 'envoi'>('')
@@ -224,7 +225,7 @@ export default function Configurateur({ pro, banques }: { pro: ProConfigurateur;
         ...(spin ? { spinSegments: lotsOk.map((l, k): { label: string; color: string; perdant?: boolean } => ({ label: l.nom.trim(), color: k % 2 ? '#7FA1F0' : BLEU })).concat([{ label: 'Perdu', color: '#CBD5E1', perdant: true }] as { label: string; color: string; perdant?: boolean }[]) } : cfgDepuisTirage({ mode: 'manuel', date: '', publier: false, notifierPerdants: true })),
         ...cfgMaster(module_, MASTER_VIDE),
         ...(logoUrl ? { logoUrl } : {}),
-        commande: { offre: 'lancement', quiz_flowin: quizFlowin, kit, total_ht: totalHt, supports: supportsChoisis.map(s => s.t), paiement_actif: PAIEMENT_ACTIF, cree_le: new Date().toISOString() },
+        commande: { offre: 'lancement', quiz_flowin: quizFlowin, kit, ...(kit === 'physique' ? { nb_boutiques: nbBoutiques } : {}), total_ht: totalHt, supports: supportsChoisis.map(s => s.t), paiement_actif: PAIEMENT_ACTIF, cree_le: new Date().toISOString() },
         ...(quizFlowin ? { quizFlowin: { statut: 'demande', theme: theme.trim(), objectif: objectif.trim(), bonus: jeu === 'quizbonus' } } : {}),
       },
       lots: lotsEnvoi,
@@ -249,6 +250,14 @@ export default function Configurateur({ pro, banques }: { pro: ProConfigurateur;
         animationNom: `Jeu ${commerce.trim()}`, jeu: JEUX.find(j => j.k === jeu)?.t, eventId: evId,
       })
       if (!d.ok) infos.push(`Demande de quiz non transmise : appelez Flowin au 04 93 59 91 37.`)
+    }
+    /* Kit physique : demande d'impression envoyée à Flowin même sans paiement (même file que la demande de quiz). */
+    if (kit === 'physique') {
+      const d = await enregistrerDemandeKit({
+        proId: p.id, proNom: commerce.trim(), nbBoutiques, contactNom: contact, contactTel: tel, contactEmail: email,
+        siret: chiffres(siret), adresse, cp, ville, eventId: evId, animationNom: `Jeu ${commerce.trim()}`,
+      })
+      if (!d.ok) infos.push(`Demande d’impression du kit non transmise : appelez Flowin au 04 93 59 91 37.`)
     }
     try {
       window.localStorage.setItem('flowin_am_prefill', JSON.stringify({
@@ -413,10 +422,20 @@ export default function Configurateur({ pro, banques }: { pro: ProConfigurateur;
           <div style={{ fontSize: 17, fontWeight: 900 }}>Kit digital (inclus)</div>
           <div style={{ fontSize: 13, ...MUTED, marginTop: 3 }}>Affiches et QR à imprimer vous-même.</div>
         </button>
-        <button type="button" data-kit="physique" style={{ ...carte(kit === 'physique'), padding: 18 }} onClick={() => choisirPuisSuivant(() => setKit('physique'))}>
+        <button type="button" data-kit="physique" style={{ ...carte(kit === 'physique'), padding: 18 }} onClick={() => setKit('physique')}>
           <div style={{ fontSize: 17, fontWeight: 900 }}>Demander l’impression du kit physique</div>
           <div style={{ fontSize: 13, ...MUTED, marginTop: 3 }}>Support de caisse, 3 affiches, 3 macarons · <b style={{ color: BLEU }}>{PRIX_KIT_PHYSIQUE} € HT</b> par boutique</div>
         </button>
+        {kit === 'physique' && (
+          <div data-nb-boutiques style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10, padding: '4px 4px 0' }}>
+            <b style={{ fontSize: 15 }}>Nombre de boutiques</b>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+              <button type="button" aria-label="Moins" style={{ ...BTN2, padding: '8px 14px' }} onClick={() => setNbBoutiques(n => Math.max(1, n - 1))}>−</button>
+              <b data-nb style={{ fontSize: 18, minWidth: 22, textAlign: 'center' }}>{nbBoutiques}</b>
+              <button type="button" aria-label="Plus" style={{ ...BTN2, padding: '8px 14px' }} onClick={() => setNbBoutiques(n => Math.min(50, n + 1))}>+</button>
+            </div>
+          </div>
+        )}
       </div>
     </>
   )
@@ -427,7 +446,7 @@ export default function Configurateur({ pro, banques }: { pro: ProConfigurateur;
       ...(estQuiz ? [{ cle: voie === 'flowin' ? 'flowin' : 'quiz', t: 'Quiz', v: voie === 'flowin' ? `Rédigé par Flowin · ${theme.trim() || '—'}` : 'Je rédige mes questions' }] : []),
       { cle: 'lots', t: 'Lots', v: lotsOk.map(l => `${l.nom.trim()} × ${l.quantite}${l.conditions.trim() ? ` (${l.conditions.trim()})` : ''} · ${l.validite === 'sans' ? 'sans limite' : l.validite === 'jours' ? `${l.jours} j` : `du ${l.du.split('-').reverse().join('/')} au ${l.au.split('-').reverse().join('/')}`}`).join(' ; ') || '—' },
       { cle: 'supports', t: 'Supports', v: supportsChoisis.map(s => s.t).join(', ') || '—' },
-      { cle: 'kit', t: 'Kit', v: kit === 'physique' ? 'Kit physique imprimé' : 'Kit digital' },
+      { cle: 'kit', t: 'Kit', v: kit === 'physique' ? `Kit physique imprimé · ${nbBoutiques} boutique${nbBoutiques > 1 ? 's' : ''}` : 'Kit digital' },
     ]
     contenu = (
       <>
@@ -452,7 +471,7 @@ export default function Configurateur({ pro, banques }: { pro: ProConfigurateur;
       <div style={{ border: `1.5px solid ${C.bordure}`, borderRadius: 16, background: '#fff', padding: '4px 14px' }}>
         <LignePrix t="Animation, 1re année" barre={`${PRIX_ANIMATION.annuelle} € HT/an`} v={`${PRIX_ANIMATION.lancement} € HT`} />
         {quizFlowin && <LignePrix t="Quiz rédigé par Flowin" barre={eur(PRIX_ANIMATION.quizFlowin)} v={`${eur(PRIX_ANIMATION.quizFlowinLancement)} HT`} />}
-        {kit === 'physique' && <LignePrix t="Kit physique imprimé" v={`${PRIX_KIT_PHYSIQUE} € HT`} />}
+        {kit === 'physique' && <LignePrix t={`Kit physique imprimé${nbBoutiques > 1 ? ` × ${nbBoutiques}` : ''}`} v={`${PRIX_KIT_PHYSIQUE * nbBoutiques} € HT`} />}
         <div style={{ display: 'flex', justifyContent: 'space-between', padding: '11px 0', fontWeight: 900, fontSize: 16 }}><span>Total</span><span data-total>{eur(totalHt)} HT</span></div>
       </div>
       <div style={{ fontSize: 13, ...MUTED, marginTop: 10, textAlign: 'center' }}>Votre facture vous est envoyée par email.{quizFlowin ? ' Quiz : retour sous 72 h.' : ''}</div>

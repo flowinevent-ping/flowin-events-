@@ -36,7 +36,9 @@ export default async function ProAccueilPage({ searchParams }: Props) {
   }
   const ops = await fetchOperationsPro(proId)
   /* Droits donnes par le Super Admin (sql/06) : sans le droit, les boutons de creation disparaissent. */
-  const peutCreer = peutOuvrirNouvelle(await lireDroitsPro(proId))
+  const droitsPro = await lireDroitsPro(proId)
+  const peutCreer = peutOuvrirNouvelle(droitsPro)
+  const peutRejoindre = droitsPro.rejoindre_super_event
   const proName = ops.proNom ?? 'Mon établissement'
   const q = proId ? `?pro=${encodeURIComponent(proId)}` : ''
   const et = q ? '&' : '?'
@@ -80,7 +82,8 @@ export default async function ProAccueilPage({ searchParams }: Props) {
         </div>
         <Link href={`/pro/historique${q}`} style={{ ...BTN2, padding: '10px 18px', fontSize: 13.5, textDecoration: 'none' }}>Historique</Link>
         <Link href={`/pro/parcours${q}`} style={{ ...BTN2, padding: '10px 18px', fontSize: 13.5, textDecoration: 'none' }}>Aperçu mobile</Link>
-        {peutCreer && <Link href={`/pro/nouvelle${q}`} style={{ ...BTN, padding: '11px 20px', fontSize: 14, textDecoration: 'none' }}>+ Nouvelle animation</Link>}
+        {peutRejoindre && <Link href={`/pro/rejoindre${q}`} data-rejoindre style={{ ...BTN2, padding: '10px 18px', fontSize: 13.5, textDecoration: 'none' }}>Rejoindre un Super Event</Link>}
+        {peutCreer && <Link href={`/pro/nouvelle${q}${et}type=animation`} style={{ ...BTN, padding: '11px 20px', fontSize: 14, textDecoration: 'none' }}>+ Nouvelle animation</Link>}
       </div>
 
       <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 16 }}>
