@@ -59,7 +59,7 @@ export default function Page() {
      Flowin", sans pro rattache) n'a pas sa place ici -- il faisait apparaitre une
      fausse carte "-" avant ce fix. Meme regle qu'avant pour les super events. */
   const base = useMemo(() =>
-    sansGabarit(events).filter((e: FlowinEvent & Record<string, unknown>) => !e.super_event_id && !!e.pro_id && e.status !== 'archived'),
+    sansGabarit(events).filter((e: FlowinEvent & Record<string, unknown>) => !e.super_event_id && !!e.pro_id && String(e.status) !== 'archived'),
   [events])
 
   const list = useMemo(() => {
@@ -117,7 +117,7 @@ export default function Page() {
      animations) : groupees sous leur super event, gabarit exclu. */
   const stationsParSe = (pid: string) => {
     const m = new Map<string, number>()
-    for (const e of sansGabarit(events)) if (e.pro_id === pid && e.super_event_id && e.status !== 'archived') m.set(e.super_event_id, (m.get(e.super_event_id) ?? 0) + 1)
+    for (const e of sansGabarit(events)) if (e.pro_id === pid && e.super_event_id && String(e.status) !== 'archived') m.set(e.super_event_id, (m.get(e.super_event_id) ?? 0) + 1)
     return Array.from(m.entries()).map(([se, n]) => ({ se, n, nom: supersNoms[se] ?? se }))
   }
 
