@@ -63,3 +63,4 @@ fois) → L3 → L4 → L5 (vidéos tournées sur les écrans finis, pour ne pas
 | L13 | **Import du fichier client** dans l'espace pro (10/11) | Bouton « Importer votre fichier » (CSV, Excel, tableur), dans la même présentation que l'espace pro. | À faire |
 | L14 | **Calcul de tenue / coût des emails** (10/11) | Si chaque commerce envoie ~1 000 emails/mois (annonces + ~30 emails de lots) : le système actuel tient-il ? sinon coût par commerce. | À faire (après les vidéos) |
 | L15 | **5 films réseaux sociaux** (10/11) | Scénarios V4 corrigés : commerce, participant (Animation) ; organisateur, commerce, participant (Super Event). Priorité n° 1. | En cours |
+| L16 | **Parcours pro, publication d'animation, joueur** (10/11) | Plan en 8 lots : `docs/PLAN-parcours-pro-joueur-2026-11-10.md`. | Plan à valider |
