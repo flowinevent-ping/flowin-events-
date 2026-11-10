@@ -9,7 +9,7 @@ import CrmPro from '@/components/pro/CrmPro'
 import GrilleOperations, { Vignette } from '@/components/pro/GrilleOperations'
 import { OngletOperationsPro } from '@/components/operations/BlocsOperations'
 import { CHARTE_PRO as C } from '@/lib/charte'
-import { H1, SUB } from '@/lib/proui'
+import { H1, SUB, BTN } from '@/lib/proui'
 
 export const dynamic = 'force-dynamic'
 
@@ -45,8 +45,14 @@ export default async function Page({ searchParams }: { searchParams: { pro?: str
 
   return (
     <ProShell proName={ops.proNom ?? 'Mon établissement'} proId={proId} active="donnees">
-      <h1 style={H1}>Mes contacts &amp; stats</h1>
-      <div style={{ ...SUB, marginBottom: 12 }}>Fichier client, gagnants et trafic par support, pour toutes vos animations.</div>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap', marginBottom: 12 }}>
+        <div style={{ flex: 1, minWidth: 200 }}>
+          <h1 style={H1}>Mes contacts &amp; stats</h1>
+          <div style={SUB}>Fichier client, gagnants et trafic par support, pour toutes vos animations.</div>
+        </div>
+        <Link data-lien-import href={`/pro/donnees/import${proId ? `?pro=${encodeURIComponent(proId)}` : ''}`}
+          style={{ ...BTN, padding: '10px 18px', fontSize: 13.5, textDecoration: 'none' }}>Importer votre fichier client</Link>
+      </div>
       <div style={{ display: 'flex', gap: 10, alignItems: 'center', flexWrap: 'wrap', marginBottom: 16 }}>
         <div style={{ display: 'flex', gap: 4, background: '#fff', border: `1px solid ${C.bordure}`, borderRadius: 14, padding: 5 }}>
           {ONGLETS.map(o => (

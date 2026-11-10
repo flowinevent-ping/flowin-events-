@@ -211,6 +211,7 @@ export default function CrmPro({ proId, proNom, contacts, erreur, operations, op
             <button style={bouton} onClick={() => copier(destEmail.map(c => c.email).join(', '), 'emails')}>Copier les emails</button>
             <button style={bouton} onClick={() => copier(tels.join(', '), 'téléphones')}>Copier les téléphones</button>
             <button style={bouton} onClick={exporter}>Export CSV (contact autorisé)</button>
+            <a data-lien-import style={bouton} href={`/pro/donnees/import${proId ? `?pro=${encodeURIComponent(proId)}` : ''}`}>Importer votre fichier client</a>
             {copie && <span style={{ fontSize: 12, color: '#15803D', fontWeight: 700 }}>{copie} copiés</span>}
           </div>
           <div style={{ fontSize: 12.5, color: C.attenue, marginBottom: 10, lineHeight: 1.5 }}>

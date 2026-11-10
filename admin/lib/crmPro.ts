@@ -54,6 +54,7 @@ export async function fetchCrmPro(proId: string, opts?: { sa?: boolean }): Promi
 export function libelleOrigine(o: string): string {
   if (o === 'nds2026') return 'Nuits du Sud 2026'
   if (o === 'brigade-manuel') return 'Brigade (saisie sur place)'
+  if (o === 'import') return 'Fichier client importé'
   return libelleSource(o)
 }
 

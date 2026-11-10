@@ -60,14 +60,14 @@ export default async function ProAccueilPage({ searchParams }: Props) {
         </div>
       )}
       {searchParams.bienvenue === 'jeu' && (
-        /* Retour du configurateur (Romain, 10/11/2026) : 3 messages courts. Pas encore de page d'import CSV :
-           le lien mène à « Mes données » (contacts, export). */
+        /* Retour du configurateur (Romain, 10/11/2026) : 3 messages courts. Le lien d'import mène au
+           carrousel « Importer votre fichier client » (registre L13). */
         <div data-bienvenue-jeu style={{ ...CARD, border: `1.5px solid ${C.violet}`, background: C.violetClair }}>
           <div style={{ fontSize: 18, fontWeight: 900, marginBottom: 8 }}>Bienvenue dans votre espace Flowin</div>
           <div style={{ display: 'grid', gap: 8, fontSize: 14, lineHeight: 1.45 }}>
             {searchParams.quiz === '1' && <div>• Flowin vous recontacte sous 72 h avec votre quiz.</div>}
             <div>• Votre QR code est utilisable dès maintenant sur vos supports : mesurez l’impact de chaque communication.</div>
-            <div>• Complétez votre profil : <Link href={`/pro/donnees${q}`} style={{ color: C.violet, fontWeight: 800 }}>importer votre fichier client</Link>, <Link href={`/pro/compte${q}${et}onglet=entreprise`} style={{ color: C.violet, fontWeight: 800 }}>ajouter votre logo</Link>.</div>
+            <div>• Complétez votre profil : <Link href={`/pro/donnees/import${q}`} style={{ color: C.violet, fontWeight: 800 }}>importer votre fichier client</Link>, <Link href={`/pro/compte${q}${et}onglet=entreprise`} style={{ color: C.violet, fontWeight: 800 }}>ajouter votre logo</Link>.</div>
           </div>
         </div>
       )}
