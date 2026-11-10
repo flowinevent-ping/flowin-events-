@@ -12,6 +12,7 @@
  */
 import { useEffect, useRef, useState } from 'react'
 import { supabase } from '@/lib/supabase'
+import { estDemo } from '@/lib/demo'
 import { CHARTE_PRO as C } from '@/lib/charte'
 import { CARD, CHAMP, LABEL, BTN, BTN2, H1, SUB, MUTED } from '@/lib/proui'
 
@@ -77,6 +78,8 @@ export default function ScannerBillet() {
 
   async function chercherCode() {
     const c = code.trim().toUpperCase()
+    /* Mode demo : n'importe quel code ouvre un billet Démo (public/flowin-demo.js, consulter_lot). */
+    if (estDemo()) { window.location.href = `/lot.html?t=${encodeURIComponent('demo-' + (c || 'DEMO'))}`; return }
     if (c.length < 4) { setRecherche('erreur'); return }
     setRecherche('loading')
     const { data, error } = await supabase.from('tirages').select('retrait_token').eq('ticket_code', c).limit(1).maybeSingle()

@@ -1,3 +1,4 @@
+import { estDemo } from './demo'
 /**
  * ENTREPRISE — SIRET / SIREN et pre-remplissage depuis l'API publique
  * « Recherche d'entreprises » (https://recherche-entreprises.api.gouv.fr,
@@ -39,6 +40,8 @@ function siretLaPosteOk(s: string): boolean {
 }
 
 export function siretValide(v: string): boolean {
+  /* Mode demo (lib/demo.ts) : la valeur « [démo] » remplie automatiquement est acceptee. */
+  if (estDemo() && /d[ée]mo/i.test(v || '')) return true
   const s = chiffres(v)
   return s.length === 14 && (luhnOk(s) || siretLaPosteOk(s))
 }

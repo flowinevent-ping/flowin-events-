@@ -1,4 +1,5 @@
 import { createClient } from '@supabase/supabase-js'
+import { fetchDemo } from './demo'
 
 const SUPABASE_URL  = process.env.NEXT_PUBLIC_SUPABASE_URL  ?? 'https://ywcqtupgoxfzkddqkztk.supabase.co'
 const SUPABASE_ANON = process.env.NEXT_PUBLIC_SUPABASE_ANON ?? 'sb_publishable_yQcGyoh4UdlUCwA96RKSwg_3jMJVVb1'
@@ -60,6 +61,10 @@ function surEcranAdmin(): boolean {
 }
 
 const fetchAvecJetonSA: typeof fetch = async (input, init) => {
+  /* Mode demo (lib/demo.ts) : les ecritures sont court-circuitees dans le navigateur, rien ne part. */
+  const fd = fetchDemo()
+  const methode = String((init && init.method) || (input instanceof Request ? input.method : 'GET')).toUpperCase()
+  if (fd && methode !== 'GET' && methode !== 'HEAD') return fd(input, init)
   if (!surEcranAdmin()) return fetch(input, init)
   const s = await sessionSAFraiche()
   if (!s) return fetch(input, init)
@@ -84,7 +89,7 @@ export const supabasePublic = createClient(SUPABASE_URL, SUPABASE_ANON, {
    decident de l'acces (etat de l'animation, droits du pro). Dans le navigateur : inchange.
    Reserve aux pages DYNAMIQUES (searchParams) : sur une page generee au build, un fetch no-store
    leve le signal « Dynamic server usage » -- ne pas l'utiliser dans un layout du dashboard. */
-const fetchVivant: typeof fetch = (input, init) => (typeof window === 'undefined' ? fetch(input, { ...(init || {}), cache: 'no-store' }) : fetch(input, init))
+const fetchVivant: typeof fetch = (input, init) => (typeof window === 'undefined' ? fetch(input, { ...(init || {}), cache: 'no-store' }) : (fetchDemo() || fetch)(input, init))
 export const supabaseVivant = createClient(SUPABASE_URL, SUPABASE_ANON, { global: { fetch: fetchVivant } })
 
 export { SUPABASE_URL, SUPABASE_ANON }

@@ -18,6 +18,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import Link from 'next/link'
 import { supabase } from '@/lib/supabase'
+import { estDemo } from '@/lib/demo'
 import { capturerSource, tagSource } from '@/lib/source'
 import { CHARTE_PRO as C, VARIABLES_PRO_CSS } from '@/lib/charte'
 import {
@@ -202,8 +203,26 @@ export default function PremiereFois() {
   const ok = Object.keys(erreurs).length === 0
   const err = (k: string) => (tente && erreurs[k] ? <div className="pf-err">{erreurs[k]}</div> : null)
 
+  /* Mode demo (lib/demo.ts) : jamais bloque, l'ecran incomplet est complete de valeurs « Démo ». */
+  function completerDemo() {
+    if (id === 'vous') {
+      setPerso(x => ({ prenom: x.prenom.trim() || 'Prénom', nom: x.nom.trim() || 'Démo' }))
+      maj({ email: EMAIL_OK(f.email) ? f.email : 'demo@demo.invalid', tel: TEL_OK(f.tel) ? f.tel : '' })
+    }
+    if (id === 'entreprise') {
+      if (mode === 'recherche') setMode('manuel')
+      maj({ nom: f.nom.trim().length >= 2 ? f.nom : 'Commerce Démo', siret: f.siret.trim() && !siretValide(f.siret) ? '' : f.siret })
+    }
+    if (id === 'secteur') maj({ secteur: f.secteur || SECTEURS_PRO[0], secteurAutre: nettoyerPrecision(f.secteurAutre).length >= 3 ? f.secteurAutre : 'Activité Démo' })
+    if (id === 'produits') maj({ produits: (f.produits ?? '').trim().length >= 3 ? f.produits : 'Produits Démo' })
+    if (id === 'adresse') maj({ adresse: f.adresse.trim().length >= 3 ? f.adresse : '1 rue Démo', codePostal: CP_OK(f.codePostal) ? f.codePostal : '00000', ville: f.ville.trim().length >= 2 ? f.ville : 'Ville Démo' })
+    if (id === 'points') maj({ nbPointsVente: parseInt(f.nbPointsVente ?? '', 10) >= 1 ? f.nbPointsVente : '1' })
+    if (id === 'compte') { maj({ motdepasse: f.motdepasse.length >= 8 ? f.motdepasse : 'demo-demo-2026' }); setConfirmation(f.motdepasse.length >= 8 ? f.motdepasse : 'demo-demo-2026') }
+  }
+
   function suivant() {
-    if (!ok) { setTente(true); return }
+    if (!ok && estDemo()) completerDemo()
+    else if (!ok) { setTente(true); return }
     if (id === 'vous') maj({ contact: `${perso.prenom.trim()} ${perso.nom.trim()}`.trim() })
     if (id === 'compte') { creer(); return }
     allerA(etape + 1)

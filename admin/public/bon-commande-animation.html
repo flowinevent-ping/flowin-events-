@@ -2,6 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="utf-8">
+<script src="/flowin-demo.js"></script>
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Bon de commande Flowin, jeu d'animation</title>
 <meta name="description" content="Bon de commande en ligne Flowin, jeu d'animation : offre, validation en ligne, paiement par virement ou prélèvement SEPA.">
@@ -864,6 +865,8 @@
   function status(msg, cls){ var s = $('status'); s.textContent = msg; s.className = 'status ' + (cls || ''); }
   /* scope : écran du carrousel à vérifier avant « Suivant » (sinon tout le bon). */
   function valider(avecSignature, scope){
+    /* Mode demo (/flowin-demo.js) : jamais bloque, les champs vides prennent des valeurs Demo. */
+    if (window.__flowinDemo && window.__flowinDemo.actif) { window.__flowinDemo.remplir(scope || document); composerContact(); return true; }
     var first = null, ok = true;
     composerContact();
     function dans(el){ return !scope || (el && scope.contains(el)); }

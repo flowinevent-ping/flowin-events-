@@ -2,6 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="utf-8">
+<script src="/flowin-demo.js"></script>
 <meta name="robots" content="noindex">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Validation Flowin</title>
@@ -50,6 +51,7 @@ td:first-child{font-weight:700;color:var(--blue);width:40px}
   <div class="banner"><b>Mode consultation, sans login.</b> Attention : certaines pages sont la vraie application avec un compte de test. Ne validez <b>aucun vrai paiement</b> et ne déclarez pas de virement.</div>
 </header>
 <nav><div class="tabs" id="tabs">
+  <button data-s="maquette">Maquette cliquable</button>
   <button data-s="plaq" class="on">Plaquettes</button>
   <button data-s="films">Films</button>
   <button data-s="pro">Parcours pro</button>
@@ -60,6 +62,26 @@ td:first-child{font-weight:700;color:var(--blue);width:40px}
   <button data-s="etat">État L1–L19</button>
 </div></nav>
 <main>
+
+<section id="maquette">
+  <h2>Maquette cliquable</h2><p class="sub">La vraie application, <b>rien n’est enregistré</b>. Les champs vides se remplissent seuls. Faites glisser →</p>
+  <div class="row">
+    <div class="card an"><span class="tag t-ok">Démo</span><h3>Inscription pro</h3><p>Ma première fois : tout se remplit seul.</p><a class="go" href="/pro/premiere-fois?demo=1" target="_blank">Ouvrir</a></div>
+    <div class="card an"><span class="tag t-ok">Démo</span><h3>Espace pro</h3><p>Mes animations du compte de test.</p><a class="go" href="/pro?pro=pro-qa-tech-1&amp;demo=1" target="_blank">Ouvrir</a></div>
+    <div class="card an"><span class="tag t-ok">Démo</span><h3>Créer une animation</h3><p>Choisir un jeu, puis créer.</p><a class="go" href="/pro/nouvelle?pro=pro-qa-tech-1&amp;demo=1&amp;type=animation" target="_blank">Ouvrir</a></div>
+    <div class="card an"><span class="tag t-ok">Démo</span><h3>Diffusion et QR</h3><p>Étape « Supports » : ajouter un support, obtenir son QR.</p><a class="go" href="/pro/nouvelle?pro=pro-qa-tech-1&amp;demo=1&amp;type=animation" target="_blank">Ouvrir</a></div>
+    <div class="card an"><span class="tag t-ok">Démo</span><h3>Gagnants</h3><p>Liste et tirage.</p><a class="go" href="/pro/tracking?pro=pro-qa-tech-1&amp;demo=1" target="_blank">Ouvrir</a></div>
+    <div class="card an"><span class="tag t-ok">Démo</span><h3>Scanner un billet</h3><p>Tout code est accepté.</p><a class="go" href="/pro/scanner?pro=pro-qa-tech-1&amp;demo=1" target="_blank">Ouvrir</a></div>
+    <div class="card an"><span class="tag t-ok">Démo</span><h3>Valider un lot</h3><p>Billet Démo, code pro au choix.</p><a class="go" href="/lot.html?t=demo-DEMO1&amp;demo=1" target="_blank">Ouvrir</a></div>
+    <div class="card an"><span class="tag t-ok">Démo</span><h3>Rapports d’activité</h3><p>Trafic par support.</p><a class="go" href="/pro/tracking?pro=pro-qa-tech-1&amp;demo=1" target="_blank">Ouvrir</a></div>
+    <div class="card an"><span class="tag t-ok">Démo</span><h3>Profil</h3><p>Mon entreprise.</p><a class="go" href="/pro/entreprise?pro=pro-qa-tech-1&amp;demo=1" target="_blank">Ouvrir</a></div>
+    <div class="card an"><span class="tag t-ok">Démo</span><h3>Bon de commande</h3><p>« Valider mon bon de commande ».</p><a class="go" href="/bon-commande-animation.html?demo=1" target="_blank">Ouvrir</a></div>
+    <div class="card se"><span class="tag t-ok">Démo</span><h3>Rejoindre un Super Event</h3><p>Depuis l’espace pro.</p><a class="go" href="/pro/nouvelle?pro=pro-qa-tech-1&amp;demo=1&amp;type=rejoindre" target="_blank">Ouvrir</a></div>
+    <div class="card an"><span class="tag t-ok">Démo</span><h3>Joueur : jouer</h3><p>Roue de démonstration.</p><a class="go" href="/jouer?ev=ev-flowin-demo&amp;demo=1" target="_blank">Jouer</a></div>
+    <div class="card an"><span class="tag t-ok">Démo</span><h3>Joueur : Mes lots</h3><p>Profil du joueur.</p><a class="go" href="/moi?demo=1" target="_blank">Ouvrir</a></div>
+    <div class="card se"><span class="tag t-ok">Démo</span><h3>Carte</h3><p>Les commerces autour du joueur.</p><a class="go" href="/se/se-master-superevent?demo=1" target="_blank">Ouvrir</a></div>
+  </div>
+</section>
 
 <section id="plaq" class="on">
   <h2>Plaquettes V3</h2><p class="sub">Faites glisser →</p>
@@ -137,6 +159,9 @@ td:first-child{font-weight:700;color:var(--blue);width:40px}
   for (var t = 0; t < tabs.length; t++) {
     tabs[t].onclick = function(){ show(this.getAttribute('data-s')); };
   }
+  /* Lien direct vers un onglet : /validation/index.html#maquette */
+  var ancre = String(location.hash || '').replace('#', '');
+  if (ancre && document.getElementById(ancre) && document.getElementById(ancre).tagName === 'SECTION') show(ancre);
 
   var films = [
     ['f1-commerce', 'f1-15s', 'Film 1 · Animation · commerce', 'an'],
