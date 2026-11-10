@@ -9,6 +9,9 @@ Source de vérité du reste-à-faire : `HANDOFF-flowin-nds2026.md`.
 
 **À lire avant tout travail : `docs/DECISIONS-flowin-event.md` et `docs/REGISTRE-livrables-refonte.md`** et, pour tout texte, `docs/ARGUMENTAIRE-flowin-event.md` (formulations de Romain, à reprendre sans paraphrase) (registre des livrables : aucune ligne supprimée sans Romain) (décisions tranchées par Romain et méthode de travail). Ce qui y est écrit ne se redemande jamais.
 
+## Règle d'interface absolue (Romain)
+**Carrousel, jamais de longue page à scroller. Peu de texte. Moins d'actions possible.** Détail : section « RÈGLES D'INTERFACE ABSOLUES » de `docs/DECISIONS-flowin-event.md`.
+
 ## Projet
 - Flowin : plateforme B2B de gamification événementielle. Produit de **BAITA EURL (OPConsult)**.
 - Projet actif : **Nuits du Sud 2026** (festival, Vence, 9–18 juillet 2026).

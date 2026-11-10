@@ -67,3 +67,6 @@ fois) → L3 → L4 → L5 (vidéos tournées sur les écrans finis, pour ne pas
 
 ## Point au 10/11 (soir)
 - Audit des travaux demandés : `docs/audit-2026-11-10/AUDIT-travaux-demandes-2026-11-10.md` (plan + lots A-H : 16 faits dont 2 corrigés ce soir, 16 partiels, 8 pas faits, 1 à décider). Essai en vrai sur 30 pages : aucun plantage, aucun lien cassé, aucune page au-delà de 3,2 s ni de 300 kB. Corrigé : logo du commerce repris dans le jeu publié ; violets restants de l'espace pro passés au bleu. À décider par Romain : accès par l'adresse `?pro=` sans connexion (sécurité), couleur du super admin.
+| L17 | **Tickets gagnants Animation dans le profil joueur** (10/11 soir) | Stockage profil + espace pro + déstockage, rappels 1 mois / 15 j / 48 h, « en faire profiter un ami ». | À faire |
+| L18 | **Parcours de publication sans scroll** (10/11 soir) | Carrousel ; « Valider mon bon de commande » ; pas d'« ancien format » ; QR/IBAN banque ; moins de texte ; pas de logo à l'inscription ; champs réduits ; configurer puis payer. | À faire |
+| L19 | **Page de consultation sans login** (10/11 soir) | Accès à tout ce qui est livré : plaquettes, films, carte, parcours pro / joueur / Super Event, captures. | À faire |

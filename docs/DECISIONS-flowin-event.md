@@ -268,3 +268,28 @@ que sur instruction explicite de Romain.
   Pas de campagne d'acquisition : on travaille sur l'existant et le flux capté, en local.
 - Piste prix : 1re année 99 € HT/an ; **2e année éventuellement 99 €/mois**, avec envoi d'**offres
   flash** instantanées aux clients de proximité. (Réflexion en cours, non tranchée.)
+
+## RÈGLES D'INTERFACE ABSOLUES (Romain, 10/11/2026 soir — répétées de nombreuses fois, ne plus jamais les redemander)
+- **CARROUSEL, PAS DE SCROLL.** Tout parcours (pro, publication, souscription, joueur, Super Event) se présente
+  en écrans successifs (carrousel / étapes), jamais en longue page à faire défiler. Une idée par écran.
+- **Peu de texte.** Phrases courtes ; pas de pavés dans le règlement ou les explications.
+- **Moins d'actions possible jusqu'à l'acquisition.** Chaque champ ou clic non indispensable est retiré.
+- **On ne dit pas « signer »** : on dit **« Valider mon bon de commande »** (ou « Valider mon devis »).
+- **Pas d'étiquette « ancienne version / ancien format »** sur les QR codes ni ailleurs.
+- **Ne pas montrer ce qui sera payé l'année suivante** au moment de la commande.
+- Première connexion : présenter d'abord **« Tester Flowin : 445 € HT la 1re année »**, puis seulement ensuite
+  les offres mensuelle et annuelle. Option quiz : « le premier quiz rédigé par Flowin » à son prix.
+- Ordre de publication : **configurer le jeu, puis payer pour mettre en ligne**.
+- Inscription / bon de commande : **pas de logo** (il se met plus tard dans « Mon profil »). Champs utiles
+  seulement : SIRET, nom, prénom, adresse, téléphone, objet de l'entreprise, lots proposés, conditions
+  d'utilisation des lots (avec un exemple).
+- Virement : un bouton qui ouvre la banque avec l'IBAN prêt (QR de virement SEPA + copier en un clic).
+- **Validation par Romain sans login** : une page de consultation (maquette cliquable) donne accès à tout
+  ce qui est livré (plaquettes, films, carte, parcours pro, joueur, souscription Super Event).
+
+## Tickets gagnants dans le profil (Romain, 10/11/2026 soir)
+- Animations comme Super Events : le ticket gagnant validé est **stocké dans le profil du participant**
+  (téléphone) et **dans l'espace du pro**, et **déstocké** du stock du pro. Passe par Supabase, visible
+  dans le super admin. **Email uniquement pour une relance.**
+- Durée de validité ; rappels **1 mois, 15 jours, 48 h** avant expiration.
+- **« En faire profiter un ami »** : envoyer le ticket à un ami (effet cadeau).
