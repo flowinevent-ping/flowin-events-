@@ -86,3 +86,34 @@ de l'événement, découvre les lots dans les stations jeu » ; « Des lots dans
 « Un grand tirage » parfait ; **« Fais jouer tes amis, augmente tes chances de gagner »**.
 
 **Personnages** : Alex **sans barbe** ; Léa, Max ok ; Sam ok mais **sans casque**.
+
+## Version 3 (10/11/2026) : toutes les corrections de Romain appliquées et films réenregistrés
+Moteur : `admin/public/videos/scenes/films-v4.html`. Fichiers écrasés sous les mêmes noms dans
+`admin/public/videos/v4/` (5 films, 5 versions de 15 s, 5 affiches). Planches de contrôle : une
+image toutes les 2 s, dans `admin/public/validation/captures/films-v3-*.jpg`.
+Contrôle texte : aucune occurrence de « promo flash », « consent », « accord », « réveiller », « dormant », « financent », « force du réseau », « créez votre jeu », réseau nommé seul.
+
+| Correction demandée | État | Preuve |
+|---|---|---|
+| Trop rapide (films 1 à 5) | Fait : chaque plan reste 15 % plus longtemps à l'écran, l'animation ne change pas | Durées : f1 53,1 s · f2 30,6 s · f3 52,3 s · f4 37,7 s · f5 38,2 s |
+| Versions courtes | Fait : 15,0 s chacune, 4 plans et la fin | f1 : accroche, 3 à 5 fois, captez le flux, publiez, fin |
+| Cible identifiée | Fait : pastille en haut à droite sur tous les plans | « Pour les commerçants » / « Pour les participants » / « Pour les organisateurs d'événements » |
+| Alex sans barbe | Fait (code de la barbe supprimé) | Toutes les planches |
+| Sam sans casque | Fait : Sam n'a que ses lunettes ; au plan 1 du film 3, le disque jaune du décor de scène passait derrière sa tête et se lisait comme un casque : Sam est déplacé à droite de la scène | f3, 0-3 s |
+| « l'impact du réseau local » | Fait | f3, plan 2 (« Démultipliez votre communication avec l'impact du réseau local ») |
+| « Publiez », jamais « créez votre jeu » | Fait ; bouton de la page de partage f1 : « Je publie mon jeu » | f1 « Publiez en quelques clics votre animation » ; f3 « Publiez votre jeu en quelques clics » |
+| Interagir plutôt que « jouer » | Fait : « Interagissez avec votre public » (f3) ; f2 « Quiz, roulette, tombola. » au lieu de « à toi de jouer » | f2 plan 2, f3 plan 6 |
+| Pas de « promos flash » | Fait (aucune occurrence) | Contrôle texte du moteur |
+| Film 2 : trois billets de lots | Fait : « -5 % de remise », « Un lot surprise offert », « Un acheté, un offert » | f2 « Découvre les lots de ton commerce. » |
+| « Parraine tes amis, gagne des lots » | Fait | f2 plan 6 |
+| Film 2 : « Tu gagnes tout de suite, ou tu participes au tirage au sort » | Fait | f2 plan 3 |
+| Film 3 : publication du jeu et intérêt du jeu | Fait : « Publiez votre jeu en quelques clics » puis « Le jeu fait connaître votre événement » | f3 plans 4 et 5 |
+| Film 3 : tirage au sort déplacé | Fait : juste après « Mesurez la fréquentation sur place » (pendant), avant le sondage | f3 plan 8 |
+| Film 3 : fin « Faites participer vos participants et futurs participants avant, pendant et après… Démultipliez votre communication en local » | Fait | f3 deux derniers plans |
+| Film 4 : « Des lots du festival et des lots chez vous » | Fait | f4 plan 5 |
+| Film 4 : « Votre fichier client grandit. Votre visibilité aussi. » / « Découvrez le prochain Super Event… sponsor, affichage ou station jeu » / fin « Je participe au prochain Super Event » | Fait | f4 plans 7, 9, fin |
+| Film 5 : roulette, quiz, tombola ; lots dans les stations ; grand tirage ; « Fais jouer tes amis, augmente tes chances de gagner » | Fait | f5 |
+| Fin commerce (f1, f4) | QR réel vers `/pro/premiere-fois` (souscription Animation) | Fin f1, f4 |
+| Fin organisateur (f3) | QR réel vers la plaquette Super Event organisateur (`/validation/plaquette-super-event-v3.html#organisateur`), bouton « Je découvre le Super Event » | Fin f3 |
+| Fin participant Animation (f2) | QR réel vers `/carte-commerces` (carte publique des commerces, en ligne : 200), bouton « Je trouve les commerces » | Fin f2 |
+| Fin participant Super Event (f5) | QR réel vers `/se/se-master-superevent` (page joueur du Super Event) | Fin f5 |

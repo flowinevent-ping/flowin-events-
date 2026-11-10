@@ -71,7 +71,7 @@ td:first-child{font-weight:700;color:var(--blue);width:40px}
 
 <section id="films">
   <h2>5 films réseaux sociaux</h2>
-  <p class="sub">Version 2 : une partie de vos corrections est faite. Les autres corrections demandées ne sont pas encore faites (ex. film 3 : fin « Démultipliez votre communication en local » ; film 4 : « Des lots du festival et des lots chez vous »).</p>
+  <p class="sub">Version 3 : toutes vos corrections sont faites (rythme plus lent, cible affichée, fins avec QR par cible). Versions courtes : 15 s. Planches : une image toutes les 2 s.</p>
   <div class="row" id="filmrow"></div>
 </section>
 
@@ -147,9 +147,10 @@ td:first-child{font-weight:700;color:var(--blue);width:40px}
   ];
   var fr = document.getElementById('filmrow'), h = '';
   for (var f = 0; f < films.length; f++) {
-    h += '<div class="card ' + films[f][3] + '"><span class="tag t-part">Version 2</span><h3>' + films[f][2] + '</h3>' +
+    h += '<div class="card ' + films[f][3] + '"><span class="tag t-ok">Version 3</span><h3>' + films[f][2] + '</h3>' +
       '<video controls playsinline preload="metadata" src="/videos/v4/' + films[f][0] + '.mp4"></video>' +
-      '<p>Version 15 s :</p><video controls playsinline preload="none" src="/videos/v4/' + films[f][1] + '.mp4"></video></div>';
+      '<p>Version 15 s :</p><video controls playsinline preload="none" src="/videos/v4/' + films[f][1] + '.mp4"></video>' +
+      '<a class="go" href="/validation/captures/films-v3-' + films[f][0].split('-')[0] + '.jpg" target="_blank">Planche</a></div>';
   }
   fr.innerHTML = h;
 
@@ -193,7 +194,7 @@ td:first-child{font-weight:700;color:var(--blue);width:40px}
     ['L12', 'Carte des partenaires', 'todo', 'Plus tard'],
     ['L13', 'Import du fichier client', 'todo', 'À faire'],
     ['L14', 'Coût des emails', 'todo', 'À faire'],
-    ['L15', '5 films réseaux sociaux', 'part', 'Version 2, corrections en partie'],
+    ['L15', '5 films réseaux sociaux', 'ok', 'Version 3, toutes les corrections faites'],
     ['L16', 'Parcours pro, publication, joueur', 'part', 'En cours'],
     ['L17', 'Tickets dans le profil', 'part', 'En cours'],
     ['L18', 'Publication sans scroll', 'part', 'En cours'],
