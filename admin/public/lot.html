@@ -436,7 +436,22 @@
     }
   }
 
+  function accepterExpire(){
+    var b = $('btn-valider'), err = $('v-pin-err');
+    if(err){ err.style.display='none'; }
+    b.disabled = true; b.textContent = 'Validation…';
+    rpc('accepter_ticket_expire', { p_token: TOK, p_pin: PIN_PRO }).then(function(res){
+      var d = Array.isArray(res) ? res[0] : res;
+      if (d && CUR) { d.partenaire_nom = CUR.partenaire_nom; d.partenaire_logo = CUR.partenaire_logo; }
+      if (d && d.ok) { renderDone(d); }
+      else if (d && d.raison === 'deja_utilise') { renderDeja(d); }
+      else { b.disabled = false; b.textContent = 'Accepter quand même et valider'; if(err){ err.textContent = (d && d.message) || 'Erreur, réessayez.'; err.style.display='block'; } }
+    }).catch(function(){ b.disabled = false; show('s-erreur'); });
+  }
+
+  var MODE_EXPIRE = false;
   function valider(){
+    if (MODE_EXPIRE) { accepterExpire(); return; }
     var b = $('btn-valider'), err = $('v-pin-err');
     if(err){ err.style.display='none'; err.textContent=''; }
     b.disabled = true; b.textContent = 'Validation…';
@@ -446,6 +461,12 @@
       if (d && CUR) { d.partenaire_nom = CUR.partenaire_nom; d.partenaire_logo = CUR.partenaire_logo; }
       if (d && d.ok) { renderDone(d); }
       else if (d && d.raison === 'deja_utilise') { renderDeja(d); }
+      else if (d && d.raison === 'expire') {
+        /* Decision Romain 10/11 : billet expire refuse, sauf si le commerce l accepte quand meme. */
+        b.disabled = false; b.textContent = 'Accepter quand même et valider';
+        MODE_EXPIRE = true;
+        if(err){ err.textContent = d.message || 'Billet expiré.'; err.style.display='block'; }
+      }
       else {
         b.disabled = false; b.textContent = 'Valider le retrait du lot';
         if(err){ err.textContent = (d && d.message) || 'Erreur, réessayez.'; err.style.display='block'; }
