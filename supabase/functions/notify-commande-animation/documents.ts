@@ -33,6 +33,7 @@ export type Facture = {
 };
 
 export const FORMULES: Record<string, string> = {
+  lancement: "Offre de lancement · 445 € HT la 1re année (-50 %) · engagement 12 mois",
   annuelle: "Formule annuelle · 990 € HT / an · engagement 12 mois",
   mensuelle: "Formule mensuelle · 110 € HT / mois · engagement 3 mois minimum",
 };

@@ -1,7 +1,7 @@
 // supabase/functions/notify-commande-animation/index.ts
 //
 // Chaîne « Flowin, jeu d'animation » : souscription -> accusé de réception -> paiement validé ->
-// contrat signé + facture acquittée -> statut documents_envoyes. NON DÉPLOYÉE à la date d'écriture.
+// contrat signé + facture acquittée -> statut documents_envoyes. Déployée le 10/11/2026 (verify_jwt false).
 //
 // Appels (voir sql/03-commandes-animation.sql, NON appliqué) :
 //   { type: 'nouvelle_commande', record }   trigger après insert  -> email Flowin + ACCUSÉ au client
@@ -32,6 +32,10 @@ import { emailAccuse, emailDocuments, emailFlowin, emailMensualite, esc, eur, pd
 
 const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY") || "";
 const NOTIFY_TO = Deno.env.get("NOTIFY_TO") || "flowinevent@gmail.com";
+// Décision Romain (10/11/2026) : aucun email aux clients pour l'instant. Tout email destiné à un client
+// est redirigé vers Flowin (NOTIFY_TO + flowinevent@gmail.com), sujet préfixé. ENVOI_CLIENT=oui pour réactiver.
+const ENVOI_CLIENT = (Deno.env.get("ENVOI_CLIENT") || "") === "oui";
+const DEST_FLOWIN = Array.from(new Set([NOTIFY_TO, "flowinevent@gmail.com"]));
 const NOTIFY_FROM = Deno.env.get("NOTIFY_FROM") || "Flowin <onboarding@resend.dev>";
 const SUPA_URL = Deno.env.get("SUPABASE_URL") || "";
 const SERVICE = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || "";
@@ -39,7 +43,7 @@ const SERVICE = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || "";
 const COLS = "id,statut,type_commande,offre,enseigne,prelevement_inclut_reste,engagement_mois,engagement_accepte,raison_sociale,siret,adresse,cp,ville,contact_nom,contact_fonction,email,tel,nb_boutiques,commercial,kit,opt_quiz_qte,opt_bonus_qte,montant_abonnement_ht,montant_kit_ht,montant_options_ht,montant_ht,montant_tva,montant_ttc,mode_paiement,garantie,garantie_clients_objectif,garantie_certifiee_le,garantie_certifiee_par,panier_moyen,flux_journalier,cgv_version,signataire_nom,signataire_qualite,signature_horodatage,signature_ip,facture_numero,documents_envoyes_le";
 
 function json(body: unknown, status = 200): Response {
-  return new Response(JSON.stringify(body), { status, headers: { "Content-Type": "application/json" } });
+  return new Response(JSON.stringify(body), { status, headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*", "Access-Control-Allow-Headers": "authorization, apikey, content-type" } });
 }
 const H = () => ({ apikey: SERVICE, Authorization: `Bearer ${SERVICE}`, "Content-Type": "application/json" });
 async function rest(path: string, init: RequestInit = {}): Promise<any> {
@@ -58,9 +62,12 @@ function b64(buf: ArrayBuffer): string {
   const u = new Uint8Array(buf); let s = ""; for (let i = 0; i < u.length; i += 0x8000) s += String.fromCharCode(...u.subarray(i, i + 0x8000)); return btoa(s);
 }
 async function envoyer(to: string, m: { sujet: string; html: string }, pj: Array<{ filename: string; content: string }> = []): Promise<string> {
+  let dest = [to];
+  if (to === NOTIFY_TO) dest = DEST_FLOWIN;
+  else if (!ENVOI_CLIENT) { dest = DEST_FLOWIN; m = { sujet: `[Non envoyé au client ${to}] ${m.sujet}`, html: m.html }; }
   const r = await fetch("https://api.resend.com/emails", {
     method: "POST", headers: { Authorization: `Bearer ${RESEND_API_KEY}`, "Content-Type": "application/json" },
-    body: JSON.stringify({ from: NOTIFY_FROM, to: [to], subject: m.sujet, html: m.html, attachments: pj.length ? pj : undefined }),
+    body: JSON.stringify({ from: NOTIFY_FROM, to: dest, subject: m.sujet, html: m.html, attachments: pj.length ? pj : undefined }),
   });
   const j = await r.json().catch(() => ({}));
   if (!r.ok) throw new Error(`resend ${r.status} ${JSON.stringify(j).slice(0, 200)}`);
@@ -93,6 +100,7 @@ async function documents(id: string, force: boolean): Promise<Response> {
 }
 
 Deno.serve(async (req: Request): Promise<Response> => {
+  if (req.method === "OPTIONS") return json({ ok: true });
   if (req.method !== "POST") return json({ error: "POST only" }, 405);
   let p: Record<string, any> = {};
   try { p = await req.json(); } catch { return json({ error: "invalid json" }, 400); }
@@ -129,11 +137,7 @@ Deno.serve(async (req: Request): Promise<Response> => {
       const r = await commande(id); if (!r) return json({ error: "commande introuvable" }, 404);
       if (String((r as any).statut) !== "en_attente_paiement") return json({ ok: true, skipped: "commande deja traitee" });
       const ev = String(p.event_id ?? "").slice(0, 100);
-      const sujetPro = `Paiement déclaré : contrôle sous 3 à 5 jours (commande ${esc(r.id)})`;
-      const htmlPro = `<div style="font-family:-apple-system,Segoe UI,Roboto,sans-serif;max-width:620px;margin:0 auto"><div style="background:#1B3A5C;border-radius:14px 14px 0 0;padding:18px 20px;color:#fff;font-size:17px;font-weight:800">Paiement déclaré, merci !</div><div style="background:#F4F6F9;border:1px solid #DCE3EC;border-top:none;padding:16px 20px;font-size:14px;line-height:1.6;color:#1B3A5C">Bonjour ${esc((r as any).contact_nom)},<br><br>Vous avez déclaré le virement de <b>${esc(eur((r as any).montant_ttc))} TTC</b> pour la commande <b>${esc(r.id)}</b>. Votre animation est en ligne.<br>Flowin contrôle la réception du virement <b>sous 3 à 5 jours</b> ; vous recevez ensuite votre contrat signé et votre facture acquittée.</div></div>`;
-      await envoyer(String((r as any).email), { sujet: sujetPro, html: htmlPro });
-      await envoyer(NOTIFY_TO, { sujet: `Paiement à vérifier : ${esc((r as any).raison_sociale)} (${esc(r.id)})`, html: `<div style="font-family:sans-serif;font-size:14px">Virement déclaré par le pro pour la commande <b>${esc(r.id)}</b> (${esc(eur((r as any).montant_ttc))} TTC)${ev ? `, animation ${esc(ev)}` : ""}. À contrôler puis « Marquer le virement reçu » dans /admin-commandes-animation.html.</div>` });
-      try { await rest("commandes_animation_journal", { method: "POST", body: JSON.stringify({ commande_id: id, par: "fonction notify-commande-animation", action: "paiement_declare" }) }); } catch (_) { /* action ajoutée par sql/2026-11-10-lot-a.sql */ }
+      await envoyer(NOTIFY_TO, { sujet: `Paiement à vérifier : ${(r as any).raison_sociale ?? ""} (${r.id}) · ${eur((r as any).montant_ttc)} TTC`, html: `<div style="font-family:sans-serif;font-size:14px;color:#1B3A5C"><b>Virement déclaré, à contrôler à la main.</b><br>Commande <b>${esc(r.id)}</b> · ${esc((r as any).raison_sociale)} · ${esc((r as any).contact_nom)} · ${esc((r as any).email)} · ${esc((r as any).tel)}<br>Montant : <b>${esc(eur((r as any).montant_ttc))} TTC</b>, référence du virement : <b>${esc(r.id)}</b>${ev ? `<br>Animation : ${esc(ev)} (déjà en ligne)` : ""}<br><br>Dès le virement vu sur le compte : « Marquer le virement reçu » dans https://flowin-events.vercel.app/admin-commandes-animation.html</div>` });
       return json({ ok: true });
     }
     if (type === "paiement_valide") return await documents(String(p.record?.id ?? ""), false);
