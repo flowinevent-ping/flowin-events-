@@ -303,6 +303,8 @@ function LigneGain({ g, superEvent, opId, opNom, partenaireNom, setMessage, onCh
           </div>
           {g.joueurEmail && <div style={{ fontSize: 11.5, ...MUTED }}>{g.joueurEmail}</div>}
           {g.retireAt && <div style={{ fontSize: 11.5, color: '#15803D', fontWeight: 700 }}>{libelleRemise(g.retireAt)}</div>}
+          {!g.retireAt && g.valableJusquAu && <div style={{ fontSize: 11.5, ...MUTED }}>Valable jusqu’au {new Date(g.valableJusquAu.length <= 10 ? g.valableJusquAu + 'T12:00:00' : g.valableJusquAu).toLocaleDateString('fr-FR')}</div>}
+          {g.offertLe && <div style={{ fontSize: 11.5, color: '#3B5CC4', fontWeight: 700 }}>Offert à un ami</div>}
           {g.retraitToken && (
             <a href={`/nds/billets-partenaires.html?t=${encodeURIComponent(g.retraitToken)}`} target="_blank" rel="noreferrer"
               style={{ fontSize: 11.5, color: '#3B5CC4', fontWeight: 700, textDecoration: 'none' }}>Voir le billet ↗</a>

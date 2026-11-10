@@ -2,6 +2,8 @@
 import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabase'
 import { Ico } from '@/lib/proicons'
+import MesLots from '@/components/joueur/MesLots'
+import { chargerMesLots, joursRestants, palierRappel, type MonLot } from '@/lib/mesLots'
 
 type Joueur = { id: string; prenom?: string | null; nom?: string | null; email?: string | null }
 type Ticket = { event_id: string | null; super_event_id: string | null }
@@ -16,7 +18,8 @@ export default function MonComptePage() {
   const [gains, setGains] = useState<Gain[]>([])
   const [evNames, setEvNames] = useState<Record<string, string>>({})
   const [seNames, setSeNames] = useState<Record<string, string>>({})
-  const [showCode, setShowCode] = useState<string | null>(null)
+  const [lots, setLots] = useState<MonLot[]>([])
+  const [ecran, setEcran] = useState<'lots' | 'tickets'>('lots')
 
   useEffect(() => {
     let local: { id?: string } | null = null
@@ -24,11 +27,13 @@ export default function MonComptePage() {
     if (!local?.id) { setLoading(false); return }
     const jid = local.id
     ;(async () => {
-      const [jr, tk, ga] = await Promise.all([
+      const [jr, tk, ga, ml] = await Promise.all([
         supabase.from('joueurs').select('id,prenom,nom,email').eq('id', jid).single(),
         supabase.from('se_tickets').select('event_id,super_event_id').eq('joueur_id', jid),
         supabase.from('se_gains').select('id,libelle,code,utilise,event_id,super_event_id').eq('joueur_id', jid),
+        chargerMesLots(jid).catch(() => [] as MonLot[]),
       ])
+      setLots(ml)
       setJoueur((jr.data as Joueur) ?? { id: jid })
       const tkRows = (tk.data ?? []) as Ticket[]
       const gaRows = (ga.data ?? []) as Gain[]
@@ -65,7 +70,6 @@ export default function MonComptePage() {
 
   const wrap: React.CSSProperties = { minHeight: '100dvh', background: '#f1ede6', fontFamily: 'system-ui, sans-serif', color: '#141a26', paddingBottom: 40 }
   const card: React.CSSProperties = { maxWidth: 540, margin: '0 auto', padding: '0 18px' }
-  const sectionTitle: React.CSSProperties = { fontSize: 13, fontWeight: 800, letterSpacing: '.04em', color: '#9aa0ad', textTransform: 'uppercase', margin: '26px 0 12px' }
 
   if (loading) {
     return <div style={{ ...wrap, display: 'flex', alignItems: 'center', justifyContent: 'center' }}><div style={{ color: '#9aa0ad' }}>Chargement…</div></div>
@@ -85,8 +89,18 @@ export default function MonComptePage() {
     )
   }
 
-  const gainsActifs = gains.filter(g => !g.utilise)
-  const gainsUtilises = gains.filter(g => g.utilise)
+  /* Anciens gains (table se_gains, abandonnée le 28/07) : affichés à la suite, sans QR. */
+  const tousLots: MonLot[] = lots.concat(gains.map(g => ({
+    id: 'g-' + g.id, commerce: (g.event_id && evNames[g.event_id]) || '[commerce à compléter]', commerceCle: g.event_id || 'autre',
+    operation: g.super_event_id ? seNames[g.super_event_id] || null : null, type: g.super_event_id ? 'super' : 'animation',
+    lot: g.libelle || 'Lot', valeur: null, ticketCode: g.code, token: null, etat: g.utilise ? 'utilise' : 'a_utiliser',
+    gagneLe: null, valableJusquAu: null, offertLe: null,
+  } as MonLot)))
+  const gainsActifs = tousLots.filter(l => l.etat === 'a_utiliser' || l.etat === 'a_confirmer')
+  /* Rappel in-app le plus proche (1 mois / 15 j / 48 h). */
+  const urgent = tousLots.filter(l => l.etat === 'a_utiliser' && palierRappel(joursRestants(l.valableJusquAu)))
+    .sort((a, b) => (joursRestants(a.valableJusquAu) ?? 999) - (joursRestants(b.valableJusquAu) ?? 999))[0]
+  const ongl = (a: boolean): React.CSSProperties => ({ flex: 1, padding: '10px', borderRadius: 100, border: 'none', cursor: 'pointer', fontWeight: 800, fontSize: 14, background: a ? '#fff' : 'transparent', color: a ? HERO : '#5a6071', boxShadow: a ? '0 2px 6px rgba(20,26,38,.08)' : 'none' })
 
   return (
     <div style={wrap}>
@@ -114,51 +128,18 @@ export default function MonComptePage() {
       </div>
 
       <div style={card}>
-        {/* Mes gains */}
-        <div style={sectionTitle}><Ico k="gift" size={13} style={{ marginRight: 5, verticalAlign: -2 }} />Mes gains</div>
-        {gains.length === 0 && (
-          <div style={{ background: '#fff', borderRadius: 16, padding: '18px', fontSize: 14, color: '#5a6071', textAlign: 'center' }}>
-            Pas encore de gain. Joue dans un commerce pour en remporter !
-          </div>
+        {urgent && (
+          <button data-rappel-banniere onClick={() => setEcran('lots')} style={{ display: 'flex', alignItems: 'center', gap: 8, width: '100%', marginTop: 16, background: '#FEF3C7', color: '#92400E', border: 'none', borderRadius: 14, padding: '12px 14px', fontSize: 13.5, fontWeight: 800, textAlign: 'left', cursor: 'pointer' }}>
+            <Ico k="bell" size={16} />Ton lot chez {urgent.commerce} expire bientôt
+          </button>
         )}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 11 }}>
-          {gainsActifs.map(g => (
-            <div key={g.id} style={{ background: 'linear-gradient(135deg,#EAFBF3,#D6F5E6)', border: '1px solid #bfedd6', borderRadius: 18, padding: '16px 17px' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                <span style={{ display: 'inline-flex' }}><Ico k="gift" size={28} /></span>
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ fontSize: 16.5, fontWeight: 800, color: '#0B6E50' }}>{g.libelle || 'Lot'}</div>
-                  <div style={{ fontSize: 12.5, color: '#3f7a64' }}>{g.event_id ? evNames[g.event_id] || '' : ''}</div>
-                </div>
-                <span style={{ fontSize: 11, fontWeight: 800, background: '#0B6E50', color: '#fff', padding: '4px 10px', borderRadius: 100 }}>À utiliser</span>
-              </div>
-              {showCode === g.id ? (
-                <div style={{ marginTop: 14, textAlign: 'center', background: '#fff', borderRadius: 14, padding: '16px' }}>
-                  <div style={{ fontSize: 12, color: '#5a6071', marginBottom: 6 }}>Montre ce code au commerce</div>
-                  <div style={{ fontSize: 28, fontWeight: 900, letterSpacing: 3, color: '#0B6E50', fontFamily: 'monospace' }}>{g.code}</div>
-                  <div style={{ fontSize: 11.5, color: '#9aa0ad', marginTop: 8, lineHeight: 1.5 }}>Le commerçant le validera depuis son tableau de bord. Ton gain passera alors en « utilisé ».</div>
-                </div>
-              ) : (
-                <button onClick={() => setShowCode(g.id)} style={{ marginTop: 13, width: '100%', background: '#0B6E50', color: '#fff', fontWeight: 800, fontSize: 15, padding: '13px', borderRadius: 13, border: 'none', cursor: 'pointer' }}>
-                  Utiliser ce gain
-                </button>
-              )}
-            </div>
-          ))}
-          {gainsUtilises.map(g => (
-            <div key={g.id} style={{ background: '#F3F4F6', border: '1px solid #e5e7eb', borderRadius: 18, padding: '15px 17px', display: 'flex', alignItems: 'center', gap: 12, opacity: 0.85 }}>
-              <span style={{ display: 'inline-flex' }}><Ico k="check" size={26} /></span>
-              <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ fontSize: 15.5, fontWeight: 700, color: '#6b7280', textDecoration: 'line-through' }}>{g.libelle || 'Lot'}</div>
-                <div style={{ fontSize: 12, color: '#9aa0ad' }}>{g.event_id ? evNames[g.event_id] || '' : ''}</div>
-              </div>
-              <span style={{ fontSize: 11, fontWeight: 800, background: '#e5e7eb', color: '#6b7280', padding: '4px 10px', borderRadius: 100 }}>Utilisé</span>
-            </div>
-          ))}
+        <div style={{ display: 'flex', gap: 4, background: '#e6e1d8', borderRadius: 100, padding: 4, margin: '18px 0 14px' }}>
+          <button style={ongl(ecran === 'lots')} onClick={() => setEcran('lots')}><Ico k="gift" size={14} style={{ marginRight: 5, verticalAlign: -2 }} />Mes lots</button>
+          <button style={ongl(ecran === 'tickets')} onClick={() => setEcran('tickets')}><Ico k="ticket" size={14} style={{ marginRight: 5, verticalAlign: -2 }} />Mes tickets</button>
         </div>
-
+        {ecran === 'lots' && <MesLots lots={tousLots} />}
+        {ecran === 'tickets' && (<>
         {/* Mes tickets par opération */}
-        <div style={sectionTitle}><Ico k="ticket" size={13} style={{ marginRight: 5, verticalAlign: -2 }} />Mes tickets pour le tirage</div>
         {parOperation.length === 0 && (
           <div style={{ background: '#fff', borderRadius: 16, padding: '18px', fontSize: 14, color: '#5a6071', textAlign: 'center' }}>
             Aucun ticket pour l&apos;instant.
@@ -181,8 +162,9 @@ export default function MonComptePage() {
         </div>
 
         <div style={{ fontSize: 12, color: '#9aa0ad', textAlign: 'center', marginTop: 26, lineHeight: 1.6 }}>
-          Chaque ticket = une chance au tirage final de chaque opération.<br />Plus tu joues de commerces, plus tu as de chances <Ico k="sparkle" size={13} style={{ marginRight: 5, verticalAlign: -2 }} />
+          Chaque ticket = une chance au tirage.
         </div>
+        </>)}
       </div>
     </div>
   )

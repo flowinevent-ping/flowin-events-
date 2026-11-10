@@ -179,6 +179,11 @@ export interface GagnantOperation {
    *  destocke ou en stock »). null si ce lot n a pas de stock unitaire suivi
    *  (quantite declarative uniquement) : la question ne s applique pas. */
   stockDestocke: boolean | null
+  /** Validite du lot gagne (sql/2026-11-10-tickets-animation.sql : tirages.valable_jusqu_au) ;
+   *  repli : date de fin de l operation. */
+  valableJusquAu?: string | null
+  /** Billet offert a un ami par le gagnant (tirages.offert_le, meme SQL). */
+  offertLe?: string | null
   /** Date du dernier email de relance envoye -- Romain (21/10) : « il manque
    *  la sélection de ceux que l'on veut voir, qui sont ceux qui sont
    *  relancés ou à relancer ». Rempli par marquerRelance() au clic sur
@@ -402,6 +407,16 @@ export async function fetchOperationsPro(proId: string): Promise<OperationsPro> 
        « en stock » de « non suivi ». */
     stockDestocke: null,
   }))
+  /* Colonnes du SQL du 10/11 (validite, offert a un ami) : lecture separee,
+     silencieuse tant que le SQL n est pas applique (la liste ne casse jamais). */
+  if (tirages.length) {
+    const opt = await supabase.from('tirages').select('id,valable_jusqu_au,offert_le').in('id', tirages.map(t => t.id))
+    if (!opt.error) {
+      const m = new Map<number, { valable_jusqu_au: string | null; offert_le: string | null }>()
+      ;((opt.data ?? []) as { id: number; valable_jusqu_au: string | null; offert_le: string | null }[]).forEach(x => m.set(Number(x.id), x))
+      tirages.forEach(t => { const x = m.get(t.id); if (x) { t.valableJusquAu = x.valable_jusqu_au; t.offertLe = x.offert_le } })
+    }
+  }
   tirages.sort((a, b) => String(b.date ?? '').localeCompare(String(a.date ?? '')) || (a.lotNom ?? '').localeCompare(b.lotNom ?? '', 'fr'))
 
   /* Facture liee au bon le plus recent de chaque super event. Meme repli que
@@ -455,7 +470,7 @@ export async function fetchOperationsPro(proId: string): Promise<OperationsPro> 
            un tirage ne porte que lot_nom, jamais lot_id. */
         const lotCorresp = lots.find(l => l.nom === (t.lotNom ?? '').trim())
         const suivi = !!lotCorresp?.stock
-        return { ...t, stockDestocke: suivi ? ticketsDestockes.has(t.ticketCode ?? '') : null }
+        return { ...t, stockDestocke: suivi ? ticketsDestockes.has(t.ticketCode ?? '') : null, valableJusquAu: t.valableJusquAu ?? op.dateF ?? null }
       })
 
     /* Contrat (referentiel 41) : les bons de CETTE operation — rattaches a une
