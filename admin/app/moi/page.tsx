@@ -9,6 +9,7 @@
 import { useState, useEffect, useMemo } from 'react'
 import { supabase } from '@/lib/supabase'
 import { Ico } from '@/lib/proicons'
+import { buildInviteLink } from '@/lib/parrainage'
 import MesLots from '@/components/joueur/MesLots'
 import ConnexionEmail from '@/components/joueur/ConnexionEmail'
 import { fetchCarteCommercesPublique, type CommerceCarte } from '@/lib/carteReseau'
@@ -18,7 +19,7 @@ import {
   type MonLot, type Notif, type Consentement,
 } from '@/lib/mesLots'
 
-type Joueur = { id: string; prenom?: string | null; nom?: string | null; email?: string | null }
+type Joueur = { id: string; prenom?: string | null; nom?: string | null; email?: string | null; external_id?: string | null }
 type Ticket = { event_id: string | null; super_event_id: string | null }
 type Gain = { id: string; libelle: string | null; code: string | null; utilise: boolean | null; event_id: string | null; super_event_id: string | null }
 type Rubrique = 'lots' | 'bientot' | 'proche' | 'notifs' | 'compte'
@@ -53,11 +54,15 @@ export default function MonComptePage() {
   useEffect(() => {
     let local: { id?: string } | null = null
     try { const s = localStorage.getItem('flowin_joueur'); if (s) local = JSON.parse(s) } catch { /* */ }
+    /* Demonstration (?demo=1) sans compte sur ce telephone : profil fictif, aucune lecture ni ecriture. */
+    let demo = false
+    try { demo = new URLSearchParams(location.search).get('demo') === '1' } catch { /* */ }
+    if (!local?.id && demo) { setJoueur({ id: 'demo', prenom: 'Prénom', nom: 'Exemple' }); setLoading(false); return }
     if (!local?.id) { setLoading(false); return }
     const jid = local.id
     ;(async () => {
       const [jr, tk, ga, ml] = await Promise.all([
-        supabase.from('joueurs').select('id,prenom,nom,email').eq('id', jid).single(),
+        supabase.from('joueurs').select('id,prenom,nom,email,external_id').eq('id', jid).single(),
         supabase.from('se_tickets').select('event_id,super_event_id').eq('joueur_id', jid),
         supabase.from('se_gains').select('id,libelle,code,utilise,event_id,super_event_id').eq('joueur_id', jid),
         chargerMesLots(jid).catch(() => [] as MonLot[]),
@@ -146,6 +151,26 @@ export default function MonComptePage() {
       marquerCadeauxVus(joueur.id, nonVues.map(n => n.id))
       setNotifs(notifs.map(n => n.vu_le ? n : { ...n, vu_le: new Date().toISOString() }))
     }
+  }
+
+  /* Parrainage depuis le profil (Romain, 17/11) : meme mecanisme que la fin de parcours
+     (buildInviteLink, ref = external_id du joueur, source=parrainage). Sans identifiant connu,
+     le lien reste partageable mais ne credite personne. Partage natif, sinon WhatsApp. */
+  const [partageMsg, setPartageMsg] = useState('')
+  async function parrainer(canal: 'natif' | 'wa' | 'sms' | 'mail') {
+    if (!joueur) return
+    const ev = tickets.map(t => t.event_id).filter(Boolean)[0]
+    const base = ev ? '/jouer?ev=' + encodeURIComponent(ev as string) : '/carte-commerces'
+    const ref = joueur.external_id || (joueur.email && joueur.email.indexOf('@') > 0 ? 'j-' + joueur.email.toLowerCase().replace(/[^a-z0-9]/g, '-').substring(0, 40) : '')
+    const lien = ref ? buildInviteLink(base, ref, (ev as string) || undefined, 'wa') + '&source=parrainage' : new URL(base, location.origin).toString()
+    const texte = 'Je joue avec Flowin dans les commerces partenaires : une partie gratuite par jour, des lots à gagner. Viens jouer avec moi ! ' + lien
+    if (joueur.id === 'demo') { setPartageMsg('Démonstration : le lien d’invitation est prêt, rien n’est envoyé.'); return }
+    try {
+      if (canal === 'natif' && typeof navigator !== 'undefined' && navigator.share) { await navigator.share({ title: 'Viens jouer avec moi', text: texte }); return }
+    } catch { return }
+    if (canal === 'sms') { location.href = 'sms:?&body=' + encodeURIComponent(texte); return }
+    if (canal === 'mail') { location.href = 'mailto:?subject=' + encodeURIComponent('Viens jouer avec moi') + '&body=' + encodeURIComponent(texte); return }
+    window.open('https://wa.me/?text=' + encodeURIComponent(texte), '_blank')
   }
 
   /* Écran fixe (pas de défilement de page) ; en mode démo le bandeau de 24 px reste visible au-dessus. */
@@ -277,6 +302,16 @@ export default function MonComptePage() {
             <div style={{ ...carte, marginBottom: 10 }}>
               <div style={{ fontSize: 15, fontWeight: 800 }}>{[joueur.prenom, joueur.nom].filter(Boolean).join(' ') || 'Participant'}</div>
               <div style={{ fontSize: 13, color: '#5a6071', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{joueur.email || ''}</div>
+            </div>
+            <div data-parrainage style={{ ...carte, marginBottom: 10 }}>
+              <div style={{ fontSize: 15, fontWeight: 800 }}>Parrainer mes amis</div>
+              <div style={{ fontSize: 13, color: '#5a6071', margin: '2px 0 10px' }}>Un ami qui s’inscrit avec ton lien = 1 ticket de plus pour toi.</div>
+              <div style={{ display: 'flex', gap: 8 }}>
+                {([['natif', 'Partager'], ['sms', 'SMS'], ['mail', 'Email']] as const).map(([k, t]) => (
+                  <button key={k} data-share={k} onClick={() => parrainer(k)} style={{ flex: 1, minHeight: 44, borderRadius: 12, border: 'none', background: k === 'natif' ? HERO : '#EFF3FE', color: k === 'natif' ? '#fff' : HERO, fontWeight: 800, fontSize: 14, cursor: 'pointer' }}>{t}</button>
+                ))}
+              </div>
+              {partageMsg && <div data-partage-msg style={{ fontSize: 12.5, color: '#0B6E50', marginTop: 8 }}>{partageMsg}</div>}
             </div>
             {consent && consent.length > 0 && (
               <div data-consentements style={{ ...carte, marginBottom: 10 }}>

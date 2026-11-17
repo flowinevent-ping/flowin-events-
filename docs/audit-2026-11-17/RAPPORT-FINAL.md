@@ -76,3 +76,15 @@ Les captures du profil et de l'espace pro / SA ne sont **pas** publiées : elles
 2. Ordre parrainage → coordonnées (gardé, décision du 31/10) : le passer après le ticket ferait gagner 1 geste.
 3. Connexion participant par lien magique e-mail : oui / non.
 4. Films : re-rendre la roue ou garder les films tels quels.
+
+## 17/11/2026 (suite) : parrainage en fin de parcours et dans le profil
+
+Décision de Romain appliquée (remplace l'ordre du 31/10, point 2 ci-dessus tranché) : le parrainage vient **à la fin**, comme NDS 2026.
+
+- **Ordre des jeux masters** (`admin/lib/masters/engine.ts`) : jeu → résultat → coordonnées (formulaire en 2 volets inchangé, consentements inchangés) → ticket / billet → « Parrainer mes amis » → écran de parrainage (WhatsApp, SMS, email ; récompense existante `v.parrain`). Le retour depuis les coordonnées revient à l'écran précédent (repli : accueil). Déroulés et aperçu mis dans le même ordre (`apercu.ts`).
+- **Sortie de l'écran de parrainage** : barre Jouer / Commerces / Partenaires / Profil (aucune impasse). Roue perdue : « Parrainer 3 amis » ouvre toujours le parrainage (règle de relance inchangée).
+- **Anciens parcours** (`app/parcours/*`) : le partage est déjà sur l'écran ticket, rien à changer. NDS 2026 non modifié.
+- **Profil `/moi`** : carte « Parrainer mes amis » dans la rubrique Compte (5 onglets conservés, pas de défilement de page). Même mécanisme (`buildInviteLink`, `ref` = `external_id` du joueur, `source=parrainage`, partage natif sinon WhatsApp, SMS, email). Avec `?demo=1` sans compte : profil fictif, aucune lecture ni écriture, message « lien prêt, rien n'est envoyé ».
+- **Fuite corrigée** : `/parcours/quizmaster?ev=…&demo=1` renvoyait vers le bon jeu en perdant `demo=1` (`versBonJeuSiAutre`), d'où des tentatives d'écriture `joueurs`. `demo` est désormais conservé.
+
+Contrôle Playwright (390 px, build local, `?demo=1`) : quiz, quiz + bonus, quiz solo, roue (ev-demo-spin, ev-flowin-demo), tombola, vote (`/jouer?m=vote`), quizmaster (renvoyé vers quiz) : tous arrivent jusqu'au ticket puis au parrainage, sortie vers le profil vérifiée ; **0 requête non-GET vers supabase.co**. Gestes jusqu'au ticket : **1 de moins** par jeu (le passage obligé « Continuer : mes coordonnées » sur l'écran de parrainage disparaît). `/moi?demo=1` : carte parrainage OK, 5 onglets, pas de défilement.

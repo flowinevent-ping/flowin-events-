@@ -297,20 +297,20 @@ S['q-resultat'] = { r: function (v, r) {
       ? '<div class="card reward a-rise" style="--d:1.3s">' + glyph(L('ticket', '1', 'ticket')) + '<div class="tx"><small>Tu gagnes</small><b>1 ticket pour le tirage</b><span>Tirage le ' + txt(v.tirage) + '</span></div></div>'
       : '<div class="card reward a-rise" style="--d:1.3s">' + glyph(L('ticket', '0', 'ticket')) + '<div class="tx"><small>Il faut ' + tot + '/' + tot + ' pour le ticket</small><b>' + (bonus ? 'Les questions bonus te donnent un ticket' : 'Reviens demain pour retenter') + '</b><span>Tirage le ' + txt(v.tirage) + '</span></div></div>') +
     '</div>' +
-    foot(bonus ? btn('Questions bonus : +1 ticket', 'q-bonusintro', 'a-pulse', ' style="background:#fff;color:var(--fl-ink)"') + '<button class="lnk" data-go="c-parrainage" data-after="c-ticket">Passer et valider mon ticket</button>' : btn(parfait ? 'Valider mon ticket' : 'Enregistrer ma participation', 'c-parrainage', '', ' data-after="c-ticket"')) + '</div>'
+    foot(bonus ? btn('Questions bonus : +1 ticket', 'q-bonusintro', 'a-pulse', ' style="background:#fff;color:var(--fl-ink)"') + '<button class="lnk" data-go="c-inscription" data-after="c-ticket">Passer et valider mon ticket</button>' : btn(parfait ? 'Valider mon ticket' : 'Enregistrer ma participation', 'c-inscription', '', ' data-after="c-ticket"')) + '</div>'
 } }
 S['q-bonusintro'] = { r: function (v) {
   return '<div class="scr bg-s">' + barre() + geo([['c', 90, 140, 210, '#fff'], ['h', 230, 300, 120, 'var(--c)', 0, .15], ['o', 60, 120, 60, 'var(--c3)', 0, .25]]) + hdr(v) +
     '<div class="body" style="text-align:center;align-items:center"><div class="card a-pop" style="--d:.3s;margin-top:70px;width:150px;height:150px;border-radius:44px;display:grid;place-items:center"><span class="glyph g-ticket" style="width:104px;height:104px;border-radius:30px"><b style="font-size:40px">+1</b><small style="font-size:12px">ticket</small></span></div>' +
     '<h2 class="h2 a-rise" style="--d:.5s;margin-top:80px;font-size:32px">Réponds aux<br>questions bonus,</h2><div class="a-rise" style="--d:.6s;font-size:22px;font-weight:800;color:var(--c-ink);margin-top:6px">gagne un ticket supplémentaire</div><p class="sub a-rise" style="--d:.7s">' + v.bonus.length + ' questions rapides pour aider ' + esc(v.who.nom) + ' à mieux te connaître.</p></div>' +
-    foot(btn('Je réponds', 'q-bonus') + '<button class="lnk" data-go="c-parrainage" data-after="c-ticket">Plus tard</button>') + '</div>'
+    foot(btn('Je réponds', 'q-bonus') + '<button class="lnk" data-go="c-inscription" data-after="c-ticket">Plus tard</button>') + '</div>'
 } }
 S['q-bonus'] = { tall: true, r: function (v) {
   const n = v.bonus.length
   return '<div class="scr bg-o">' + barre() + hdr(v, { back: 'q-bonusintro', title: 'Questions bonus', small: n + ' questions · +1 ticket' }) +
     '<div class="body" style="padding-top:4px"><span class="plus1" style="align-self:flex-start"><i>+1</i>ticket supplémentaire</span>' +
     v.bonus.map(function (q, i) { return '<div class="card bcard a-rise" style="--d:' + (i * .07) + 's"><div class="kicker">Bonus ' + (i + 1) + ' / ' + n + '</div><h4>' + esc(q.label) + '</h4><div class="chips">' + q.opts.map(function (o) { return '<button class="chip" data-one="b' + i + '" data-val="' + esc(o) + '">' + esc(o) + '</button>' }).join('') + '</div></div>' }).join('') + '</div>' +
-    foot(btn('Valider mes réponses', 'q-bonusvalider', '', ' data-bonus-need disabled') + '<p class="mention" data-bonus-msg>Réponds aux ' + n + ' questions pour gagner le ticket.</p><button class="lnk" data-go="c-parrainage" data-after="c-ticket">Passer</button>') + '</div>'
+    foot(btn('Valider mes réponses', 'q-bonusvalider', '', ' data-bonus-need disabled') + '<p class="mention" data-bonus-msg>Réponds aux ' + n + ' questions pour gagner le ticket.</p><button class="lnk" data-go="c-inscription" data-after="c-ticket">Passer</button>') + '</div>'
 } }
 S['q-bonusok'] = { r: function (v, r) {
   const deux = r.bonnes >= v.questions.length
@@ -318,7 +318,7 @@ S['q-bonusok'] = { r: function (v, r) {
     '<div style="position:relative;width:250px;height:200px;margin-top:40px">' + (deux ? '<div style="position:absolute;left:30px;top:40px;width:190px;height:110px;border-radius:20px;background:#fff;border:1.5px solid var(--line);transform:rotate(-8deg);padding:16px;text-align:left"><small style="font-size:10px;font-weight:800;letter-spacing:.14em;color:var(--c-ink)">TICKET QUIZ</small><b style="display:block;font-size:22px;font-weight:800;margin-top:8px" class="num">Ticket 1</b></div>' : '') +
     '<div class="a-fly" style="--d:.3s;position:absolute;left:40px;top:30px;width:190px;height:110px;border-radius:20px;background:var(--c);color:var(--c-on);transform:rotate(6deg);padding:16px;text-align:left;box-shadow:0 14px 26px rgba(27,58,92,.14)"><small style="font-size:10px;font-weight:800;letter-spacing:.14em">TICKET BONUS</small><b style="display:block;font-size:22px;font-weight:800;margin-top:8px" class="num">Ticket ' + (deux ? 2 : 1) + '</b></div>' +
     '<span class="a-pop" style="--d:.9s;position:absolute;right:-6px;top:0;width:64px;height:64px;border-radius:50%;background:#fff;border:1.5px solid var(--ink);display:grid;place-items:center;font-size:23px;font-weight:800">+1</span></div>' +
-    '<h2 class="big a-rise" style="--d:1s;font-size:46px;margin-top:20px">' + (deux ? '2 tickets' : '1 ticket') + '</h2><p class="sub a-rise" style="--d:1.1s">Merci pour tes réponses&nbsp;! ' + (deux ? 'Tes deux tickets sont prêts' : 'Ton ticket est prêt') + ', il ne reste qu\'à ' + (deux ? 'les' : 'le') + ' valider.</p></div>' + foot(btn(deux ? 'Valider mes tickets' : 'Valider mon ticket', 'c-parrainage', '', ' data-after="c-ticket"')) + '</div>'
+    '<h2 class="big a-rise" style="--d:1s;font-size:46px;margin-top:20px">' + (deux ? '2 tickets' : '1 ticket') + '</h2><p class="sub a-rise" style="--d:1.1s">Merci pour tes réponses&nbsp;! ' + (deux ? 'Tes deux tickets sont prêts' : 'Ton ticket est prêt') + ', il ne reste qu\'à ' + (deux ? 'les' : 'le') + ' valider.</p></div>' + foot(btn(deux ? 'Valider mes tickets' : 'Valider mon ticket', 'c-inscription', '', ' data-after="c-ticket"')) + '</div>'
 } }
 
 /* Inscription et gain */
@@ -348,7 +348,7 @@ S['c-inscription'] = { tall: true, r: function (v, r) {
      prénom / nom / email / téléphone rouvre le volet 1, sinon le volet 2. */
   const vol1Ok = !!(p.prenom && p.nom && (p.email || '').indexOf('@') > 0 && (p.tel || '').replace(/\s/g, '').length >= 8)
   const vol = r.erreur ? (vol1Ok ? 2 : 1) : (r.inscVolet || 1)
-  return '<div class="scr bg-w insc v' + vol + '">' + barre() + hdr(v, { back: 'c-parrainage', title: 'Dernière étape', small: 'Tes coordonnées' }) + etapes(2) +
+  return '<div class="scr bg-w insc v' + vol + '">' + barre() + hdr(v, { back: 's-accueil', title: 'Dernière étape', small: 'Tes coordonnées' }) + etapes(2) +
     '<div class="body" style="padding-top:8px"><div class="iv1"><h2 class="h2" style="font-size:26px">Où t\'envoyer<br>ton gain ?</h2>' +
     '<div class="card recap">' + glyph(rec.gl) + '<div><b>' + txt(rec.t) + '</b><small>' + txt(rec.s) + '</small></div></div>' +
     '<div class="two"><div class="fld"><label for="f1">Prénom</label><input id="f1" class="inp" autocomplete="given-name" value="' + esc(p.prenom || '') + '"></div><div class="fld"><label for="f2">Nom</label><input id="f2" class="inp" autocomplete="family-name" value="' + esc(p.nom || '') + '"></div></div>' +
@@ -400,8 +400,9 @@ S['c-ticket'] = { tall: true, r: function (v, r) {
 S['c-parrainage'] = { tall: true, r: function (v, r) {
   const three = (v.key === 'spin' || v.key === 'tombola')
   const se = v.superEvent
-  /* Etape AVANT les coordonnees (Romain, 31/10) : resultat -> parrainage ->
-     coordonnees -> « Valider et recevoir mon gain ». */
+  /* Etape EN FIN de parcours (Romain, 17/11, comme NDS 2026 ; remplace l'ordre du 31/10) :
+     jeu -> coordonnees -> ticket / billet -> « Parrainer mes amis ». L'email est alors connu :
+     le champ #fpar ne s'affiche plus que si on arrive ici sans inscription (roue perdue). */
   const avant = !r.inscrit && !!r.after
   return '<div class="scr bg-w">' + barre() + hdr(v, { back: 's-accueil', title: 'Parraine tes amis', small: 'Gagne plus de chances' }) +
     '<div class="body" style="padding-top:6px"><div class="card event" style="padding:16px;margin-top:4px;background:var(--home)">' + geo([['c', 255, -30, 110, 'var(--c)'], ['o', 300, 62, 40, '#fff']]) +
@@ -642,13 +643,13 @@ S['t-res-tirage'] = { r: function (v, r) {
   return '<div class="scr bg-w">' + barre() + hdr(v) + BAND + etapes(1) + '<div class="body" style="text-align:center;align-items:center">' +
     '<div class="tk" style="width:100%;text-align:left"><div class="main"><small>Ticket tombola</small><b class="num">TK-' + esc((r.tombolaNo || '0427').slice(-4)) + '</b><span>Tirage au sort le ' + txt(v.tirage) + '</span></div><div class="stub"><b>N° ' + esc((r.tombolaNo || '0427').slice(-4)) + '</b></div></div>' +
     '<h2 class="h2 a-rise" style="--d:.6s;margin-top:30px;font-size:32px">Ton ticket<br>est dans le tirage</h2><p class="sub a-rise" style="--d:.7s">Valide ton ticket pour être prévenu si tu gagnes' + (premier ? ' : ' + esc(premier.nom.charAt(0).toLowerCase() + premier.nom.slice(1)) : '') + '.</p></div>' +
-    foot(btn('Valider mon ticket', 'c-parrainage', '', ' data-after="c-ticket"')) + '</div>'
+    foot(btn('Valider mon ticket', 'c-inscription', '', ' data-after="c-ticket"')) + '</div>'
 } }
 S['t-res-instant'] = { r: function (v) {
   return '<div class="scr bg-m">' + confetti(46, 21) + barre() + hdr(v) + BAND + etapes(1) + '<div class="body" style="text-align:center;align-items:center">' +
     '<span class="tag tir a-pop" style="--d:.2s;font-size:13px;padding:7px 16px;margin-top:22px;letter-spacing:.08em;text-transform:uppercase">Ticket gagnant</span>' +
     '<h2 class="big a-rise" style="--d:.4s;font-size:50px;margin-top:18px">Gagné,<br>tout de<br>suite&nbsp;!</h2><div class="card reward a-rise" style="--d:.7s;width:100%">' + glyph(v.billet) + '<div class="tx"><small>Gain immédiat</small><b>' + esc(v.billet.nom) + '</b><span>Il va dans ton profil. Ton ticket reste en jeu pour le tirage.</span></div></div></div>' +
-    foot(btn('Recevoir mon billet', 'c-parrainage', '', ' data-after="c-billet"')) + '</div>'
+    foot(btn('Recevoir mon billet', 'c-inscription', '', ' data-after="c-billet"')) + '</div>'
 } }
 
 /* Roue */
@@ -683,12 +684,12 @@ S['r-tourne'] = { r: function (v, r) {
 S['r-gain'] = { r: function (v, r) {
   const c = caseCourante(v, r), lb = c ? c.label : v.billet.nom
   return '<div class="scr bg-w">' + confetti(44, 41) + barre() + hdr(v) + BAND + etapes(1) + '<div class="body" style="text-align:center;align-items:center"><div class="card a-pop" style="--d:.1s;margin-top:22px;width:150px;height:150px;border-radius:44px;display:grid;place-items:center"><span class="glyph g-produit" style="width:110px;height:110px;border-radius:32px"><b style="font-size:46px">1</b><small style="font-size:13px">offert</small></span></div>' +
-    '<div class="kicker a-rise" style="--d:.4s;margin-top:26px">Gain immédiat</div><h2 class="big a-rise" style="--d:.45s;font-size:' + (lb.length > 14 ? 40 : 50) + 'px;margin-top:8px">' + esc(lb) + '&nbsp;!</h2><p class="sub a-rise" style="--d:.6s">Ton billet QR va dans ton profil : montre-le au comptoir.</p></div>' + foot(btn('Recevoir mon billet', 'c-parrainage', '', ' data-after="c-billet"')) + '</div>'
+    '<div class="kicker a-rise" style="--d:.4s;margin-top:26px">Gain immédiat</div><h2 class="big a-rise" style="--d:.45s;font-size:' + (lb.length > 14 ? 40 : 50) + 'px;margin-top:8px">' + esc(lb) + '&nbsp;!</h2><p class="sub a-rise" style="--d:.6s">Ton billet QR va dans ton profil : montre-le au comptoir.</p></div>' + foot(btn('Recevoir mon billet', 'c-inscription', '', ' data-after="c-billet"')) + '</div>'
 } }
 S['r-ticket'] = { r: function (v, r) {
   const tir = v.lots.find(function (l) { return l.mode === 'tir' })
   return '<div class="scr bg-w">' + barre() + hdr(v) + BAND + etapes(1) + '<div class="body" style="text-align:center;align-items:center"><div style="transform:scale(.6);transform-origin:top center;height:208px;margin-top:6px">' + wheelBlock(v, r.rotation) + '</div>' +
-    '<div class="tk" style="width:100%;text-align:left;margin-top:10px"><div class="main"><small>Case « ' + esc(caseCourante(v, r) ? caseCourante(v, r).label : 'Ticket') + ' »</small><b class="num">Ticket</b><span>Tirage au sort le ' + txt(v.tirage) + '</span></div><div class="stub"><b>Tirage</b></div></div><h2 class="h2 a-rise" style="--d:.5s;font-size:29px;margin-top:20px">' + (tir ? 'Un ticket pour<br>' + esc(tir.nom.charAt(0).toLowerCase() + tir.nom.slice(1)) : 'Un ticket<br>pour le tirage') + '</h2></div>' + foot(btn('Valider mon ticket', 'c-parrainage', '', ' data-after="c-ticket"')) + '</div>'
+    '<div class="tk" style="width:100%;text-align:left;margin-top:10px"><div class="main"><small>Case « ' + esc(caseCourante(v, r) ? caseCourante(v, r).label : 'Ticket') + ' »</small><b class="num">Ticket</b><span>Tirage au sort le ' + txt(v.tirage) + '</span></div><div class="stub"><b>Tirage</b></div></div><h2 class="h2 a-rise" style="--d:.5s;font-size:29px;margin-top:20px">' + (tir ? 'Un ticket pour<br>' + esc(tir.nom.charAt(0).toLowerCase() + tir.nom.slice(1)) : 'Un ticket<br>pour le tirage') + '</h2></div>' + foot(btn('Valider mon ticket', 'c-inscription', '', ' data-after="c-ticket"')) + '</div>'
 } }
 S['r-perdu'] = { r: function (v, r) {
   return '<div class="scr bg-w">' + barre() + hdr(v) + BAND + etapes(1) + '<div class="body" style="text-align:center;align-items:center"><div style="transform:scale(.6);transform-origin:top center;height:208px;margin-top:6px">' + wheelBlock(v, r.rotation) + '</div>' +
@@ -718,7 +719,7 @@ S['v-resultat'] = { r: function (v, r) {
   return '<div class="scr bg-w">' + barre() + hdr(v) + BAND + etapes(1) + '<div class="body"><div class="kicker" style="margin-top:12px">Ton vote est compté</div><h2 class="h2" style="font-size:30px">Merci pour<br>ton vote&nbsp;!</h2>' +
     '<div class="card" style="padding:14px 16px;margin-top:16px;display:flex;gap:12px;align-items:center">' + avatar(v, r.voteIdx || 0, 52) + '<div><small style="display:block;font-size:12px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)">Ton choix</small><b style="font-size:17px;font-weight:800">' + esc(v.candidats[r.voteIdx || 0] ? v.candidats[r.voteIdx || 0].nom : '') + '</b></div></div>' +
     '<p class="mention" style="text-align:left">Les résultats sont annoncés par l\'organisateur.</p><div class="card reward a-rise" style="--d:.8s">' + glyph(L('ticket', '1', 'ticket')) + '<div class="tx"><small>Ton vote te fait participer</small><b>Loterie' + (lot ? ' : ' + esc(lot.nom) : '') + '</b><span>Tirage le ' + txt(v.tirage) + '</span></div></div></div>' +
-    foot(btn('Recevoir mon ticket', 'c-parrainage', '', ' data-after="c-ticket"')) + '</div>'
+    foot(btn('Recevoir mon ticket', 'c-inscription', '', ' data-after="c-ticket"')) + '</div>'
 } }
 
 /* Vote — exemple 2 : « la plus belle vitrine » (carte, QR de la vitrine, ticket + sondage) */
@@ -744,7 +745,7 @@ S['v2-sondage'] = { tall: true, r: function (v) {
   return '<div class="scr bg-w">' + barre() + '<div class="hdr"><span style="width:44px"></span><div class="ttl">A voté !<small>Vitrines de Noël</small></div><span style="width:44px"></span></div>' +
     '<div class="body"><div class="tk" style="margin-top:6px"><div class="main"><small>Ticket · vitrines de Noël</small><b class="num">TK-1204</b><span>Tirage au sort le ' + txt(v.tirage) + '</span></div><div class="stub"><b>N° 1204</b></div></div>' +
     v.sondage.map(function (q, i) { return '<div class="card bcard"><div class="kicker">Question ' + (i + 1) + ' / ' + n + '</div><h4>' + esc(q.label) + '</h4><div class="chips">' + q.opts.map(function (o) { return '<button class="chip" data-one="s' + i + '" data-val="' + esc(o) + '">' + esc(o) + '</button>' }).join('') + '</div></div>' }).join('') +
-    '<p class="mention" style="text-align:left">Réglé par l\'association des commerçants, un commerce ou l\'organisateur.</p></div>' + foot(btn('Valider', 'c-parrainage', '', ' data-after="c-ticket" data-sondage')) + '</div>'
+    '<p class="mention" style="text-align:left">Réglé par l\'association des commerçants, un commerce ou l\'organisateur.</p></div>' + foot(btn('Valider', 'c-inscription', '', ' data-after="c-ticket" data-sondage')) + '</div>'
 } }
 function monogramme2(nom: string): string { const m = String(nom || '').replace(/[^0-9A-Za-zÀ-ÖØ-öø-ÿ ]/g, ' ').split(/\s+/).filter(function (x) { return x && ['de', 'des', 'du', 'la', 'le', 'les', 'd', 'l'].indexOf(x.toLowerCase()) < 0 }); return !m.length ? 'FL' : m.length === 1 ? m[0].slice(0, 2).toUpperCase() : (m[0][0] + m[1][0]).toUpperCase() }
 
@@ -824,11 +825,11 @@ S['sj-tickets'] = { tall: true, r: function (v) {
 /* ── Deroules (ordre du storyboard des maquettes) ──────────────────────── */
 const COMMUN_FIN = ['c-profil', 'c-resultat-gagne', 'c-resultat-perdu', 'c-connexion', 'c-raccourci', 'c-raccourci-a', 'c-commerces', 'c-carte', 'c-fiche', 'c-partenaires', 'c-fichepart', 'c-demain', 'c-digital', 'm-code', 'm-valider', 'm-ok']
 export const DEROULES: Record<string, string[]> = {
-  quiz: ['s-flash', 's-accueil', 's-regles', 'q-question', 'q-bonne', 'q-mauvaise', 'q-resultat', 'q-bonusintro', 'q-bonus', 'q-bonusok', 'c-parrainage', 'c-inscription', 'c-ticket'].concat(COMMUN_FIN),
-  solo: ['s-flash', 's-accueil', 's-regles', 'q-question', 'q-bonne', 'q-mauvaise', 'q-resultat', 'c-parrainage', 'c-inscription', 'c-ticket'].concat(COMMUN_FIN),
-  spin: ['s-flash', 's-accueil', 's-regles', 'r-roue', 'r-tourne', 'r-gain', 'r-ticket', 'r-perdu', 'c-parrainage', 'c-inscription', 'c-billet', 'c-ticket'].concat(COMMUN_FIN),
-  tombola: ['s-flash', 's-accueil', 's-regles', 't-tirer', 't-impression', 't-res-tirage', 't-res-instant', 'c-parrainage', 'c-inscription', 'c-ticket', 'c-billet'].concat(COMMUN_FIN),
-  vote: ['s-flash', 's-accueil', 's-regles', 'v-choix', 'v-envoi', 'v-resultat', 'c-parrainage', 'c-inscription', 'c-ticket', 'v2-carte', 'v2-flash', 'v2-sondage'].concat(COMMUN_FIN),
+  quiz: ['s-flash', 's-accueil', 's-regles', 'q-question', 'q-bonne', 'q-mauvaise', 'q-resultat', 'q-bonusintro', 'q-bonus', 'q-bonusok', 'c-inscription', 'c-ticket', 'c-parrainage'].concat(COMMUN_FIN),
+  solo: ['s-flash', 's-accueil', 's-regles', 'q-question', 'q-bonne', 'q-mauvaise', 'q-resultat', 'c-inscription', 'c-ticket', 'c-parrainage'].concat(COMMUN_FIN),
+  spin: ['s-flash', 's-accueil', 's-regles', 'r-roue', 'r-tourne', 'r-gain', 'r-ticket', 'r-perdu', 'c-inscription', 'c-billet', 'c-ticket', 'c-parrainage'].concat(COMMUN_FIN),
+  tombola: ['s-flash', 's-accueil', 's-regles', 't-tirer', 't-impression', 't-res-tirage', 't-res-instant', 'c-inscription', 'c-ticket', 'c-billet', 'c-parrainage'].concat(COMMUN_FIN),
+  vote: ['s-flash', 's-accueil', 's-regles', 'v-choix', 'v-envoi', 'v-resultat', 'c-inscription', 'c-ticket', 'c-parrainage', 'v2-carte', 'v2-flash', 'v2-sondage'].concat(COMMUN_FIN),
   sej: ['sj-accueil', 'sj-carte', 'sj-station', 'sj-encours', 'sj-tickets'],
 }
 /** Ecrans qui animent quelque chose a l'entree (gere par le client). */

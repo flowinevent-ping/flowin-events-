@@ -41,6 +41,6 @@ export function versBonJeuSiAutre(routeModule: string, evId: string, module: str
   if (routeModule !== 'quizmaster' && estModuleMaster(module)) return
   const q = new URLSearchParams()
   q.set('ev', evId)
-  ;['source', 'ref', 'etab', 'ch', 'token'].forEach(k => { if (sp[k]) q.set(k, String(sp[k])) })
+  ;['source', 'ref', 'etab', 'ch', 'token', 'demo'].forEach(k => { if (sp[k]) q.set(k, String(sp[k])) })
   redirect('/parcours/' + module + '?' + q.toString())
 }
