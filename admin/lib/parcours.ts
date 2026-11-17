@@ -865,8 +865,10 @@ export function parcoursCSS(couleur: string): string {
    dans tous les jeux sauf NDS 2026 (inchange). La 1re conditionne la
    participation, la 2e alimente joueurs.optin. */
 export const CONSENTEMENT_JEU = "J'autorise Flowin à conserver mes coordonnées uniquement dans le cadre du jeu. Mes données ne sont ni échangées ni revendues."
-export const CONSENTEMENT_ANIMATIONS = "J'autorise Flowin à me faire participer à ses animations."
-export const CONSENTEMENT_VERSION = 'flowin-consentement-2026-11'
+/* Audit 17/11 : même texte que les masters (/jouer), même donnée collectée (joueurs.optin). */
+export const CONSENTEMENT_ANIMATIONS = 'Je souhaite rester en contact avec Flowin Event : offres, bons deals, prochains events.'
+export const CONSENTEMENT_MENTION = 'Tes données sont utilisées par Flowin ou par le commerce choisi. Elles ne sont jamais vendues, échangées ni commercialisées.'
+export const CONSENTEMENT_VERSION = 'flowin-consentement-2026-11-17'
 export const RGPD_TEXT = "J'accepte que mes coordonnées soient utilisées pour ce jeu. Traitées et utilisées par Flowin, mes données ne sont ni vendues ni échangées, en respect avec la loi RGPD."
 
 /* ── Shared Form Component helper ── */

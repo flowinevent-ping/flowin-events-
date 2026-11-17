@@ -74,5 +74,7 @@ export async function GET(req: NextRequest, { params }: { params: { code: string
   } catch { /* idem */ }
   if (!ev) return inconnu()
 
-  return aller(req, cibleJeu(ev, st.source_qr))
+  // Mode démo (audit 17/11) : ?demo=1 doit survivre à la redirection, sinon un test écrit en base.
+  const demo = req.nextUrl.searchParams.get('demo') === '1'
+  return aller(req, cibleJeu(ev, st.source_qr) + (demo ? '&demo=1' : ''))
 }

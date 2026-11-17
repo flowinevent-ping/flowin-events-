@@ -301,9 +301,19 @@ export default function MonComptePage() {
               <div style={{ ...carte, fontSize: 13, color: '#5a6071' }}>
                 <Ico k="ticket" size={13} style={{ marginRight: 5, verticalAlign: -2 }} />
                 {tickets.length} ticket{tickets.length > 1 ? 's' : ''} de tirage
-                {Array.from(new Set(tickets.map(t => t.super_event_id).filter(Boolean))).slice(0, 2).map(se => (
-                  <a key={se as string} href={`/se/${se}`} style={{ marginLeft: 8, color: HERO, fontWeight: 800, textDecoration: 'none' }}>{seNames[se as string] || 'Opération'}</a>
-                ))}
+                {/* Contrôle audit 17/11 : détail par opération et par commerce rétabli (présent avant l'audit). */}
+                {Array.from(new Set(tickets.map(t => t.super_event_id || '').filter(Boolean))).map(se => {
+                  const parCom: Record<string, number> = {}
+                  tickets.filter(t => t.super_event_id === se).forEach(t => { const k = t.event_id || ''; if (k) parCom[k] = (parCom[k] || 0) + 1 })
+                  return (
+                    <a key={se} href={`/se/${se}`} style={{ display: 'block', marginTop: 8, color: 'inherit', textDecoration: 'none' }}>
+                      <b style={{ color: HERO }}>{seNames[se] || 'Opération'}</b> · {tickets.filter(t => t.super_event_id === se).length}
+                      <span style={{ display: 'flex', flexWrap: 'wrap', gap: 5, marginTop: 4 }}>
+                        {Object.keys(parCom).map(eid => <span key={eid} style={{ fontSize: 11.5, background: '#f3f4f6', padding: '2px 8px', borderRadius: 100 }}>{evNames[eid] || eid} · {parCom[eid]}</span>)}
+                      </span>
+                    </a>
+                  )
+                })}
               </div>
             )}
           </>)}

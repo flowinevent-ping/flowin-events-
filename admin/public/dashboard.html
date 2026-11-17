@@ -996,6 +996,8 @@ code{font-family:'SF Mono',Consolas,monospace;font-size:.92em}
   border: none;
   display: block;
 }
+/* Audit 17/11 : telephone, cibles tactiles >= 44 px et aucun debordement horizontal a 390 px. */
+@media (max-width:640px){html,body{max-width:100%;overflow-x:hidden}button,select,input:not([type=checkbox]):not([type=radio]),.btn,.nav-item,.tab,.chip{min-height:44px}input[type=checkbox],input[type=radio]{min-width:22px;min-height:22px}table{max-width:100%}img,video,canvas{max-width:100%}}
 </style>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 </head>

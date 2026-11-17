@@ -206,6 +206,7 @@ color:var(--ink);font-family:var(--fl-font);-webkit-font-smoothing:antialiased}
 .ages{display:grid;grid-template-columns:repeat(4,1fr);gap:7px}
 .ages .chip{padding:0 6px;justify-content:center;font-size:13.5px;min-height:44px}
 .ages .chip:first-child{grid-column:span 2}
+.insc.v1 .iv2,.insc.v2 .iv1{display:none}.insc.v2 .fld{margin-top:6px}.insc.v2 .fld .lab{margin-bottom:5px}.insc.v2 .body{padding-top:2px!important}.insc.v2 .chips,.insc.v2 .ages{gap:6px}.insc.v2 .consent{padding:8px 10px;margin-top:6px;gap:10px}.insc.v2 .consent p{font-size:13px;line-height:1.3}.insc .foot .lnk{margin-top:2px}.insc .etapes{display:none}.insc.v2 .consent em{display:inline-block;margin-top:2px;font-size:10px}.insc.v2 .consent .box{flex:none}.insc.v2 .mention{margin-top:8px;font-size:12px}.insc.v2 .foot{padding-top:8px;padding-bottom:16px}
 .consent{display:flex;gap:13px;align-items:flex-start;padding:14px;border:1.5px solid var(--field);border-radius:18px;cursor:pointer;margin-top:12px;background:#fff}
 .consent .box{width:26px;height:26px;border-radius:8px;border:2px solid #8797AB;flex:none;display:grid;place-items:center;color:#fff;margin-top:1px}
 .consent .box svg{opacity:0}

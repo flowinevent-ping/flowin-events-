@@ -410,6 +410,29 @@ export default function JouerClient(p: Props) {
       if (go === 't-resultat') { montrer('t-res-tirage'); return }
       if (go === 'v-voter') { if (r.voteIdx == null) return; montrer('v-envoi'); return }
       if (go === 'c-valider') { valider(); return }
+      if (go === '@insc-2' || go === '@insc-1') {
+        /* Formulaire en 2 volets (audit 17/11) : on bascule sans re-rendre, les saisies restent en place. */
+        const scr = host!.querySelector('.insc') as HTMLElement | null
+        if (!scr) return
+        const f = lireForm()
+        r.profil = { ...(r.profil || {}), prenom: f.prenom, nom: f.nom, email: f.email, tel: f.tel }
+        let err = ''
+        if (go === '@insc-2') {
+          if (!f.prenom || !f.nom) err = 'Indique ton prénom et ton nom.'
+          else if (f.email.indexOf('@') < 1) err = 'Ton email semble incomplet.'
+          else if (f.tel.replace(/\s/g, '').length < 8) err = 'Ton numéro de téléphone semble incomplet.'
+        }
+        let box = scr.querySelector('.fm-err') as HTMLElement | null
+        if (err) {
+          if (!box) { box = document.createElement('p'); box.className = 'fm-err'; box.setAttribute('role', 'alert'); const b = scr.querySelector('.body'); if (b) b.appendChild(box) }
+          box.textContent = err; return
+        }
+        if (box) box.remove()
+        r.inscVolet = go === '@insc-2' ? 2 : 1
+        scr.classList.remove('v1', 'v2'); scr.classList.add('v' + r.inscVolet)
+        scr.scrollTop = 0; window.scrollTo(0, 0); vibrer(8)
+        return
+      }
       if (go === 'c-resultat') { const x = file.current[0]; if (x) r.resultat = versVue(x); montrer('c-resultat'); return }
       if (go === 'sj-geo') { autourDeMoi(); return }
       if (go === 'c-inscription') { const ch = host!.querySelector('#fpar') as HTMLInputElement | null; if (ch && ch.value.trim()) r.profil = { ...(r.profil || {}), email: ch.value.trim() } }

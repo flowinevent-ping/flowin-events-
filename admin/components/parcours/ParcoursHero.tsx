@@ -25,7 +25,7 @@
  * les mêmes tracés que proicons.tsx si ce fichier change.
  */
 
-import { animationDejaJouee, CONSENTEMENT_JEU, CONSENTEMENT_ANIMATIONS } from '@/lib/parcours'
+import { animationDejaJouee, CONSENTEMENT_JEU, CONSENTEMENT_ANIMATIONS, CONSENTEMENT_MENTION } from '@/lib/parcours'
 
 export interface HeroLogoProps { emoji?: string; logoSvg?: string; logoUrl?: string }
 
@@ -192,6 +192,7 @@ export function ParcoursConsentement({ jeu, animations, onJeu, onAnimations, err
         <input type="checkbox" checked={animations} onChange={e => onAnimations(e.target.checked)} />
         <span>{CONSENTEMENT_ANIMATIONS}</span>
       </label>
+      <p style={{ fontSize: 12.5, lineHeight: 1.45, margin: '6px 0 0', opacity: .8 }}>{CONSENTEMENT_MENTION}</p>
     </div>
   )
 }

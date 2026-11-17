@@ -51,6 +51,8 @@ export interface EtatPartie {
   consent: { jeu: boolean; anim: boolean; com: boolean }
   parrainN: number
   erreur: string
+  /** Volet affiché du formulaire de coordonnées (1 ou 2), audit 17/11. */
+  inscVolet?: number
   envoi: boolean
 }
 
@@ -341,19 +343,25 @@ S['c-inscription'] = { tall: true, r: function (v, r) {
   const lotGagne = imm ? (r.caseIdx != null && v.cases[r.caseIdx] ? L('produit', '1', 'offert', v.cases[r.caseIdx].label, 'Gain immédiat', 'imm') : v.billet) : null
   const rec = imm && lotGagne ? { gl: lotGagne, t: lotGagne.nom, s: 'Gain immédiat · ton billet est prêt' } : { gl: L('ticket', '1', 'ticket'), t: v.key === 'vote' ? 'Ton ticket pour la loterie' : 'Ton ticket pour le tirage', s: 'Tirage au sort le ' + v.tirage }
   const p = r.profil || {}
-  return '<div class="scr bg-w">' + barre() + hdr(v, { back: 'c-parrainage', title: 'Dernière étape', small: 'Tes coordonnées' }) + etapes(2) +
-    '<div class="body" style="padding-top:12px"><h2 class="h2" style="font-size:28px">Où t\'envoyer<br>ton gain ?</h2>' +
+  /* Audit 17/11 : formulaire en 2 temps (carrousel), sans défilement à 390 x 844. Mêmes champs,
+     mêmes consentements ; tout reste dans la page (lireForm lit les deux volets). Une erreur sur
+     prénom / nom / email / téléphone rouvre le volet 1, sinon le volet 2. */
+  const vol1Ok = !!(p.prenom && p.nom && (p.email || '').indexOf('@') > 0 && (p.tel || '').replace(/\s/g, '').length >= 8)
+  const vol = r.erreur ? (vol1Ok ? 2 : 1) : (r.inscVolet || 1)
+  return '<div class="scr bg-w insc v' + vol + '">' + barre() + hdr(v, { back: 'c-parrainage', title: 'Dernière étape', small: 'Tes coordonnées' }) + etapes(2) +
+    '<div class="body" style="padding-top:8px"><div class="iv1"><h2 class="h2" style="font-size:26px">Où t\'envoyer<br>ton gain ?</h2>' +
     '<div class="card recap">' + glyph(rec.gl) + '<div><b>' + txt(rec.t) + '</b><small>' + txt(rec.s) + '</small></div></div>' +
     '<div class="two"><div class="fld"><label for="f1">Prénom</label><input id="f1" class="inp" autocomplete="given-name" value="' + esc(p.prenom || '') + '"></div><div class="fld"><label for="f2">Nom</label><input id="f2" class="inp" autocomplete="family-name" value="' + esc(p.nom || '') + '"></div></div>' +
     '<div class="fld"><label for="f3">Email</label><input id="f3" class="inp" type="email" autocomplete="email" value="' + esc(p.email || '') + '"></div>' +
-    '<div class="fld"><label for="f4">Téléphone</label><input id="f4" class="inp" type="tel" autocomplete="tel" value="' + esc(p.tel || '') + '"></div>' +
+    '<div class="two"><div class="fld"><label for="f4">Téléphone</label><input id="f4" class="inp" type="tel" autocomplete="tel" value="' + esc(p.tel || '') + '"></div><div class="fld"><label for="f6">Code postal</label><input id="f6" class="inp" inputmode="numeric" autocomplete="postal-code" value="' + esc(p.cp || '') + '"></div></div>' +
     '<div class="fld"><div class="lab">Sexe <span class="opt-l">facultatif</span></div><div class="seg" role="radiogroup" aria-label="Sexe"><button data-seg data-genre="Homme"' + (p.genre === 'Homme' ? ' class="on"' : '') + '>Homme</button><button data-seg data-genre="Femme"' + (p.genre === 'Femme' ? ' class="on"' : '') + '>Femme</button></div></div>' +
+    '</div><div class="iv2">' +
     '<div class="fld"><div class="lab">Tranche d\'âge</div><div class="ages">' + ages.map(function (a) { return '<button class="chip' + (p.age === a ? ' on' : '') + '" data-one="age" data-val="' + esc(a) + '">' + a + '</button>' }).join('') + '</div></div>' +
-    '<div class="fld"><label for="f6">Code postal</label><input id="f6" class="inp" inputmode="numeric" autocomplete="postal-code" style="width:50%" value="' + esc(p.cp || '') + '"></div>' +
     '<div class="fld"><div class="lab">Comment nous as-tu connus ?</div><div class="chips">' + src.map(function (s) { return '<button class="chip' + (p.src === s ? ' on' : '') + '" data-one="src" data-val="' + esc(s) + '">' + s + '</button>' }).join('') + '</div></div>' +
-    consentements(v, r) +
+    consentements(v, r) + '</div>' +
     (r.erreur ? '<p class="fm-err" role="alert">' + esc(r.erreur) + '</p>' : '') + '</div>' +
-    foot(btn(r.envoi ? 'Envoi…' : 'Valider et recevoir mon gain', 'c-valider', '', ' data-need disabled') + '<p class="mention">Coche la première case pour valider.</p>') + '</div>'
+    foot('<div class="iv1">' + btn('Continuer', '@insc-2') + '<p class="mention">Étape 1 sur 2 · encore quelques choix rapides.</p></div>' +
+      '<div class="iv2">' + btn(r.envoi ? 'Envoi…' : 'Valider et recevoir mon gain', 'c-valider', '', ' data-need disabled') + '<p class="mention">Coche la première case pour valider.</p><button class="lnk" data-go="@insc-1">Modifier mes coordonnées</button></div>') + '</div>'
 } }
 
 S['c-billet'] = { tall: true, r: function (v, r) {

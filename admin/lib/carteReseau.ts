@@ -51,16 +51,25 @@ export function filtrer(l: CommerceCarte[], f: FiltreCarte): CommerceCarte[] {
   return l.filter(c => c.type === f || c.type === 'les_deux')
 }
 
+/** Normalise la réponse RPC (audit 17/11 : erreur console `g.map` sur la carte SA quand la
+ *  réponse n'est pas une liste, ou quand `jeux` / GPS sont nuls). */
+function propre(data: unknown): CommerceCarte[] {
+  if (!Array.isArray(data)) return []
+  return (data as CommerceCarte[])
+    .filter(c => c && typeof c.lat === 'number' && typeof c.lng === 'number' && isFinite(c.lat) && isFinite(c.lng))
+    .map(c => ({ ...c, jeux: Array.isArray(c.jeux) ? c.jeux : [], type: (c.type === 'animation' || c.type === 'super_event' || c.type === 'les_deux') ? c.type : 'animation' }))
+}
+
 export async function fetchCarteReseauSA(): Promise<CommerceCarte[]> {
   const { data, error } = await supabase.rpc('carte_reseau_sa')
   if (error) { console.error('[carte_reseau_sa]', error.message); return [] }
-  return (data ?? []) as CommerceCarte[]
+  return propre(data)
 }
 
 export async function fetchCarteCommercesPublique(): Promise<CommerceCarte[]> {
   const v2 = await supabase.rpc('carte_commerces_publique_v2')
-  if (!v2.error) return (v2.data ?? []) as CommerceCarte[]
+  if (!v2.error) return propre(v2.data)
   const { data, error } = await supabase.rpc('carte_commerces_publique')
   if (error) { console.error('[carte_commerces_publique]', error.message); return [] }
-  return (data ?? []) as CommerceCarte[]
+  return propre(data)
 }
