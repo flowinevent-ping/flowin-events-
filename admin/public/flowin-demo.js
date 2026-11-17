@@ -167,6 +167,7 @@
       var user = { id: '00000000-0000-4000-8000-000000000000', aud: 'authenticated', role: 'authenticated', email: (corps && corps.email) || 'demo@demo.invalid',
         identities: [{ id: 'demo', provider: 'email' }], created_at: maintenant, updated_at: maintenant, app_metadata: {}, user_metadata: {} };
       if (p.indexOf('/auth/v1/signup') === 0 || p.indexOf('/auth/v1/user') === 0) return Promise.resolve(rep(200, user));
+      if (p.indexOf('/auth/v1/otp') === 0) return Promise.resolve(rep(200, {}));
       if (p.indexOf('/auth/v1/logout') === 0) return Promise.resolve(rep(204, null));
       if (p.indexOf('/auth/v1/token') === 0) return Promise.resolve(rep(400, { error: 'demo', error_description: 'Mode démo : connexion désactivée.' }));
       return Promise.resolve(rep(200, {}));

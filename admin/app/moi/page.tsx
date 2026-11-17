@@ -10,6 +10,7 @@ import { useState, useEffect, useMemo } from 'react'
 import { supabase } from '@/lib/supabase'
 import { Ico } from '@/lib/proicons'
 import MesLots from '@/components/joueur/MesLots'
+import ConnexionEmail from '@/components/joueur/ConnexionEmail'
 import { fetchCarteCommercesPublique, type CommerceCarte } from '@/lib/carteReseau'
 import {
   chargerMesLots, chargerNotifications, marquerCadeauxVus, joursRestants, palierRappel, libelleNotif,
@@ -161,8 +162,9 @@ export default function MonComptePage() {
           <div style={{ display: 'inline-flex', marginBottom: 14 }}><Ico k="game" size={50} /></div>
           <div style={{ fontSize: 20, fontWeight: 800, marginBottom: 8 }}>Aucun compte sur ce téléphone</div>
           <div style={{ fontSize: 14.5, color: '#5a6071', lineHeight: 1.6, maxWidth: 320 }}>
-            Ton compte se crée en jouant. Déjà joué ? Rejoue avec le même e-mail : tes lots reviennent ici.
+            Déjà joué ? Reçois un lien par e-mail : tes lots reviennent ici. Sinon, ton compte se crée en jouant.
           </div>
+          <div style={{ marginTop: 16 }}><ConnexionEmail /></div>
           <a href="/carte-commerces" style={{ display: 'inline-block', marginTop: 18, padding: '13px 22px', borderRadius: 100, background: HERO, color: '#fff', fontWeight: 800, textDecoration: 'none' }}>Trouver un jeu près de moi</a>
         </div>
       </div>
@@ -294,8 +296,8 @@ export default function MonComptePage() {
               </div>
             )}
             <div style={{ ...carte, marginBottom: 10, fontSize: 13, color: '#5a6071', lineHeight: 1.5 }}>
-              <div style={{ fontSize: 13.5, fontWeight: 800, color: '#141a26', marginBottom: 2 }}>Nouveau téléphone ?</div>
-              Pas de mot de passe : rejoue avec le même e-mail, ton compte et tes lots reviennent.
+              <div style={{ fontSize: 13.5, fontWeight: 800, color: '#141a26', marginBottom: 6 }}>Utiliser un autre compte</div>
+              <ConnexionEmail compact />
             </div>
             {tickets.length > 0 && (
               <div style={{ ...carte, fontSize: 13, color: '#5a6071' }}>
