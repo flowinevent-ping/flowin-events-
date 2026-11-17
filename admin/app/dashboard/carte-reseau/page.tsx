@@ -12,7 +12,7 @@ export default function PageCarteReseau() {
   return (
     <div>
       <PageHeader title="Carte du réseau" subtitle="Les commerces partenaires géolocalisés. Touchez un point pour voir sa fiche." />
-      {l === null ? <div style={{ fontSize: 13, color: '#5a6b80' }}>Chargement…</div> : <CarteCommerces commerces={l} mode="sa" />}
+      {l === null ? <div style={{ fontSize: 13, color: '#5a6b80' }}>Chargement…</div> : <CarteCommerces commerces={l} mode="sa" hauteur="min(640px, calc(100vh - 180px))" />}
     </div>
   )
 }

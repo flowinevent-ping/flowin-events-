@@ -26,6 +26,11 @@ export interface CommerceCarte {
   nb_super_events?: number
   actif?: boolean
   pro_id?: string | null
+  /** v2 publique (17/11) : lien du jeu en cours, lot à gagner, horaires, animation en cours. */
+  lien_jeu?: string | null
+  lot?: string | null
+  horaires?: string | null
+  en_cours?: boolean | null
 }
 
 export const COULEUR_TYPE: Record<TypeCommerce, string> = {
@@ -53,6 +58,8 @@ export async function fetchCarteReseauSA(): Promise<CommerceCarte[]> {
 }
 
 export async function fetchCarteCommercesPublique(): Promise<CommerceCarte[]> {
+  const v2 = await supabase.rpc('carte_commerces_publique_v2')
+  if (!v2.error) return (v2.data ?? []) as CommerceCarte[]
   const { data, error } = await supabase.rpc('carte_commerces_publique')
   if (error) { console.error('[carte_commerces_publique]', error.message); return [] }
   return (data ?? []) as CommerceCarte[]
