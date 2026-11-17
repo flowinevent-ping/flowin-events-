@@ -42,14 +42,20 @@ export interface EtatPartie {
   vitrineVote: boolean
   tombolaNo: string
   after: string | null
-  profil: { prenom?: string; nom?: string; email?: string; tel?: string; cp?: string; age?: string } | null
+  profil: { prenom?: string; nom?: string; email?: string; tel?: string; cp?: string; age?: string; genre?: string; src?: string } | null
+  /** Coordonnees validees pour cette partie (audit jeux 17/11) : decide si le parrainage
+   *  mene encore aux coordonnees. Avant, la tombola (ticket tire AVANT l'inscription)
+   *  restait bloquee sur le parrainage, sans acces au formulaire. */
+  inscrit: boolean
+  /** Cases cochees du formulaire, conservees si l'envoi echoue (avant : tout se decochait). */
+  consent: { jeu: boolean; anim: boolean; com: boolean }
   parrainN: number
   erreur: string
   envoi: boolean
 }
 
 export function etatInitial(): EtatPartie {
-  return { mesTickets: null, resultat: null, qi: 0, rep: [], bonnes: 0, bonusFait: false, ticket: '', ticketBonus: '', gain: null, caseIdx: null, rotation: -12, voteIdx: null, vitrineVote: false, tombolaNo: '', after: null, profil: null, parrainN: 0, erreur: '', envoi: false }
+  return { mesTickets: null, resultat: null, qi: 0, rep: [], bonnes: 0, bonusFait: false, ticket: '', ticketBonus: '', gain: null, caseIdx: null, rotation: -12, voteIdx: null, vitrineVote: false, tombolaNo: '', after: null, profil: null, inscrit: false, consent: { jeu: false, anim: false, com: false }, parrainN: 0, erreur: '', envoi: false }
 }
 
 /* ── Outils ────────────────────────────────────────────────────────────── */
@@ -259,7 +265,7 @@ function quizScreen(v: VueMaster, r: EtatPartie, state: 'idle' | 'ok' | 'ko'): s
   const q = v.questions[r.qi] || { txt: '[question à compléter]', opts: ['[réponse]', '[réponse]'], ok: 0, expl: '' }
   const tot = v.questions.length || 1, ring = 138.2, left = 30
   const choix = r.rep[r.qi]
-  let h = '<div class="scr ' + (v.key === 'quiz' ? 'stage' : 'bg-o') + '">' + barre() + '<div class="qtop"><button class="iconbtn" data-go="s-accueil" aria-label="Quitter">' + icon('x', 20, 2) + '</button><div class="mid"><small>QUESTION ' + (r.qi + 1) + ' / ' + tot + '</small><div class="prog">' + v.questions.map(function (_, i) { return '<i class="' + (i <= r.qi ? 'on' : '') + '"></i>' }).join('') + '</div></div>' +
+  let h = '<div class="scr ' + (v.key === 'quiz' ? 'stage' : 'bg-o') + '">' + barre() + '<div class="qtop"><button class="iconbtn" data-go="s-accueil" aria-label="Quitter">' + icon('x', 20, 2) + '</button><div class="mid"><small class="qcom">' + mono(v, 'width:22px;height:22px;font-size:9px;border-radius:7px') + '<span class="qnom">' + esc(v.who.nom) + '</span><span>QUESTION ' + (r.qi + 1) + ' / ' + tot + '</span></small><div class="prog">' + v.questions.map(function (_, i) { return '<i class="' + (i <= r.qi ? 'on' : '') + '"></i>' }).join('') + '</div></div>' +
     '<div class="timer"><svg width="54" height="54" viewBox="0 0 54 54"><circle cx="27" cy="27" r="22" fill="#fff" stroke="#E7ECF3" stroke-width="5"/><circle class="tring" cx="27" cy="27" r="22" fill="none" stroke="var(--ring,var(--c))" stroke-width="5" stroke-linecap="round" stroke-dasharray="' + ring + '" stroke-dashoffset="' + (state === 'idle' ? 0 : n1(ring * .6)) + '"/></svg><b class="tnum">' + (state === 'idle' ? left : '') + '</b></div></div>' +
     BAND + '<div class="body"><div class="card qcard">' + geo([['c', 290, -40, 100, 'var(--c2)']]) + '<div class="kicker" style="position:relative">' + esc(v.who.nom) + '</div><h2 class="qtxt">' + esc(q.txt) + '</h2></div><div class="opts">'
   q.opts.forEach(function (o, i) {
@@ -314,6 +320,21 @@ S['q-bonusok'] = { r: function (v, r) {
 } }
 
 /* Inscription et gain */
+/** Consentements (audit 17/11, regle Romain) : 1 case obligatoire pour le jeu, puis les deux
+ *  choix facultatifs « rester en contact avec Flowin Event » et « rester en contact avec ce
+ *  commerce ». Donnees utilisees par Flowin ou par le commerce choisi, jamais vendues,
+ *  echangees ni commercialisees. Aucune case cochee par defaut. */
+function caseConsent(cle: string, on: boolean, texte: string, req: boolean): string {
+  return '<div class="consent' + (on ? ' on' : '') + '" data-tog' + (req ? ' data-req' : '') + ' data-consent="' + cle + '" role="checkbox" aria-checked="' + on + '" tabindex="0"><span class="box">' + icon('check', 16, 3) + '</span><div><p>' + texte + '</p>' + (req ? '<em class="req">Obligatoire</em>' : '<em>Facultatif</em>') + '</div></div>'
+}
+function consentements(v: VueMaster, r: EtatPartie): string {
+  const c = r.consent || { jeu: false, anim: false, com: false }
+  return '<div style="margin-top:16px">' +
+    caseConsent('jeu', c.jeu, 'J\'autorise Flowin à conserver mes coordonnées uniquement dans le cadre du jeu. Mes données ne sont ni échangées ni revendues.', true) +
+    caseConsent('anim', c.anim, 'Je souhaite rester en contact avec Flowin Event : offres, bons deals, prochains events.', false) +
+    caseConsent('com', c.com, 'Je souhaite rester en contact avec ce commerce' + (v.who.nom ? ' : ' + esc(v.who.nom) : '') + '.', false) +
+    '<p class="mention" style="text-align:left">Tes données sont utilisées par Flowin ou par le commerce choisi. Elles ne sont jamais vendues, échangées ni commercialisées.</p></div>'
+}
 S['c-inscription'] = { tall: true, r: function (v, r) {
   const ages = ['Moins de 18', '18–24', '25–34', '35–44', '45–54', '55–64', '65 et +'], src = ['Instagram', 'Facebook', 'Affiche', 'Bouche à oreille', 'Autre']
   const imm = r.after === 'c-billet'
@@ -326,12 +347,11 @@ S['c-inscription'] = { tall: true, r: function (v, r) {
     '<div class="two"><div class="fld"><label for="f1">Prénom</label><input id="f1" class="inp" autocomplete="given-name" value="' + esc(p.prenom || '') + '"></div><div class="fld"><label for="f2">Nom</label><input id="f2" class="inp" autocomplete="family-name" value="' + esc(p.nom || '') + '"></div></div>' +
     '<div class="fld"><label for="f3">Email</label><input id="f3" class="inp" type="email" autocomplete="email" value="' + esc(p.email || '') + '"></div>' +
     '<div class="fld"><label for="f4">Téléphone</label><input id="f4" class="inp" type="tel" autocomplete="tel" value="' + esc(p.tel || '') + '"></div>' +
-    '<div class="fld"><div class="lab">Sexe <span class="opt-l">facultatif</span></div><div class="seg" role="radiogroup" aria-label="Sexe"><button data-seg data-genre="Homme">Homme</button><button data-seg data-genre="Femme">Femme</button></div></div>' +
+    '<div class="fld"><div class="lab">Sexe <span class="opt-l">facultatif</span></div><div class="seg" role="radiogroup" aria-label="Sexe"><button data-seg data-genre="Homme"' + (p.genre === 'Homme' ? ' class="on"' : '') + '>Homme</button><button data-seg data-genre="Femme"' + (p.genre === 'Femme' ? ' class="on"' : '') + '>Femme</button></div></div>' +
     '<div class="fld"><div class="lab">Tranche d\'âge</div><div class="ages">' + ages.map(function (a) { return '<button class="chip' + (p.age === a ? ' on' : '') + '" data-one="age" data-val="' + esc(a) + '">' + a + '</button>' }).join('') + '</div></div>' +
     '<div class="fld"><label for="f6">Code postal</label><input id="f6" class="inp" inputmode="numeric" autocomplete="postal-code" style="width:50%" value="' + esc(p.cp || '') + '"></div>' +
-    '<div class="fld"><div class="lab">Comment nous as-tu connus ?</div><div class="chips">' + src.map(function (s) { return '<button class="chip" data-one="src" data-val="' + esc(s) + '">' + s + '</button>' }).join('') + '</div></div>' +
-    '<div style="margin-top:16px"><div class="consent" data-tog data-req data-consent="jeu" role="checkbox" aria-checked="false" tabindex="0"><span class="box">' + icon('check', 16, 3) + '</span><div><p>J\'autorise Flowin à conserver mes coordonnées uniquement dans le cadre du jeu. Mes données ne sont ni échangées ni revendues.</p><em class="req">Obligatoire</em></div></div>' +
-    '<div class="consent" data-tog data-consent="anim" role="checkbox" aria-checked="false" tabindex="0"><span class="box">' + icon('check', 16, 3) + '</span><div><p>J\'autorise Flowin à me faire participer à ses animations.</p><em>Facultatif</em></div></div></div>' +
+    '<div class="fld"><div class="lab">Comment nous as-tu connus ?</div><div class="chips">' + src.map(function (s) { return '<button class="chip' + (p.src === s ? ' on' : '') + '" data-one="src" data-val="' + esc(s) + '">' + s + '</button>' }).join('') + '</div></div>' +
+    consentements(v, r) +
     (r.erreur ? '<p class="fm-err" role="alert">' + esc(r.erreur) + '</p>' : '') + '</div>' +
     foot(btn(r.envoi ? 'Envoi…' : 'Valider et recevoir mon gain', 'c-valider', '', ' data-need disabled') + '<p class="mention">Coche la première case pour valider.</p>') + '</div>'
 } }
@@ -344,7 +364,7 @@ S['c-billet'] = { tall: true, r: function (v, r) {
     '<div class="body" style="padding-top:2px"><h2 class="h2 a-rise" style="text-align:center;font-size:33px">Bravo, c\'est gagné&nbsp;!</h2>' +
     '<div class="billet"><div class="bt">' + geo([['c', 250, -40, 140, '#fff'], ['h', 300, 70, 70, '#fff']]) + '<small>Billet gagnant · ' + esc(v.billetChez) + '</small><h3>' + esc(nom) + '</h3><span>' + esc(cond) + '</span></div><div class="perf"><i></i><i></i></div>' +
     '<div class="bb"><div class="qrw" data-qr="' + esc(code) + '">' + qr(42, 110) + '</div><dl class="kv"><dt>N° de billet</dt><dd class="num">' + esc(code) + '</dd><dt>Valable jusqu\'au</dt><dd>' + txt(v.tirage) + '</dd><dt>Où</dt><dd>' + esc(v.billetChez) + '</dd></dl></div></div>' +
-    '<p class="mention" style="color:var(--ink2);font-size:13.5px">Montre ce billet en caisse : le commerçant le valide avec son code. Il est rangé dans ton profil.</p></div>' +
+    '<p class="mention" style="color:var(--ink2);font-size:13.5px">Montre ce billet en caisse : le commerçant le valide avec son code. Il est rangé dans ton profil.</p><button class="lnk" data-go="c-profil">Voir mon lot dans mon profil</button></div>' + autresCommerces(v) +
     dock({ cta: btn('Parrainer mes amis', 'c-parrainage'), nav: '' }) + '</div>'
 } }
 
@@ -365,7 +385,7 @@ S['c-ticket'] = { tall: true, r: function (v, r) {
     (n ? '<div class="tk"><div class="main"><small>Ticket · ' + esc(v.who.nom) + '</small><b class="num">' + esc(code) + '</b><span>Tirage au sort le ' + txt(v.tirage) + '</span></div><div class="stub"><b>N° ' + esc(numCourt(code)) + '</b></div></div>' : '') +
     '<div class="card stack a-rise" style="--d:.5s"><span class="cnt">' + n + '</span><p>' + (n > 1 ? 'tickets pour ce tirage. ' : 'ticket pour ce tirage. ') + (n ? 'On te prévient par email si tu gagnes.' : 'Fais un sans-faute demain pour gagner ton ticket.') + '</p></div>' +
     '<div class="card infobox a-rise" style="--d:.6s"><div class="inforow">' + icon('users', 21) + '<span>' + esc(v.parrain) + '</span></div><div class="inforow">' + icon('clock', 21) + 'Reviens demain : une partie par jour et par commerce</div></div></div>' +
-    autresCommerces(v) +
+    autresCommerces(v) + '<button class="lnk" data-go="c-profil">Voir mes tickets dans mon profil</button>' +
     dock({ cta: btn('Parrainer mes amis', 'c-parrainage'), nav: '' }) + '</div>'
 } }
 
@@ -374,7 +394,7 @@ S['c-parrainage'] = { tall: true, r: function (v, r) {
   const se = v.superEvent
   /* Etape AVANT les coordonnees (Romain, 31/10) : resultat -> parrainage ->
      coordonnees -> « Valider et recevoir mon gain ». */
-  const avant = !r.ticket && !!r.after
+  const avant = !r.inscrit && !!r.after
   return '<div class="scr bg-w">' + barre() + hdr(v, { back: 's-accueil', title: 'Parraine tes amis', small: 'Gagne plus de chances' }) +
     '<div class="body" style="padding-top:6px"><div class="card event" style="padding:16px;margin-top:4px;background:var(--home)">' + geo([['c', 255, -30, 110, 'var(--c)'], ['o', 300, 62, 40, '#fff']]) +
     '<div class="kicker" style="color:var(--ink)">Ta récompense</div><div style="font-size:20px;font-weight:800;line-height:1.2;margin-top:6px;max-width:215px">' + esc(v.parrain) + '</div>' +
@@ -601,8 +621,8 @@ function tombolaTicket(v: VueMaster, r: EtatPartie): string {
     '<div class="line"></div><div style="font-size:14px;font-weight:800">Tirage au sort le ' + txt(v.tirage) + '</div><div class="bar"></div><div style="font-size:11px;font-weight:700;color:var(--muted);margin-top:6px">' + esc(v.who.nom) + '</div></div>'
 }
 S['t-tirer'] = { r: function (v) {
-  return '<div class="scr bg-o">' + barre() + geo([['c', -50, 560, 170, 'var(--c2)'], ['h', 280, 640, 120, 'var(--c)', 0, .1]]) + hdr(v, { back: 's-regles' }) + BAND + etapes(0) +
-    '<div class="body" style="text-align:center"><div class="kicker" style="margin-top:14px">Tombola du jour</div><h2 class="h2" style="font-size:34px;margin-top:6px">Ton ticket<br>t\'attend</h2><div class="machine"><div class="slot"></div></div>' +
+  return '<div class="scr bg-o">' + barre() + hdr(v, { back: 's-regles' }) + BAND + etapes(0) +
+    '<div class="body" style="text-align:center"><div class="kicker" style="margin-top:14px">Tombola du jour</div><h2 class="h2" style="font-size:34px;margin-top:6px">Ton ticket<br>t\'attend</h2><div class="machine"><div class="slot"></div><div class="amorce" aria-hidden="true"><div class="amorce-tk"><small>Ticket n°</small><i></i></div></div></div>' +
     '<button class="bigbtn" data-go="t-impression">Tirer<br>mon ticket</button><p class="mention" style="margin-top:34px">Un ticket par jour et par commerce</p></div></div>'
 } }
 S['t-impression'] = { r: function (v, r) {
@@ -626,16 +646,17 @@ S['t-res-instant'] = { r: function (v) {
 /* Roue */
 function wheelSvg(v: VueMaster): string {
   const cx = 165, cy = 165, r = 146, n = Math.max(2, v.cases.length), pas = 360 / n
-  let h = '<svg viewBox="0 0 330 330"><circle cx="165" cy="165" r="163" fill="#fff" stroke="#C9D4E3" stroke-width="1.5"/>'
+  let h = '<svg viewBox="0 0 330 330"><circle cx="165" cy="165" r="161" fill="#fff" stroke="#0F172A" stroke-width="5"/>'
   v.cases.forEach(function (s, i) {
     const a0 = (i * pas - pas / 2) * Math.PI / 180, a1 = (i * pas + pas / 2) * Math.PI / 180
     h += '<path d="M' + cx + ' ' + cy + ' L' + n1(cx + r * Math.sin(a0)) + ' ' + n1(cy - r * Math.cos(a0)) + ' A' + r + ' ' + r + ' 0 ' + (pas > 180 ? 1 : 0) + ' 1 ' + n1(cx + r * Math.sin(a1)) + ' ' + n1(cy - r * Math.cos(a1)) + 'Z" fill="' + esc(s.fond) + '" stroke="#fff" stroke-width="3"/>'
     h += '<g transform="rotate(' + (i * pas) + ' ' + cx + ' ' + cy + ')"><text x="' + cx + '" y="' + (cy - r * .6) + '" transform="rotate(-90 ' + cx + ' ' + (cy - r * .6) + ')" text-anchor="middle" dominant-baseline="central" font-family="Roboto,sans-serif" font-weight="800" font-size="' + (s.label.length > 11 ? 12.5 : 15) + '" fill="' + esc(s.texte) + '">' + esc(s.label.length > 16 ? s.label.slice(0, 15) + '…' : s.label) + '</text></g>'
   })
   for (let k = 0; k < 16; k++) { const a = k * 22.5 * Math.PI / 180; h += '<circle class="bulb' + (k % 2 ? ' b2' : '') + '" cx="' + n1(cx + 155 * Math.sin(a)) + '" cy="' + n1(cy - 155 * Math.cos(a)) + '" r="4" fill="#F5A100"/>' }
-  return h + '<circle cx="165" cy="165" r="34" fill="#fff" stroke="#C9D4E3" stroke-width="1.5"/><circle cx="165" cy="165" r="14" fill="var(--c)"/></svg>'
+  return h + '<circle cx="165" cy="165" r="146" fill="none" stroke="#0F172A" stroke-width="2"/><circle cx="165" cy="165" r="32" fill="#fff" stroke="#0F172A" stroke-width="6"/><circle cx="165" cy="165" r="12" fill="var(--c)"/></svg>'
 }
-function pointer(): string { return '<svg class="pointer" viewBox="0 0 40 48"><path d="M20 46 L4 12 A16 16 0 1 1 36 12 Z" fill="#fff" stroke="#C9D4E3" stroke-width="1.5"/><circle cx="20" cy="15" r="6" fill="var(--c)"/></svg>' }
+/* Pointeur facon film (audit coherence 17/11) : triangle rouge cerne, pointe vers le bas, a cheval sur la jante. */
+function pointer(): string { return '<svg class="pointer" viewBox="0 0 40 48"><path d="M4 4 L36 4 L20 44 Z" fill="#E5322D" stroke="#0F172A" stroke-width="4" stroke-linejoin="round"/></svg>' }
 function wheelBlock(v: VueMaster, rot: number): string { return '<div class="wheelbox">' + pointer() + '<div class="wheel" style="transform:rotate(' + rot + 'deg)">' + wheelSvg(v) + '</div></div>' }
 /** Rotation finale qui amene la case i sous l'aiguille. */
 export function rotationPourCase(v: VueMaster, i: number): number { const pas = 360 / Math.max(2, v.cases.length); return 360 * 5 - i * pas }
@@ -643,7 +664,7 @@ function caseCourante(v: VueMaster, r: EtatPartie) { return r.caseIdx != null ? 
 S['r-roue'] = { r: function (v) {
   const tir = v.lots.find(function (l) { return l.mode === 'tir' })
   return '<div class="scr bg-m">' + barre() + hdr(v, { back: 's-regles' }) + BAND + etapes(0) + '<div class="body" style="text-align:center"><div class="kicker" style="margin-top:12px">Un tour offert</div><h2 class="h2" style="font-size:33px;margin-top:4px">Tente ta chance</h2>' + wheelBlock(v, -12) +
-    '<div class="legend">' + icon('ticket', 18) + 'Case « Ticket » : 1 ticket pour le tirage du ' + txt(courte(v.tirage)) + (tir ? '' : '') + '</div></div>' + foot(btn('Lancer la roue', 'r-lancer', 'a-pulse')) + '</div>'
+    '<div class="legend">' + icon('ticket', 18) + '<span>Case « Ticket » : 1 ticket pour le tirage du ' + txt(courte(v.tirage)) + (tir ? '' : '') + '</span></div></div>' + foot(btn('Lancer la roue', 'r-lancer', 'a-pulse')) + '</div>'
 } }
 S['r-tourne'] = { r: function (v, r) {
   const c = caseCourante(v, r)

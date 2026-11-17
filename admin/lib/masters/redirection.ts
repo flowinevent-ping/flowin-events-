@@ -19,7 +19,7 @@ export function versMasterSiBesoin(evId: string, cfg: unknown, sp: Record<string
   if (!m && !estModuleMaster(module)) return
   const q = new URLSearchParams()
   q.set('ev', evId)
-  ;['source', 'ref', 'etab', 'ch', 'apercu', 'token'].forEach(k => { if (sp[k]) q.set(k, String(sp[k])) })
+  ;['source', 'ref', 'etab', 'ch', 'apercu', 'token', 'demo'].forEach(k => { if (sp[k]) q.set(k, String(sp[k])) })
   if (sp.preview !== undefined) q.set('preview', '1')
   if (sp.bar === '0' || sp.sb === '1') q.set('sb', sp.bar === '0' ? '0' : '1')
   redirect('/jouer?' + q.toString())

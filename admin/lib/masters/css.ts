@@ -2,7 +2,7 @@
    CSS des ecrans telephone, couleurs remplacees par les jetons du theme. */
 export const MASTER_CSS = `/* Variables courtes des maquettes, branchees sur le fichier de theme unique
    public/flowin-theme.css (jetons --fl-*). L'accent commun = --fl-accent. */
-.fm{--ink:var(--fl-ink);--ink2:var(--fl-ink-2);--muted:var(--fl-muted);--line:var(--fl-line);--field:var(--fl-field);--cta:var(--fl-accent);
+.fm{--ink:var(--fl-ink);--ink2:var(--fl-ink-2);--muted:var(--fl-muted);--line:var(--fl-line);--field:var(--fl-field);--cta:#3B5CC4;
 --white:#FFFFFF;--off:var(--fl-paper);--mint:var(--fl-mint);--sky:var(--fl-sky);--peach:var(--fl-mint);
 --coral:#F26B4F;--violet:var(--fl-solo);--gold:#F5A100;--teal:var(--fl-spin);--blue:var(--fl-vote);--sy:var(--fl-super-jaune);--sr:var(--fl-super-rouge);--sb:var(--fl-super-bleu);--logo-in:var(--fl-blue);
 --ok:var(--fl-ok);--ko:var(--fl-ko);--page:var(--fl-paper);
@@ -72,7 +72,7 @@ color:var(--ink);font-family:var(--fl-font);-webkit-font-smoothing:antialiased}
 .btn.teal{background:var(--cta);color:#fff}
 .btn[disabled]{background:#E7ECF3;color:var(--fl-muted);box-shadow:none;cursor:not-allowed}
 .btn+.btn{margin-top:12px}
-.lnk{display:block;width:100%;text-align:center;font-weight:800;font-size:15.5px;color:var(--c-ink);padding:14px 10px 4px;background:none;border:0;cursor:pointer}
+.lnk{display:block;width:100%;min-height:44px;text-align:center;font-weight:800;font-size:15.5px;color:var(--c-ink);padding:14px 10px 4px;background:none;border:0;cursor:pointer}
 .mention{font-size:12.5px;line-height:1.45;text-align:center;color:var(--muted);font-weight:600;margin-top:12px}
 
 /* typographie */
@@ -204,7 +204,7 @@ color:var(--ink);font-family:var(--fl-font);-webkit-font-smoothing:antialiased}
 .seg button{border:0;background:transparent;border-radius:12px;font-weight:800;font-size:15.5px;color:var(--ink2);cursor:pointer}
 .seg button.on{background:#fff;color:var(--ink);box-shadow:inset 0 0 0 1.5px var(--ink)}
 .ages{display:grid;grid-template-columns:repeat(4,1fr);gap:7px}
-.ages .chip{padding:0 6px;justify-content:center;font-size:13.5px;min-height:42px}
+.ages .chip{padding:0 6px;justify-content:center;font-size:13.5px;min-height:44px}
 .ages .chip:first-child{grid-column:span 2}
 .consent{display:flex;gap:13px;align-items:flex-start;padding:14px;border:1.5px solid var(--field);border-radius:18px;cursor:pointer;margin-top:12px;background:#fff}
 .consent .box{width:26px;height:26px;border-radius:8px;border:2px solid #8797AB;flex:none;display:grid;place-items:center;color:#fff;margin-top:1px}
@@ -365,7 +365,7 @@ color:var(--ink);font-family:var(--fl-font);-webkit-font-smoothing:antialiased}
 .resultchip small{display:block;font-size:11px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:#00796B}
 .resultchip b{display:block;font-size:26px;font-weight:800;letter-spacing:-.03em;margin-top:2px}
 .after{animation:rise .5s 5s both}
-.legend{display:flex;gap:10px;align-items:center;justify-content:center;font-size:13.5px;font-weight:700;color:var(--ink2);margin-top:16px;text-align:center;padding:0 10px}
+.legend{display:flex;gap:8px;align-items:center;justify-content:center;flex-wrap:nowrap;font-size:13.5px;font-weight:700;color:var(--ink2);margin-top:16px;text-align:center;padding:0 10px}
 
 /* tombola */
 .machine{position:relative;margin:24px auto 0;width:300px}
@@ -572,10 +572,23 @@ color:var(--ink);font-family:var(--fl-font);-webkit-font-smoothing:antialiased}
 .tag.st-attente{background:#fff;border-color:#AEBBCD;color:var(--fl-ink)}
 .tag.st-gagne{background:#DDF3F0;color:#0B6F67}
 .tag.st-perdu{background:#FDECEC;color:#9B2323}
-.nav a{position:relative}
+.nav a{position:relative;min-height:44px}
 .nav .pastille{position:absolute;top:-1px;left:calc(50% + 6px);min-width:18px;height:18px;padding:0 5px;border-radius:99px;background:var(--fl-touche);color:#fff;font-size:11px;font-weight:800;display:grid;place-items:center;border:2px solid #fff;line-height:1}
 .card.alerte{display:flex;gap:12px;align-items:center;width:100%;padding:12px 14px;margin-top:14px;cursor:pointer;border-color:var(--fl-accent);background:var(--fl-accent-soft);font-family:inherit;color:var(--ink)}
 .card.alerte .ai{width:42px;height:42px;border-radius:13px;background:var(--fl-accent);color:#fff;display:grid;place-items:center;flex:none}
 .card.alerte b{display:block;font-size:15px;font-weight:800}
 .card.alerte small{display:block;font-size:12.5px;color:var(--ink2);font-weight:600;margin-top:2px}
+/* Audit jeux / coherence films (17/11) */
+.legend{display:block;font-size:12px;letter-spacing:-.015em;padding:0 2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}@media (max-width:370px){.legend{white-space:normal}}.legend>svg{display:inline-block;vertical-align:-4px;margin-right:6px}.legend>span{display:inline}
+.opt.pick{background:var(--cta);border-color:transparent;color:#fff}
+.opt.pick .k{background:#fff;color:var(--ink);border-color:#fff}
+.qcom{display:flex!important;align-items:center;gap:7px;white-space:nowrap;overflow:hidden}
+.qcom .mono{flex:none}
+.qcom .qnom{overflow:hidden;text-overflow:ellipsis;max-width:46%;text-transform:none;letter-spacing:0}
+.amorce{position:relative;margin:-20px 22px 0;height:58px;overflow:hidden;z-index:2}
+.amorce-tk{position:absolute;left:0;right:0;top:0;height:58px;background:#fff;border:2px solid var(--c);border-top:0;border-radius:0 0 16px 16px;padding:24px 16px 0;text-align:center;animation:amorce 1.6s .4s ease-in-out infinite alternate}
+.amorce-tk small{display:block;font-size:10px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;color:var(--c-ink)}
+.amorce-tk i{display:block;height:8px;margin:6px 10px 0;background:repeating-linear-gradient(90deg,var(--ink) 0 2px,transparent 2px 5px)}
+@keyframes amorce{from{transform:translateY(-14px)}to{transform:translateY(0)}}
+@media (prefers-reduced-motion:reduce){.amorce-tk{animation:none}}
 `

@@ -20,7 +20,26 @@ import { MASTER_CSS } from '@/lib/masters/css'
 import { rendreEcran, etatInitial, rotationPourCase, regleBarre, regleParte, regleSuperReel, reglePastille, ecranExiste, DEROULES, type EtatPartie } from '@/lib/masters/engine'
 import { chargerMesTickets, nonVus, versVue, marquerVus, TICKETS_EXEMPLE, type ResultatRow } from '@/lib/masters/tickets'
 import type { VueMaster } from '@/lib/masters/resolve'
-import { writeJoueur, getJoueurLocal, animationDejaJouee, dejaJoueAujourdhuiCeQr, CONSENTEMENT_VERSION } from '@/lib/parcours'
+import { writeJoueur, getJoueurLocal, animationDejaJouee, dejaJoueAujourdhuiCeQr } from '@/lib/parcours'
+
+/* Version du texte de consentement des masters (audit 17/11 : ajout des choix « rester en
+   contact avec Flowin Event » et « rester en contact avec ce commerce »). */
+const CONSENTEMENT_MASTER_VERSION = 'flowin-consentement-2026-11-17'
+/* Enchainement automatique (ecran -> [suite, delai ms]) des ecrans sans decision. */
+const AUTO_SUITE: Record<string, [string, number]> = {
+  's-flash': ['s-accueil', 2600],
+  'q-bonne': ['@suite-quiz', 2200],
+  'q-mauvaise': ['@suite-quiz', 3600],
+  't-impression': ['t-resultat', 3700],
+  'r-tourne': ['r-resultat', 6000],
+  'v-envoi': ['v-resultat', 2900],
+}
+/* Retour haptique (navigator.vibrate, ignore la ou il n'existe pas, ex. iOS Safari). */
+const VIBRATIONS: Record<string, number | number[]> = {
+  'q-bonne': 35, 'q-mauvaise': [20, 60, 20],
+  'r-gain': [60, 50, 120], 't-res-instant': [60, 50, 120], 'c-billet': [60, 50, 120],
+  'q-bonusok': [40, 40, 80], 'r-ticket': [40, 40, 80], 'c-ticket': 40, 'v-envoi': 30,
+}
 import { doitRefuserDigital } from '@/components/parcours/ParcoursHero'
 import { buildInviteLink } from '@/lib/parrainage'
 import { generateTicket } from '@/lib/ticket'
@@ -154,6 +173,12 @@ export default function JouerClient(p: Props) {
     /* Animations et minuteurs d'entree d'ecran. */
     function entree(id: string, el: HTMLElement | null) {
       if (!el) return
+      /* Audit jeux 17/11 : retour haptique et enchainement automatique des ecrans d'attente.
+         Le bouton reste affiche (le joueur presse peut toucher avant). Jamais dans un cadre
+         d'apercu ni sur un ecran de depart impose (navigation manuelle du Super Admin). */
+      vibrer(VIBRATIONS[id])
+      const auto = AUTO_SUITE[id]
+      if (auto && !enCadre && !p.apercu) plus_tard(() => { if (courant.current === id) aller(auto[0]) }, auto[1])
       if (id === 'q-question' && p.timer > 0) {
         let n = p.timer
         const b = el.querySelector('.tnum'), ring = el.querySelector('.tring')
@@ -268,6 +293,10 @@ export default function JouerClient(p: Props) {
         : '<div class="card" style="padding:14px 16px;margin-top:12px;font-weight:600;color:#3a4d63">Pas encore de super ticket : joue dans une station.</div>'
     }
 
+    function vibrer(motif?: number | number[]) {
+      if (!motif) return
+      try { if (typeof navigator !== 'undefined' && typeof navigator.vibrate === 'function') navigator.vibrate(motif) } catch { /* ignore */ }
+    }
     function repondre(i: number | null) {
       if (courant.current !== 'q-question') return
       const q = v.questions[r.qi]
@@ -293,7 +322,7 @@ export default function JouerClient(p: Props) {
         genre: on('[data-genre]')?.getAttribute('data-genre') || '',
         age: on('[data-one="age"]')?.getAttribute('data-val') || '',
         src: on('[data-one="src"]')?.getAttribute('data-val') || '',
-        jeu: !!on('[data-consent="jeu"]'), anim: !!on('[data-consent="anim"]'),
+        jeu: !!on('[data-consent="jeu"]'), anim: !!on('[data-consent="anim"]'), com: !!on('[data-consent="com"]'),
       }
     }
     function majValider() {
@@ -313,11 +342,12 @@ export default function JouerClient(p: Props) {
       else if (f.email.indexOf('@') < 1) err = 'Ton email semble incomplet.'
       else if (f.tel.replace(/\s/g, '').length < 8) err = 'Ton numéro de téléphone semble incomplet.'
       else if (!f.jeu) err = 'Coche la première case pour valider.'
-      r.profil = { prenom: f.prenom, nom: f.nom, email: f.email, tel: f.tel, cp: f.cp, age: f.age }
+      r.profil = { prenom: f.prenom, nom: f.nom, email: f.email, tel: f.tel, cp: f.cp, age: f.age, genre: f.genre, src: f.src }
+      r.consent = { jeu: f.jeu, anim: f.anim, com: f.com }
       if (err) { r.erreur = err; montrer('c-inscription', true); return }
       r.erreur = ''
       const apres = r.after || 'c-ticket'
-      if (p.demo || !p.evId) { r.ticket = generateTicket(p.prefixe as TicketPrefix); montrer(apres); return }
+      if (p.demo || !p.evId) { r.ticket = generateTicket(p.prefixe as TicketPrefix); r.inscrit = true; montrer(apres); return }
       r.envoi = true; majValider()
       const parfait = v.questions.length > 0 && r.bonnes >= v.questions.length
       const quiz = v.key === 'quiz' || v.key === 'solo'
@@ -325,6 +355,10 @@ export default function JouerClient(p: Props) {
       const bonus: Record<string, unknown> = {}
       if (v.key === 'vote' && r.voteIdx != null) { bonus.vote_mode = r.vitrineVote ? 'vitrine' : 'choix'; bonus.vote_choix = (r.vitrineVote ? v.vitrines : v.candidats)[r.voteIdx]?.nom ?? null }
       Object.keys(reponsesBonus).forEach(k => { bonus[k] = reponsesBonus[k] })
+      /* Choix « rester en contact avec ce commerce » : trace avec les reponses de la partie
+         (se_reponses), sans nouvelle colonne. « Rester en contact avec Flowin Event » = optin. */
+      bonus.optin_commerce = f.com
+      bonus.optin_flowin_event = f.anim
       const res = await writeJoueur({
         email: f.email, prenom: f.prenom, nom: f.nom, tel: f.tel, code_postal: f.cp || undefined,
         genre: f.genre || undefined, age_tranche: f.age || undefined, decouverte: f.src || undefined,
@@ -332,14 +366,15 @@ export default function JouerClient(p: Props) {
         lot_gagne: cas && cas.issue === 'imm' ? cas.label : undefined,
         events: [p.evId], ticket_code: r.ticket || generateTicket(p.prefixe as TicketPrefix), source: p.source, prefix: p.prefixe,
         bonus_reponses: Object.keys(bonus).length ? bonus : undefined,
-        optin: f.anim, optin_version: CONSENTEMENT_VERSION,
+        optin: f.anim, optin_version: CONSENTEMENT_MASTER_VERSION,
         ...(quiz ? { quiz_ticket: parfait, bonus_ticket: r.bonusFait } : {}),
       })
       r.envoi = false
       if (res.digitalRefuse) { montrer('c-digital'); return }
-      if (res.duplicate) { r.ticket = res.ticket; montrer('c-demain'); return }
+      if (res.duplicate) { r.ticket = res.ticket; r.inscrit = true; montrer('c-demain'); return }
       if (!res.success) { r.erreur = 'Enregistrement impossible pour le moment, réessaie dans un instant.'; montrer('c-inscription', true); return }
       r.ticket = res.ticket
+      r.inscrit = true
       if (res.gain) { r.gain = { lot: res.gain.lot, cond: res.gain.conditions || 'Gain immédiat', token: res.gain.retraitToken }; if (res.gain.ticketCode) r.ticket = res.gain.ticketCode; montrer('c-billet'); return }
       montrer(apres === 'c-billet' && !res.gain ? 'c-ticket' : apres)
     }
@@ -362,6 +397,7 @@ export default function JouerClient(p: Props) {
 
     function aller(go: string, repli?: string) {
       if (go === '@retour') { retour(repli || ''); return }
+      if (go === '@suite-quiz') { aller(r.qi + 1 < v.questions.length ? 'q-suivante' : 'q-resultat'); return }
       if (go === 'q-suivante') { r.qi = Math.min(r.qi + 1, v.questions.length - 1); montrer('q-question'); return }
       if (go === 'q-question') { if (courant.current === 's-regles') { r.qi = 0; r.bonnes = 0; r.rep = [] } montrer('q-question'); return }
       if (go === 'q-bonusvalider') {
@@ -392,7 +428,14 @@ export default function JouerClient(p: Props) {
       const href = t.closest('[data-href]') as HTMLElement | null
       if (href) { location.href = href.getAttribute('data-href') || '/'; return }
       const rep = t.closest('[data-rep]') as HTMLElement | null
-      if (rep) { repondre(Number(rep.getAttribute('data-rep'))); return }
+      if (rep) {
+        /* Retour immediat : la reponse touchee passe en couleur pleine, puis le verdict. */
+        if (host!.querySelector('.opt.pick')) return
+        rep.classList.add('pick')
+        vibrer(12)
+        plus_tard(() => repondre(Number(rep.getAttribute('data-rep'))), 260)
+        return
+      }
       const sh = t.closest('[data-share]') as HTMLElement | null
       if (sh) { partager(sh.getAttribute('data-share') || 'wa'); return }
       const seg = t.closest('[data-seg]') as HTMLElement | null
