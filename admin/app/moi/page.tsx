@@ -62,6 +62,9 @@ export default function MonComptePage() {
        gagne pendant la demo (rangé dans l'onglet par /jouer) apparait dans « Mes lots ». */
     if (demo && (!local?.id || String(local.id).indexOf('demo') === 0)) {
       setJoueur({ id: 'demo', prenom: 'Prénom', nom: 'Exemple' })
+      /* Annonce de commerce fictive (18/11) : montre la notification « annonce » dans Alertes. */
+      setNotifs([{ id: 'demo-annonce', tirage_id: null, palier: 'annonce', created_at: new Date().toISOString(), vu_le: null, lot_nom: null, retrait_token: null, valable_jusqu_au: null,
+        titre: 'Nouveau jeu ce week-end', message: 'Venez jouer et tenter de gagner un lot.', lien: '/moi?demo=1', commerce: 'Commerce Démo' }])
       try {
         const l = JSON.parse(sessionStorage.getItem('flowin_demo_lots') || '[]') as { commerce?: string; lot?: string; ticketCode?: string | null; eventId?: string | null }[]
         setLots(l.map((x, i) => ({
@@ -162,7 +165,7 @@ export default function MonComptePage() {
   const ouvrir = (k: Rubrique) => {
     setRub(k)
     if (k === 'notifs' && joueur && nonVues.length) {
-      marquerCadeauxVus(joueur.id, nonVues.map(n => n.id))
+      if (joueur.id !== 'demo') marquerCadeauxVus(joueur.id, nonVues.map(n => n.id))
       setNotifs(notifs.map(n => n.vu_le ? n : { ...n, vu_le: new Date().toISOString() }))
     }
   }
@@ -302,6 +305,17 @@ export default function MonComptePage() {
             {titre('Mes notifications')}
             <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
               {notifs.slice(0, 6).map(n => (
+                n.palier === 'annonce' ? (
+                <div key={n.id} data-notif="annonce" style={{ ...carte, display: 'flex', alignItems: 'flex-start', gap: 10 }}>
+                  <span style={{ flexShrink: 0, color: HERO, marginTop: 2 }}><Ico k="bell" size={18} /></span>
+                  <span style={{ flex: 1, minWidth: 0 }}>
+                    <span style={{ display: 'block', fontSize: 12, fontWeight: 800, color: HERO }}>{n.commerce || '[commerce à compléter]'}</span>
+                    <span style={{ display: 'block', fontSize: 14, fontWeight: 800 }}>{libelleNotif(n)}</span>
+                    {n.message && <span style={{ display: 'block', fontSize: 13, color: '#5a6071', marginTop: 2 }}>{n.message}</span>}
+                    {n.lien && <a href={n.lien} style={{ display: 'inline-block', marginTop: 6, fontSize: 13, fontWeight: 800, color: HERO, textDecoration: 'none' }}>Voir l’animation</a>}
+                  </span>
+                </div>
+                ) :
                 <button key={n.id} data-notif={n.palier} onClick={() => setRub('lots')} style={{ ...carte, display: 'flex', alignItems: 'center', gap: 10, border: 'none', textAlign: 'left', cursor: 'pointer', fontFamily: 'inherit', color: 'inherit' }}>
                   <span style={{ flexShrink: 0, color: n.palier === 'cadeau' ? '#0B6E50' : n.palier === '48h' ? '#991B1B' : HERO }}><Ico k={n.palier === 'cadeau' ? 'gift' : 'bell'} size={18} /></span>
                   <span style={{ flex: 1, fontSize: 14, fontWeight: 700 }}>{libelleNotif(n)}</span>

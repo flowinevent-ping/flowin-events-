@@ -71,7 +71,7 @@ const ICON_BY_ID: Record<string, string> = {
   events: 'calendar', planning: 'calendar', 'super-events': 'star', 'crm-pro': 'users',
   'wizard-super-event': 'sparkles', 'btob-prospects': 'target',
   'landing-page': 'globe', pilotage: 'target', statistiques: 'chart', 'rapport-points': 'pin',
-  'track-qr': 'link', 'nds-lots': 'gift', 'nds-resultat': 'calendar', 'nds-participants': 'users', 'nds-carte': 'map', 'carte-reseau': 'map',
+  'track-qr': 'link', 'nds-lots': 'gift', 'nds-resultat': 'calendar', 'nds-participants': 'users', 'nds-carte': 'map', 'carte-reseau': 'map', 'annonces-pro': 'users',
   prospection: 'phone', 'nds-bon-commande': 'receipt', 'commandes-animation': 'receipt', 'nds-packs': 'gift',
   operations: 'gauge', banques: 'clipboard',
   'crm-landing': 'inbox', 'crm-retours': 'clipboard', cgv: 'receipt', jeux: 'gamepad', 'wizard-event': 'sparkles',
@@ -169,6 +169,7 @@ export default function Sidebar() {
         { id: 'track-qr', label: 'Origines du trafic', href: '/dashboard/track-qr' },
         { id: 'nds-carte', label: 'Carte du super event', href: '/dashboard/nds-carte' },
         { id: 'carte-reseau', label: 'Carte du réseau', href: '/dashboard/carte-reseau' },
+        { id: 'annonces-pro', label: 'Annonces des commerces', href: '/dashboard/annonces-pro' },
       ],
     },
     {

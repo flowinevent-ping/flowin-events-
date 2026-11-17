@@ -6,6 +6,7 @@ import ProShell from '@/components/pro/ProShell'
 import GagnantsClient from '@/components/pro/GagnantsClient'
 import ChoixOperation from '@/components/pro/ChoixOperation'
 import CrmPro from '@/components/pro/CrmPro'
+import AnnoncePro from '@/components/pro/AnnoncePro'
 import GrilleOperations, { Vignette } from '@/components/pro/GrilleOperations'
 import { OngletOperationsPro } from '@/components/operations/BlocsOperations'
 import { CHARTE_PRO as C } from '@/lib/charte'
@@ -66,6 +67,10 @@ export default async function Page({ searchParams }: { searchParams: { pro?: str
         {onglet !== 'crm' && <ChoixOperation groupes={choix} valeur={cle} />}
       </div>
 
+      {onglet === 'crm' && (
+        <AnnoncePro proId={proId} proNom={ops.proNom ?? ''}
+          liens={ops.operations.filter(o => o.type === 'event' && o.stations[0]).map(o => ({ nom: o.nom || 'Mon animation', url: `/parcours/${o.stations[0].module || 'nds2026'}?ev=${encodeURIComponent(o.stations[0].id)}` }))} />
+      )}
       {onglet === 'crm' && (
         <CrmPro
           proId={proId} proNom={ops.proNom ?? ''} contacts={crm.contacts} erreur={crm.erreur}
