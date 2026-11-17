@@ -39,6 +39,8 @@ export interface MonLot {
   recu?: boolean
   /** Billet que j'ai offert : il est dans le Flowin de mon ami, plus dans le mien. */
   donne?: boolean
+  /** Pas de date de péremption (Nuits du Sud 2026). */
+  sansLimite?: boolean
 }
 
 interface TirRow {
@@ -47,6 +49,9 @@ interface TirRow {
   retire_at: string | null; notifie_at: string | null; statut: string | null; created_at: string | null
   valable_jusqu_au?: string | null; offert_le?: string | null; joueur_id?: string | null; offert_a_joueur_id?: string | null
 }
+
+/** Super event sans date de péremption (décision du 10/11/2026, miroir de date_limite_tirage). */
+export const SANS_PEREMPTION = 'se-nds-2026'
 
 const COLS = 'id,event_id,super_event_id,partenaire_id,lot_nom,lot_valeur,ticket_code,retrait_token,retire_at,notifie_at,statut,created_at'
 
@@ -117,7 +122,8 @@ export async function chargerMesLots(joueurId: string): Promise<MonLot[]> {
     const e = t.event_id ? evs[t.event_id] : undefined
     const s = t.super_event_id ? ses[t.super_event_id] : undefined
     const commerce = (t.partenaire_id && pts[t.partenaire_id]) || (e && (e.titre || e.nom)) || '[commerce à compléter]'
-    const valable = t.valable_jusqu_au || (e && e.date_f) || (s && s.date_f) || null
+    /* Exception Nuits du Sud 2026 (Romain, 10/11) : pas de date de péremption, comme date_limite_tirage en base. */
+    const valable = t.super_event_id === SANS_PEREMPTION ? null : (t.valable_jusqu_au || (e && e.date_f) || (s && s.date_f) || null)
     const j = joursRestants(valable)
     let etat: EtatLot = 'a_utiliser'
     if (t.retire_at) etat = 'utilise'
@@ -130,6 +136,7 @@ export async function chargerMesLots(joueurId: string): Promise<MonLot[]> {
       etat, gagneLe: t.created_at, valableJusquAu: valable, offertLe: t.offert_le || null, eventId: t.event_id,
       recu: !!t.offert_a_joueur_id && t.offert_a_joueur_id === joueurId && t.joueur_id !== joueurId,
       donne: !!t.offert_a_joueur_id && t.offert_a_joueur_id !== joueurId,
+      sansLimite: t.super_event_id === SANS_PEREMPTION,
     } as MonLot
   })
 }
@@ -178,4 +185,49 @@ export async function chargerRelances(joueurId: string): Promise<Relance[]> {
   const { data, error } = await supabase.rpc('mes_notifications', { p_joueur_id: joueurId })
   if (error) return []
   return ((data || []) as Relance[]).filter(n => n.palier === 'relance' && !n.vu_le)
+}
+
+/** Toutes les notifications in-app (paliers 30j / 15j / 48h / cadeau / relance), plus récentes d'abord. */
+export interface Notif { id: string; tirage_id: number; palier: string; created_at: string; vu_le: string | null; lot_nom: string | null; retrait_token: string | null; valable_jusqu_au: string | null }
+export async function chargerNotifications(joueurId: string): Promise<Notif[]> {
+  const { data, error } = await supabase.rpc('mes_notifications', { p_joueur_id: joueurId })
+  if (error) return []
+  return (data || []) as Notif[]
+}
+export function libelleNotif(n: Notif): string {
+  const lot = n.lot_nom ? `« ${n.lot_nom} »` : 'ton lot'
+  if (n.palier === 'cadeau') return `Un ami t’offre ${lot}`
+  if (n.palier === 'relance') return `Le commerce te rappelle ${lot}`
+  if (n.palier === '48h') return `${lot} expire dans 48 h`
+  if (n.palier === '15j') return `${lot} expire dans 15 jours`
+  if (n.palier === '30j') return `${lot} expire dans un mois`
+  return lot
+}
+
+/**
+ * Consentements (audit 17/11, « à garder absolument ») : rester en contact avec Flowin Event
+ * (joueurs.optin) et avec chaque commerce (clients_commerce.optin). RPC security definer
+ * mes_consentements / maj_consentement (sql/2026-11-17-joueur-consentements.sql).
+ * pro_id null = Flowin Event.
+ */
+export interface Consentement { pro_id: string | null; nom: string; optin: boolean }
+export async function chargerConsentements(joueurId: string): Promise<Consentement[] | null> {
+  const { data, error } = await supabase.rpc('mes_consentements', { p_joueur_id: joueurId })
+  if (error) return null
+  return (data || []) as Consentement[]
+}
+export async function majConsentement(joueurId: string, proId: string | null, optin: boolean): Promise<boolean> {
+  const { error } = await supabase.rpc('maj_consentement', { p_joueur_id: joueurId, p_pro_id: proId, p_optin: optin })
+  return !error
+}
+
+/** Distance en mètres (haversine). */
+export function distanceM(a: { lat: number; lng: number }, b: { lat: number; lng: number }): number {
+  const R = 6371000, r = Math.PI / 180
+  const dLat = (b.lat - a.lat) * r, dLng = (b.lng - a.lng) * r
+  const h = Math.sin(dLat / 2) ** 2 + Math.cos(a.lat * r) * Math.cos(b.lat * r) * Math.sin(dLng / 2) ** 2
+  return Math.round(2 * R * Math.asin(Math.sqrt(h)))
+}
+export function distanceTxt(m: number): string {
+  return m < 1000 ? `${Math.round(m / 10) * 10} m` : `${(m / 1000).toFixed(m < 10000 ? 1 : 0).replace('.', ',')} km`
 }

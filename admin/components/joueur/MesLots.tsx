@@ -28,10 +28,30 @@ const ETAT: Record<MonLot['etat'], { txt: string; fg: string; bg: string }> = {
   expire: { txt: 'Expiré', fg: '#991B1B', bg: '#FEE2E2' },
 }
 
-function Qr({ url }: { url: string }) {
+export function Qr({ url, taille = 170 }: { url: string; taille?: number }) {
   const [src, setSrc] = useState('')
-  useEffect(() => { QRCode.toDataURL(url, { margin: 1, width: 360 }).then(setSrc).catch(() => setSrc('')) }, [url])
-  return src ? <img src={src} alt="QR du billet" width={170} height={170} style={{ display: 'block', margin: '0 auto', borderRadius: 10 }} /> : <div style={{ width: 170, height: 170, margin: '0 auto' }} />
+  useEffect(() => { QRCode.toDataURL(url, { margin: 1, width: 600 }).then(setSrc).catch(() => setSrc('')) }, [url])
+  return src ? <img src={src} alt="QR du billet" width={taille} height={taille} style={{ display: 'block', margin: '0 auto', borderRadius: 10 }} /> : <div style={{ width: taille, height: taille, margin: '0 auto' }} />
+}
+
+/** QR plein écran, à montrer en caisse (un toucher depuis la carte du lot). */
+export function QrPleinEcran({ lot, onClose }: { lot: MonLot; onClose: () => void }) {
+  useEffect(() => {
+    const k = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose() }
+    window.addEventListener('keydown', k)
+    return () => window.removeEventListener('keydown', k)
+  }, [onClose])
+  if (!lot.token) return null
+  return (
+    <div role="dialog" aria-label="QR à montrer en caisse" data-qr-plein onClick={onClose} style={{ position: 'fixed', inset: 0, zIndex: 60, background: '#fff', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: 20, boxSizing: 'border-box', textAlign: 'center', color: '#141a26' }}>
+      <div style={{ fontSize: 13, fontWeight: 800, color: '#9aa0ad', textTransform: 'uppercase', letterSpacing: '.05em' }}>{lot.commerce}</div>
+      <div style={{ fontSize: 24, fontWeight: 800, margin: '6px 0 18px' }}>{lot.lot}</div>
+      <Qr url={lienQr(lot.token)} taille={Math.min(320, typeof window !== 'undefined' ? window.innerWidth - 60 : 300)} />
+      {lot.ticketCode && <div style={{ fontFamily: 'monospace', fontWeight: 900, fontSize: 26, letterSpacing: 3, marginTop: 12 }}>{lot.ticketCode}</div>}
+      <div style={{ fontSize: 13.5, color: '#5a6071', marginTop: 6 }}>{lot.valableJusquAu ? `Valable jusqu’au ${dateCourte(lot.valableJusquAu)}` : lot.sansLimite ? 'Sans date limite' : ''}</div>
+      <button data-qr-fermer onClick={onClose} style={{ marginTop: 26, padding: '13px 34px', borderRadius: 100, border: 'none', background: BLEU, color: '#fff', fontWeight: 800, fontSize: 15, cursor: 'pointer' }}>Fermer</button>
+    </div>
+  )
 }
 
 function Rappel({ lot }: { lot: MonLot }) {
@@ -96,7 +116,7 @@ function FeuilleAmi({ lot, joueurId, onClose, onOffert }: { lot: MonLot; joueurI
   )
 }
 
-function Carte({ lot, onAmi }: { lot: MonLot; onAmi: () => void }) {
+function Carte({ lot, onAmi, onQr }: { lot: MonLot; onAmi: () => void; onQr?: () => void }) {
   const e = lot.donne && lot.etat === 'a_utiliser' ? { txt: 'Offert', fg: BLEU, bg: '#EFF3FE' } : ETAT[lot.etat]
   const actif = lot.etat === 'a_utiliser' && !lot.donne
   return (
@@ -109,16 +129,18 @@ function Carte({ lot, onAmi }: { lot: MonLot; onAmi: () => void }) {
       {lot.operation && <div style={{ fontSize: 12.5, color: '#5a6071' }}>{lot.operation}</div>}
       <div style={{ fontSize: 13, color: '#5a6071', marginTop: 4 }}>
         <Ico k="clock" size={13} style={{ marginRight: 5, verticalAlign: -2 }} />
-        {lot.valableJusquAu ? `Valable jusqu’au ${dateCourte(lot.valableJusquAu)}` : 'Validité : [à compléter par le commerce]'}
+        {lot.valableJusquAu ? `Valable jusqu’au ${dateCourte(lot.valableJusquAu)}` : lot.sansLimite ? 'Sans date limite' : 'Validité : [à compléter par le commerce]'}
       </div>
       <Rappel lot={lot} />
       {lot.recu && <div data-recu style={{ fontSize: 12.5, fontWeight: 800, color: '#0B6E50', marginTop: 8 }}><Ico k="gift" size={13} style={{ marginRight: 5, verticalAlign: -2 }} />Offert par un ami</div>}
       {lot.offertLe && !lot.recu && <div style={{ fontSize: 12.5, fontWeight: 800, color: BLEU, marginTop: 8 }}><Ico k="gift" size={13} style={{ marginRight: 5, verticalAlign: -2 }} />Offert à un ami</div>}
       {actif && lot.token && (
         <div style={{ marginTop: 14 }}>
-          <Qr url={lienQr(lot.token)} />
-          {lot.ticketCode && <div style={{ textAlign: 'center', fontFamily: 'monospace', fontWeight: 900, fontSize: 18, letterSpacing: 2, marginTop: 6 }}>{lot.ticketCode}</div>}
-          <div style={{ textAlign: 'center', fontSize: 12, color: '#9aa0ad', marginTop: 2 }}>À montrer au commerce</div>
+          <button data-qr-ouvrir aria-label="Afficher le QR en plein écran" onClick={onQr} style={{ display: 'block', width: '100%', background: 'none', border: 'none', padding: 0, cursor: 'pointer', color: 'inherit' }}>
+            <Qr url={lienQr(lot.token)} taille={130} />
+            {lot.ticketCode && <div style={{ textAlign: 'center', fontFamily: 'monospace', fontWeight: 900, fontSize: 17, letterSpacing: 2, marginTop: 4 }}>{lot.ticketCode}</div>}
+            <div style={{ textAlign: 'center', fontSize: 12.5, fontWeight: 800, color: BLEU, marginTop: 2 }}>Toucher pour montrer en caisse</div>
+          </button>
           <div style={{ display: 'flex', gap: 8, marginTop: 14 }}>
             <a href={lienBillet(lot.token)} style={{ flex: 1, textAlign: 'center', padding: '12px 8px', borderRadius: 12, background: '#EFF3FE', color: BLEU, fontWeight: 800, fontSize: 13.5, textDecoration: 'none' }}>Mon billet</a>
             <button data-ami onClick={onAmi} style={{ flex: 1.4, padding: '12px 8px', borderRadius: 12, background: BLEU, color: '#fff', fontWeight: 800, fontSize: 13.5, border: 'none', cursor: 'pointer' }}><Ico k="gift" size={14} style={{ marginRight: 5, verticalAlign: -2 }} />En faire profiter un ami</button>
@@ -135,9 +157,10 @@ function Carte({ lot, onAmi }: { lot: MonLot; onAmi: () => void }) {
   )
 }
 
-export default function MesLots({ lots, joueurId = null, onChange }: { lots: MonLot[]; joueurId?: string | null; onChange?: () => void }) {
+export default function MesLots({ lots, joueurId = null, onChange, vide }: { lots: MonLot[]; joueurId?: string | null; onChange?: () => void; vide?: string }) {
   const [filtre, setFiltre] = useState<string>('tous')
   const [ami, setAmi] = useState<MonLot | null>(null)
+  const [qr, setQr] = useState<MonLot | null>(null)
   const [idx, setIdx] = useState(0)
   const piste = useRef<HTMLDivElement>(null)
 
@@ -159,7 +182,7 @@ export default function MesLots({ lots, joueurId = null, onChange }: { lots: Mon
   }
 
   if (!lots.length) {
-    return <div style={{ background: '#fff', borderRadius: 16, padding: 18, fontSize: 14, color: '#5a6071', textAlign: 'center' }}>Pas encore de lot. Joue dans un commerce !</div>
+    return <div style={{ background: '#fff', borderRadius: 16, padding: 18, fontSize: 14, color: '#5a6071', textAlign: 'center' }}>{vide || 'Pas encore de lot. Joue dans un commerce !'}</div>
   }
 
   const pastille = (actif: boolean): React.CSSProperties => ({ flexShrink: 0, fontSize: 12.5, fontWeight: 800, padding: '7px 12px', borderRadius: 100, border: 'none', cursor: 'pointer', background: actif ? BLEU : '#fff', color: actif ? '#fff' : '#141a26', whiteSpace: 'nowrap' })
@@ -173,13 +196,14 @@ export default function MesLots({ lots, joueurId = null, onChange }: { lots: Mon
         </div>
       )}
       <div ref={piste} onScroll={onScroll} data-carrousel-lots style={{ display: 'flex', gap: 12, overflowX: 'auto', scrollSnapType: 'x mandatory', padding: '4px 7% 10px', margin: '0 -18px', scrollbarWidth: 'none' }}>
-        {visibles.map(l => <Carte key={l.id} lot={l} onAmi={() => setAmi(l)} />)}
+        {visibles.map(l => <Carte key={l.id} lot={l} onAmi={() => setAmi(l)} onQr={() => setQr(l)} />)}
       </div>
       {visibles.length > 1 && (
         <div style={{ display: 'flex', justifyContent: 'center', gap: 6, marginTop: 4 }}>
           {visibles.map((l, i) => <span key={l.id} style={{ width: i === idx ? 18 : 7, height: 7, borderRadius: 7, background: i === idx ? BLEU : '#cfd3dc', transition: 'width .2s' }} />)}
         </div>
       )}
+      {qr && <QrPleinEcran lot={qr} onClose={() => setQr(null)} />}
       {ami && <FeuilleAmi lot={ami} joueurId={joueurId} onClose={() => { setAmi(null); if (onChange) onChange() }} onOffert={() => { /* rechargé à la fermeture */ }} />}
     </div>
   )

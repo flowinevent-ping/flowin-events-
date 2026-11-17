@@ -1,15 +1,38 @@
 'use client'
-import { useState, useEffect } from 'react'
+/**
+ * PROFIL PARTICIPANT /moi — refonte audit 17/11/2026 (Romain : pas de scroll interminable,
+ * rubriques ; lots gagnés, lots en jeu à proximité, lots qui expirent, notifications, compte).
+ * Une rubrique = un écran (barre d'onglets à icônes). Un toucher sur le QR d'un lot l'affiche en
+ * plein écran pour la caisse. Compteurs et badges calculés uniquement sur les vraies données.
+ * Identité : flowin_joueur (localStorage), créée en jouant. Pas de mot de passe côté participant.
+ */
+import { useState, useEffect, useMemo } from 'react'
 import { supabase } from '@/lib/supabase'
 import { Ico } from '@/lib/proicons'
-import MesLots, { LIBELLE_NOTIF } from '@/components/joueur/MesLots'
-import { chargerMesLots, chargerCadeaux, chargerRelances, marquerCadeauxVus, joursRestants, palierRappel, type MonLot, type Cadeau, type Relance } from '@/lib/mesLots'
+import MesLots from '@/components/joueur/MesLots'
+import { fetchCarteCommercesPublique, type CommerceCarte } from '@/lib/carteReseau'
+import {
+  chargerMesLots, chargerNotifications, marquerCadeauxVus, joursRestants, palierRappel, libelleNotif,
+  chargerConsentements, majConsentement, distanceM, distanceTxt,
+  type MonLot, type Notif, type Consentement,
+} from '@/lib/mesLots'
 
 type Joueur = { id: string; prenom?: string | null; nom?: string | null; email?: string | null }
 type Ticket = { event_id: string | null; super_event_id: string | null }
 type Gain = { id: string; libelle: string | null; code: string | null; utilise: boolean | null; event_id: string | null; super_event_id: string | null }
+type Rubrique = 'lots' | 'bientot' | 'proche' | 'notifs' | 'compte'
+type Pos = { lat: number; lng: number }
 
 const HERO = '#2746A6'
+const PROCHE_M = 2000
+
+const RUBRIQUES: { k: Rubrique; ico: string; txt: string }[] = [
+  { k: 'lots', ico: 'gift', txt: 'Mes lots' },
+  { k: 'bientot', ico: 'clock', txt: 'Expirent' },
+  { k: 'proche', ico: 'shop', txt: 'Près de moi' },
+  { k: 'notifs', ico: 'bell', txt: 'Alertes' },
+  { k: 'compte', ico: 'user', txt: 'Compte' },
+]
 
 export default function MonComptePage() {
   const [loading, setLoading] = useState(true)
@@ -19,10 +42,12 @@ export default function MonComptePage() {
   const [evNames, setEvNames] = useState<Record<string, string>>({})
   const [seNames, setSeNames] = useState<Record<string, string>>({})
   const [lots, setLots] = useState<MonLot[]>([])
-  const [ecran, setEcran] = useState<'lots' | 'tickets'>('lots')
-  /* Lot offert par un ami (notification in-app, palier « cadeau »). */
-  const [cadeaux, setCadeaux] = useState<Cadeau[]>([])
-  const [relances, setRelances] = useState<Relance[]>([])
+  const [notifs, setNotifs] = useState<Notif[]>([])
+  const [consent, setConsent] = useState<Consentement[] | null>(null)
+  const [commerces, setCommerces] = useState<CommerceCarte[]>([])
+  const [pos, setPos] = useState<Pos | null>(null)
+  const [geoEtat, setGeoEtat] = useState<'' | 'demande' | 'refus'>('')
+  const [rub, setRub] = useState<Rubrique>('lots')
 
   useEffect(() => {
     let local: { id?: string } | null = null
@@ -37,8 +62,9 @@ export default function MonComptePage() {
         chargerMesLots(jid).catch(() => [] as MonLot[]),
       ])
       setLots(ml)
-      chargerCadeaux(jid).then(setCadeaux).catch(() => { /* */ })
-      chargerRelances(jid).then(setRelances).catch(() => { /* */ })
+      chargerNotifications(jid).then(setNotifs).catch(() => { /* */ })
+      chargerConsentements(jid).then(setConsent).catch(() => { /* */ })
+      fetchCarteCommercesPublique().then(setCommerces).catch(() => { /* */ })
       setJoueur((jr.data as Joueur) ?? { id: jid })
       const tkRows = (tk.data ?? []) as Ticket[]
       const gaRows = (ga.data ?? []) as Gain[]
@@ -60,128 +86,247 @@ export default function MonComptePage() {
       }
       setLoading(false)
     })()
+    /* Géolocalisation : seulement si déjà autorisée (aucune demande à l'ouverture). */
+    try { if (document.body.style.paddingTop) document.documentElement.style.setProperty('--moi-haut', document.body.style.paddingTop) } catch { /* */ }
+    const t = setInterval(() => { try { document.documentElement.style.setProperty('--moi-haut', document.body.style.paddingTop || '0px') } catch { /* */ } }, 700)
+    try {
+      const nav = navigator as Navigator & { permissions?: { query: (d: { name: string }) => Promise<{ state: string }> } }
+      if (nav.permissions && nav.geolocation) nav.permissions.query({ name: 'geolocation' }).then(p => { if (p.state === 'granted') localiser() }).catch(() => { /* */ })
+    } catch { /* */ }
+    return () => clearInterval(t)
   }, [])
 
-  // tickets groupés par opération
-  const parOperation = Object.values(
-    tickets.reduce((acc, t) => {
-      const se = t.super_event_id || '?'
-      if (!acc[se]) acc[se] = { se, total: 0, commerces: {} as Record<string, number> }
-      acc[se].total++
-      if (t.event_id) acc[se].commerces[t.event_id] = (acc[se].commerces[t.event_id] || 0) + 1
-      return acc
-    }, {} as Record<string, { se: string; total: number; commerces: Record<string, number> }>)
-  )
+  function localiser() {
+    if (typeof navigator === 'undefined' || !navigator.geolocation) { setGeoEtat('refus'); return }
+    setGeoEtat('demande')
+    navigator.geolocation.getCurrentPosition(
+      p => { setPos({ lat: p.coords.latitude, lng: p.coords.longitude }); setGeoEtat('') },
+      () => setGeoEtat('refus'),
+      { enableHighAccuracy: false, timeout: 10000, maximumAge: 300000 },
+    )
+  }
 
-  const wrap: React.CSSProperties = { minHeight: '100dvh', boxSizing: 'border-box', background: '#f1ede6', fontFamily: 'system-ui, sans-serif', color: '#141a26', paddingBottom: 40 }
-  const card: React.CSSProperties = { maxWidth: 540, margin: '0 auto', padding: '0 18px' }
+  /* Anciens gains (table se_gains, abandonnée le 28/07) : à la suite, sans QR. */
+  const tousLots: MonLot[] = useMemo(() => lots.concat(gains.map(g => ({
+    id: 'g-' + g.id, commerce: (g.event_id && evNames[g.event_id]) || '[commerce à compléter]', commerceCle: g.event_id || 'autre',
+    operation: g.super_event_id ? seNames[g.super_event_id] || null : null, type: g.super_event_id ? 'super' : 'animation',
+    lot: g.libelle || 'Lot', valeur: null, ticketCode: g.code, token: null, etat: g.utilise ? 'utilise' : 'a_utiliser',
+    gagneLe: null, valableJusquAu: null, offertLe: null,
+  } as MonLot))), [lots, gains, evNames, seNames])
+
+  const actifs = tousLots.filter(l => !l.donne && (l.etat === 'a_utiliser' || l.etat === 'a_confirmer'))
+  const bientot = tousLots.filter(l => !l.donne && l.etat === 'a_utiliser' && palierRappel(joursRestants(l.valableJusquAu)))
+    .sort((a, b) => (joursRestants(a.valableJusquAu) ?? 999) - (joursRestants(b.valableJusquAu) ?? 999))
+  const nonVues = notifs.filter(n => !n.vu_le)
+
+  /* Compteurs et badges : uniquement des données réelles. */
+  const nbGagnes = tousLots.filter(l => !l.recu).length
+  const commercesVisites = new Set(tickets.map(t => t.event_id).filter(Boolean).concat(tousLots.filter(l => !l.recu).map(l => l.commerceCle))).size
+  const nbOfferts = tousLots.filter(l => l.donne || (l.offertLe && !l.recu)).length
+  const nbUtilises = tousLots.filter(l => l.etat === 'utilise').length
+  const badges = [
+    { k: 'premier', ico: 'star', txt: 'Premier lot', ok: nbGagnes >= 1 },
+    { k: 'explorateur', ico: 'shop', txt: '3 commerces', ok: commercesVisites >= 3 },
+    { k: 'genereux', ico: 'gift', txt: 'Généreux', ok: nbOfferts >= 1 },
+    { k: 'fidele', ico: 'ticket', txt: '10 tickets', ok: tickets.length >= 10 },
+    { k: 'client', ico: 'check', txt: 'Lot utilisé', ok: nbUtilises >= 1 },
+  ]
+
+  const proches = useMemo(() => {
+    const l = commerces.map(c => ({ c, d: pos ? distanceM(pos, c) : null }))
+    if (pos) l.sort((a, b) => (a.d ?? 0) - (b.d ?? 0))
+    return l
+  }, [commerces, pos])
+  const plusProche = pos && proches.length && proches[0].d !== null && proches[0].d <= PROCHE_M ? proches[0] : null
+
+  const ouvrir = (k: Rubrique) => {
+    setRub(k)
+    if (k === 'notifs' && joueur && nonVues.length) {
+      marquerCadeauxVus(joueur.id, nonVues.map(n => n.id))
+      setNotifs(notifs.map(n => n.vu_le ? n : { ...n, vu_le: new Date().toISOString() }))
+    }
+  }
+
+  /* Écran fixe (pas de défilement de page) ; en mode démo le bandeau de 24 px reste visible au-dessus. */
+  const wrap: React.CSSProperties = { position: 'fixed', left: 0, right: 0, bottom: 0, top: 'var(--moi-haut, 0px)', display: 'flex', flexDirection: 'column', boxSizing: 'border-box', background: '#f1ede6', fontFamily: 'system-ui, sans-serif', color: '#141a26', overflow: 'hidden' }
 
   if (loading) {
-    return <div style={{ ...wrap, display: 'flex', alignItems: 'center', justifyContent: 'center' }}><div style={{ color: '#9aa0ad' }}>Chargement…</div></div>
+    return <div style={{ ...wrap, alignItems: 'center', justifyContent: 'center' }}><div style={{ color: '#9aa0ad' }}>Chargement…</div></div>
   }
 
   if (!joueur) {
     return (
-      <div style={{ ...wrap, display: 'flex', alignItems: 'center', justifyContent: 'center', textAlign: 'center', padding: 24 }}>
+      <div style={{ ...wrap, alignItems: 'center', justifyContent: 'center', textAlign: 'center', padding: 24 }}>
         <div>
           <div style={{ display: 'inline-flex', marginBottom: 14 }}><Ico k="game" size={50} /></div>
-          <div style={{ fontSize: 20, fontWeight: 800, marginBottom: 8 }}>Aucun compte pour l&apos;instant</div>
+          <div style={{ fontSize: 20, fontWeight: 800, marginBottom: 8 }}>Aucun compte sur ce téléphone</div>
           <div style={{ fontSize: 14.5, color: '#5a6071', lineHeight: 1.6, maxWidth: 320 }}>
-            Ton compte se crée en jouant : rends-toi dans un commerce participant, scanne son QR et joue. Tes tickets et tes gains apparaîtront ici.
+            Ton compte se crée en jouant. Déjà joué ? Rejoue avec le même e-mail : tes lots reviennent ici.
           </div>
+          <a href="/carte-commerces" style={{ display: 'inline-block', marginTop: 18, padding: '13px 22px', borderRadius: 100, background: HERO, color: '#fff', fontWeight: 800, textDecoration: 'none' }}>Trouver un jeu près de moi</a>
         </div>
       </div>
     )
   }
 
-  /* Anciens gains (table se_gains, abandonnée le 28/07) : affichés à la suite, sans QR. */
-  const tousLots: MonLot[] = lots.concat(gains.map(g => ({
-    id: 'g-' + g.id, commerce: (g.event_id && evNames[g.event_id]) || '[commerce à compléter]', commerceCle: g.event_id || 'autre',
-    operation: g.super_event_id ? seNames[g.super_event_id] || null : null, type: g.super_event_id ? 'super' : 'animation',
-    lot: g.libelle || 'Lot', valeur: null, ticketCode: g.code, token: null, etat: g.utilise ? 'utilise' : 'a_utiliser',
-    gagneLe: null, valableJusquAu: null, offertLe: null,
-  } as MonLot)))
-  const gainsActifs = tousLots.filter(l => !l.donne && (l.etat === 'a_utiliser' || l.etat === 'a_confirmer'))
-  /* Rappel in-app le plus proche (1 mois / 15 j / 48 h). */
-  const urgent = tousLots.filter(l => l.etat === 'a_utiliser' && palierRappel(joursRestants(l.valableJusquAu)))
-    .sort((a, b) => (joursRestants(a.valableJusquAu) ?? 999) - (joursRestants(b.valableJusquAu) ?? 999))[0]
-  const ongl = (a: boolean): React.CSSProperties => ({ flex: 1, padding: '10px', borderRadius: 100, border: 'none', cursor: 'pointer', fontWeight: 800, fontSize: 14, background: a ? '#fff' : 'transparent', color: a ? HERO : '#5a6071', boxShadow: a ? '0 2px 6px rgba(20,26,38,.08)' : 'none' })
+  const carte: React.CSSProperties = { background: '#fff', borderRadius: 16, padding: '13px 14px', boxShadow: '0 2px 8px rgba(20,26,38,.06)' }
+  const titre = (t: string, sous?: string) => (
+    <div style={{ margin: '4px 0 12px' }}>
+      <div style={{ fontSize: 19, fontWeight: 800 }}>{t}</div>
+      {sous && <div style={{ fontSize: 13, color: '#5a6071', marginTop: 2 }}>{sous}</div>}
+    </div>
+  )
 
   return (
-    <div style={wrap}>
-      {/* En-tête profil */}
-      <div style={{ background: `linear-gradient(135deg,${HERO},#3B7DE0)`, color: '#fff', padding: '40px 18px 30px' }}>
-        <div style={{ maxWidth: 540, margin: '0 auto', display: 'flex', alignItems: 'center', gap: 14 }}>
-          <div style={{ width: 58, height: 58, borderRadius: '50%', background: 'rgba(255,255,255,.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 24, fontWeight: 800, flexShrink: 0 }}>
-            {((joueur.prenom?.[0] ?? '') + (joueur.nom?.[0] ?? '')).toUpperCase() || '·'}
+    <div style={wrap} data-profil>
+      {/* En-tête compact : identité, compteurs, badges */}
+      <div style={{ background: `linear-gradient(135deg,${HERO},#3B7DE0)`, color: '#fff', padding: '18px 18px 14px', flexShrink: 0 }}>
+        <div style={{ maxWidth: 540, margin: '0 auto' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+            <div style={{ width: 44, height: 44, borderRadius: '50%', background: 'rgba(255,255,255,.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18, fontWeight: 800, flexShrink: 0 }}>
+              {((joueur.prenom?.[0] ?? '') + (joueur.nom?.[0] ?? '')).toUpperCase() || '·'}
+            </div>
+            <div style={{ minWidth: 0, flex: 1 }}>
+              <div style={{ fontSize: 19, fontWeight: 800, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{joueur.prenom ? `Salut ${joueur.prenom}` : 'Mon Flowin'}</div>
+              <div style={{ fontSize: 12.5, opacity: 0.85 }}>{actifs.length ? `${actifs.length} lot${actifs.length > 1 ? 's' : ''} à utiliser` : 'Aucun lot à utiliser'}</div>
+            </div>
           </div>
-          <div style={{ minWidth: 0 }}>
-            <div style={{ fontSize: 22, fontWeight: 800 }}>{joueur.prenom || 'Mon compte'} {joueur.nom || ''}</div>
-            <div style={{ fontSize: 13, opacity: 0.85, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{joueur.email}</div>
+          <div data-compteurs style={{ display: 'flex', gap: 8, marginTop: 12 }}>
+            {[
+              { n: nbGagnes, t: nbGagnes > 1 ? 'lots gagnés' : 'lot gagné', i: 'gift' },
+              { n: commercesVisites, t: commercesVisites > 1 ? 'commerces' : 'commerce', i: 'shop' },
+              { n: tickets.length, t: tickets.length > 1 ? 'tickets' : 'ticket', i: 'ticket' },
+            ].map(c => (
+              <div key={c.i} style={{ flex: 1, background: 'rgba(255,255,255,.16)', borderRadius: 12, padding: '7px 6px', textAlign: 'center' }}>
+                <div style={{ fontSize: 19, fontWeight: 800 }}><Ico k={c.i} size={12} style={{ marginRight: 4, verticalAlign: -1 }} />{c.n}</div>
+                <div style={{ fontSize: 10.5, opacity: 0.85 }}>{c.t}</div>
+              </div>
+            ))}
           </div>
-        </div>
-        <div style={{ maxWidth: 540, margin: '18px auto 0', display: 'flex', gap: 10 }}>
-          <div style={{ flex: 1, background: 'rgba(255,255,255,.16)', borderRadius: 14, padding: '12px 14px', textAlign: 'center' }}>
-            <div style={{ fontSize: 24, fontWeight: 800 }}><Ico k="ticket" size={13} style={{ marginRight: 5, verticalAlign: -2 }} />{tickets.length}</div>
-            <div style={{ fontSize: 11, opacity: 0.85 }}>ticket{tickets.length > 1 ? 's' : ''}</div>
-          </div>
-          <div style={{ flex: 1, background: 'rgba(255,255,255,.16)', borderRadius: 14, padding: '12px 14px', textAlign: 'center' }}>
-            <div style={{ fontSize: 24, fontWeight: 800 }}><Ico k="gift" size={13} style={{ marginRight: 5, verticalAlign: -2 }} />{gainsActifs.length}</div>
-            <div style={{ fontSize: 11, opacity: 0.85 }}>gain{gainsActifs.length > 1 ? 's' : ''} à utiliser</div>
+          <div data-badges style={{ display: 'flex', gap: 6, marginTop: 10, overflowX: 'auto', scrollbarWidth: 'none' }}>
+            {badges.map(b => (
+              <span key={b.k} data-badge={b.k} data-obtenu={b.ok ? '1' : '0'} style={{ flexShrink: 0, display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 11, fontWeight: 800, padding: '4px 9px', borderRadius: 100, background: b.ok ? '#FBBF24' : 'rgba(255,255,255,.12)', color: b.ok ? '#3b2a00' : 'rgba(255,255,255,.55)' }}>
+                <Ico k={b.ico} size={11} />{b.txt}
+              </span>
+            ))}
           </div>
         </div>
       </div>
 
-      <div style={card}>
-        {cadeaux.length > 0 && (
-          <button data-cadeau-banniere onClick={() => { setEcran('lots'); marquerCadeauxVus(joueur.id, cadeaux.map(c => c.id)); setCadeaux([]) }} style={{ display: 'flex', alignItems: 'center', gap: 8, width: '100%', marginTop: 16, background: '#E7F8EE', color: '#0B6E50', border: 'none', borderRadius: 14, padding: '12px 14px', fontSize: 13.5, fontWeight: 800, textAlign: 'left', cursor: 'pointer' }}>
-            <Ico k="gift" size={16} />{LIBELLE_NOTIF.cadeau(cadeaux[0].lot_nom)}
-          </button>
-        )}
-        {/* Une seule bannière à la fois (pas de scroll à 390 px) : cadeau, puis relance du commerce, puis expiration. */}
-        {relances.length > 0 && cadeaux.length === 0 && (
-          <button data-relance-banniere onClick={() => { setEcran('lots'); marquerCadeauxVus(joueur.id, relances.map(c => c.id)); setRelances([]) }} style={{ display: 'flex', alignItems: 'center', gap: 8, width: '100%', marginTop: 16, background: '#EFF3FE', color: '#2746A6', border: 'none', borderRadius: 14, padding: '12px 14px', fontSize: 13.5, fontWeight: 800, textAlign: 'left', cursor: 'pointer' }}>
-            <Ico k="bell" size={16} />{LIBELLE_NOTIF.relance(relances[0].lot_nom)}
-          </button>
-        )}
-        {urgent && cadeaux.length === 0 && relances.length === 0 && (
-          <button data-rappel-banniere onClick={() => setEcran('lots')} style={{ display: 'flex', alignItems: 'center', gap: 8, width: '100%', marginTop: 16, background: '#FEF3C7', color: '#92400E', border: 'none', borderRadius: 14, padding: '12px 14px', fontSize: 13.5, fontWeight: 800, textAlign: 'left', cursor: 'pointer' }}>
-            <Ico k="bell" size={16} />Ton lot chez {urgent.commerce} expire bientôt
-          </button>
-        )}
-        <div style={{ display: 'flex', gap: 4, background: '#e6e1d8', borderRadius: 100, padding: 4, margin: '18px 0 14px' }}>
-          <button style={ongl(ecran === 'lots')} onClick={() => setEcran('lots')}><Ico k="gift" size={14} style={{ marginRight: 5, verticalAlign: -2 }} />Mes lots</button>
-          <button style={ongl(ecran === 'tickets')} onClick={() => setEcran('tickets')}><Ico k="ticket" size={14} style={{ marginRight: 5, verticalAlign: -2 }} />Mes tickets</button>
-        </div>
-        {ecran === 'lots' && <MesLots lots={tousLots} joueurId={joueur.id} onChange={() => { chargerMesLots(joueur.id).then(setLots).catch(() => { /* */ }) }} />}
-        {ecran === 'tickets' && (<>
-        {/* Mes tickets par opération */}
-        {parOperation.length === 0 && (
-          <div style={{ background: '#fff', borderRadius: 16, padding: '18px', fontSize: 14, color: '#5a6071', textAlign: 'center' }}>
-            Aucun ticket pour l&apos;instant.
-          </div>
-        )}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 11 }}>
-          {parOperation.map(op => (
-            <a key={op.se} href={`/se/${op.se}`} style={{ display: 'block', background: '#fff', borderRadius: 18, padding: '16px 17px', boxShadow: '0 2px 8px rgba(20,26,38,.06)', textDecoration: 'none', color: 'inherit' }}>
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: op.commerces && Object.keys(op.commerces).length ? 10 : 0 }}>
-                <div style={{ fontSize: 16, fontWeight: 800 }}>{seNames[op.se] || 'Opération'}</div>
-                <span style={{ fontSize: 13, fontWeight: 800, color: HERO, background: '#EFF3FE', padding: '4px 11px', borderRadius: 100 }}><Ico k="ticket" size={13} style={{ marginRight: 5, verticalAlign: -2 }} />{op.total}</span>
+      {/* Coup de pouce de proximité (géolocalisation déjà autorisée, vraie distance) */}
+      {plusProche && rub !== 'proche' && (
+        <button data-nudge onClick={() => ouvrir('proche')} style={{ flexShrink: 0, display: 'flex', alignItems: 'center', gap: 8, margin: '10px auto 0', width: 'calc(100% - 36px)', maxWidth: 504, background: '#FEF3C7', color: '#92400E', border: 'none', borderRadius: 12, padding: '10px 12px', fontSize: 13.5, fontWeight: 800, textAlign: 'left', cursor: 'pointer' }}>
+          <Ico k="game" size={16} />Un jeu est en cours à {distanceTxt(plusProche.d as number)} : {plusProche.c.nom || 'un commerce'}
+        </button>
+      )}
+
+      {/* Rubrique courante : un écran, pas de longue page */}
+      <div data-rubrique={rub} style={{ flex: 1, minHeight: 0, overflowY: 'auto', padding: '14px 18px 10px' }}>
+        <div style={{ maxWidth: 540, margin: '0 auto' }}>
+          {rub === 'lots' && (<>
+            {titre('Mes lots', actifs.length ? 'Touche le QR pour le montrer en caisse.' : undefined)}
+            <MesLots lots={tousLots} joueurId={joueur.id} onChange={() => { chargerMesLots(joueur.id).then(setLots).catch(() => { /* */ }) }} vide="Pas encore de lot. Joue dans un commerce près de chez toi !" />
+          </>)}
+
+          {rub === 'bientot' && (<>
+            {titre('Expirent bientôt', 'Rappels à 1 mois, 15 jours et 48 h.')}
+            {bientot.length
+              ? <MesLots lots={bientot} joueurId={joueur.id} onChange={() => { chargerMesLots(joueur.id).then(setLots).catch(() => { /* */ }) }} />
+              : <div style={{ ...carte, textAlign: 'center', color: '#5a6071', fontSize: 14 }}>Aucun lot n’expire dans le mois.</div>}
+          </>)}
+
+          {rub === 'proche' && (<>
+            {titre('Lots en jeu près de moi', pos ? 'Commerces avec un jeu en cours, du plus proche au plus loin.' : 'Commerces avec un jeu en cours.')}
+            {!pos && (
+              <button data-localiser onClick={localiser} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, width: '100%', padding: 12, borderRadius: 12, border: 'none', background: HERO, color: '#fff', fontWeight: 800, fontSize: 14, cursor: 'pointer', marginBottom: 10 }}>
+                <Ico k="globe" size={15} />{geoEtat === 'demande' ? 'Localisation…' : geoEtat === 'refus' ? 'Localisation refusée' : 'Me localiser'}
+              </button>
+            )}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+              {proches.slice(0, 4).map(({ c, d }) => (
+                <div key={c.cle} data-commerce style={{ ...carte, display: 'flex', alignItems: 'center', gap: 10 }}>
+                  <div style={{ minWidth: 0, flex: 1 }}>
+                    <div style={{ fontSize: 15, fontWeight: 800, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{c.nom || '[commerce à compléter]'}</div>
+                    <div style={{ fontSize: 12.5, color: '#5a6071', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{[d !== null ? distanceTxt(d) : '', c.adresse || ''].filter(Boolean).join(' · ')}</div>
+                  </div>
+                  <a href={`https://www.google.com/maps/dir/?api=1&destination=${c.lat},${c.lng}`} target="_blank" rel="noreferrer" aria-label="Itinéraire" style={{ flexShrink: 0, padding: '9px 12px', borderRadius: 10, background: '#EFF3FE', color: HERO, fontWeight: 800, fontSize: 12.5, textDecoration: 'none' }}>Y aller</a>
+                </div>
+              ))}
+              {!proches.length && <div style={{ ...carte, textAlign: 'center', color: '#5a6071', fontSize: 14 }}>Aucun jeu en cours pour l’instant.</div>}
+            </div>
+            <a href="/carte-commerces" style={{ display: 'block', textAlign: 'center', marginTop: 12, fontSize: 13.5, fontWeight: 800, color: HERO, textDecoration: 'none' }}>Voir la carte ({commerces.length})</a>
+          </>)}
+
+          {rub === 'notifs' && (<>
+            {titre('Mes notifications')}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+              {notifs.slice(0, 6).map(n => (
+                <button key={n.id} data-notif={n.palier} onClick={() => setRub('lots')} style={{ ...carte, display: 'flex', alignItems: 'center', gap: 10, border: 'none', textAlign: 'left', cursor: 'pointer', fontFamily: 'inherit', color: 'inherit' }}>
+                  <span style={{ flexShrink: 0, color: n.palier === 'cadeau' ? '#0B6E50' : n.palier === '48h' ? '#991B1B' : HERO }}><Ico k={n.palier === 'cadeau' ? 'gift' : 'bell'} size={18} /></span>
+                  <span style={{ flex: 1, fontSize: 14, fontWeight: 700 }}>{libelleNotif(n)}</span>
+                </button>
+              ))}
+              {!notifs.length && <div style={{ ...carte, textAlign: 'center', color: '#5a6071', fontSize: 14 }}>Rien de nouveau. On te prévient ici avant qu’un lot expire.</div>}
+            </div>
+          </>)}
+
+          {rub === 'compte' && (<>
+            {titre('Mon compte')}
+            <div style={{ ...carte, marginBottom: 10 }}>
+              <div style={{ fontSize: 15, fontWeight: 800 }}>{[joueur.prenom, joueur.nom].filter(Boolean).join(' ') || 'Participant'}</div>
+              <div style={{ fontSize: 13, color: '#5a6071', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{joueur.email || ''}</div>
+            </div>
+            {consent && consent.length > 0 && (
+              <div data-consentements style={{ ...carte, marginBottom: 10 }}>
+                <div style={{ fontSize: 13.5, fontWeight: 800, marginBottom: 6 }}>Rester en contact</div>
+                {consent.slice(0, 4).map(c => (
+                  <label key={c.pro_id || 'flowin'} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '7px 0', fontSize: 14, cursor: 'pointer' }}>
+                    <input type="checkbox" data-consent={c.pro_id || 'flowin'} checked={c.optin} onChange={async e => {
+                      const v = e.target.checked
+                      setConsent(consent.map(x => x.pro_id === c.pro_id ? { ...x, optin: v } : x))
+                      const ok = await majConsentement(joueur.id, c.pro_id, v)
+                      if (!ok) setConsent(consent)
+                    }} style={{ width: 20, height: 20, accentColor: HERO }} />
+                    <span style={{ flex: 1 }}>{c.pro_id ? c.nom : 'Flowin Event : offres, bons deals, prochains events'}</span>
+                  </label>
+                ))}
+                <div style={{ fontSize: 11.5, color: '#9aa0ad', marginTop: 4 }}>Tes données ne sont jamais vendues, échangées ni commercialisées.</div>
               </div>
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
-                {Object.entries(op.commerces).map(([eid, n]) => (
-                  <span key={eid} style={{ fontSize: 12, color: '#5a6071', background: '#f3f4f6', padding: '3px 9px', borderRadius: 100 }}>{evNames[eid] || eid} · {n}</span>
+            )}
+            <div style={{ ...carte, marginBottom: 10, fontSize: 13, color: '#5a6071', lineHeight: 1.5 }}>
+              <div style={{ fontSize: 13.5, fontWeight: 800, color: '#141a26', marginBottom: 2 }}>Nouveau téléphone ?</div>
+              Pas de mot de passe : rejoue avec le même e-mail, ton compte et tes lots reviennent.
+            </div>
+            {tickets.length > 0 && (
+              <div style={{ ...carte, fontSize: 13, color: '#5a6071' }}>
+                <Ico k="ticket" size={13} style={{ marginRight: 5, verticalAlign: -2 }} />
+                {tickets.length} ticket{tickets.length > 1 ? 's' : ''} de tirage
+                {Array.from(new Set(tickets.map(t => t.super_event_id).filter(Boolean))).slice(0, 2).map(se => (
+                  <a key={se as string} href={`/se/${se}`} style={{ marginLeft: 8, color: HERO, fontWeight: 800, textDecoration: 'none' }}>{seNames[se as string] || 'Opération'}</a>
                 ))}
               </div>
-            </a>
-          ))}
+            )}
+          </>)}
         </div>
-
-        <div style={{ fontSize: 12, color: '#9aa0ad', textAlign: 'center', marginTop: 26, lineHeight: 1.6 }}>
-          Chaque ticket = une chance au tirage.
-        </div>
-        </>)}
       </div>
+
+      {/* Barre des rubriques (toujours visible, pouce) */}
+      <nav data-rubriques style={{ flexShrink: 0, background: '#fff', borderTop: '1px solid #e6e1d8', paddingBottom: 'env(safe-area-inset-bottom)' }}>
+        <div style={{ maxWidth: 540, margin: '0 auto', display: 'flex' }}>
+          {RUBRIQUES.map(r => {
+            const a = rub === r.k
+            const pastille = r.k === 'notifs' ? nonVues.length : r.k === 'bientot' ? bientot.length : r.k === 'lots' ? actifs.length : 0
+            return (
+              <button key={r.k} data-onglet={r.k} onClick={() => ouvrir(r.k)} style={{ flex: 1, position: 'relative', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3, padding: '9px 2px 8px', border: 'none', background: 'none', cursor: 'pointer', color: a ? HERO : '#7a8091', fontWeight: 800, fontSize: 11 }}>
+                <Ico k={r.ico} size={20} />
+                {r.txt}
+                {pastille > 0 && <span style={{ position: 'absolute', top: 4, left: '56%', minWidth: 16, height: 16, borderRadius: 8, background: r.k === 'lots' ? '#0B6E50' : '#DC2626', color: '#fff', fontSize: 10, lineHeight: '16px', textAlign: 'center', padding: '0 4px', boxSizing: 'border-box' }}>{pastille}</span>}
+                {a && <span style={{ position: 'absolute', top: 0, left: '30%', right: '30%', height: 3, borderRadius: 3, background: HERO }} />}
+              </button>
+            )
+          })}
+        </div>
+      </nav>
     </div>
   )
 }
