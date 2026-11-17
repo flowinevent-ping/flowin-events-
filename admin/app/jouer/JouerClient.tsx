@@ -20,6 +20,7 @@ import { MASTER_CSS } from '@/lib/masters/css'
 import { rendreEcran, etatInitial, rotationPourCase, regleBarre, regleParte, regleSuperReel, reglePastille, ecranExiste, DEROULES, type EtatPartie } from '@/lib/masters/engine'
 import { chargerMesTickets, nonVus, versVue, marquerVus, TICKETS_EXEMPLE, type ResultatRow } from '@/lib/masters/tickets'
 import type { VueMaster } from '@/lib/masters/resolve'
+import { estDemo } from '@/lib/demo'
 import { writeJoueur, getJoueurLocal, animationDejaJouee, dejaJoueAujourdhuiCeQr } from '@/lib/parcours'
 
 /* Version du texte de consentement des masters (audit 17/11 : ajout des choix « rester en
@@ -376,6 +377,19 @@ export default function JouerClient(p: Props) {
       r.ticket = res.ticket
       r.inscrit = true
       if (res.gain) { r.gain = { lot: res.gain.lot, cond: res.gain.conditions || 'Gain immédiat', token: res.gain.retraitToken }; if (res.gain.ticketCode) r.ticket = res.gain.ticketCode; montrer('c-billet'); return }
+      /* Mode demo (?demo=1) sur un event de demonstration existant : les ecritures sont court-circuitees,
+         la base ne renvoie donc jamais de gain. La case « gain immediat » de la roue montre quand meme
+         son billet (lot de la case), comme en vrai ; rien n'est enregistre. */
+      if (!res.gain && apres === 'c-billet' && estDemo()) {
+        /* Le lot de demo est range dans l'onglet (sessionStorage) : /moi?demo=1 le montre dans « Mes lots ». */
+        try {
+          const cs = r.caseIdx != null ? v.cases[r.caseIdx] : null
+          const k = 'flowin_demo_lots', l = JSON.parse(sessionStorage.getItem(k) || '[]')
+          l.unshift({ commerce: v.billetChez || v.who.nom, lot: cs ? cs.label : v.billet.nom, ticketCode: r.ticket, eventId: p.evId })
+          sessionStorage.setItem(k, JSON.stringify(l.slice(0, 5)))
+        } catch { /* ignore */ }
+        montrer('c-billet'); return
+      }
       montrer(apres === 'c-billet' && !res.gain ? 'c-ticket' : apres)
     }
 

@@ -73,7 +73,7 @@ Les captures du profil et de l'espace pro / SA ne sont **pas** publiées : elles
 ## Décisions pour Romain
 1. `lot.html` : les conditions NDS des partenaires disent « valable jusqu'au 25 octobre 2026 », alors que NDS n'a pas
    de date limite. **Non modifié** (décision en attente).
-2. Ordre parrainage → coordonnées (gardé, décision du 31/10) : le passer après le ticket ferait gagner 1 geste.
+2. Ordre parrainage → coordonnées : **tranché le 17/11 : parrainage en fin de parcours (fait)**.
 3. Connexion participant par lien magique e-mail : oui / non.
 4. Films : re-rendre la roue ou garder les films tels quels.
 
@@ -88,3 +88,34 @@ Décision de Romain appliquée (remplace l'ordre du 31/10, point 2 ci-dessus tra
 - **Fuite corrigée** : `/parcours/quizmaster?ev=…&demo=1` renvoyait vers le bon jeu en perdant `demo=1` (`versBonJeuSiAutre`), d'où des tentatives d'écriture `joueurs`. `demo` est désormais conservé.
 
 Contrôle Playwright (390 px, build local, `?demo=1`) : quiz, quiz + bonus, quiz solo, roue (ev-demo-spin, ev-flowin-demo), tombola, vote (`/jouer?m=vote`), quizmaster (renvoyé vers quiz) : tous arrivent jusqu'au ticket puis au parrainage, sortie vers le profil vérifiée ; **0 requête non-GET vers supabase.co**. Gestes jusqu'au ticket : **1 de moins** par jeu (le passage obligé « Continuer : mes coordonnées » sur l'écran de parrainage disparaît). `/moi?demo=1` : carte parrainage OK, 5 onglets, pas de défilement.
+
+## 17/11/2026 (fin) : chemins de jeu restants vérifiés de bout en bout
+
+Build local de `main` (copie de travail, `next start`, 390 x 844), toujours avec `?demo=1`, données fictives
+(« Prénom Exemple », `prenom.exemple@example.com`). Toutes les requêtes non-GET vers supabase.co étaient
+enregistrées et bloquées : **0 sur l'ensemble des parcours**.
+
+| Chemin | Résultat | Écrans parcourus |
+|---|---|---|
+| Roue, gain immédiat → billet (`ev-demo-spin`) | **corrigé puis validé** | flash, accueil, règles, roue, ça tourne, gain immédiat, coordonnées (2 volets), billet, parrainage, profil |
+| Roue, gain immédiat → billet (`ev-flowin-demo`, « Découvrez Flowin ») | **corrigé puis validé** | idem ; lot « Mon 1er event offert » |
+| « Découvrez Flowin », case perdue | validé | roue → « Pas cette fois » → « Parrainer 3 amis » → parrainage (règle de relance, pas de formulaire) ; cette roue n'a pas de case « ticket » |
+| Tombola (`ev-demo-tombola`) | validé | flash, accueil, règles, tirer, impression, résultat, coordonnées (2 volets), ticket, parrainage, profil |
+| Quiz + bonus (`ev-demo-quiz`) | validé | 5 questions, résultat, bonus : **les 4 questions répondues**, « +1 ticket », coordonnées, ticket, parrainage, profil |
+| `/moi?demo=1` après la roue | **corrigé puis validé** | lot « Surprise » dans Mes lots (Démo · Roue, À utiliser, QR, n° de billet) ; QR plein écran en 1 toucher ; carte « Parrainer mes amis » (« lien prêt, rien n'est envoyé ») ; pas de défilement de page |
+
+Billet de la roue : nom du commerce (en-tête du billet et « Où »), lot, QR, n° de billet, « Valable jusqu'au »
+(placeholder `[date du tirage à compléter]` sur les events de démo sans date), « Voir mon lot dans mon profil ».
+Pas de logo sur le billet : le modèle n'en prévoit pas (monogramme dans l'en-tête des écrans de jeu) ; non modifié.
+
+Corrections :
+- **Billet jamais montré en démo** : sur un event de démonstration existant en base, `?demo=1` coupe les écritures,
+  donc la base ne renvoie jamais de gain ; la case « gain immédiat » finissait sur le ticket de tirage. En mode démo,
+  le billet de la case est maintenant montré (rien n'est écrit) ; condition affichée « Gain immédiat » au lieu de
+  « le commerce n'a pas encore saisi ses lots » (`app/jouer/JouerClient.tsx`, `lib/masters/engine.ts`).
+- **`/moi?demo=1` vide après une partie** : la partie de démo laisse un identifiant local fictif (`demo-…`), le profil
+  cherchait alors en base et n'affichait rien. Ce cas est traité comme la démo (profil fictif, aucune lecture) et le
+  lot gagné pendant la démo, rangé dans l'onglet, apparaît dans « Mes lots » (`app/moi/page.tsx`).
+
+Aucune redirection ne perd `demo=1` sur ces chemins. Captures : `tests-fin/` et `planche.png` (dossier de travail).
+

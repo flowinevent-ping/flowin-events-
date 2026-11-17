@@ -10,6 +10,7 @@ import { useState, useEffect, useMemo } from 'react'
 import { supabase } from '@/lib/supabase'
 import { Ico } from '@/lib/proicons'
 import { buildInviteLink } from '@/lib/parrainage'
+import { estDemo } from '@/lib/demo'
 import MesLots from '@/components/joueur/MesLots'
 import ConnexionEmail from '@/components/joueur/ConnexionEmail'
 import { fetchCarteCommercesPublique, type CommerceCarte } from '@/lib/carteReseau'
@@ -56,8 +57,21 @@ export default function MonComptePage() {
     try { const s = localStorage.getItem('flowin_joueur'); if (s) local = JSON.parse(s) } catch { /* */ }
     /* Demonstration (?demo=1) sans compte sur ce telephone : profil fictif, aucune lecture ni ecriture. */
     let demo = false
-    try { demo = new URLSearchParams(location.search).get('demo') === '1' } catch { /* */ }
-    if (!local?.id && demo) { setJoueur({ id: 'demo', prenom: 'Prénom', nom: 'Exemple' }); setLoading(false); return }
+    try { demo = new URLSearchParams(location.search).get('demo') === '1' || estDemo() } catch { /* */ }
+    /* Apres une partie de demo, l'identifiant local est fictif (demo-…) : meme profil fictif, et le lot
+       gagne pendant la demo (rangé dans l'onglet par /jouer) apparait dans « Mes lots ». */
+    if (demo && (!local?.id || String(local.id).indexOf('demo') === 0)) {
+      setJoueur({ id: 'demo', prenom: 'Prénom', nom: 'Exemple' })
+      try {
+        const l = JSON.parse(sessionStorage.getItem('flowin_demo_lots') || '[]') as { commerce?: string; lot?: string; ticketCode?: string | null; eventId?: string | null }[]
+        setLots(l.map((x, i) => ({
+          id: 'demo-' + i, commerce: x.commerce || 'Commerce Démo', commerceCle: x.eventId || 'demo', operation: null, type: 'animation' as const,
+          lot: x.lot || 'Lot Démo', valeur: null, ticketCode: x.ticketCode || null, token: 'demo-' + String(x.ticketCode || i).replace(/[^A-Za-z0-9]/g, '').toLowerCase(),
+          etat: 'a_utiliser' as const, gagneLe: new Date().toISOString(), valableJusquAu: null, offertLe: null, eventId: x.eventId || null,
+        })))
+      } catch { /* */ }
+      setLoading(false); return
+    }
     if (!local?.id) { setLoading(false); return }
     const jid = local.id
     ;(async () => {
@@ -252,13 +266,13 @@ export default function MonComptePage() {
         <div style={{ maxWidth: 540, margin: '0 auto' }}>
           {rub === 'lots' && (<>
             {titre('Mes lots', actifs.length ? 'Touche le QR pour le montrer en caisse.' : undefined)}
-            <MesLots lots={tousLots} joueurId={joueur.id} onChange={() => { chargerMesLots(joueur.id).then(setLots).catch(() => { /* */ }) }} vide="Pas encore de lot. Joue dans un commerce près de chez toi !" />
+            <MesLots lots={tousLots} joueurId={joueur.id} onChange={joueur.id === 'demo' ? undefined : () => { chargerMesLots(joueur.id).then(setLots).catch(() => { /* */ }) }} vide="Pas encore de lot. Joue dans un commerce près de chez toi !" />
           </>)}
 
           {rub === 'bientot' && (<>
             {titre('Expirent bientôt', 'Rappels à 1 mois, 15 jours et 48 h.')}
             {bientot.length
-              ? <MesLots lots={bientot} joueurId={joueur.id} onChange={() => { chargerMesLots(joueur.id).then(setLots).catch(() => { /* */ }) }} />
+              ? <MesLots lots={bientot} joueurId={joueur.id} onChange={joueur.id === 'demo' ? undefined : () => { chargerMesLots(joueur.id).then(setLots).catch(() => { /* */ }) }} />
               : <div style={{ ...carte, textAlign: 'center', color: '#5a6071', fontSize: 14 }}>Aucun lot n’expire dans le mois.</div>}
           </>)}
 

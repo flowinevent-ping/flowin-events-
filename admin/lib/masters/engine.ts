@@ -366,7 +366,7 @@ S['c-inscription'] = { tall: true, r: function (v, r) {
 
 S['c-billet'] = { tall: true, r: function (v, r) {
   const nom = r.gain ? r.gain.lot : (r.caseIdx != null && v.cases[r.caseIdx] ? v.cases[r.caseIdx].label : v.billet.nom)
-  const cond = r.gain ? (r.gain.cond || 'Gain immédiat') : v.billet.cond
+  const cond = r.gain ? (r.gain.cond || 'Gain immédiat') : (r.caseIdx != null && v.cases[r.caseIdx] ? 'Gain immédiat' : v.billet.cond)
   const code = r.ticket || 'BL-0000-0000'
   return '<div class="scr bg-m">' + confetti(42, 3) + barre() + hdr(v, { title: 'Gagné !', small: 'Gain immédiat', back: 's-accueil' }) +
     '<div class="body" style="padding-top:2px"><h2 class="h2 a-rise" style="text-align:center;font-size:33px">Bravo, c\'est gagné&nbsp;!</h2>' +
