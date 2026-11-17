@@ -335,6 +335,9 @@
   .resultchip small{font-size:var(--t1)} .resultchip b{font-size:var(--t3)}
   .ptk small{font-size:var(--t1)} .ptk .no{font-size:var(--t5)} .ptk .pm{font-size:var(--t1);font-weight:800;margin-top:4px}
   .paper.static{height:170px} .paper.static .ptk{transform:none;animation:none}
+  .appcap{margin:10px auto 0;width:min(240px,62vw);border-radius:24px;overflow:hidden;border:6px solid #0F172A;box-shadow:var(--sh);background:#fff;pointer-events:none}
+  .appcap img{display:block;width:100%;height:auto;max-height:44vh;object-fit:cover;object-position:top}
+  @media (min-width:1024px){.appcap{width:220px}.appcap img{max-height:45vh}}
   .gcap{font-size:var(--t2);font-weight:700;color:var(--ink);text-align:center;margin-top:10px}
   .jtabs{display:flex;flex-wrap:wrap;gap:6px;margin-top:14px}
   @media (max-width:1023px){ .jtabs{justify-content:center} #jeux .tx{text-align:center} }
@@ -647,32 +650,13 @@
         </div>
       </div>
       <div class="vis" aria-label="Aper&ccedil;us des jeux (non jouables)">
-        <div class="tp on" id="g-marque"><div class="phone" style="--c:#3B5CC4"><div class="ph-top"><span class="mono">BE</span><div><b>Boulangerie Exemple</b><small>Quiz de marque</small></div></div><div class="ph-body"><div class="card qcard"><div class="kicker">Question 1 / 1</div><div class="qtxt">[Votre question sur votre m&eacute;tier]</div></div><div class="opts"><div class="opt"><span class="k">A</span><span>[R&eacute;ponse A]</span></div><div class="opt"><span class="k">B</span><span>[R&eacute;ponse B]</span></div><div class="opt"><span class="k">C</span><span>[R&eacute;ponse C]</span></div></div></div></div>
+        <div class="tp on" id="g-marque"><figure class="appcap"><img src="captures/app-jeu-quiz.jpg" width="520" height="1127" loading="lazy" alt="&Eacute;cran r&eacute;el du quiz dans l&rsquo;application Flowin"></figure>
           <p class="gcap">Renforcez votre marque, &agrave; travers un jeu qui fid&eacute;lise, qui dynamise.</p></div>
-        <div class="tp" id="g-bonus"><div class="phone" style="--c:#3B5CC4">
-          <div class="ph-top"><span class="mono">FE</span><div><b>Festival Exemple</b><small>Quiz + bonus</small></div></div>
-          <div class="ph-body">
-            <div class="card qcard"><div class="kicker">Question 1 / 1</div><div class="qtxt">[Votre question sur votre m&eacute;tier]</div></div>
-            <div class="card qcard" style="margin-top:8px"><div class="kicker">Question bonus &middot; +1 ticket</div><div class="qtxt">[Votre question bonus]</div>
-              <div class="chips"><span class="chip">[Choix 1]</span><span class="chip">[Choix 2]</span><span class="chip">[Choix 3]</span></div></div>
-          </div></div>
+        <div class="tp" id="g-bonus"><figure class="appcap"><img src="captures/app-jeu-quiz-bonus.jpg" width="520" height="1127" loading="lazy" alt="&Eacute;cran r&eacute;el des questions bonus dans l&rsquo;application Flowin"></figure>
           <p class="gcap">Questions bonus&nbsp;: elles int&eacute;ressent et sondent.</p></div>
-        <div class="tp" id="g-tombola"><div class="phone" style="--c:#2B47A8">
-          <div class="ph-top"><span class="mono">FL</span><div><b>Fleuriste Exemple</b><small>Tombola</small></div></div>
-          <div class="ph-body c">
-            <div class="kicker">Tombola du jour</div>
-            <div class="h3">Ticket tombola</div>
-            <div class="machine"><div class="slot"></div><div class="paper static"><div class="ptk"><small>Ticket tombola</small><div class="no">[N&deg;]</div><div class="pm">Tirage au sort &agrave; la date du commerce</div><div class="bc"></div></div></div></div>
-            <div class="legend">Un ticket par jour et par personne</div>
-          </div></div>
+        <div class="tp" id="g-tombola"><figure class="appcap"><img src="captures/app-jeu-tombola.jpg" width="520" height="1127" loading="lazy" alt="&Eacute;cran r&eacute;el de la tombola dans l&rsquo;application Flowin"></figure>
           <p class="gcap">Des lots qui font revenir.</p></div>
-        <div class="tp" id="g-roue"><div class="phone" style="--c:#3B5CC4">
-          <div class="ph-top"><span class="mono">CE</span><div><b>Caf&eacute; Exemple</b><small>Roue de la fortune</small></div></div>
-          <div class="ph-body c">
-            <div class="kicker">Caf&eacute; Exemple</div>
-            <div class="h3">Roue de la fortune</div>
-            <div class="wheelbox"><svg class="pointer" viewBox="0 0 40 48" aria-hidden="true"><path d="M20 46 L4 12 A16 16 0 1 1 36 12 Z" fill="#fff" stroke="#CBD5E2" stroke-width="1.5"/><circle cx="20" cy="15" r="6" fill="#8DA2EC"/></svg><div class="wheel" id="wheel"></div></div>
-          </div></div>
+        <div class="tp" id="g-roue"><figure class="appcap"><img src="captures/app-jeu-roue.jpg" width="520" height="1127" loading="lazy" alt="&Eacute;cran r&eacute;el de la roue de la fortune dans l&rsquo;application Flowin"></figure>
           <p class="gcap">Captez l&rsquo;attention. Faites jouer vos clients et vos futurs clients.</p></div>
       </div>
     </div>
@@ -1069,8 +1053,9 @@
     for (var k = 0; k < 16; k++) { var a = k * 22.5 * Math.PI / 180; h += '<circle class="bulb' + (k % 2 ? ' b2' : '') + '" cx="' + n1(cx + 155 * Math.sin(a)) + '" cy="' + n1(cy - 155 * Math.cos(a)) + '" r="4" fill="#8DA2EC"/>'; }
     return h + '<circle cx="165" cy="165" r="34" fill="#fff" stroke="#CBD5E2" stroke-width="1.5"/><circle cx="165" cy="165" r="14" fill="#8DA2EC"/></svg>';
   }
-  var wheel = $('wheel'), spun = false;
-  wheel.innerHTML = wheelSvg(); wheel.style.transform = 'rotate(-12deg)';
+  /* 17/11/2026 : les aperçus de jeux sont des captures réelles de l'application (captures/app-jeu-*.jpg) */
+  var wheel = $('wheel');
+  if (wheel) { wheel.innerHTML = wheelSvg(); wheel.style.transform = 'rotate(-12deg)'; }
   /* Canal d'origine (?src=) : retenu à la 1re visite, transmis à « Ma première fois » */
   function srcCourant(){
     var m = /[?&]src=([a-z0-9_-]{1,40})/i.exec(location.search), v = m ? m[1].toLowerCase() : '';
