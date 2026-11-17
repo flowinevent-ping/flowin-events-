@@ -70,3 +70,28 @@ fois) → L3 → L4 → L5 (vidéos tournées sur les écrans finis, pour ne pas
 | L17 | **Tickets gagnants Animation dans le profil joueur** (10/11 soir) | Stockage profil + espace pro + déstockage, rappels 1 mois / 15 j / 48 h, « en faire profiter un ami ». | À faire |
 | L18 | **Parcours de publication sans scroll** (10/11 soir) | Carrousel ; « Valider mon bon de commande » ; pas d'« ancien format » ; QR/IBAN banque ; moins de texte ; pas de logo à l'inscription ; champs réduits ; configurer puis payer. | À faire |
 | L19 | **Page de consultation sans login** (10/11 soir) | Accès à tout ce qui est livré : plaquettes, films, carte, parcours pro / joueur / Super Event, captures. | À faire |
+
+## Point au 17/11/2026
+État réel de chaque ligne (aucune ligne ci-dessus n'est supprimée ; seul Romain clôt une ligne).
+
+| N° | État au 17/11 | Preuve |
+|---|---|---|
+| L1 | Fait, à valider par Romain (aperçus de jeux = captures réelles) | `c3798924` ; plaquettes dans le super admin |
+| L2 | Fait, à valider par Romain | plaquette Super Event, `0f50d800` (canal ?src=) |
+| L3 | En cours (autre agent, 17/11) | `2aa783f8` (première version), reprise en cours |
+| L4 | En cours (autre agent, 17/11) | idem |
+| L5 | En cours (autre agent, 17/11) | idem |
+| L6 | Fait (redesign souscription, « Être recontacté » branché CRM, /pro/premiere-fois pré-rempli), à valider | Point au 09/11 (nuit) ; `11bf48dc` |
+| L7 | Fait : parcours de création = configurateur en carrousel jusqu'au bon de commande | `4bd55ea4`, `52ff60e0` |
+| L8 | Fait : demande super event station jeu / sponsor, virement après validation | Point au 09/11 (nuit) ; `5617d00a` |
+| L9 | Fait : espace pro v3 (rapport en carrousel, Hommes/Femmes, chalandise, égaliseur QR) | `5617d00a`, `2c113413`, `55a07660` |
+| L10 | À valider par Romain | visite guidée, page de validation `450bc57b` |
+| L11 | En attente Romain (charte définitive) | — |
+| L12 | Fait le 17/11 (registre disait « plus tard ») : carte des commerces et carte réseau | `e173d7df`, `27983214`, `e292c06a` |
+| L13 | Fait : import fichier client (CSV, Excel, tableur) | `aea8a69e`, `b7706427` |
+| L14 | Étude faite : le système actuel ne tient pas (expéditeur de test Resend, 100/jour) ; recommandation Resend Pro 20 $/mois + domaine vérifié, ~0,40 $/commerce à 50 commerces | `docs/ETUDE-cout-emails-L14-2026-11-17.md` |
+| L15 | Fait : films v4 (v3.2) | `3d14e42d`, `0f50d800`, `ab91188b` |
+| L16 | Lots livrés (configurateur, publication, profil, jeux) ; plan à clore par Romain | `docs/PLAN-parcours-pro-joueur-2026-11-10.md`, audits 10/11 et 17/11 |
+| L17 | Fait : tickets dans le profil, offrir à un ami, rappels | `12a2cffa`, `b0ba7b1c`, `6d02da95` |
+| L18 | Fait : publication sans scroll, « Valider mon bon de commande », QR SEPA | `11bf48dc`, `4bd55ea4` |
+| L19 | Fait : page de consultation sans login | `450bc57b`, onglet Validation `e292c06a` |
