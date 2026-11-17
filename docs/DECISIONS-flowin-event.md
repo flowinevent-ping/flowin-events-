@@ -317,3 +317,7 @@ que sur instruction explicite de Romain.
   campagne, ce que les gens gagnent, piloter en autonomie, récupérer les coordonnées ; ticket offert = coordonnées du
   donneur ET du bénéficiaire.
 - **Piste de prix (non tranchée)** : 2 QR inclus, QR de tracking supplémentaire payant (5, 10 ou 15 € — à décider).
+
+## Prix des QR supplémentaires (Romain, 17/11/2026 — provisoire)
+- **2 QR inclus**, puis **10 € HT par QR de tracking supplémentaire**. Prix provisoire, à confirmer par Romain.
+- Une animation du commerce et sa station d'un Super Event peuvent tourner **en parallèle** (deux interfaces, gains et suivi séparés).
