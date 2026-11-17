@@ -334,3 +334,7 @@ que sur instruction explicite de Romain.
 - **Carte** : la meilleure carte gratuite, lisible, avec géolocalisation et itinéraire en un geste (style Waze :
   ouverture Waze / Google Maps / Plans).
 - Romain délègue en **autonomie complète** : audit, maquettes, corrections, validation.
+
+## Décisions de Romain sur le rapport d'audit du 17/11
+- **Parrainage à la FIN du parcours de jeu**, comme dans NDS 2026 (après les coordonnées et le résultat), et **accessible dans le profil** participant. Remplace l'ordre du 31/10 (parrainage avant coordonnées).
+- **Films : refaire le rendu de la roue** pour qu'elle soit identique à l'application.
