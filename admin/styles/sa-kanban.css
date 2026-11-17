@@ -67,3 +67,9 @@
 .sa-kb-mois{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;
   color:var(--sa-muted);padding:4px 4px 0}
 .sa-kb-mois:first-child{padding-top:0}
+/* Audit 17/11 (expert 5) : sur telephone, une colonne = un ecran (carrousel a glisser, aimante),
+   au lieu de colonnes de 268 px coupees au bord de l'ecran. Ordinateur inchange. */
+@media (max-width:560px){
+  .sa-kanban{scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch}
+  .sa-kb-col{flex:0 0 calc(100vw - 56px);scroll-snap-align:start}
+}

@@ -52,7 +52,7 @@
 @media (max-width:900px){
   .sa-shell{display:block;height:auto;overflow:visible}
   .sa-mobile-bar{display:flex;align-items:center;gap:10px;height:52px;padding:0 16px;background:var(--sa-sb-bg);border-bottom:1px solid var(--sa-sb-border);position:sticky;top:0;z-index:30}
-  .sa-mobile-burger{background:none;border:none;color:#1B3A5C;padding:4px;display:flex;cursor:pointer}
+  .sa-mobile-burger{background:none;border:none;color:#1B3A5C;padding:4px;display:flex;align-items:center;justify-content:center;min-width:44px;min-height:44px;margin-left:-8px;cursor:pointer}
   .sa-mobile-titre{color:#1B3A5C;font-size:17px;font-weight:900;letter-spacing:-.5px}
   .sa-mobile-titre em{font-style:normal;color:#3B5CC4}
   .sa-sb-backdrop{display:block;position:fixed;inset:0;background:rgba(15,23,42,.55);z-index:40}
@@ -60,6 +60,9 @@
   .sa-sb.open{transform:translateX(0)}
   .sa-main{min-height:100vh}
   .sa-content{padding:16px}
+  /* Audit 17/11 (expert 5) : zones de toucher >= 44 px sur telephone (boutons, listes, champs, menu). */
+  .sa-main button,.sa-main select,.sa-main input:not([type=checkbox]):not([type=radio]):not([type=range]):not([type=color]),.sa-sb button,.sa-sb a{min-height:44px}
+  .sa-main input[type=checkbox],.sa-main input[type=radio]{width:20px;height:20px}
 }
 /* ── Topbar ── */
 .sa-topbar{height:52px;background:var(--sa-card);border-bottom:1px solid var(--sa-border);padding:0 24px;display:flex;align-items:center;gap:16px;flex-shrink:0}

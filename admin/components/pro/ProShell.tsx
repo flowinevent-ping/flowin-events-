@@ -5,6 +5,7 @@ import { useEffect, useState } from 'react'
 import { useFermetureOverlay } from '@/lib/useFermetureOverlay'
 import { supabase } from '@/lib/supabase'
 import AccesBloque from './AccesBloque'
+import TablesMobiles from '@/components/dashboard/TablesMobiles'
 import { lireDroitsPro, peutOuvrirNouvelle, DROITS_DEFAUT, type DroitsPro } from '@/lib/droitsPro'
 import { CHARTE_PRO, POLICE_PRO, VARIABLES_CSS, VARIABLES_PRO_CSS } from '@/lib/charte'
 import '@/styles/sa-kanban.css'
@@ -167,7 +168,7 @@ export default function ProShell({ proName, proId, active, children }: { proName
           <span className="fl-logo">Flow<em>in</em> Event</span>
           <span style={{ fontSize: 10.5, fontWeight: 800, letterSpacing: '.12em', color: C.violet }}>PRO</span>
         </span>
-        <button className="pro-drawer-close" onClick={() => setOpen(false)} aria-label="Fermer le menu" style={{ display: 'none', background: 'none', border: 'none', color: C.attenue, fontSize: 22, cursor: 'pointer', lineHeight: 1 }}>×</button>
+        <button className="pro-drawer-close" onClick={() => setOpen(false)} aria-label="Fermer le menu" style={{ display: 'none', background: 'none', border: 'none', color: C.attenue, fontSize: 24, cursor: 'pointer', lineHeight: 1, minWidth: 44, minHeight: 44, marginRight: -10 }}>×</button>
       </div>
       <div style={{ background: C.fond, border: `1px solid ${C.bordure}`, borderRadius: 14, padding: '11px 13px', marginBottom: 20 }}>
         <div style={{ fontSize: 10, fontWeight: 800, letterSpacing: '.12em', textTransform: 'uppercase', color: C.attenue }}>Établissement</div>
@@ -228,13 +229,16 @@ export default function ProShell({ proName, proId, active, children }: { proName
             padding-bottom: env(safe-area-inset-bottom, 0px); box-shadow: 0 -6px 20px rgba(27,58,92,.08);
           }
           .pro-hamburger { display: inline-flex !important; }
+          /* Audit 17/11 (expert 5) : zones de toucher >= 44 px sur telephone. */
+          .pro-main-pad button, .pro-main-pad select, .pro-main-pad input:not([type=checkbox]):not([type=radio]):not([type=range]):not([type=color]) { min-height: 44px; }
+          .pro-main-pad input[type=checkbox], .pro-main-pad input[type=radio] { width: 20px; height: 20px; }
         }
       ` }} />
       {sidebar}
       <div className="pro-drawer-backdrop" onClick={() => setOpen(false)} />
       <main style={{ flex: 1, minWidth: 0 }}>
         <div style={{ background: '#fff', borderBottom: `1px solid ${C.bordure}`, height: 54, padding: '0 24px', display: 'flex', alignItems: 'center', gap: 10, fontSize: 13, color: C.attenue }}>
-          <button className="pro-hamburger" onClick={() => setOpen(true)} aria-label="Menu" style={{ display: 'none', background: 'none', border: 'none', cursor: 'pointer', color: C.accent, padding: 0 }}><Icon k="more" /></button>
+          <button className="pro-hamburger" onClick={() => setOpen(true)} aria-label="Menu" style={{ display: 'none', background: 'none', border: 'none', cursor: 'pointer', color: C.accent, padding: 0, minWidth: 44, minHeight: 44, marginLeft: -12, alignItems: 'center', justifyContent: 'center' }}><Icon k="more" /></button>
           <span className="fl-logo" style={{ fontSize: 15 }}>Flow<em>in</em> Event</span><span>›</span><span style={{ fontWeight: 800, color: C.texte }}>{page?.label ?? 'Mes animations'}</span>
         </div>
         <div className="pro-main-pad" style={{ padding: 26, maxWidth: 1180 }}>
@@ -253,6 +257,7 @@ export default function ProShell({ proName, proId, active, children }: { proName
         </div>
       </main>
       {barreBasse}
+      <TablesMobiles />
     </div>
   )
 }

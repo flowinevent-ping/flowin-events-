@@ -25,7 +25,7 @@ export default function Page() {
 
   useEffect(() => {
     rpcSA<Ligne[]>('admin_rapport_emails_connexion', {}).then((r) => {
-      if (r.erreur) setErreur(r.erreur); else setLignes(r.data ?? [])
+      if (r.erreur) setErreur(r.erreur); else setLignes(Array.isArray(r.data) ? r.data : [])
       setCharge(false)
     })
   }, [])

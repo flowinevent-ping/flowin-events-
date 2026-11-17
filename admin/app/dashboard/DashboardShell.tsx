@@ -4,6 +4,7 @@ import { DashboardProvider } from '@/contexts/DashboardContext'
 import Sidebar from '@/components/dashboard/Sidebar'
 import Drawer from '@/components/dashboard/Drawer'
 import GardeSA from '@/components/dashboard/GardeSA'
+import TablesMobiles from '@/components/dashboard/TablesMobiles'
 import type { FlowinJoueur, FlowinEvent, FlowinPartenaire, FlowinPro, FlowinLot } from '@/lib/types'
 
 interface Props {
@@ -40,6 +41,7 @@ export default function DashboardShell({
             {children}
           </div>
           <Drawer />
+          <TablesMobiles />
         </div>
       </GardeSA>
     </DashboardProvider>

@@ -46,11 +46,14 @@ export function NavCarrousel({ n, i, setI, dernier, suivantBloque, onAvant, onTe
   }
   return (
     <div data-nav-carrousel>
-      <div style={{ display: 'flex', justifyContent: 'center', gap: 8, margin: '16px 0 12px' }}>
+      <div style={{ display: 'flex', justifyContent: 'center', gap: 0, margin: '2px 0 0' }}>
+        {/* Zone de toucher 44 px de haut (audit 17/11) ; le point visible garde sa taille. */}
         {Array.from({ length: n }, (_, k) => (
           <button key={k} type="button" aria-label={`Écran ${k + 1} sur ${n}`} aria-current={k === cur}
             onClick={() => aller(k)}
-            style={{ width: k === cur ? 22 : 9, height: 9, borderRadius: 9, border: 'none', padding: 0, cursor: 'pointer', background: k === cur ? C.violet : C.bordureChamp, transition: 'width .2s' }} />
+            style={{ height: 44, minWidth: 30, border: 'none', padding: '0 4px', cursor: 'pointer', background: 'transparent', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <span style={{ display: 'block', width: k === cur ? 22 : 9, height: 9, borderRadius: 9, background: k === cur ? C.violet : C.bordureChamp, transition: 'width .2s' }} />
+          </button>
         ))}
       </div>
       <div style={{ display: 'flex', justifyContent: 'space-between', gap: 10 }}>
