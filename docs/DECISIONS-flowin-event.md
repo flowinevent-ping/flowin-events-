@@ -321,3 +321,16 @@ que sur instruction explicite de Romain.
 ## Prix des QR supplémentaires (Romain, 17/11/2026 — provisoire)
 - **2 QR inclus**, puis **10 € HT par QR de tracking supplémentaire**. Prix provisoire, à confirmer par Romain.
 - Une animation du commerce et sa station d'un Super Event peuvent tourner **en parallèle** (deux interfaces, gains et suivi séparés).
+
+## Audit organisationnel, design, ergonomie (Romain, 17/11/2026) — règles
+- **Jeux** : rendre le plus fluide et le plus « gaming » possible au sens FONCTIONNEL (moins d'étapes, réactivité, effet
+  de gain), sans changer le design graphique validé. Suggestions et corrections autorisées.
+- **À GARDER ABSOLUMENT** : la collecte des coordonnées telle qu'elle existe, et les choix « rester en contact avec
+  Flowin Event » (offres, bons deals, prochains events) / « rester en contact avec ce commerce » ; données utilisées
+  par Flowin ou par le commerce choisi, **jamais vendues, échangées ni commercialisées**.
+- **Pas de scroll interminable** (règle générale) : carrousel, ou rangement visuel par rubriques.
+- **Profil participant** rangé par rubriques : lots gagnés, lots en jeu dans les commerces de proximité, lots qui
+  vont expirer ; notifications ; compte ; mot de passe oublié.
+- **Carte** : la meilleure carte gratuite, lisible, avec géolocalisation et itinéraire en un geste (style Waze :
+  ouverture Waze / Google Maps / Plans).
+- Romain délègue en **autonomie complète** : audit, maquettes, corrections, validation.
