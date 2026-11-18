@@ -169,11 +169,14 @@ function Tirage({ op, data, setMessage, onChange }: {
      participations), comptes de test exclus -- fetchJoueursEligibles. */
   useEffect(() => { fetchJoueursEligibles(ev.id).then(setEligibles) }, [ev.id])
   const dejaGagnants = useMemo(() => op.gagnants.map(g => g.joueurNom ?? ''), [op.gagnants])
-  const vivier = (eligibles ?? []).filter(j => exclus.indexOf(j.id) < 0)
+  /* Un gain par joueur et par animation, comme le tirage programme et le tirage de super event
+     (audit 18/11) : un joueur deja gagnant (non annule) n est pas retire. */
+  const idsGagnants = useMemo(() => op.gagnants.map(g => g.joueurId ?? '').filter(Boolean), [op.gagnants])
+  const vivier = (eligibles ?? []).filter(j => exclus.indexOf(j.id) < 0 && idsGagnants.indexOf(j.id) < 0)
 
   const tirer = (liste = vivier) => {
     setMessage(null); setMail('idle'); setDernierToken(null)
-    if (!liste.length) { setPropose(null); setMessage({ ok: false, texte: 'Aucun joueur éligible : personne n’a encore joué sur cette animation.' }); return }
+    if (!liste.length) { setPropose(null); setMessage({ ok: false, texte: (eligibles ?? []).length ? 'Aucun joueur éligible : tous les joueurs ont déjà gagné ou ont été écartés.' : 'Aucun joueur éligible : personne n’a encore joué sur cette animation.' }); return }
     setPropose(liste[Math.floor(Math.random() * liste.length)])
   }
 
@@ -242,7 +245,7 @@ function Tirage({ op, data, setMessage, onChange }: {
             <button style={btn} disabled={envoi} onClick={() => {
               const ex = exclus.concat([propose.id])
               setExclus(ex)
-              tirer((eligibles ?? []).filter(j => ex.indexOf(j.id) < 0))
+              tirer((eligibles ?? []).filter(j => ex.indexOf(j.id) < 0 && idsGagnants.indexOf(j.id) < 0))
             }}>Injoignable — retirer au sort</button>
           </div>
         </div>

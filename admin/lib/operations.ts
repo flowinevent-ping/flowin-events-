@@ -157,6 +157,8 @@ export interface LotOperation {
 
 export interface GagnantOperation {
   id: number
+  /** Identifiant du joueur gagnant (tirage : un joueur deja gagnant n est pas retire). */
+  joueurId?: string | null
   joueurNom: string | null
   joueurEmail: string | null
   joueurTel: string | null
@@ -319,12 +321,12 @@ export async function fetchOperationsPro(proId: string): Promise<OperationsPro> 
       : Promise.resolve({ data: [] }),
     partenaireId && seIds.length
       ? supabase.from('tirages')
-        .select('id,joueur_nom,joueur_email,joueur_tel,lot_nom,lot_valeur,ticket_code,retrait_token,notifie_at,retire_at,relance_envoyee_at,created_at,super_event_id,event_id,statut,type')
+        .select('id,joueur_id,joueur_nom,joueur_email,joueur_tel,lot_nom,lot_valeur,ticket_code,retrait_token,notifie_at,retire_at,relance_envoyee_at,created_at,super_event_id,event_id,statut,type')
         .eq('partenaire_id', partenaireId).in('super_event_id', seIds).neq('statut', 'annule').eq('type', 'grand')
       : Promise.resolve({ data: [] }),
     evIds.length
       ? supabase.from('tirages')
-        .select('id,joueur_nom,joueur_email,joueur_tel,lot_nom,lot_valeur,ticket_code,retrait_token,notifie_at,retire_at,relance_envoyee_at,created_at,super_event_id,event_id,statut,type')
+        .select('id,joueur_id,joueur_nom,joueur_email,joueur_tel,lot_nom,lot_valeur,ticket_code,retrait_token,notifie_at,retire_at,relance_envoyee_at,created_at,super_event_id,event_id,statut,type')
         .in('event_id', evIds).neq('statut', 'annule')
       : Promise.resolve({ data: [] }),
     evIds.length
@@ -389,6 +391,7 @@ export async function fetchOperationsPro(proId: string): Promise<OperationsPro> 
     .forEach(t => tirMap.set(Number(t.id), t))
   const tirages: GagnantOperation[] = Array.from(tirMap.values()).map(t => ({
     id: Number(t.id),
+    joueurId: (t.joueur_id as string) ?? null,
     joueurNom: (t.joueur_nom as string) ?? null,
     joueurEmail: (t.joueur_email as string) ?? null,
     joueurTel: (t.joueur_tel as string) ?? null,
