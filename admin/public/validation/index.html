@@ -99,6 +99,9 @@ td:first-child{font-weight:700;color:var(--blue);width:40px}
   <h2>3 vidéos de présentation (L3, L4, L5)</h2>
   <p class="sub">Version de travail, à valider. Chaque vidéo existe en vertical (9:16) et en horizontal (16:9). Écrans réels de l'application. Planches : une image toutes les 3 s.</p>
   <div class="row" id="filmrow5"></div>
+  <h2>Vidéos v6 (storyboards v3)</h2>
+  <p class="sub">Version de travail, à valider. Sous-titres toujours à l'écran. Vertical (9:16), horizontal (16:9), coupes 30 s et 15 s. Planches : une image toutes les 3 s (complet) et 2 s (coupes).</p>
+  <div class="row" id="filmrow6"></div>
 </section>
 
 <section id="pro">
@@ -210,6 +213,25 @@ td:first-child{font-weight:700;color:var(--blue);width:40px}
       '<a class="go" href="/validation/captures/videos-v5-' + films5[g][0].split('-')[0] + '.jpg" target="_blank">Planche</a></div>';
   }
   document.getElementById('filmrow5').innerHTML = h5;
+
+  var films6 = [
+    ['l3-animation', 'L3 · Flowin Animation (commerces)', 'an'],
+    ['l4-super-event', 'L4 · Flowin Super Event (organisateurs)', 'se'],
+    ['l5se-participant', 'L5-SE · Super Event (participants)', 'se']
+  ];
+  var h6 = '';
+  for (var k6 = 0; k6 < films6.length; k6++) {
+    var b6 = '/videos/v6/' + films6[k6][0];
+    h6 += '<div class="card ' + films6[k6][2] + '"><span class="tag t-part">À valider</span><h3>' + films6[k6][1] + '</h3>' +
+      '<video controls playsinline preload="metadata" poster="' + b6 + '-9x16.jpg" src="' + b6 + '-9x16.mp4"></video>' +
+      '<p>Horizontal (16:9) :</p><video controls playsinline preload="none" poster="' + b6 + '-16x9.jpg" src="' + b6 + '-16x9.mp4"></video>' +
+      '<p>Coupe 30 s :</p><video controls playsinline preload="none" poster="' + b6 + '-30s.jpg" src="' + b6 + '-30s.mp4"></video>' +
+      '<p>Coupe 15 s :</p><video controls playsinline preload="none" poster="' + b6 + '-15s.jpg" src="' + b6 + '-15s.mp4"></video>' +
+      '<a class="go" href="/validation/captures/videos-v6-' + films6[k6][0] + '.jpg" target="_blank">Planche</a> ' +
+      '<a class="go" href="/validation/captures/videos-v6-' + films6[k6][0] + '-30s.jpg" target="_blank">Planche 30 s</a> ' +
+      '<a class="go" href="/validation/captures/videos-v6-' + films6[k6][0] + '-15s.jpg" target="_blank">Planche 15 s</a></div>';
+  }
+  document.getElementById('filmrow6').innerHTML = h6;
 
   var caps = [
     ['pub-planche', 'Publication : planche (v1)'], ['pub-01-nos-offres', 'Nos offres'], ['pub-01b-publication-page', 'Page de publication'],
