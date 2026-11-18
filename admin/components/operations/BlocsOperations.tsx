@@ -11,7 +11,7 @@
  * declarent tous les deux, le meme composant se lit donc pareil des deux cotes.
  */
 import { useEffect, useState } from 'react'
-import { supabase } from '@/lib/supabase'
+import { supabase, sessionPourTirage, MESSAGE_CONNEXION_TIRAGE } from '@/lib/supabase'
 import {
   libelleDates, libelleModule, libelleStatut, fetchSuiviOperation, fetchOperationsPro, gagnantsParStation, libelleRemise, marquerRelance,
   type DonneesOperation, type Operation, type OperationsPro, type SuiviOperation, type StatsOperation, type LotOperation, type PartenaireMin, type GagnantOperation,
@@ -240,6 +240,8 @@ function lienRelanceTirage(g: GagnantOperation, type: 'relance' | 'merci', op: D
 
 async function confirmerGagnant(id: number, onChange: () => void) {
   if (!confirm('Confirmer ce gagnant ?\n\nIl apparaîtra alors dans la liste et les billets du partenaire, et son nom s\'inscrira sur le billet.')) return
+  /* 18/11 : marquer_notifie fermee a anon. En mode lien ?pro= sans connexion : on le dit. */
+  if (!await sessionPourTirage()) { alert(MESSAGE_CONNEXION_TIRAGE); return }
   const { error } = await supabase.rpc('marquer_notifie', { p_tirage_id: id })
   if (error) { alert('La confirmation a échoué.'); return }
   onChange()

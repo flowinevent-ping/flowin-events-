@@ -1098,7 +1098,8 @@ const TODAY = new Date('2026-05-03');
   try {
     var _cur = 'flowin_v30_data';
     Object.keys(localStorage).forEach(function(k){
-      if(k.indexOf('flowin_')===0 && k!==_cur) localStorage.removeItem(k);
+      // 18/11 : ne jamais effacer la session admin (sinon toutes les requetes partent en anon).
+      if(k.indexOf('flowin_')===0 && k!==_cur && k!=='flowin_admin_session') localStorage.removeItem(k);
     });
     var _d30 = localStorage.getItem(_cur);
     if(_d30){ try{ var _p=JSON.parse(_d30); if(!_p||!_p.events||!_p.events.length) localStorage.removeItem(_cur); }catch(e){ localStorage.removeItem(_cur); } }
@@ -8112,9 +8113,10 @@ async function gwMarquerNotifie(tid,on){
   try{
     var r=await fetch(FLOWIN_SUPA_URL+'/rest/v1/rpc/marquer_notifie',{
       method:'POST',
-      headers:{apikey:FLOWIN_SUPA_ANON,Authorization:'Bearer '+FLOWIN_SUPA_ANON,'Content-Type':'application/json'},
+      headers:{apikey:FLOWIN_SUPA_ANON,Authorization:'Bearer '+FLOWIN_AUTH,'Content-Type':'application/json'},
       body:JSON.stringify({p_tirage_id:tid,p_on:!!on})
     });
+    if(r.status===401||r.status===403){ toast('Session admin expirée : reconnectez-vous pour marquer l\'envoi.','error'); return; }
     var res=await r.json(); if(!res||res.ok===false) return;
     var v=on?(res.notifie_at||new Date().toISOString()):null;
     (state.gagWins||[]).forEach(function(x){ if(Number(x.tirage_id)===tid) x.notifie_at=v; });
@@ -8361,9 +8363,13 @@ var PT_SE = 'se-nds-2026';
 function ptRpc(name, body){
   return fetch(FLOWIN_SUPA_URL+'/rest/v1/rpc/'+name, {
     method:'POST',
-    headers:{apikey:FLOWIN_SUPA_ANON, Authorization:'Bearer '+FLOWIN_SUPA_ANON, 'Content-Type':'application/json'},
+    /* 18/11 : jeton de la session SA (les ecritures du tirage sont fermees a anon). */
+    headers:{apikey:FLOWIN_SUPA_ANON, Authorization:'Bearer '+FLOWIN_AUTH, 'Content-Type':'application/json'},
     body:JSON.stringify(body||{})
-  }).then(function(r){ return r.ok ? r.json() : null; });
+  }).then(function(r){
+    if(r.status===401||r.status===403){ try{ toast('Session admin expirée : reconnectez-vous pour enregistrer.','error'); }catch(e){} return null; }
+    return r.ok ? r.json() : null;
+  });
 }
 // Gagnants + billets d'un partenaire (RPC partenaire_gagnants : inclut retrait_token).
 function ptLoadGagnants(pid){

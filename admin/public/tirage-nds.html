@@ -469,6 +469,8 @@
 
   async function rpc(fn,body){
     var r=await fetch(SUPA+"/rest/v1/rpc/"+fn,{method:'POST',headers:H,body:JSON.stringify(body)});
+    // 18/11 : les ecritures du tirage exigent la session SA (fermees a anon en base).
+    if(r.status===401||r.status===403) throw new Error('Session admin expirée ou accès refusé : reconnectez-vous (menu Flowin > connexion) puis relancez.');
     if(!r.ok) throw new Error('HTTP '+r.status+' '+(await r.text()));
     return await r.json();
   }

@@ -13,7 +13,7 @@
  *
  * Rien n est code en dur sur NDS : le super event est toujours un parametre.
  */
-import { supabase } from './supabase'
+import { supabase, sessionPourTirage, MESSAGE_CONNEXION_TIRAGE } from './supabase'
 import { BASE_CANONIQUE } from './qrPermalien'
 import { GMAIL_COMPOSE_BASE } from './messaging'
 
@@ -80,6 +80,7 @@ export async function fetchEtatPartenaire(
 
 /** Confirme un gagnant : il devient visible du partenaire et son billet se nomme. */
 export async function confirmerGagnant(tirageId: number): Promise<boolean> {
+  if (!await sessionPourTirage()) { if (typeof window !== 'undefined') window.alert(MESSAGE_CONNEXION_TIRAGE); return false }
   const { error } = await supabase.rpc('marquer_notifie', { p_tirage_id: tirageId })
   if (error) { console.error('[confirmerGagnant]', error.message); return false }
   return true
@@ -92,6 +93,7 @@ export async function confirmerGagnant(tirageId: number): Promise<boolean> {
 export async function annulerEtRetirer(
   tirageId: number, partenaireId: string, lotNom: string, lotValeur: number
 ): Promise<{ ok: boolean; erreur?: string }> {
+  if (!await sessionPourTirage()) return { ok: false, erreur: MESSAGE_CONNEXION_TIRAGE }
   const { data: annul, error: e1 } = await supabase.rpc('annuler_tirage', { p_tirage_id: tirageId })
   if (e1) { console.error('[annulerEtRetirer] annuler', e1.message); return { ok: false, erreur: e1.message } }
   const r = annul as { ok: boolean; erreur?: string } | null

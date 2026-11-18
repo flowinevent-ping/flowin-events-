@@ -93,3 +93,23 @@ const fetchVivant: typeof fetch = (input, init) => (typeof window === 'undefined
 export const supabaseVivant = createClient(SUPABASE_URL, SUPABASE_ANON, { global: { fetch: fetchVivant } })
 
 export { SUPABASE_URL, SUPABASE_ANON }
+
+/* ── Ecritures du tirage (securite 18/11/2026) ─────────────────────────────────
+   attribuer_gain_joueur, tirage_super_event, annuler_tirage, marquer_notifie, tirage_lot,
+   tirage_soir sont fermees a anon (sql/2026-11-18-tirage-correctifs.sql). Avant l'appel,
+   on verifie qu'un jeton de session part bien avec la requete : session SA sur /dashboard,
+   sinon session pro supabase-js. Sans session (mode lien ?pro= sans connexion) : on ne
+   tente rien et l'ecran affiche MESSAGE_CONNEXION_TIRAGE. En demo : rien ne part, on laisse
+   passer (la demo court-circuite deja l'ecriture). */
+export const MESSAGE_CONNEXION_TIRAGE =
+  'Connexion requise : pour tirer, confirmer ou annuler un gagnant, connectez-vous à votre espace (identifiant et mot de passe).'
+
+export async function sessionPourTirage(): Promise<boolean> {
+  if (typeof window === 'undefined') return false
+  if (fetchDemo()) return true
+  if (surEcranAdmin() && await sessionSAFraiche()) return true
+  try {
+    const { data } = await supabase.auth.getSession()
+    return !!data.session?.access_token
+  } catch { return false }
+}

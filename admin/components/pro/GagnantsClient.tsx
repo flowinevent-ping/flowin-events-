@@ -22,6 +22,7 @@
 
 import { useEffect, useMemo, useState } from 'react'
 import { supabase } from '@/lib/supabase'
+import { MESSAGE_CONNEXION_TIRAGE } from '@/lib/supabase'
 import { marquerGainUtilise, enregistrerTirage, envoyerTicketGagnant, fetchJoueursEligibles, type JoueurEligible } from '@/lib/dashboard'
 import type { DonneesOperation, GagnantOperation, OperationsPro } from '@/lib/operations'
 import { fetchOperationsPro, gagnantsParStation, libelleRemise, marquerRelance } from '@/lib/operations'
@@ -191,7 +192,7 @@ function Tirage({ op, data, setMessage, onChange }: {
       partenaireId: data.partenaire?.id ?? null,
       joueur: { id: propose.id },
     })
-    if (!res.ok) { setEnvoi(false); setMessage({ ok: false, texte: 'Le tirage n’a pas pu être enregistré.' }); return }
+    if (!res.ok) { setEnvoi(false); setMessage({ ok: false, texte: res.connexionRequise ? MESSAGE_CONNEXION_TIRAGE : 'Le tirage n’a pas pu être enregistré.' }); return }
     setDernierToken(res.retraitToken)
     if (propose.email) {
       setMail('envoi')

@@ -1,4 +1,4 @@
-import { supabase, supabasePublic } from './supabase'
+import { supabase, supabasePublic, sessionPourTirage } from './supabase'
 import { sansGabarit } from './operations'
 import type { FlowinJoueur, FlowinEvent, FlowinPartenaire, FlowinLot, FlowinPro } from './types'
 
@@ -494,7 +494,9 @@ export async function enregistrerTirage(params: {
   partenaireId?: string | null
   lotValeur?: number | null
   joueur: { id: string; prenom?: string | null; nom?: string | null; email?: string | null; tel?: string | null }
-}): Promise<{ ok: boolean; code: string; retraitToken: string | null }> {
+}): Promise<{ ok: boolean; code: string; retraitToken: string | null; connexionRequise?: boolean }> {
+  /* 18/11 : attribuer_gain_joueur fermee a anon -- sans session, on ne tente rien. */
+  if (!await sessionPourTirage()) return { ok: false, code: '', retraitToken: null, connexionRequise: true }
   /* 28/07/2026 -- remplace l'ecriture dans se_gains (dead-end, aucun retrait_token, aucun
    * billet exploitable) par attribuer_gain_joueur(), RPC additive miroir de tirage_lot() deja
    * en prod. Ecrit dans `tirages`, meme table que le mecanisme de validation QR deja utilise

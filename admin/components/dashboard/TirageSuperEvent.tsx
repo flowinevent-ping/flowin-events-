@@ -11,7 +11,7 @@
  */
 
 import { useEffect, useState } from 'react'
-import { supabase } from '@/lib/supabase'
+import { supabase, sessionPourTirage, MESSAGE_CONNEXION_TIRAGE } from '@/lib/supabase'
 import { SectionHeader } from './DashboardUI'
 import { Ico } from '@/lib/proicons'
 
@@ -44,11 +44,13 @@ export default function TirageSuperEvent({ seId, stations }: { seId: string; sta
   useEffect(() => { charger() }, [seId, cle])
 
   const nomLot = (l: LotSE) => (l.titre || l.nom || 'Lot')
-  const dejaTires = (l: LotSE) => tires.filter(t => t.event_id === l.event_id && t.lot_nom === nomLot(l)).length
+  /* 18/11 : le SQL corrige enregistre lots.nom d'abord ; on compte les deux libelles. */
+  const dejaTires = (l: LotSE) => tires.filter(t => t.event_id === l.event_id && (t.lot_nom === l.nom || t.lot_nom === l.titre)).length
 
   async function tirer(l: LotSE) {
     const n = Math.max(1, nb[l.id] ?? 1)
     setOccupe(l.id); setMessage(null)
+    if (!await sessionPourTirage()) { setOccupe(null); setMessage({ ok: false, texte: MESSAGE_CONNEXION_TIRAGE }); return }
     const { data, error } = await supabase.rpc('tirage_super_event', { p_lot_id: l.id, p_nb: n })
     setOccupe(null)
     if (error) { setMessage({ ok: false, texte: `Tirage impossible — ${error.message}` }); return }
