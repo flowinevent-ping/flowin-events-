@@ -159,3 +159,8 @@ Avant toute livraison, chaque texte est relu contre ce fichier (et la liste « i
   clients ; **capter le flux des passants** ; **encourager le parrainage** pour la visibilité.
 - On **publie** un jeu (on ne le crée pas) : **« Publiez en quelques clics votre animation 100 %
   automatisée. »** Aucune charge en plus : **aussi simple que coller une affiche, tout est géré ensuite.**
+
+## Promesse et signature (Romain, 18/11/2026) — à reprendre telles quelles
+- **Promesse : « Faites jouer, faites grandir votre fichier, faites-les revenir. »**
+- **Signature : « Flowin, l'animation plug and play. »**
+- Voix off des vidéos : voix « Vivienne », jeune femme, ton enjoué (seule voix testée qui prononce « Flowin » correctement).
