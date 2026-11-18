@@ -523,7 +523,7 @@ function trajetAnim(t,el,col){var tr=$(el,'#trace'),L=tr.getTotalLength(),p=eo(w
  allume(el,1,win(t,.2,.5),col);allume(el,2,p>.55?win(p,.55,.65):0,col);allume(el,4,p>.97?1:0,col);}
 var TX=136,TY=300;
 if(FILM==='l3v6'){
- sc(4.4,'F c30 c15',function(){return cp('Animez votre clientèle. <em>Gagnez de nouveaux clients.</em>')+sol()+A(30,350,boutique(480))+A(78,500,affiche(false,120),'z-index:3')+C('alex','alex','coucou','joie',190,300,500);},
+ sc(4.4,'F c30 c15 d15:3.3 ',function(){return cp('Animez votre clientèle. <em>Gagnez de nouveaux clients.</em>')+sol()+A(30,350,boutique(480))+A(78,500,affiche(false,120),'z-index:3')+C('alex','alex','coucou','joie',190,300,500);},
   function(t,el){bob($(el,'#alex'),t);});
  sc(4.4,'F',function(){return cp('Publiez en quelques clics <em>votre animation.</em>')+sol()+A(30,350,boutique(480))+A(78,500,affiche(false,120),'opacity:0;z-index:3" id="aff')+C('alex','alex','debout','sourire',190,300,500);},
   function(t,el){var a=$(el,'#aff'),p=eo(win(t,.3,1));at(a,lerp(200,0,p),lerp(140,0,p),lerp(.6,1,p),win(t,.3,.5),lerp(-25,-3,p));repose($(el,'#alex'),'alex',t<1?'affiche':'coucou',t<1?'sourire':'joie',{w:190});bob($(el,'#alex'),t);});
@@ -550,27 +550,27 @@ if(FILM==='l3v6'){
   function(t,el){barsAnim(el,t,.3);});
  sc(4.6,'F',function(){return cp('Votre fichier client grandit. <em>Votre visibilité aussi.</em>')+fileHTML()+C('alex','alex','telephone','joie',170,30,560);},
   function(t,el){fichierAnim(el,t,.3,2.4,5);bob($(el,'#alex'),t);});
- sc(6,'F c30 c15',function(){return fin('Flowin, <b>l\'animation client locale, plug and play.</b>','','Je publie mon animation',QR_L3,'flowin-events.vercel.app/pro/premiere-fois');},finAnim);
+ sc(6,'F c30 c15 d30:6.2 d15:6.2 ',function(){return fin('Faites jouer, faites grandir votre fichier, <b>faites-les revenir.</b>','Flowin, l\'animation plug and play.','Je publie mon animation',QR_L3,'flowin-events.vercel.app/pro/premiere-fois');},finAnim);
 }
 if(FILM==='l4v6'){
- sc(4.4,'F c30 c15',function(){return cp('Vous organisez <em>un événement ?</em>')+A(30,330,sceneSE())+A(0,640,'<div style="width:540px;height:320px;background:#0A1426"></div>')+C('sam','sam','affiche','sourire',190,320,420)+A(30,800,foule(9,480));},
+ sc(4.4,'F c30 c15 d30:2.4 ',function(){return cp('Vous organisez <em>un événement ?</em>')+A(30,330,sceneSE())+A(0,640,'<div style="width:540px;height:320px;background:#0A1426"></div>')+C('sam','sam','affiche','sourire',190,320,420)+A(30,800,foule(9,480));},
   function(t,el){fouleAnim(el,t);bob($(el,'#sam'),t);});
- sc(5,'F c30 c15',function(){var h='',pos=[[40,320,'Vitrines'],[300,320,'Réseaux sociaux'],[40,560,'Clients'],[300,560,'Commerces']];for(var i=0;i<4;i++)h+=A(pos[i][0],pos[i][1],'<div class="card" style="width:200px;text-align:center;padding:14px"><div style="display:flex;justify-content:center;margin-bottom:8px">'+affiche(true,86)+'</div><b style="font-size:20px">'+pos[i][2]+'</b></div>','opacity:0" data-c="1');
+ sc(5,'F c30 c15 d30:3.3 ',function(){var h='',pos=[[40,320,'Vitrines'],[300,320,'Réseaux sociaux'],[40,560,'Clients'],[300,560,'Commerces']];for(var i=0;i<4;i++)h+=A(pos[i][0],pos[i][1],'<div class="card" style="width:200px;text-align:center;padding:14px"><div style="display:flex;justify-content:center;margin-bottom:8px">'+affiche(true,86)+'</div><b style="font-size:20px">'+pos[i][2]+'</b></div>','opacity:0" data-c="1');
    return cp('Connectez votre événement <em>avec l\'impact du réseau local.</em>')+h+A(220,470,affiche(true,100),'z-index:5" id="src');},
   function(t,el){var c=$$(el,'[data-c]'),X=[40,300,40,300],Y=[320,320,560,560];for(var i=0;i<4;i++){var p=eo(win(t,.4+i*.3,1+i*.3));at(c[i],(220-X[i])*(1-p),(470-Y[i])*(1-p),.5+.5*p,p);}at($(el,'#src'),0,0,1,1-win(t,1.8,2.2));});
  sc(5,'F',function(){return cp('Diffusez votre événement auprès des partenaires, <em>en quelques clics.</em>')+tel('conf-recap',TX,TY)+doigt();},
   function(t,el){tap($(el,'.fg'),t,px(TX,330),px(TY,277),.5,1,1.4);});
- sc(5.6,'F c30',function(){return cp('Invitez les commerces de votre ville : <em>chaque partenaire devient une station jeu qui relaie votre communication.</em>')+sol(true)+A(30,350,boutique(480,{se:true}))+A(78,500,affiche(true,120),'z-index:3')+A(150,330,'<div class="pill" style="font-size:22px;padding:12px 20px">Station jeu</div>','opacity:0" data-in=".8')+C('alex','alex','coucou','joie',170,320,520);},
+ sc(5.6,'F c30 d30:4.8 ',function(){return cp('Invitez les commerces de votre ville : <em>chaque partenaire devient une station jeu qui relaie votre communication.</em>')+sol(true)+A(30,350,boutique(480,{se:true}))+A(78,500,affiche(true,120),'z-index:3')+A(150,330,'<div class="pill" style="font-size:22px;padding:12px 20px">Station jeu</div>','opacity:0" data-in=".8')+C('alex','alex','coucou','joie',170,320,520);},
   function(t,el){bob($(el,'#alex'),t);});
- sc(4.8,'F c30',function(){return cp('Vos participants voient <em>votre événement sur la carte.</em>')+tel(['carte','carte-autour'],TX,TY);},
+ sc(4.8,'F c30 d30:2.7 ',function(){return cp('Vos participants voient <em>votre événement sur la carte.</em>')+tel(['carte','carte-autour'],TX,TY);},
   function(t,el){telAnim(el,t,[2]);});
  sc(5.2,'F',function(){return cp('Avant : augmentez la visibilité. <em>Des lots à gagner : places, invitations, goodies.</em>')+lots3();});
  sc(5.2,'F',function(){return cp('Pendant : on joue à l\'événement et chez les partenaires. <em>Mesurez la fréquentation sur place.</em>')+tel(['jeu-accueil','roue-tourne'],TX,TY)+doigt();},
   function(t,el){tap($(el,'.fg'),t,px(TX,195),px(TY,612),.4,.9,1.2);telAnim(el,t,[1.1]);});
  /* coupe 30 s : plans 6 et 7 fusionnes (les deux legendes exactes se succedent) */
- sc(6.4,'c30',function(){return cp('Avant : augmentez la visibilité. <em>Des lots à gagner : places, invitations, goodies.</em>','ca')+cp('Pendant : on joue à l\'événement et chez les partenaires. <em>Mesurez la fréquentation sur place.</em>','cb')+'<div class="a" id="la" style="left:0;top:0;width:540px;height:960px">'+lots3()+'</div>'+'<div class="a" id="lb" style="left:0;top:0;width:540px;height:960px;opacity:0">'+tel(['roue-tourne','roue-gain'],TX,TY)+'</div>';},
-  function(t,el){var o=win(t,3,3.3);$(el,'#ca').style.opacity=1-o;$(el,'#cb').style.opacity=o;$(el,'#la').style.opacity=1-o;$(el,'#lb').style.opacity=o;telAnim($(el,'#lb'),t,[4.6]);
-   var k=$(el,'#cb').children;for(var j=0;j<k.length;j++){var p=win(t,3.05+j*.12,3.4+j*.12);at(k[j],0,26*(1-eo(p)),1,p);}});
+ sc(6.4,'c30 d30:9.3 ',function(){return cp('Avant : augmentez la visibilité. <em>Des lots à gagner : places, invitations, goodies.</em>','ca')+cp('Pendant : on joue à l\'événement et chez les partenaires. <em>Mesurez la fréquentation sur place.</em>','cb')+'<div class="a" id="la" style="left:0;top:0;width:540px;height:960px">'+lots3()+'</div>'+'<div class="a" id="lb" style="left:0;top:0;width:540px;height:960px;opacity:0">'+tel(['roue-tourne','roue-gain'],TX,TY)+'</div>';},
+  function(t,el){var o=win(t,3.3,3.6);$(el,'#ca').style.opacity=1-o;$(el,'#cb').style.opacity=o;$(el,'#la').style.opacity=1-o;$(el,'#lb').style.opacity=o;telAnim($(el,'#lb'),t,[4.6]);
+   var k=$(el,'#cb').children;for(var j=0;j<k.length;j++){var p=win(t,3.35+j*.12,3.7+j*.12);at(k[j],0,26*(1-eo(p)),1,p);}});
  sc(5.2,'F',function(){return cp('Quiz et questions bonus : <em>gardez le contact, mieux connaître vos participants.</em>')+tel('quiz',TX,TY)+doigt();},
   function(t,el){tap($(el,'.fg'),t,px(TX,200),px(TY,207),.6,1.1,1.5);});
  sc(4.8,'F',function(){return cp('La roue : <em>des lots immédiats ou un tirage au sort.</em>')+tel(['roue-tourne','roue-gain','billet'],TX,TY);},
@@ -579,8 +579,8 @@ if(FILM==='l4v6'){
   function(t,el){$(el,'#ur').setAttribute('transform','rotate('+(600*eo(win(t,0,1.5)))+' 90 90)');});
  sc(4.8,'F',function(){return cp('Diffusez vos offres. <em>Détenez des chiffres utiles.</em>')+A(50,320,egaliseur())+C('sam','sam','tendg','sourire',160,320,600);},
   function(t,el){barsAnim(el,t,.2);bob($(el,'#sam'),t);});
- sc(6.4,'F c30 c15',function(){return cp('<em>Nuits du Sud 2026 :</em>')+stat('2&nbsp;804','passages',230,'.2')+stat('plus de 70','lots dans les commerces locaux',400,'1')+stat('56&nbsp;%','des participants souhaitent garder le contact',570,'1.8');});
- sc(6,'F c30 c15',function(){return fin('Flowin Super Event : <b>la super diffusion locale.</b>','','Je diffuse mon événement',QR_L4,'flowin-events.vercel.app/validation/plaquette-super-event-v3.html');},finAnim);
+ sc(6.4,'F c30 c15 d30:3.4 ',function(){return cp('<em>Nuits du Sud 2026 :</em>')+stat('2&nbsp;804','passages',230,'.2')+stat('plus de 70','lots dans les commerces locaux',400,'1')+stat('56&nbsp;%','des participants souhaitent garder le contact',570,'1.8');});
+ sc(6,'F c30 c15 d30:4.1 ',function(){return fin('Flowin Super Event : <b>la super diffusion locale.</b>','','Je diffuse mon événement',QR_L4,'flowin-events.vercel.app/validation/plaquette-super-event-v3.html');},finAnim);
 }
 if(FILM==='l5se'){
  sc(5.4,'F c30 c15',function(){return cp('Gagne tes places <em>pour l\'événement !</em>')+A(30,330,sceneSE())+A(0,640,'<div style="width:540px;height:320px;background:#0A1426"></div>')+C('lea','lea','bras','joie',190,320,420)+A(30,800,foule(9,480));},
@@ -602,8 +602,9 @@ var COURTS={f1:[0,2,3,12,14],f2:[0,1,3,5,7],f3:[0,1,3,12,13],f4:[0,2,4,7,9],f5:[
 if(COURTS[FILM])for(var i=0;i<S.length;i++)S[i].court=COURTS[FILM].indexOf(i)>=0;
 /* V3 : chaque plan tient plus longtemps (k>1 : animation identique, lecture plus longue) ; version courte calée sur 15 s */
 var LENT=V6?1:1.15;
-if(V6){var T=[],acc=0,tot=0,kc=1;for(var i=0;i<S.length;i++){S[i].inn=S[i].tg.indexOf(CUT?' c'+CUT+' ':' F ')>=0;if(S[i].inn)tot+=S[i].d;}if(CUT)kc=CUT/tot;
- for(i=0;i<S.length;i++)if(S[i].inn){S[i].d0=S[i].d;S[i].v=1/kc;S[i].d=S[i].d*kc;S[i].a=acc;acc+=S[i].d;S[i].b=acc;T.push(S[i]);}S=T;}
+/* v6.1 : jeton ' d30:X ' / ' d15:X ' = duree imposee du plan dans la coupe (voix off), les autres plans se partagent le reste */
+if(V6){var T=[],acc=0,tot=0,kc=1,fx=0,mo;for(var i=0;i<S.length;i++){S[i].inn=S[i].tg.indexOf(CUT?' c'+CUT+' ':' F ')>=0;mo=CUT?S[i].tg.match(new RegExp(' d'+CUT+':([0-9.]+) ')):null;S[i].fx=mo?parseFloat(mo[1]):0;if(S[i].inn){if(S[i].fx)fx+=S[i].fx;else tot+=S[i].d;}}if(CUT)kc=(CUT-fx)/tot;
+ for(i=0;i<S.length;i++)if(S[i].inn){S[i].d0=S[i].d;var nd=S[i].fx||S[i].d*kc;S[i].v=S[i].d0/nd;S[i].d=nd;S[i].a=acc;acc+=S[i].d;S[i].b=acc;T.push(S[i]);}S=T;}
 if(V6){}else if(COURT){var T=[],acc=0,tot=0;for(var i=0;i<S.length;i++)if(S[i].court)tot+=S[i].d;var kc=15/tot;for(i=0;i<S.length;i++)if(S[i].court){S[i].v=1/kc;S[i].d=S[i].d*kc;S[i].a=acc;acc+=S[i].d;S[i].b=acc;T.push(S[i]);}S=T;}
 else{var acc=0;for(var i=0;i<S.length;i++){S[i].v=1;S[i].d0=S[i].d;S[i].d=S[i].d*LENT;S[i].a=acc;acc+=S[i].d;S[i].b=acc;}}
 var CIB={l3v6:'Pour les commerçants',l4v6:'Pour les organisateurs',l5se:'Pour les participants',l3:'Pour les commerçants',l4:'Pour les organisateurs et les commerces',l5:'Pour les participants',f1:'Pour les commerçants',f4:'Pour les commerçants',f2:'Pour les participants',f5:'Pour les participants',f3:'Pour les organisateurs d\'événements'}[FILM]||'';
