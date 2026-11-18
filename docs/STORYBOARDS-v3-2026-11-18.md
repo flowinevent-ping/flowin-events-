@@ -45,3 +45,10 @@ Non inclus (non validés) : prix « Première année -50 % » ; « gratuit » (a
 6. Retrouve tes lots dans ton profil. Parraine tes amis.
 7. FIN : « Un événement ? Gagne tes places, découvre les lots dans ta ville. » + QR « Je joue »
 30 s : 1, 3, 4, 5, 7 · 15 s : 1, 4, 7
+
+## Note — fin L3 v6.1 (Romain, 18/11/2026)
+- Fin L3 (complet, 16:9, 30 s, 15 s) remplacée par la **promesse** « Faites jouer, faites grandir votre fichier,
+  faites-les revenir. » suivie de la **signature** « Flowin, l'animation plug and play. » (QR et « Je publie mon animation » inchangés).
+  L'ancienne fin « Flowin, l'animation client locale, plug and play. » n'est plus utilisée.
+- Fins L4 (« Flowin Super Event : la super diffusion locale. ») et L5-SE inchangées.
+- Voix off (Vivienne) = légende de chaque plan, mot pour mot.
