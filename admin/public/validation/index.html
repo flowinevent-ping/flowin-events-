@@ -96,6 +96,9 @@ td:first-child{font-weight:700;color:var(--blue);width:40px}
   <h2>5 films réseaux sociaux</h2>
   <p class="sub">Version 3 : toutes vos corrections sont faites (rythme plus lent, cible affichée, fins avec QR par cible). Versions courtes : 15 s. Planches : une image toutes les 2 s.</p>
   <div class="row" id="filmrow"></div>
+  <h2>3 vidéos de présentation (L3, L4, L5)</h2>
+  <p class="sub">Version de travail, à valider. Chaque vidéo existe en vertical (9:16) et en horizontal (16:9). Écrans réels de l'application. Planches : une image toutes les 3 s.</p>
+  <div class="row" id="filmrow5"></div>
 </section>
 
 <section id="pro">
@@ -194,6 +197,20 @@ td:first-child{font-weight:700;color:var(--blue);width:40px}
   }
   fr.innerHTML = h;
 
+  var films5 = [
+    ['l3-animation', 'L3 · Flowin Animation · présentation et tuto', 'an'],
+    ['l4-super-event', 'L4 · Flowin Super Event', 'se'],
+    ['l5-utilisateur', 'L5 · Vision utilisateur', 'an']
+  ];
+  var h5 = '';
+  for (var g = 0; g < films5.length; g++) {
+    h5 += '<div class="card ' + films5[g][2] + '"><span class="tag t-part">À valider</span><h3>' + films5[g][1] + '</h3>' +
+      '<video controls playsinline preload="metadata" poster="/videos/v5/' + films5[g][0] + '-9x16.jpg" src="/videos/v5/' + films5[g][0] + '-9x16.mp4"></video>' +
+      '<p>Format horizontal (16:9) :</p><video controls playsinline preload="none" poster="/videos/v5/' + films5[g][0] + '-16x9.jpg" src="/videos/v5/' + films5[g][0] + '-16x9.mp4"></video>' +
+      '<a class="go" href="/validation/captures/videos-v5-' + films5[g][0].split('-')[0] + '.jpg" target="_blank">Planche</a></div>';
+  }
+  document.getElementById('filmrow5').innerHTML = h5;
+
   var caps = [
     ['pub-planche', 'Publication : planche (v1)'], ['pub-01-nos-offres', 'Nos offres'], ['pub-01b-publication-page', 'Page de publication'],
     ['pub-02-animation-en-attente', 'Animation en attente'], ['pub-03-bon-prerempli', 'Bon de commande prérempli'],
@@ -222,9 +239,9 @@ td:first-child{font-weight:700;color:var(--blue);width:40px}
   var etat = [
     ['L1', 'Plaquette Animation V3', 'ok', 'Faite'],
     ['L2', 'Plaquette Super Event V3', 'ok', 'Faite'],
-    ['L3', 'Vidéo Animation (tuto)', 'todo', 'À faire'],
-    ['L4', 'Vidéo Super Event', 'todo', 'À faire'],
-    ['L5', 'Vidéo vision joueur', 'todo', 'À faire'],
+    ['L3', 'Vidéo Animation (tuto)', 'part', 'Faite, à valider'],
+    ['L4', 'Vidéo Super Event', 'part', 'Faite, à valider'],
+    ['L5', 'Vidéo vision joueur', 'part', 'Faite, à valider'],
     ['L6', 'Première connexion (redesign)', 'part', 'Partiel'],
     ['L7', 'Création d\'animation', 'part', 'Partiel'],
     ['L8', 'Demande Super Event', 'part', 'Partiel'],

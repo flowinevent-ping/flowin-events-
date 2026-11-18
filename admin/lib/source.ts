@@ -19,6 +19,9 @@ export const CANAUX: { v: string; label: string }[] = [
   { v: 'video-participant-se', label: 'Vidéo participants super event' },
   { v: 'video-partenaire-se', label: 'Vidéo partenaires / super-event' },
   { v: 'video-organisateur', label: 'Vidéo organisateurs' },
+  { v: 'video-tuto-animation', label: 'Vidéo Animation présentation et tuto' },
+  { v: 'video-super-event', label: 'Vidéo Super Event présentation' },
+  { v: 'video-vision-utilisateur', label: 'Vidéo vision utilisateur' },
   { v: 'salon', label: 'Salon / rencontre' },
   { v: 'reseaux', label: 'Réseaux sociaux' },
 ]
