@@ -142,8 +142,15 @@
 (function(){
   var BASE='https://ywcqtupgoxfzkddqkztk.supabase.co/rest/v1/';
   var KEY='sb_publishable_yQcGyoh4UdlUCwA96RKSwg_3jMJVVb1';
-  var H={'apikey':KEY,'Authorization':'Bearer '+KEY,'Content-Type':'application/json'};
-  var HMIN={'apikey':KEY,'Authorization':'Bearer '+KEY,'Content-Type':'application/json','Prefer':'return=minimal'};
+  /* Sécurité RLS phase 2 (19/11) : la table prospection est réservée au Super Admin.
+     On envoie le jeton de la session SA (porte /admin-connexion.html), jamais la clé seule. */
+  var _S=(function(){try{return JSON.parse(localStorage.getItem('flowin_admin_session')||'null');}catch(e){return null;}})();
+  if(!_S||!_S.access_token||(_S.expires_at&&Math.floor(Date.now()/1000)>_S.expires_at-60)){
+    location.replace('/admin-connexion.html?next='+encodeURIComponent(location.pathname)); return;
+  }
+  var AUTH=_S.access_token;
+  var H={'apikey':KEY,'Authorization':'Bearer '+AUTH,'Content-Type':'application/json'};
+  var HMIN={'apikey':KEY,'Authorization':'Bearer '+AUTH,'Content-Type':'application/json','Prefer':'return=minimal'};
 
   var ETATS=[
     {v:'a_contacter',l:'À contacter',c:'#5B6B8C'},

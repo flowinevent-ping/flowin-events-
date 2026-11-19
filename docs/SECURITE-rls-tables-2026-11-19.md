@@ -65,3 +65,51 @@ joueur anonyme : jouer une animation de bout en bout (inscription + participatio
 ## Appliqué en production le 19/11/2026 (accord de Romain : les 18 pros sans accès sont des comptes de test)
 Ordre appliqué : tirage-correctifs → super-event-phases → banque-interets (brouillon privé) → annonces-pro (sans `offrir_ticket_ami_contact`, déjà à jour en prod) → securite-events-rls → securite-rls-tables.
 Vérifié après application : anon refusé sur les 6 fonctions de tirage, `appliquer_regle_gain` ouverte à anon, lectures publiques (events, lots, super_events, qr_stations, tirages, participations) en 200.
+
+---
+
+# Phase 2 — toutes les autres tables `public` (préparée le 19/11, **NON appliquée**)
+
+SQL : `sql/2026-11-19-securite-rls-phase2.sql` (idempotent, rollback complet en pied de fichier, à appliquer après la phase 1).
+Confirmé par Romain : aucun Google Apps Script ni outil externe n'écrit en base (seuls : code du dépôt, edge functions en service_role, pg_cron).
+Audit lecture seule : pg_policies, grants, pg_proc (aucune fonction SECURITY INVOKER n'écrit dans ces tables).
+
+**Constat transversal** : TRUNCATE accordé à anon et authenticated sur toutes les tables `public` (TRUNCATE ignore les RLS). Phase 2 le retire partout (aucun code n'en fait).
+
+| Table | Aujourd'hui | Après | Écrivains (jeton) |
+|---|---|---|---|
+| `config` | 5 politiques ALL/INSERT/UPDATE true à public | lecture publique conservée ; écriture SA | aucun dans le code |
+| `landings` | 2 × ALL true à public | lecture publique ; écriture SA | `dashboard.html` (SA), `OpsDetailClient` (SA) |
+| `banques` | ALL true à public | lecture publique (parcours joueurs) ; écriture SA ou pro de `pro_id` | `lib/banques.ts`, `BanqueEditor`, `Configurateur`, `ParcoursCreation` (pro), `dashboard.html`, `/dashboard/banques` (SA) |
+| `event_modeles` | ALL true à public | lecture publique ; écriture SA | `lib/modeles.ts` (`/dashboard/jeux`, SA) |
+| `se_gains` | ALL true à public | lecture publique ; INSERT anon limité (`type='immediat'`, non utilisé) ; reste SA / pro de l'event ou du super event | `lib/parcours.ts` (joueur anon), `dashboard.html` (SA) |
+| `se_lots` | ALL true à public | lecture publique ; écriture SA ou pro du super event | `ParcoursCreation` (création super event, SA) |
+| `se_reponses` | 2 × ALL true à public | lecture publique ; INSERT anon (`joueur_id` requis) ; UPDATE/DELETE SA | `lib/parcours.ts` (joueur anon) |
+| `se_tickets` | ALL true à public | lecture publique ; INSERT anon (`type` quiz/bonus) ; UPDATE/DELETE SA | `lib/parcours.ts` upsert ignoreDuplicates (= INSERT) |
+| `sondage_brigade` | ALL + INSERT true à public | INSERT anon (`converti=false`) ; lecture/écriture SA | `lib/parcours.ts`, `nds-brigade-verte*` (anon) |
+| `visites` | ALL true à public | lecture publique (pages pro serveur) ; INSERT anon ; UPDATE/DELETE SA | `lib/track.ts` (anon) |
+| `partenaire_clics` | ALL true anon+auth | lecture publique ; INSERT anon (`partenaire_id` requis) ; UPDATE/DELETE SA | `parcours-tracking`, `NDS2026Client`, `/r/[pid]` (anon) |
+| `crm_retours` | ALL true à public (lecture des contacts comprise) | INSERT anon/pro limité (`etat='nouveau'`, drapeaux à false) ; lecture/écriture SA | `nds-partenaire.html` (anon), `lib/pro.ts` (pro), `dashboard.html` (SA) |
+| `parrainage` | 2 × ALL true à public | lecture publique (dédoublonnage client) ; INSERT anon (`sender<>destinataire`, `pts_alloues<=1`) ; reste SA | `lib/parrainage.ts` (joueur anon) |
+| `lots_stock` | 2 × ALL true (codes lisibles par tous) | SA ou pro du lot (`flowin_pro_gere_lot`) ; plus de lecture anon | `lib/stock.ts`, `lib/operations.ts` (SA ou pro) |
+| `liens_ephemeres` | ALL true à anon | SA ou pro de l'event | `lib/dashboard.ts` (SA) |
+| `prospection` | ALL true authenticated + UPDATE/SELECT anon | SA uniquement | `dashboard.html` (SA), `lib/commercial.ts` (SA), **`prospection.html` corrigé** : envoie le jeton de session SA (redirection `/admin-connexion.html` sinon) |
+| `documents_legaux` | ALL true authenticated | lecture publique conservée ; écriture SA | `dashboard.html` (SA) |
+| `packs_participation` | UPDATE true anon+auth | lecture conservée ; écriture SA | aucun |
+| `lots_visuels` | ALL true authenticated | lecture conservée ; écriture SA | `lots-nds.html` (session SA) |
+| `gains` | ALL true à public | `gains_select_own` conservée ; écriture SA | aucun (ancien modèle) |
+| `votes`, `analytics_daily`, `analytics_events`, `analytics_kpi_snapshots`, `gas_backup_log` | ALL true à public | RLS on, aucune politique (service_role seulement) | aucun |
+
+Nouvelles fonctions d'aide (SECURITY DEFINER, exécutables par authenticated) : `flowin_est_pro_super_event(se)`, `flowin_pro_gere_lot(lot)`.
+
+## Laissés ouverts volontairement (risques résiduels)
+- **INSERT anonymes** sur `se_gains`, `se_tickets`, `se_reponses`, `parrainage`, `visites`, `partenaire_clics`, `sondage_brigade`, `crm_retours`, `leads_landing` : le parcours joueur/visiteur écrit directement sous la clé publishable. Un tricheur peut toujours s'auto-attribuer un ticket ou un gain immédiat. Correction de fond : passer par des RPC SECURITY DEFINER (chantier séparé).
+- **Lecture anonyme** de `se_reponses` (formulaire joueur), `se_gains` (nom/email/tel gagnant), `parrainage`, `visites`, `partenaire_clics` : lues par les pages joueurs (`/moi`, `/se`, historique) et par les pages pro rendues côté serveur sans session. Resserrer exige des RPC.
+- `leads_landing` (« Anyone can insert », with check true) et `profils` (propres à l'utilisateur) : inchangés, déjà conformes.
+
+## Tests phase 2
+- Playwright (Chromium, serveur statique `admin/public`, non-GET supabase.co bloqués) : `/dashboard.html?demo=1` 0 non-GET (9 GET) 0 erreur JS ; `/static/dashboard.html?demo=1` idem ; `cgv-nds.html`, `nds-partenaire.html?demo=1` 0 non-GET 0 erreur ; `prospection.html` sans session → redirection connexion, avec session → GET avec `Bearer <jeton SA>`, 0 erreur.
+- `dashboard.html` et code Next non modifiés (miroir MD5 inchangé, pas de build nécessaire). SQL vérifié au parseur Postgres (pglast, 148 instructions).
+
+## Après application, vérifier
+SA : éditer une landing, une banque, un document légal, la prospection (`prospection.html`). Pro : éditer sa banque, ajouter/retirer du stock de lot. Joueur anonyme : partie complète NDS (réponse, ticket, gain immédiat, clic partenaire, parrainage).
