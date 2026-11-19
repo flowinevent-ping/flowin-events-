@@ -68,3 +68,6 @@ Non vérifiable serveur : « sur place » (géolocalisation décidée par le té
 ## Checklist prod
 Avant B : `select proname from pg_proc where proname in ('se_attribuer_partie','se_enregistrer_reponses','mon_historique_reponses','parrainage_capturer','parrainage_recu','moi_tickets_gains','se_tickets_compte_event','visites_origines','visites_entonnoir')` → 9 lignes ; jouer une station NDS de test → l'onglet réseau montre `rpc/se_attribuer_partie` et `rpc/se_enregistrer_reponses` en 200, aucune requête `se_tickets`/`se_gains`/`se_reponses` ; `/moi` → `rpc/moi_tickets_gains` 200.
 Après B : en anon, `GET /rest/v1/se_gains?select=gagnant_email` → `[]` ; `POST /rest/v1/se_tickets` → 401/403 ; partie complète (ticket, gain immédiat, parrainage via `?ref=`) → tickets visibles dans `/moi` et `/se/se-nds-2026` ; pro : `/pro/super` origines et `/pro/super/<station>` entonnoir affichés ; SA : dashboard gagnants / clics partenaires chargés.
+
+## Parties A et B appliquées en production le 19/11/2026
+Code déployé sur Vercel vérifié avant la partie B (bundle /moi contient moi_tickets_gains). Vérifié après : lecture anonyme vide sur se_gains, se_tickets, se_reponses, parrainage, visites, partenaire_clics ; rpc moi_tickets_gains répond ; /nds, /moi, /se/se-nds-2026 en 200. Partie C : en préparation (fichier séparé).
