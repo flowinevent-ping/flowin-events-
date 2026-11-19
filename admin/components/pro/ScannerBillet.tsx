@@ -6,7 +6,7 @@
  * existante (/lot.html?t=<jeton>, RPC valider_lot + PIN pro, destockage).
  *
  * Trois facons d'y arriver, de la plus directe a la plus robuste :
- *   1. la camera dans cette page (BarcodeDetector : Chrome Android, Edge…) ;
+ *   1. la camera dans cette page (BarcodeDetector, sinon jsQR : iPhone et Android) ;
  *   2. l'appareil photo du telephone (iPhone : viser le QR, toucher le lien) ;
  *   3. le code imprime sous le QR, saisi a la main.
  */
@@ -28,9 +28,14 @@ function lienValidation(brut: string): string | null {
 }
 
 interface Detecteur { detect: (src: HTMLVideoElement) => Promise<{ rawValue: string }[]> }
+type JsQR = (d: Uint8ClampedArray, w: number, h: number, o?: { inversionAttempts?: 'dontInvert' | 'onlyInvert' | 'attemptBoth' | 'invertFirst' }) => { data: string } | null
 
+/* Decision Romain (19/11/2026) : camera dans la page aussi sur iPhone. getUserMedia
+   (camera arriere) + BarcodeDetector s'il existe (Chrome Android), sinon jsQR (MIT,
+   charge a la demande) sur une image de la video. iOS Safari : playsInline + muted, HTTPS. */
 export default function ScannerBillet() {
   const video = useRef<HTMLVideoElement>(null)
+  const toile = useRef<HTMLCanvasElement | null>(null)
   const flux = useRef<MediaStream | null>(null)
   const [cameraDispo, setCameraDispo] = useState(false)
   const [actif, setActif] = useState(false)
@@ -39,34 +44,68 @@ export default function ScannerBillet() {
   const [recherche, setRecherche] = useState<'idle' | 'loading' | 'introuvable' | 'erreur'>('idle')
 
   useEffect(() => {
-    setCameraDispo(typeof window !== 'undefined' && 'BarcodeDetector' in window && !!navigator.mediaDevices?.getUserMedia)
+    setCameraDispo(typeof window !== 'undefined' && !!navigator.mediaDevices?.getUserMedia)
     return () => { flux.current?.getTracks().forEach(t => t.stop()) }
   }, [])
 
+  async function decodeur(): Promise<(v: HTMLVideoElement) => Promise<string[]>> {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const BD = (window as any).BarcodeDetector
+    if (BD) {
+      try {
+        const det: Detecteur = new BD({ formats: ['qr_code'] })
+        return async v => (await det.detect(v)).map(x => x.rawValue)
+      } catch { /* format non pris en charge : jsQR */ }
+    }
+    const jsQR = ((await import('jsqr')).default) as unknown as JsQR
+    return async v => {
+      const w = v.videoWidth, h = v.videoHeight
+      if (!w || !h) return []
+      const k = Math.min(1, 640 / Math.max(w, h))
+      const cw = Math.round(w * k), ch = Math.round(h * k)
+      const c = toile.current ?? (toile.current = document.createElement('canvas'))
+      c.width = cw; c.height = ch
+      const ctx = c.getContext('2d', { willReadFrequently: true } as CanvasRenderingContext2DSettings)
+      if (!ctx) return []
+      ctx.drawImage(v, 0, 0, cw, ch)
+      const r = jsQR(ctx.getImageData(0, 0, cw, ch).data, cw, ch, { inversionAttempts: 'dontInvert' })
+      return r?.data ? [r.data] : []
+    }
+  }
+
   async function demarrer() {
     setMessage('')
+    let s: MediaStream
     try {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const det: Detecteur = new (window as any).BarcodeDetector({ formats: ['qr_code'] })
-      const s = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } })
-      flux.current = s
-      if (video.current) { video.current.srcObject = s; await video.current.play() }
-      setActif(true)
+      s = await navigator.mediaDevices.getUserMedia({ video: { facingMode: { ideal: 'environment' } }, audio: false })
+    } catch (e) {
+      const nom = (e as { name?: string })?.name ?? ''
+      setMessage(nom === 'NotAllowedError' || nom === 'SecurityError'
+        ? 'Accès à la caméra refusé. Autorisez la caméra pour ce site dans les réglages du navigateur, puis réessayez. Ou saisissez le code du billet.'
+        : nom === 'NotFoundError' ? 'Aucune caméra trouvée. Saisissez le code du billet.'
+        : 'La caméra n’a pas pu démarrer. Saisissez le code du billet.')
+      arreter(); return
+    }
+    flux.current = s
+    setActif(true)
+    try {
+      const v = video.current
+      if (v) { v.setAttribute('playsinline', ''); v.muted = true; v.srcObject = s; await v.play() }
+      const lire = await decodeur()
       const boucle = async () => {
         if (!flux.current || !video.current) return
         try {
-          const r = await det.detect(video.current)
-          for (const x of r) {
-            const lien = lienValidation(x.rawValue)
+          for (const brut of await lire(video.current)) {
+            const lien = lienValidation(brut)
             if (lien) { arreter(); window.location.href = lien; return }
             setMessage('Ce QR n’est pas un billet gagnant Flowin.')
           }
         } catch { /* image pas prete */ }
-        window.setTimeout(boucle, 300)
+        window.setTimeout(boucle, 200)
       }
       boucle()
     } catch {
-      setMessage('La caméra n’a pas pu démarrer. Autorisez l’accès à la caméra, ou utilisez l’appareil photo du téléphone.')
+      setMessage('La caméra n’a pas pu démarrer. Saisissez le code du billet.')
       arreter()
     }
   }
@@ -98,17 +137,16 @@ export default function ScannerBillet() {
         {cameraDispo ? (
           <>
             <div style={{ position: 'relative', borderRadius: 16, overflow: 'hidden', background: C.fond, border: `1px solid ${C.bordure}`, aspectRatio: '4 / 3', display: actif ? 'block' : 'none' }}>
-              <video ref={video} playsInline muted style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+              <video ref={video} playsInline muted autoPlay style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
               <div style={{ position: 'absolute', inset: '18%', border: `3px solid ${C.violet}`, borderRadius: 18 }} />
             </div>
             <div style={{ display: 'flex', gap: 10, marginTop: actif ? 12 : 0 }}>
-              {!actif ? <button style={BTN} onClick={demarrer}>Ouvrir la caméra</button> : <button style={BTN2} onClick={arreter}>Arrêter</button>}
+              {!actif ? <button style={BTN} data-ouvrir-camera onClick={demarrer}>Ouvrir la caméra</button> : <button style={BTN2} onClick={arreter}>Arrêter</button>}
             </div>
           </>
         ) : (
           <div style={{ fontSize: 14, lineHeight: 1.6 }}>
-            Ouvrez l’<b>appareil photo</b> de votre téléphone et visez le QR du billet, puis touchez le lien qui s’affiche :
-            la page de validation s’ouvre. (La caméra intégrée à cette page fonctionne sur Chrome Android.)
+            Ouvrez l’<b>appareil photo</b> du téléphone, visez le QR du billet et touchez le lien.
           </div>
         )}
         {message && <div style={{ fontSize: 13, color: '#B45309', fontWeight: 700, marginTop: 10 }}>{message}</div>}

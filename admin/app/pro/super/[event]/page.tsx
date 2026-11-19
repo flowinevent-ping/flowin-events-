@@ -6,6 +6,7 @@ import { supabase } from '@/lib/supabase'
 import ProShell from '@/components/pro/ProShell'
 import ParcoursMobil from '@/components/pro/ParcoursMobil'
 import { CARD, TH, TD, MUTED, H1, SUB, ACC } from '@/lib/proui'
+import { grouperParTheme } from '@/lib/themesBonus'
 
 const fr = (d: string) => { const p = d.split('-'); return p.length === 3 ? `${p[2]}/${p[1]}` : d }
 
@@ -160,13 +161,18 @@ export default async function ProStationPage({ params, searchParams }: { params:
       <div style={CARD}>
         <div style={{ fontSize: 11, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '.05em', color: '#8a7e93', marginBottom: 10 }}>Réponses aux questions bonus{nbReponses ? ` (${nbReponses} joueurs ont répondu)` : ''}</div>
         {Object.keys(bonusTally).length === 0 ? <div style={{ fontSize: 13, ...MUTED }}>Aucune réponse bonus ce jour-là.</div> : (
-          Object.entries(bonusTally).map(([question, vals]) => (
+          grouperParTheme(bonusTally).map(g => (
+            <div key={g.theme} data-theme-bonus={g.theme} style={{ marginBottom: 16 }}>
+              <div style={{ fontSize: 13, fontWeight: 900, color: '#C2410C', marginBottom: 8 }}>{g.theme}</div>
+              {g.questions.map(([question, vals]) => (
             <div key={question} style={{ marginBottom: 14 }}>
               <div style={{ fontSize: 12.5, fontWeight: 700, marginBottom: 6 }}>{question}</div>
               {Object.entries(vals).sort((a, b) => b[1] - a[1]).map(([v, n]) => (
                 <div key={v} style={{ display: 'flex', gap: 8, fontSize: 12.5, padding: '3px 0', color: '#334155' }}>
                   <span style={{ flex: 1 }}>{v}</span><span style={{ fontWeight: 800 }}>{n}</span>
                 </div>
+              ))}
+            </div>
               ))}
             </div>
           ))

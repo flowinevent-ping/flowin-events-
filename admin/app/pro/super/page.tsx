@@ -25,8 +25,15 @@ import { BlocOperation } from '@/components/operations/BlocsOperations'
 export default async function ProSuperPage({ searchParams }: { searchParams: { pro?: string; se?: string } }) {
   const proId = searchParams.pro ?? ''
   const data = await fetchProDashboard(proId)
-  const { data: supersRes } = await supabase.from('super_events').select('id,nom,date_d,date_f,status')
+  /* pro_id = pro organisateur (sql/06). Colonne absente : on relit sans elle (tolerant). */
+  let { data: supersRes, error: errSup } = await supabase.from('super_events').select('id,nom,date_d,date_f,status,pro_id')
+  if (errSup) supersRes = ((await supabase.from('super_events').select('id,nom,date_d,date_f,status')).data ?? []) as typeof supersRes
   const opsSE = grouperOperations(data.events, (supersRes ?? []) as SuperEventRef[]).filter(o => o.type === 'super')
+  /* Audit promesse L4 (19/11) : l'organisateur voit SON super event, meme sans station a lui. */
+  const organises = proId ? (supersRes ?? []).filter(x => (x as { pro_id?: string | null }).pro_id === proId) : []
+  organises.forEach(x => {
+    if (!opsSE.some(o => o.id === x.id)) opsSE.push({ cle: `se:${x.id}`, type: 'super', id: x.id, nom: x.nom, dateD: x.date_d, dateF: x.date_f, status: x.status ?? null, stations: [] })
+  })
 
   /* Demandes "rejoindre un super event" pas encore actees (en_attente) ou
      refusees : sans ca, le pro qui a envoye une demande ne voit plus rien
@@ -98,14 +105,18 @@ export default async function ProSuperPage({ searchParams }: { searchParams: { p
   const sondage = seId ? await fetchSondageLanding(seId) : null
   const nomsDuPro = new Set(choisi.stations.map(e => e.nom))
   const myStations = allStations.filter(s => evIds.has(s.event_id))
+  const estOrganisateur = organises.some(x => x.id === seId)
+  const toutes = allStations.slice().sort((a, b) => (b.scans ?? 0) - (a.scans ?? 0))
   const tri = myStations.slice().sort((a, b) => (b.commencees ?? 0) - (a.commencees ?? 0))
 
   let lieux: any[] = []
-  if (evIds.size) {
+  /* Organisateur : carte de TOUS les commerces participants (promesse 8). */
+  const idsCarte = estOrganisateur ? allStations.map(x => x.event_id) : Array.from(evIds)
+  if (idsCarte.length) {
     const { data: lieuxRes } = await supabase
       .from('events')
       .select('id,nom,module,lat,lng,couleur,gain_immediat,gain_ticket,adresse,description,categorie,tel,site_web,photo_url,horaires')
-      .in('id', Array.from(evIds))
+      .in('id', idsCarte)
     lieux = lieuxRes ?? []
   }
 
@@ -144,7 +155,7 @@ export default async function ProSuperPage({ searchParams }: { searchParams: { p
       )}
       <h1 style={H1}>Ma participation — {choisi.nom}</h1>
       <div style={{ ...SUB }}>{libelleDates(choisi.dateD, choisi.dateF)}</div>
-      <div style={{ ...SUB, marginBottom: 16 }}>Vous ne voyez ici que vos propres stations. Le bilan global du super event est suivi par Flowin, organisateur de l'opération. Vos chiffres sont calculés de la même façon, limités à vos stations.</div>
+      <div style={{ ...SUB, marginBottom: 16, display: estOrganisateur ? 'none' : undefined }}>Vous ne voyez ici que vos propres stations. Le bilan global du super event est suivi par Flowin, organisateur de l'opération. Vos chiffres sont calculés de la même façon, limités à vos stations.</div>
       {blocDemandes}
       <div style={{ borderRadius: 18, padding: 20, color: '#fff', marginBottom: 16, background: 'linear-gradient(135deg,#FF8A14 0%,#EA580C 55%,#C2410C 100%)' }}>
         <div style={{ fontSize: 11, fontWeight: 800, letterSpacing: '.1em', opacity: 0.9 }}>MA PARTICIPATION · BILAN</div>
@@ -168,6 +179,21 @@ export default async function ProSuperPage({ searchParams }: { searchParams: { p
           </table>
         )}
       </div>
+      {estOrganisateur && (
+        <div data-organisateur style={{ ...CARD, overflowX: 'auto', borderLeft: '3px solid #C2410C' }}>
+          <div style={{ fontSize: 11, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '.05em', color: '#C2410C', marginBottom: 10 }}>Organisateur · passages par station</div>
+          {toutes.length === 0 ? <div style={{ fontSize: 13, ...MUTED }}>Aucune station pour l’instant.</div> : (
+            <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: 480 }}>
+              <thead><tr><th style={TH}>Station</th><th style={TH}>Flashs QR</th><th style={TH}>Joueurs</th><th style={TH}>Parties</th></tr></thead>
+              <tbody>{toutes.map(s => (<tr key={s.event_id}><td style={{ ...TD, fontWeight: 800 }}>{s.nom}</td><td style={TD}>{s.scans ?? 0}</td><td style={TD}>{s.joueurs ?? 0}</td><td style={TD}>{s.commencees ?? 0}</td></tr>))}</tbody>
+            </table>
+          )}
+          <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginTop: 12 }}>
+            <Link href={`/pro/crm${q}`} style={{ background: '#C2410C', color: '#fff', borderRadius: 12, padding: '9px 14px', fontWeight: 800, fontSize: 13, textDecoration: 'none' }}>Contacts</Link>
+            <Link href="/carte-commerces" style={{ border: '1.5px solid #C2410C', color: '#C2410C', borderRadius: 12, padding: '8px 14px', fontWeight: 800, fontSize: 13, textDecoration: 'none' }}>Carte des commerces</Link>
+          </div>
+        </div>
+      )}
       {sondage ? <SondageLandingPro s={sondage} nomsDuPro={nomsDuPro} /> : null}
 
       <div style={{ ...CARD, display: 'flex', gap: 12, alignItems: 'center', flexWrap: 'wrap' }}>

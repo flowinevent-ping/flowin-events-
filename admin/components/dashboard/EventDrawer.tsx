@@ -328,10 +328,12 @@ export default function EventDrawer() {
             </div>
             <div className="sa-field">
               <label className="sa-label">Super Event</label>
-              <select className="sa-input" value={form.super_event_id ?? ''} onChange={e => setForm(p => ({ ...p, super_event_id: e.target.value || null }))}>
+              {/* Super Event = toujours tirage au sort (Romain, 19/11) : la roue (gain immediat) ne s'y rattache pas. */}
+              <select className="sa-input" data-se-select value={form.super_event_id ?? ''} disabled={ev.module === 'spin' && !form.super_event_id} onChange={e => setForm(p => ({ ...p, super_event_id: e.target.value || null }))}>
                 <option value="">— Aucun (animation autonome)</option>
-                {supers.map(s => <option key={s.id} value={s.id}>{s.nom}</option>)}
+                {supers.filter(s => ev.module !== 'spin' || s.id === form.super_event_id).map(s => <option key={s.id} value={s.id}>{s.nom}</option>)}
               </select>
+              {ev.module === 'spin' && <div style={{ fontSize: 12, color: '#64748B', marginTop: 4 }}>Roue : gain immédiat, hors Super Event (tirage au sort uniquement).</div>}
             </div>
             <div className="sa-field">
               <label className="sa-label">Description</label>

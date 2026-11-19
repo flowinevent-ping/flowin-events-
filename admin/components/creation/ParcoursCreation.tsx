@@ -279,7 +279,7 @@ export default function ParcoursCreation({ mode = 'pro', pro, banques, supers, p
     : coMdp !== coMdp2 ? 'Les deux mots de passe ne sont pas identiques.' : null
 
   /* 2. Jeu */
-  const [module_, setModule] = useState<string | null>(prefill?.module && JEUX.some(j => j.m === prefill.module) ? prefill.module : null)
+  const [module_, setModule] = useState<string | null>(prefill?.module && JEUX.some(j => j.m === prefill.module) && !(typeInitial === 'super' && prefill.module === 'spin') ? prefill.module : null)
   const [cfgJeu, setCfgJeu] = useState<Record<string, unknown>>({})
   const [banqueId, setBanqueId] = useState<string | null>(null)
   /* Masters de jeux (31/10) : presentation de reference + personnalisation, et
@@ -638,6 +638,8 @@ export default function ParcoursCreation({ mode = 'pro', pro, banques, supers, p
     }
 
     if (estSuper) {
+      /* Super Event = toujours tirage au sort (Romain, 19/11) : jamais la roue (gain immediat). */
+      if (module_ === 'spin') { setEnvoi('echec'); setErreur('Un super event se joue en tirage au sort : choisissez un autre jeu.'); return }
       const id = slugSuperEvent(nom)
       const cat = new Map(prosCatalogue.map(x => [x.id, x]))
       const r = await creerSuperEvent({

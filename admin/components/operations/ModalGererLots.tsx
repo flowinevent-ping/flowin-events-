@@ -420,9 +420,11 @@ export default function ModalGererLots({ op, partenaire, onClose, onChange }: {
     setEtat('envoi')
     let ko = false
     for (const l of lots ?? []) {
+      /* Super Event = toujours tirage au sort (Romain, 19/11) : une station n'enregistre jamais un lot en gain immediat. */
+      const enSE = !!op.stations.find(s => s.id === l.event_id)?.super_event_id
       const { error } = await supabase.from('lots').upsert({
         id: l.id, event_id: l.event_id, nom: (l.nom ?? '').trim() || 'Lot', titre: (l.nom ?? '').trim() || 'Lot',
-        valeur: l.valeur, quantite: Math.max(1, l.quantite ?? 1), conditions: l.conditions, note: l.note,
+        valeur: l.valeur, quantite: Math.max(1, l.quantite ?? 1), conditions: l.conditions, note: enSE ? 'Type : tirage au sort' : l.note,
         partenaire_id: partenaire?.id ?? null,
       }, { onConflict: 'id' })
       if (error) ko = true

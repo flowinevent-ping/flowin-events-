@@ -338,3 +338,9 @@ que sur instruction explicite de Romain.
 ## Décisions de Romain sur le rapport d'audit du 17/11
 - **Parrainage à la FIN du parcours de jeu**, comme dans NDS 2026 (après les coordonnées et le résultat), et **accessible dans le profil** participant. Remplace l'ordre du 31/10 (parrainage avant coordonnées).
 - **Films : refaire le rendu de la roue** pour qu'elle soit identique à l'application.
+
+## Décisions de Romain sur l'audit promesse L3 (19/11/2026)
+- **Quiz en gain immédiat (animation)** : on garde la règle actuelle, **un lot par joueur et par jour, tant qu'il reste du stock**.
+- **Super Event = toujours tirage au sort.** Aucune option de gain immédiat dans la création ou le réglage d'un Super Event (pas de roue, lots de station verrouillés en tirage). Les animations gardent le choix gain immédiat / tirage.
+- **Scanner** : oui, **caméra dans la page `/pro/scanner` sur iPhone et Android** (décodeur QR jsQR, licence MIT ; BarcodeDetector gardé quand il existe). Code manuel et validation `/lot.html` inchangés. Caméra ouverte en un geste ; message clair si l'accès est refusé.
+- **Les 8 animations sans position sur la carte** : pas urgent, rien à faire.
