@@ -19,7 +19,7 @@
 //                                            sous 3 à 5 jours » + email Flowin « paiement à vérifier ». Commande RELUE en
 //                                            base ; envoi seulement si elle est encore en attente de paiement.
 //
-// Secrets (AUCUNE valeur ici) : RESEND_API_KEY, NOTIFY_TO (défaut flowinevent@gmail.com), NOTIFY_FROM.
+// Secrets (AUCUNE valeur ici) : GMAIL_USER + GMAIL_APP_PASSWORD (prioritaires, _shared/mailer.ts) ou RESEND_API_KEY, NOTIFY_TO (défaut flowinevent@gmail.com), NOTIFY_FROM.
 // SUPABASE_URL et SUPABASE_SERVICE_ROLE_KEY sont fournis automatiquement par Supabase aux fonctions edge.
 // Déploiement : supabase functions deploy notify-commande-animation --no-verify-jwt
 // (les triggers appellent avec la clé anon ; aucune donnée n'est renvoyée à l'appelant).
@@ -28,16 +28,15 @@ import { jsPDF } from "npm:jspdf@2.5.1";
 // Modèle unique du bon de commande (identique au navigateur) : pose FlowinBonPDF sur globalThis. Copie de public/bon-commande-pdf.js (MD5 identique, scripts/verifier-bon-commande-pdf.sh).
 import "../_shared/flowin-config.js"; // interrupteur central (GARANTIE_ACTIVE) : pose FLOWIN_CONFIG sur globalThis, AVANT le modèle PDF
 import "../_shared/bon-commande-pdf.js";
+import { canal, envoyerEmail } from "../_shared/mailer.ts"; // Gmail SMTP si GMAIL_USER + GMAIL_APP_PASSWORD, sinon Resend
 import { emailAccuse, emailDocuments, emailFlowin, emailMensualite, esc, eur, pdfContrat, pdfFacture, type Commande, type Facture } from "./documents.ts";
 
-const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY") || "";
 const NOTIFY_TO = Deno.env.get("NOTIFY_TO") || "flowinevent@gmail.com";
 // Règle de Romain (10/11/2026) : bon de commande édité depuis le SUPER ADMIN (champ « commercial » rempli,
 // vente assistée) -> envoyé au pro. Rempli depuis la PLAQUETTE (pas de commercial) -> envoyé à Flowin, objet
 // au nom du commerce, Flowin le transmet ensuite depuis le super admin. ENVOI_CLIENT=oui : toujours au pro.
 const ENVOI_CLIENT = (Deno.env.get("ENVOI_CLIENT") || "") === "oui";
 const DEST_FLOWIN = Array.from(new Set([NOTIFY_TO, "flowinevent@gmail.com"]));
-const NOTIFY_FROM = Deno.env.get("NOTIFY_FROM") || "Flowin <onboarding@resend.dev>";
 const SUPA_URL = Deno.env.get("SUPABASE_URL") || "";
 const SERVICE = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || "";
 
@@ -66,13 +65,9 @@ async function envoyer(to: string, m: { sujet: string; html: string }, pj: Array
   let dest = [to];
   if (to === NOTIFY_TO) dest = DEST_FLOWIN;
   else if (!ENVOI_CLIENT && !(r && r.commercial)) { dest = DEST_FLOWIN; m = { sujet: `[${(r && (r.enseigne || r.raison_sociale)) || to}] ${m.sujet} (à transmettre au pro : ${to})`, html: m.html }; }
-  const res = await fetch("https://api.resend.com/emails", {
-    method: "POST", headers: { Authorization: `Bearer ${RESEND_API_KEY}`, "Content-Type": "application/json" },
-    body: JSON.stringify({ from: NOTIFY_FROM, to: dest, subject: m.sujet, html: m.html, attachments: pj.length ? pj : undefined }),
-  });
-  const j = await res.json().catch(() => ({}));
-  if (!res.ok) throw new Error(`resend ${res.status} ${JSON.stringify(j).slice(0, 200)}`);
-  return String(j.id ?? "");
+  const res = await envoyerEmail({ to: dest, subject: m.sujet, html: m.html, attachments: pj });
+  if (!res.ok) throw new Error(`${res.via} ${res.error ?? "echec"}`);
+  return `${res.via}:${res.id ?? ""}`;
 }
 
 /** Paiement validé ou renvoi : contrat signé + facture acquittée, une seule fois (sauf renvoi SA). */
@@ -105,7 +100,7 @@ Deno.serve(async (req: Request): Promise<Response> => {
   if (req.method !== "POST") return json({ error: "POST only" }, 405);
   let p: Record<string, any> = {};
   try { p = await req.json(); } catch { return json({ error: "invalid json" }, 400); }
-  if (!RESEND_API_KEY) return json({ skipped: true, reason: "RESEND_API_KEY absent" });
+  if (canal() === "aucun") return json({ skipped: true, reason: "ni GMAIL_USER/GMAIL_APP_PASSWORD ni RESEND_API_KEY" });
   if (!SUPA_URL || !SERVICE) return json({ error: "SUPABASE_URL / SUPABASE_SERVICE_ROLE_KEY absents" }, 500);
   const type = String(p.type ?? "");
   try {
