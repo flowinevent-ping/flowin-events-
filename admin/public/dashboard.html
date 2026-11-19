@@ -5,6 +5,7 @@
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
 <meta charset="UTF-8">
+<script src="/flowin-demo.js"></script>
 <script src="/nds/mail-gagnant.js"></script>
 <script>
 /* GATE SÉCURITÉ — premier script exécuté, avant tout le reste.
@@ -12,6 +13,8 @@
    Purement synchrone (localStorage), aucune requête réseau : ne peut pas se bloquer. */
 (function(){
   try{
+    /* 19/11 : en mode démo (?demo=1, flowin-demo.js), pas de redirection : aucune écriture ne part. */
+    if(window.__flowinDemo && window.__flowinDemo.actif) return;
     var s=JSON.parse(localStorage.getItem('flowin_admin_session')||'null');
     var ok = s && s.access_token; // présence d'un jeton = connecté (validité réelle vérifiée côté serveur)
     if(!ok){ location.replace('/admin-connexion.html?next='+encodeURIComponent(location.pathname+location.search)); }
@@ -1917,9 +1920,12 @@ function saveData(supaSync){
     localStorage.setItem(LS_KEY, JSON.stringify(DATA));
     DATA.evJoueurs = _evj || {};
   }catch(e){ console.warn('[saveData] localStorage write error', e); }
-  /* RÈGLE GLOBALE : toujours persister dans Supabase — plus de perte de données */
-  if(FLOWIN_SUPA_URL && FLOWIN_SUPA_ANON){
-    if(DATA.events) DATA.events.forEach(function(ev){ supaWriteEvent(ev); });
+  /* RÈGLE GLOBALE : toujours persister dans Supabase — plus de perte de données.
+     19/11 (sécurité events) : jamais pendant le chargement de la page (FLOWIN_BOOT_FINI),
+     et seuls les events réellement lus depuis Supabase (ou créés dans cette session) sont
+     réécrits : un event seed resté local n'écrase jamais une ligne de prod. */
+  if(FLOWIN_SUPA_URL && FLOWIN_SUPA_ANON && FLOWIN_BOOT_FINI){
+    if(DATA.events) DATA.events.forEach(function(ev){ if(ev && FLOWIN_EV_SUPA[ev.id]) supaWriteEvent(ev); });
     if(DATA.lots) DATA.lots.forEach(function(l){ supaWriteLot(l); });
     if(DATA.pros) DATA.pros.forEach(function(p){ supaWritePro(p); });
     if(DATA.partenaires) DATA.partenaires.forEach(function(p){ supaWritePartenaire(p); });
@@ -2119,6 +2125,7 @@ async function refreshFromSupabase(){
   DATA.pros = data.pros;
   DATA.partenaires = data.partenaires;
   DATA.events = data.events;
+  for(var _rei=0; _rei<data.events.length; _rei++){ FLOWIN_EV_SUPA[data.events[_rei].id] = true; } // 19/11
   DATA.superEvents = data.superEvents;
     if(data.landings && data.landings.length) DATA.landings = data.landings;
   // FIX bug recurrent : les landings NDS sont des pages STATIQUES (pas en table Supabase).
@@ -2178,8 +2185,14 @@ async function supaWriteJoueur(j){
 }
 
 // Upsert event → Supabase + GAS fallback
+/* 19/11 : ids des events connus en base (lus au chargement ou écrits avec succès). */
+var FLOWIN_EV_SUPA = {};
+var FLOWIN_BOOT_FINI = false;
+function flowinSessionSA(){ return !!(FLOWIN_ADMIN_SESSION && FLOWIN_ADMIN_SESSION.access_token && FLOWIN_AUTH && FLOWIN_AUTH !== FLOWIN_SUPA_ANON); }
 async function supaWriteEvent(e){
-  if(!e || !e.id) return;
+  if(!e || !e.id) return false;
+  /* 19/11 : écriture events réservée à une session SA (jeton utilisateur), jamais la clé anon. */
+  if(!flowinSessionSA()){ console.warn('[Flowin] supaWriteEvent ignoré : pas de session SA', e.id); return false; }
   // GÉNÉRATION AUTOMATIQUE DU QR URL — TOUJOURS recalculé pour garantir cohérence
   // (id event → URL parcours_user, indépendamment de ce qui était dans cfg avant)
   if(!e.cfg) e.cfg = {};
@@ -2198,7 +2211,45 @@ async function supaWriteEvent(e){
     client_type:e.clientType||'btoc'
   };
   var ok = await supaUpsert('events', payload);
+  if(ok) FLOWIN_EV_SUPA[e.id] = true;
   if(!ok) gasBackup('event_upsert', payload);
+  return ok;
+}
+
+/* 19/11 : action SA explicite — insère les events seed (ev-crf-2026, ev-paques) UNIQUEMENT
+   s'ils sont absents de Supabase. Jamais d'écrasement (Prefer: resolution=ignore-duplicates). */
+async function supaInsererEventSiAbsent(e){
+  if(!e || !e.id || !flowinSessionSA()) return false;
+  try {
+    var r0 = await fetch(FLOWIN_SUPA_URL+'/rest/v1/events?select=id&id=eq.'+encodeURIComponent(e.id),
+      {headers:{'apikey':FLOWIN_SUPA_ANON,'Authorization':'Bearer '+FLOWIN_AUTH}});
+    var rows = r0.ok ? await r0.json() : null;
+    if(!rows) return false;
+    if(rows.length){ FLOWIN_EV_SUPA[e.id] = true; return 'existe'; }
+    var cfg = JSON.parse(JSON.stringify(e.cfg||{}));
+    cfg.qrUrl = 'https://flowin-events.vercel.app/parcours/' + (e.module||'quiz') + '?ev=' + e.id;
+    var r = await fetch(FLOWIN_SUPA_URL+'/rest/v1/events', {method:'POST',
+      headers:{'apikey':FLOWIN_SUPA_ANON,'Authorization':'Bearer '+FLOWIN_AUTH,'Content-Type':'application/json',
+        'Prefer':'resolution=ignore-duplicates,return=minimal'},
+      body:JSON.stringify({id:e.id, pro_id:e.proId, nom:e.nom, module:e.module, status:e.status,
+        date_d:e.dateD||null, date_f:e.dateF||null, h_start:e.hStart||'10:00', h_end:e.hEnd||'18:00',
+        lieu:e.lieu||'', adresse:e.adresse||'', description:e.description||'', couleur:e.couleur||'#3B5CC4',
+        participants:e.participants||0, gagnants:e.gagnants||0, joueurs_optin:e.joueursOptin||0,
+        score_min:e.scoreMin||0, cfg:cfg, stats:e.stats||{}, pro_visib:e.proVisib||{},
+        super_event_id:e.superEventId||null, client_type:e.clientType||'btoc'})});
+    if(r.ok){ FLOWIN_EV_SUPA[e.id] = true; return 'insere'; }
+    return false;
+  } catch(err){ console.warn('[Flowin] supaInsererEventSiAbsent', e.id, err); return false; }
+}
+async function insererEventsSeedManquants(){
+  if(!flowinSessionSA()){ toast('Connexion Super Admin requise','warn'); return; }
+  var ids = ['ev-crf-2026','ev-paques'], msg = [];
+  for(var i=0;i<ids.length;i++){
+    var ev = findEvent(ids[i]);
+    var res = ev ? await supaInsererEventSiAbsent(ev) : false;
+    msg.push(ids[i]+' : '+(res==='insere'?'inséré':(res==='existe'?'déjà en base (inchangé)':'non traité')));
+  }
+  toast(msg.join(' · '), 'success');
 }
 
 // Upsert lot → Supabase + GAS fallback
@@ -2405,8 +2456,8 @@ try {
     }
     localStorage.setItem(LS_KEY, JSON.stringify(DATA));
     // Persister dans Supabase
-    try { supaWriteEvent(DATA.events.find(function(e){return e.id==='ev-crf-2026';})); } catch(_se){}
-    try { supaWritePro(DATA.pros.find(function(p){return p.id==='pro-crf-vence';})); } catch(_sp){}
+    // 19/11 : plus aucune écriture Supabase automatique au chargement (écrasait la prod).
+    // Insertion si absent : bouton SA « Insérer les events seed manquants » (Paramètres > Supabase).
   }
 } catch(e_crf){ console.warn('[garantie ev-crf-2026]', e_crf); }
 try { /* dummy to avoid try-catch mismatch */
@@ -13063,6 +13114,7 @@ function modalReglagesSection(d){
         Migre : pro-vence · ev-paques · ${DATA.joueurs.filter(j=>j.events&&j.events.indexOf('ev-paques')>=0).length} joueurs · 8 lots · ev-nds (vide)
       </div>
       <button class="btn btn-primary" onclick="migrateSupaPaques()">🚀 Lancer la migration Pâques → Supabase</button>
+      <button class="btn mt-2" onclick="insererEventsSeedManquants()">➕ Insérer les events seed manquants (ev-crf-2026, ev-paques) — sans écraser</button>
 
       <div class="section-h" style="margin-top:16px">Realtime polling (stats live)</div>
       <div class="toggle-row"><div><div class="lbl">Polling auto toutes les 10s</div><div class="desc">Actif uniquement pendant un event LIVE</div></div><div class="toggle ${state.realtimeEnabled?'on':''}" onclick="state.realtimeEnabled=!state.realtimeEnabled;toast(state.realtimeEnabled?'Realtime activé':'Realtime désactivé','success')"></div></div>
@@ -15260,7 +15312,7 @@ async function migrateSupaPaques(){
 
   // 2. Event Pâques
   var ev = findEvent('ev-paques');
-  if(ev){ var okE = await supaWriteEvent(ev); if(!okE) errors++; }
+  if(ev){ var okE = await supaInsererEventSiAbsent(ev); if(!okE) errors++; } // 19/11 : jamais d'écrasement
 
   // 3. Joueurs Pâques (par batch de 20)
   var joueurs = DATA.joueurs.filter(function(j){ return j.events && j.events.indexOf('ev-paques')>=0; });
@@ -15282,7 +15334,7 @@ async function migrateSupaPaques(){
 
   // 5. Event NDS (stub vide)
   var nds = findEvent('ev-nds');
-  if(nds){ await supaWriteEvent(nds); }
+  if(nds){ await supaInsererEventSiAbsent(nds); }
 
   if(errors === 0){
     toast('✅ Migration Pâques terminée · '+joueurs.length+' joueurs · vérifiez Supabase','success');
@@ -15379,8 +15431,9 @@ document.addEventListener('DOMContentLoaded', async function(){
       var _supaEvIds = data.events.map(function(e){ return e.id; });
       var _localOnly = DATA.events.filter(function(e){ return _supaEvIds.indexOf(e.id) < 0; });
       DATA.events = data.events.concat(_localOnly);
-      // Écrire dans Supabase les events locaux manquants
-      for(var _sei=0; _sei<_localOnly.length; _sei++){ supaWriteEvent(_localOnly[_sei]); }
+      // 19/11 : les events locaux absents de Supabase ne sont plus écrits automatiquement
+      // (bouton SA « Insérer les events seed manquants », insertion si absent uniquement).
+      for(var _sei=0; _sei<_supaEvIds.length; _sei++){ FLOWIN_EV_SUPA[_supaEvIds[_sei]] = true; }
       DATA.superEvents = data.superEvents;
       DATA.joueurs = data.joueurs;
       DATA.participations = DATA.participations || [];
@@ -15397,6 +15450,7 @@ document.addEventListener('DOMContentLoaded', async function(){
       try { toast('✅ Synchronisé Supabase ('+DATA.events.length+' events)','success'); } catch(e){}
     }
   }
+  FLOWIN_BOOT_FINI = true; // 19/11 : les saveData() suivants (actions utilisateur) peuvent écrire
 });
 
 /* ═══════════════════════════════════════════════════════════════════ */
