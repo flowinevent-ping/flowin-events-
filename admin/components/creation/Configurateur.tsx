@@ -19,6 +19,7 @@ import { creerQrTrace, slugQr, QR_INCLUS, type TypeQr } from '@/lib/qrTraces'
 import { PictoSupport } from '@/components/operations/PictoSupport'
 import { lienAncien } from '@/lib/qrPermalien'
 import { qrFlowinPng } from '@/lib/qrLogo'
+import { geocoderAdresse } from '@/lib/geocodage'
 import { cfgDepuisTirage } from '@/components/operations/ReglageTirage'
 import { cfgMaster, MASTER_VIDE } from '@/components/masters/PersoMaster'
 import { NavCarrousel, useGlisser } from '@/components/pro/Carrousel'
@@ -107,6 +108,10 @@ export default function Configurateur({ pro, banques }: { pro: ProConfigurateur;
   const [commerceQuiz, setCommerceQuiz] = useState(p.nom || '')
   const [objectif, setObjectif] = useState('')
   const estQuiz = jeu === 'quizsolo' || jeu === 'quizbonus'
+  /* Audit promesse L3 (19/11/2026) : « c'est toi qui choisis le gain, immédiat ou par tirage au sort ».
+     La roue gagne tout de suite, la tombola tire au sort ; pour le quiz, le pro choisit. */
+  const [gainQuiz, setGainQuiz] = useState<'' | 'immediat' | 'tirage'>('')
+  const gainImmediat = jeu === 'spin' || (estQuiz && gainQuiz === 'immediat')
   const banquesQuiz = useMemo(() => banques.slice(0, 3), [banques])
 
   /* 5. Lots */
@@ -150,7 +155,7 @@ export default function Configurateur({ pro, banques }: { pro: ProConfigurateur;
     const e: string[] = []
     if (!coordConnues) e.push('coord')
     e.push('jeu')
-    if (estQuiz) { e.push('quiz'); if (voie === 'flowin') e.push('flowin'); if (voie === 'moi') e.push('questions') }
+    if (estQuiz) { e.push('gain'); e.push('quiz'); if (voie === 'flowin') e.push('flowin'); if (voie === 'moi') e.push('questions') }
     e.push('lots', 'supports', 'kit', 'recap', 'prix')
     return e
   }, [coordConnues, estQuiz, voie])
@@ -162,6 +167,7 @@ export default function Configurateur({ pro, banques }: { pro: ProConfigurateur;
   const bloque: Record<string, string | null> = {
     coord: coordKo,
     jeu: !jeu ? 'Choisissez un jeu.' : null,
+    gain: !gainQuiz ? 'Choisissez le gain.' : null,
     quiz: !voie ? 'Choisissez qui rédige le quiz.' : null,
     flowin: !theme.trim() ? 'Indiquez le thème du quiz.' : null,
     questions: null,
@@ -213,8 +219,10 @@ export default function Configurateur({ pro, banques }: { pro: ProConfigurateur;
       }
     }
     const spin = jeu === 'spin'
+    /* Position du commerce pour la carte des commerces participants (jamais inventée : sans résultat, pas de point). */
+    const gps = await geocoderAdresse(adresse.trim(), cp.trim() || null, ville.trim()).catch(() => null)
     const lotsEnvoi = lotsOk.map(l => ({
-      nom: l.nom.trim(), quantite: Number(l.quantite) || 1, valeur: 0, type: spin ? 'instantane' as const : 'tirage' as const, conditions: l.conditions.trim(),
+      nom: l.nom.trim(), quantite: Number(l.quantite) || 1, valeur: 0, type: gainImmediat ? 'instantane' as const : 'tirage' as const, conditions: l.conditions.trim(),
       validiteJours: l.validite === 'jours' ? Number(l.jours) || null : null,
       validiteDu: l.validite === 'dates' ? l.du : null, validiteAu: l.validite === 'dates' ? l.au : null,
     }))
@@ -234,7 +242,9 @@ export default function Configurateur({ pro, banques }: { pro: ProConfigurateur;
         ...(quizFlowin ? { quizFlowin: { statut: 'demande', theme: theme.trim(), objectif: objectif.trim(), bonus: jeu === 'quizbonus' } } : {}),
       },
       lots: lotsEnvoi,
-      regleRecompense: spin ? { mode: 'aleatoire', everyX: 10, probabilite: 15 } : undefined,
+      /* Quiz en gain immédiat : un lot par joueur et par jour tant qu'il en reste (appliquer_regle_gain). */
+      regleRecompense: spin ? { mode: 'aleatoire', everyX: 10, probabilite: 15 } : gainImmediat ? { mode: 'aleatoire', everyX: 1, probabilite: 100 } : undefined,
+      lieu: gps ? { lat: gps.lat, lng: gps.lng, adresse: [adresse.trim(), [cp.trim(), ville.trim()].filter(Boolean).join(' ')].filter(Boolean).join(', '), photoUrl: logoUrl } : null,
       diffusionPhysique: supportsChoisis.some(s => s.type === 'physique') || kit === 'physique',
       diffusionDigital: supportsChoisis.some(s => s.type === 'digital'),
       diffusionQrTracking: true,
@@ -329,6 +339,21 @@ export default function Configurateur({ pro, banques }: { pro: ProConfigurateur;
             <div style={{ fontSize: 12.5, ...MUTED, marginTop: 2, lineHeight: 1.35 }}>{j.s}</div>
           </button>
         ))}
+      </div>
+    </>
+  )
+  if (ecran === 'gain') contenu = (
+    <>
+      <Titre t="Le gain" s="Immédiat ou par tirage au sort ?" />
+      <div style={{ display: 'grid', gap: 12 }}>
+        <button type="button" data-gain="immediat" style={{ ...carte(gainQuiz === 'immediat'), padding: 18 }} onClick={() => choisirPuisSuivant(() => setGainQuiz('immediat'))}>
+          <div style={{ fontSize: 17, fontWeight: 900 }}>Gain immédiat</div>
+          <div style={{ fontSize: 13, ...MUTED, marginTop: 3 }}>Le client gagne tout de suite</div>
+        </button>
+        <button type="button" data-gain="tirage" style={{ ...carte(gainQuiz === 'tirage'), padding: 18 }} onClick={() => choisirPuisSuivant(() => setGainQuiz('tirage'))}>
+          <div style={{ fontSize: 17, fontWeight: 900 }}>Tirage au sort</div>
+          <div style={{ fontSize: 13, ...MUTED, marginTop: 3 }}>Un ticket, puis le tirage</div>
+        </button>
       </div>
     </>
   )
@@ -449,6 +474,7 @@ export default function Configurateur({ pro, banques }: { pro: ProConfigurateur;
     const jeuT = JEUX.find(j => j.k === jeu)?.t || '—'
     const blocs: { cle: string; t: string; v: string }[] = [
       { cle: 'jeu', t: 'Jeu', v: jeuT },
+      ...(estQuiz ? [{ cle: 'gain', t: 'Gain', v: gainQuiz === 'immediat' ? 'Gain immédiat' : 'Tirage au sort' }] : []),
       ...(estQuiz ? [{ cle: voie === 'flowin' ? 'flowin' : 'quiz', t: 'Quiz', v: voie === 'flowin' ? `Rédigé par Flowin · ${theme.trim() || '—'}` : 'Je rédige mes questions' }] : []),
       { cle: 'lots', t: 'Lots', v: lotsOk.map(l => `${l.nom.trim()} × ${l.quantite}${l.conditions.trim() ? ` (${l.conditions.trim()})` : ''} · ${l.validite === 'sans' ? 'sans limite' : l.validite === 'jours' ? `${l.jours} j` : `du ${l.du.split('-').reverse().join('/')} au ${l.au.split('-').reverse().join('/')}`}`).join(' ; ') || '—' },
       { cle: 'supports', t: 'Supports', v: supportsChoisis.map(s => s.t).join(', ') || '—' },

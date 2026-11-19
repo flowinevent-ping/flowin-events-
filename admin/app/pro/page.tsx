@@ -114,6 +114,8 @@ export default async function ProAccueilPage({ searchParams }: Props) {
         {peutRejoindre && <Link href={`/pro/rejoindre${q}`} data-rejoindre style={{ ...BTN2, padding: '0 18px', fontSize: 14, textDecoration: 'none' }}>Rejoindre un Super Event</Link>}
         <Link href={`/pro/historique${q}`} style={{ ...BTN2, padding: '0 18px', fontSize: 14, textDecoration: 'none' }}>Historique</Link>
         <Link href={`/pro/parcours${q}`} style={{ ...BTN2, padding: '0 18px', fontSize: 14, textDecoration: 'none' }}>Aperçu mobile</Link>
+        {/* Audit promesse L3 (19/11/2026) : le pro voit sa vignette sur la carte des commerces participants. */}
+        <Link href="/carte-commerces" data-lien-carte style={{ ...BTN2, padding: '0 18px', fontSize: 14, textDecoration: 'none' }}>Carte des commerces</Link>
       </div>
 
       <div className="pro-rangee" style={{ marginBottom: 14 }}>

@@ -105,6 +105,9 @@ export interface CreationAnimation {
   /** Identifiant décidé à l'avance (QR montrés avant la publication) ; sinon tiré ici. */
   id?: string
   regleRecompense?: { mode: 'tousLesX' | 'aleatoire'; everyX: number; probabilite: number }
+  /** Audit promesse L3 (19/11/2026) : position et vignette du commerce, lues par carte_commerces_publique
+   *  (events.lat/lng/adresse/photo_url). Absentes : l'animation n'apparaît pas sur la carte. */
+  lieu?: { lat: number; lng: number; adresse: string | null; photoUrl: string | null } | null
   diffusionPhysique: boolean
   diffusionDigital: boolean
   diffusionQrTracking: boolean
@@ -130,6 +133,7 @@ export async function creerAnimation(params: CreationAnimation): Promise<{ ok: b
     date_f: params.dateF,
     gain_ticket: params.lots.some(l => l.type === 'tirage'),
     gain_immediat: premierInstantane?.nom ?? null,
+    ...(params.lieu ? { lat: params.lieu.lat, lng: params.lieu.lng, adresse: params.lieu.adresse, ...(params.lieu.photoUrl ? { photo_url: params.lieu.photoUrl } : {}) } : {}),
     cfg: {
       /* Contenu propre au jeu (bonusBanques, spinSegments, voteItems) :
          memes cles que la creation SA, lues par les jeux. */

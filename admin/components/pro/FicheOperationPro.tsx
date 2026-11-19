@@ -129,6 +129,8 @@ export default function FicheOperationPro({ initial, cle, onglet: ongletInitial,
         {onglet === 'lots' && <ContenuLots op={op} partenaireNom={pt?.nom ?? data.proNom ?? ''} partenaireEmail={pt?.email ?? data.proEmail} onChange={recharger} />}
         {onglet === 'diffusion' && <ContenuComm op={op} partenaireId={pt?.id ?? null} partenaireSe={pt?.super_event_id ?? null} mode="pro" />}
         {onglet === 'gagnants' && <BlocGagnants op={op} data={data} onChange={recharger} />}
+        {/* Audit promesse L3 (19/11/2026) : les réponses du quiz bonus, à un clic du rapport. */}
+        {onglet === 'trafic' && op.type !== 'super' && st && <a data-lien-bonus href={`/pro/super/${encodeURIComponent(st.id)}${q}`} style={{ ...BTN2, display: 'inline-block', textDecoration: 'none', marginBottom: 12 }}>Réponses du quiz bonus</a>}
         {onglet === 'trafic' && <ContenuTracking op={op} proId={data.proId} onStation={id => { window.location.href = `/pro/super/${encodeURIComponent(id)}${q}` }} masquerGlobal />}
         {onglet === 'crm' && <CrmPro proId={data.proId} proNom={data.proNom ?? ''} contacts={contacts} erreur={erreurContacts} operations={[]} operationFixe={op.cle} />}
         {onglet === 'bons' && <ContenuContrat op={op} mode="pro" partenaireId={pt?.id ?? null} onChange={recharger} />}
