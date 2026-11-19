@@ -113,3 +113,6 @@ Nouvelles fonctions d'aide (SECURITY DEFINER, exécutables par authenticated) : 
 
 ## Après application, vérifier
 SA : éditer une landing, une banque, un document légal, la prospection (`prospection.html`). Pro : éditer sa banque, ajouter/retirer du stock de lot. Joueur anonyme : partie complète NDS (réponse, ticket, gain immédiat, clic partenaire, parrainage).
+
+## Phase 2 appliquée en production le 19/11/2026
+Vérifié : lectures publiques en 200 (config, landings, banques, event_modeles, se_lots, se_reponses, documents_legaux, packs_participation, lots_visuels, events, lots) ; pages /nds, /landing, /jouer en 200.
