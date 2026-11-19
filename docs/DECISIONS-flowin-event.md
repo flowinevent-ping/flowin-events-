@@ -344,3 +344,14 @@ que sur instruction explicite de Romain.
 - **Super Event = toujours tirage au sort.** Aucune option de gain immédiat dans la création ou le réglage d'un Super Event (pas de roue, lots de station verrouillés en tirage). Les animations gardent le choix gain immédiat / tirage.
 - **Scanner** : oui, **caméra dans la page `/pro/scanner` sur iPhone et Android** (décodeur QR jsQR, licence MIT ; BarcodeDetector gardé quand il existe). Code manuel et validation `/lot.html` inchangés. Caméra ouverte en un geste ; message clair si l'accès est refusé.
 - **Les 8 animations sans position sur la carte** : pas urgent, rien à faire.
+
+## Super Event : deux phases et centres d'intérêt (Romain, 19/11/2026)
+- **Deux phases**, mots de Romain : « avant l'événement ils gagnent des places ou des lots que tu choisis (organisateur) ; pendant, ils jouent aux lots des commerces et jouent sur place ».
+  - Phase **avant** : du début du jeu à la veille de l'événement. Lots de l'organisateur (places, lots choisis).
+  - Phase **pendant** : dates de l'événement. Lots des stations des commerces + jeu sur place.
+  - Tirage au sort **par phase** (Super Event = toujours tirage). Les lots affichés au joueur suivent la phase en cours.
+  - Organisateur : **un écran carrousel « Les phases »** (deux cartes, dates reprises de l'événement, lots répartis d'un geste). Espace organisateur : passages et tickets par phase.
+  - Existant prolongé, rien recréé ni retiré. **Exception Nuits du Sud 2026** : pas de phases, pas d'échéance, comportement inchangé.
+  - Détail technique et ordre d'application SQL : `docs/SUPER-EVENT-phases-2026-11-19.md`.
+- **Centres d'intérêt** : banque bonus de 5 questions proposée (courtes, à choix, neutres, aucune donnée sensible), **à valider par Romain** avant mise en ligne (`sql/2026-11-19-banque-interets.sql`, non appliqué).
+- **Vidéo L4, bloc 7** : on garde les exemples de réponses. Rien à faire.

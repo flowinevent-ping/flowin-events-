@@ -4,8 +4,11 @@ import { supabase } from '@/lib/supabase'
 import SuperEventMap, { Lieu } from '../_components/SuperEventMap'
 import { Ico, IcoModule } from '@/lib/proicons'
 import { ACCENT_SUPER } from '@/lib/charte'
+import { estDemo } from '@/lib/demo'
+import type { LotPhase } from '@/lib/superEventLots'
+import { lirePhases, phaseCourante, periodePhase, LIBELLE_PHASE, ORANGE_SE, type Phase } from '@/lib/superEventPhases'
 
-type SE = { id: string; nom: string; description?: string | null; date_d?: string | null; date_f?: string | null; social?: { insta?: string; fb?: string; site?: string } | null }
+type SE = { id: string; nom: string; description?: string | null; date_d?: string | null; date_f?: string | null; social?: { insta?: string; fb?: string; site?: string } | null; cfg_jeu?: unknown }
 type Lot = { id: string; rang: number | null; valeur: number | null; libelle?: string | null }
 type Sponsor = { id: string; nom: string; image_url?: string | null }
 type FocusEvent = { id: string; nom: string; module?: string | null; gain_immediat?: string | null }
@@ -16,6 +19,8 @@ type Joueur = { id: string; prenom?: string }
 interface Props {
   se: SE
   lots: Lot[]
+  /** Lots rangés par phase (super event en deux phases, 19/11/2026). */
+  lotsPhases?: LotPhase[]
   lieux: Lieu[]
   sponsors: Sponsor[]
   autres?: Autre[]
@@ -70,7 +75,7 @@ function fmtDist(m: number): string {
   return m < 1000 ? `à ${Math.round(m / 10) * 10} m` : `à ${(m / 1000).toFixed(1).replace('.', ',')} km`
 }
 
-export default function SuperEventClient({ se, lots, lieux, sponsors, autres = [], focus }: Props) {
+export default function SuperEventClient({ se, lots, lotsPhases = [], lieux, sponsors, autres = [], focus }: Props) {
   const [open, setOpen] = useState<boolean>(!!focus)
   const [selected, setSelected] = useState<Lieu | null>(null)
   const [joueur, setJoueur] = useState<Joueur | null>(null)
@@ -88,7 +93,19 @@ export default function SuperEventClient({ se, lots, lieux, sponsors, autres = [
     )
   }, [])
 
-  const lotsSorted = [...lots].sort((a, b) => (a.rang ?? 9) - (b.rang ?? 9))
+  /* Deux phases (Romain, 19/11) : les lots affichés suivent la phase en cours.
+     Phases inactives (ou SQL non appliqué) : une seule phase, comme avant.
+     En démo : les deux phases sont montrées, coupées à date_d. */
+  const phases = lirePhases(se)
+  const [demo, setDemo] = useState(false)
+  useEffect(() => { setDemo(estDemo()) }, [])
+  const modePhases = (phases.actif || demo) && !!phases.dateD && lotsPhases.length > 0
+  const enCours: Phase = phaseCourante({ ...phases, actif: true }) ?? 'pendant'
+  const [phaseVue, setPhaseVue] = useState<Phase | null>(null)
+  const phaseAff: Phase = phaseVue ?? enCours
+  const lotsSorted = modePhases
+    ? lotsPhases.filter(l => l.phase === phaseAff)
+    : [...lots].sort((a, b) => (a.rang ?? 9) - (b.rang ?? 9))
   const idsKey = lieux.map((l) => l.id).join(',')
 
   // Reconnaissance joueur (localStorage) → données réelles
@@ -235,6 +252,23 @@ export default function SuperEventClient({ se, lots, lieux, sponsors, autres = [
               </div>
             )}
 
+            {modePhases && (
+              <div data-phases style={{ marginBottom: 12 }}>
+                <div style={{ display: 'flex', gap: 6, background: '#FFF4EC', borderRadius: 14, padding: 4 }}>
+                  {(['avant', 'pendant'] as Phase[]).map(ph => (
+                    <button key={ph} data-phase={ph} onClick={() => setPhaseVue(ph)}
+                      style={{ flex: 1, border: 'none', borderRadius: 11, padding: '9px 6px', cursor: 'pointer', fontWeight: 800, fontSize: 12.5,
+                        background: phaseAff === ph ? ORANGE_SE : 'transparent', color: phaseAff === ph ? '#fff' : ORANGE_SE }}>
+                      {ph === 'avant' ? 'Avant' : 'Pendant'}{ph === enCours ? ' · en cours' : ''}
+                    </button>
+                  ))}
+                </div>
+                <div style={{ fontSize: 12, color: '#6b7280', textAlign: 'center', marginTop: 7 }}>
+                  {LIBELLE_PHASE[phaseAff]}{periodePhase(phases, phaseAff) ? ` · ${periodePhase(phases, phaseAff)}` : ''} · tirage au sort{demo && !phases.actif ? ' · DÉMO' : ''}
+                </div>
+                {lotsSorted.length === 0 && <div style={{ fontSize: 12.5, color: '#9aa0ad', textAlign: 'center', marginTop: 8 }}>Lots de cette phase [à compléter]</div>}
+              </div>
+            )}
             {/* Podium des lots */}
             {lotsSorted.length > 0 && (
               <div style={{ marginBottom: 22 }}>

@@ -74,6 +74,9 @@ import { SECTEUR_AUTRE, nettoyerPrecision, categorieAvecPrecision } from '@/lib/
 import { texteDemandePack, packsPourSuperEvent, MENTION_TARIF_A_CONFIRMER, prixAffiche } from '@/lib/commercial'
 import { estFeteHautMoyenPays, cfgApercuDemo, estSuperEventDemo, FHMP_DEMO } from '@/lib/demoFetes'
 import { retourSur } from '@/lib/retour'
+import { estDemo } from '@/lib/demo'
+import { colonnePhasePresente } from '@/lib/superEventLots'
+import { aujourdhui, veille, LIBELLE_PHASE, ORANGE_SE, type Phase } from '@/lib/superEventPhases'
 
 type TypeOp = 'animation' | 'rejoindre' | 'super' | 'demande'
 /** `visiteur` : page publique /rejoindre, sans compte : on peut tout parcourir, mais l'envoi exige un compte pro. */
@@ -232,8 +235,20 @@ export default function ParcoursCreation({ mode = 'pro', pro, banques, supers, p
   const [etape, setEtape] = useState(typeInitial && typeInitial !== 'demande' ? 1 : 0)
   const estSuper = type === 'super'
   const rejoindre = type === 'rejoindre'
-  const ETAPE_PROS = 4
-  const FIN = estSuper ? 5 : 4
+  /* Super event en deux phases (Romain, 19/11) : écran « Les phases » apres les lots.
+     Visible quand la colonne se_lots.phase existe (sql/2026-11-19-super-event-phases.sql)
+     ou en demo ; sinon une seule phase, parcours inchange. */
+  const [phasesDispo, setPhasesDispo] = useState(false)
+  useEffect(() => {
+    if (estDemo()) { setPhasesDispo(true); return }
+    colonnePhasePresente().then(setPhasesDispo).catch(() => setPhasesDispo(false))
+  }, [])
+  const avecPhases = estSuper && phasesDispo
+  const ETAPE_PHASES = 4
+  const ETAPE_PROS = avecPhases ? 5 : 4
+  const FIN = estSuper ? (avecPhases ? 6 : 5) : 4
+  const [debutJeu, setDebutJeu] = useState<string>(() => aujourdhui())
+  const [phaseLot, setPhaseLot] = useState<Record<string, Phase>>({})
 
   /* 1. L'animation / le super event */
   const [nom, setNom] = useState(prefill?.nom ?? '')
@@ -487,6 +502,7 @@ export default function ParcoursCreation({ mode = 'pro', pro, banques, supers, p
       : module_ === 'vote' && !itemsOk ? 'Ajoutez au moins deux éléments.' : null,
     3: sansLots ? null : !lotsNommes.length ? 'Ajoutez au moins un lot.' : aUnTirage ? erreurTirage(tirage) : null,
     [ETAPE_PROS]: null,
+    ...(avecPhases ? { [ETAPE_PHASES]: debutJeu && dateD && debutJeu >= dateD ? 'Le jeu doit commencer avant l’événement.' : null } : {}),
     [FIN]: rejoindre && visiteur && !proSession ? coordonneesKo : null,
   }
 
@@ -645,18 +661,22 @@ export default function ParcoursCreation({ mode = 'pro', pro, banques, supers, p
       const r = await creerSuperEvent({
         id, nom: nom.trim(), dateD: dateD || null, dateF: dateF || null, description: null,
         geofenceM: null, tirageGlobal: true, logoUrl: logoUrl.trim() || null,
-        module: module_ as string, cfgJeu: cfgContenu,
+        module: module_ as string,
+        cfgJeu: avecPhases && debutJeu && dateD && debutJeu < dateD ? { ...cfgContenu, phases: { debutJeu } } : cfgContenu,
         proCreateur: sa ? null : (p.id || null),
         pros: participants.map(pid => ({ pro_id: pid, nom: cat.get(pid)?.nom ?? (pid === p.id ? p.nom ?? pid : pid) })),
       })
       if (!r.ok) { setEnvoi('echec'); setErreur(r.erreur ?? ''); return }
       /* Lots du super event = lots du grand tirage (se_lots, lu par le tirage
          global et les pages /se). Une ligne par rang : quantite 3 = 3 rangs. */
-      const lignes: { id: string; super_event_id: string; rang: number; valeur: number; libelle: string }[] = []
+      const lignes: { id: string; super_event_id: string; rang: number; valeur: number; libelle: string; phase?: Phase }[] = []
+      const deuxPhases = avecPhases && !!debutJeu && !!dateD && debutJeu < dateD
       lotsNommes.forEach(l => {
         for (let i = 0; i < Math.max(1, Number(l.quantite) || 1); i++) {
           const rang = lignes.length + 1
-          lignes.push({ id: `${id}-lot-${rang}`, super_event_id: id, rang, valeur: Number(l.valeur) || 0, libelle: l.nom.trim() })
+          lignes.push({ id: `${id}-lot-${rang}`, super_event_id: id, rang, valeur: Number(l.valeur) || 0, libelle: l.nom.trim(),
+            /* Colonne phase : seulement si le SQL du 19/11 est applique (avecPhases hors demo). */
+            ...(deuxPhases ? { phase: phaseLot[l.id] ?? 'avant' } : {}) })
         }
       })
       let info = r.erreur
@@ -970,7 +990,7 @@ export default function ParcoursCreation({ mode = 'pro', pro, banques, supers, p
   const titreParcours = rejoindre ? (sa ? 'Intégrer un super event' : 'Rejoindre un super event') : estSuper ? 'Créer un super event' : 'Créer une animation'
   const ETAPES = rejoindre
     ? ['Super event', 'Jeu', 'Lots', 'Diffusion & QR']
-    : estSuper ? ['Super event', 'Jeu', 'Lots', 'Participants', 'Diffusion & QR']
+    : estSuper ? (avecPhases ? ['Super event', 'Jeu', 'Lots', 'Les phases', 'Participants', 'Diffusion & QR'] : ['Super event', 'Jeu', 'Lots', 'Participants', 'Diffusion & QR'])
     : ['Votre animation', 'Jeu', 'Lots', 'Diffusion & QR']
   const jeuxProposes = estSuper ? JEUX.filter(j => j.m !== 'spin') : JEUX
   const nonVide = (b: Banque) => (b.questions || []).length > 0
@@ -1319,7 +1339,43 @@ export default function ParcoursCreation({ mode = 'pro', pro, banques, supers, p
               )}
             </>
           )}
-          {etape === 3 && btnSuivant(estSuper ? ETAPE_PROS : FIN)}
+          {etape === 3 && btnSuivant(estSuper ? (avecPhases ? ETAPE_PHASES : ETAPE_PROS) : FIN)}
+
+          {/* ── 4. LES PHASES (super event) : deux cartes, dates reprises de l'événement, un geste par lot ── */}
+          {avecPhases && etape === ETAPE_PHASES && (() => {
+            const deux = !!debutJeu && !!dateD && debutJeu < dateD
+            const ph = (id: string): Phase => (deux ? phaseLot[id] ?? 'avant' : 'pendant')
+            const carte = (k: Phase) => (
+              <div key={k} data-carte-phase={k} style={{ flex: '1 1 240px', border: `1.5px solid ${ORANGE_SE}`, borderRadius: 16, padding: 14, background: '#fff', opacity: k === 'avant' && !deux ? 0.5 : 1 }}>
+                <div style={{ fontSize: 14, fontWeight: 900, color: ORANGE_SE }}>{LIBELLE_PHASE[k]}</div>
+                <div style={{ fontSize: 12.5, ...MUTED, margin: '4px 0 10px' }}>
+                  {k === 'avant'
+                    ? <>Du <input type="date" style={{ ...CHAMP, width: 'auto', display: 'inline-block', padding: '4px 8px' }} value={debutJeu} max={dateD ? veille(dateD) : undefined} onChange={e => setDebutJeu(e.target.value)} /> {dateD ? `au ${libelleDates(veille(dateD), null)}` : ''}</>
+                    : (dateD ? libelleDates(dateD, dateF || null) : '[dates à compléter]')}
+                </div>
+                <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+                  {lotsNommes.filter(l => ph(l.id) === k).map(l => (
+                    <button key={l.id} type="button" data-lot-phase={k} disabled={!deux}
+                      onClick={() => setPhaseLot(m => ({ ...m, [l.id]: k === 'avant' ? 'pendant' : 'avant' }))}
+                      style={{ border: 'none', borderRadius: 999, padding: '6px 11px', background: '#FFF4EC', color: ORANGE_SE, fontWeight: 800, fontSize: 12.5, cursor: deux ? 'pointer' : 'default' }}>
+                      {l.nom.trim()}{deux ? (k === 'avant' ? ' →' : ' ←') : ''}
+                    </button>
+                  ))}
+                  {k === 'pendant' && <span style={{ fontSize: 12, ...MUTED, alignSelf: 'center' }}>+ lots des commerces, jeu sur place</span>}
+                </div>
+              </div>
+            )
+            return (
+              <>
+                <Titre t="Les phases" s="Avant : places ou lots que vous choisissez. Pendant : lots des commerces, sur place. Tirage au sort à chaque phase." />
+                <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>{carte('avant')}{carte('pendant')}</div>
+                <button type="button" style={{ ...BTN2, marginTop: 12, fontSize: 12.5, padding: '7px 13px' }} onClick={() => setDebutJeu(deux ? '' : aujourdhui())}>
+                  {deux ? 'Une seule phase' : 'Ajouter la phase avant'}
+                </button>
+              </>
+            )
+          })()}
+          {avecPhases && etape === ETAPE_PHASES && btnSuivant(ETAPE_PROS)}
 
           {/* ── 4. PARTICIPANTS (super event, SA) ── */}
           {estSuper && etape === ETAPE_PROS && (

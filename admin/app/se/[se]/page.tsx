@@ -1,5 +1,5 @@
 import { supabase } from '@/lib/supabase'
-import { fetchLotsSuperEvent } from '@/lib/superEventLots'
+import { fetchLotsSuperEvent, fetchLotsSuperEventPhases } from '@/lib/superEventLots'
 import SuperEventClient from './SuperEventClient'
 import CaptureSource from '@/components/CaptureSource'
 
@@ -16,9 +16,10 @@ const NOTFOUND = (
 export default async function Page({ params }: Props) {
   const seId = params.se
 
-  const [seRes, lotsRes, lieuxRes, sponsorsRes] = await Promise.all([
-    supabase.from('super_events').select('id,nom,description,date_d,date_f,social').eq('id', seId).single(),
+  const [seRes, lotsRes, lotsPhasesRes, lieuxRes, sponsorsRes] = await Promise.all([
+    supabase.from('super_events').select('id,nom,description,date_d,date_f,social,cfg_jeu').eq('id', seId).single(),
     fetchLotsSuperEvent(seId),
+    fetchLotsSuperEventPhases(seId),
     supabase.from('events').select('id,nom,module,lat,lng,couleur,gain_immediat,gain_ticket,adresse,description,categorie,tel,site_web,photo_url,horaires').eq('super_event_id', seId).neq('status','pending'),
     supabase.from('partenaires').select('id,nom,image_url').eq('super_event_id', seId).eq('statut_paiement', 'valide'),
   ])
@@ -48,6 +49,7 @@ export default async function Page({ params }: Props) {
     <SuperEventClient
       se={seRes.data}
       lots={lotsRes}
+      lotsPhases={lotsPhasesRes}
       lieux={lieuxRes.data ?? []}
       sponsors={sponsorsRes.data ?? []}
       autres={autres}

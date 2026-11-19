@@ -9,6 +9,8 @@ export const THEMES_BONUS: ThemeBonus[] = ['RSE', 'Mobilité', 'Centres d’int�
 
 export function themeBonus(cle: string): ThemeBonus {
   const k = cle.toLowerCase()
+  /* Banque « Centres d'intérêt » (sql/2026-11-19-banque-interets.sql) : clés ci_*, testées en premier. */
+  if (/^ci_/.test(k)) return 'Centres d’intérêt'
   if (/mobil|covoit|venir|venue|acces|transport|_alt$|velo|bus/.test(k)) return 'Mobilité'
   if (/^rse|^bv|dechet|conso|environ|eco/.test(k)) return 'RSE'
   return 'Centres d’intérêt'

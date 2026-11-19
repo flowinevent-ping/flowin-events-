@@ -1,5 +1,5 @@
 import { supabase } from '@/lib/supabase'
-import { fetchLotsSuperEvent } from '@/lib/superEventLots'
+import { fetchLotsSuperEvent, fetchLotsSuperEventPhases } from '@/lib/superEventLots'
 import SuperEventClient from '../SuperEventClient'
 
 export const revalidate = 60
@@ -16,9 +16,10 @@ export default async function Page({ params }: Props) {
   const seId = params.se
   const evId = params.event
 
-  const [seRes, lotsRes, lieuxRes, sponsorsRes, focusRes] = await Promise.all([
-    supabase.from('super_events').select('id,nom,description,date_d,date_f').eq('id', seId).single(),
+  const [seRes, lotsRes, lotsPhasesRes, lieuxRes, sponsorsRes, focusRes] = await Promise.all([
+    supabase.from('super_events').select('id,nom,description,date_d,date_f,cfg_jeu').eq('id', seId).single(),
     fetchLotsSuperEvent(seId),
+    fetchLotsSuperEventPhases(seId),
     supabase.from('events').select('id,nom,module,lat,lng,couleur,gain_immediat,gain_ticket,adresse,description,categorie,tel,site_web,photo_url,horaires').eq('super_event_id', seId).neq('status','pending'),
     supabase.from('partenaires').select('id,nom,image_url').eq('super_event_id', seId).eq('statut_paiement', 'valide'),
     supabase.from('events').select('id,nom,module,gain_immediat').eq('id', evId).single(),
@@ -46,6 +47,7 @@ export default async function Page({ params }: Props) {
     <SuperEventClient
       se={seRes.data}
       lots={lotsRes}
+      lotsPhases={lotsPhasesRes}
       lieux={lieuxRes.data ?? []}
       sponsors={sponsorsRes.data ?? []}
       autres={autres}

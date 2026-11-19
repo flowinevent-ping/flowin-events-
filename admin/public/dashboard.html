@@ -2816,6 +2816,22 @@ const findJeu = id => DATA.jeux.find(j=>j.id===id);
 const findBanque = id => DATA.banques.find(b=>b.id===id);
 const findLot = id => DATA.lots.find(l=>l.id===id);
 const findSuperEvent = id => DATA.superEvents.find(s=>s.id===id);
+/* Super Event en deux phases (19/11/2026) : phase d'un lot de station, affichee seulement si
+   le super event a ses phases actives (cfg_jeu.phases.debutJeu avant dateD, hors se-nds-2026).
+   Lot sans colonne phase = « pendant » (lot de commerce). Meme regle que lib/superEventPhases.ts. */
+function sePhaseLot(l, e){
+  var sid = e ? (e.superEventId || e.super_event_id) : null;
+  if(!sid || sid === 'se-nds-2026') return '';
+  var se = null, i;
+  for(i = 0; i < DATA.superEvents.length; i++){ if(DATA.superEvents[i].id === sid){ se = DATA.superEvents[i]; break; } }
+  if(!se) return '';
+  var cfg = se.cfg_jeu || {};
+  var deb = cfg.phases && cfg.phases.debutJeu ? String(cfg.phases.debutJeu) : '';
+  var dd = se.dateD || se.date_d || '';
+  if(!deb || !dd || !(deb < dd)) return '';
+  var ph = (l.phase === 'avant' || l.phase === 'pendant') ? l.phase : 'pendant';
+  return ' · <span class="chip" style="background:#FFF4EC;color:#C2410C">'+(ph === 'avant' ? 'Avant l\u2019événement' : 'Pendant l\u2019événement')+'</span>';
+}
 const newId = pref => pref+'-'+Date.now()+'-'+Math.random().toString(36).slice(2,6);
 const numericVal = s => parseFloat(String(s).replace(/[^0-9,.-]/g,'').replace(',','.'))||0;
 
@@ -8988,7 +9004,7 @@ html += '<div class="section-h">🌙 Communs Nuits du Sud</div>';
       var isOwn = !!l._own; if(isOwn) _oi++; var oi=_oi;
       html += '<div style="padding:12px;background:var(--sa-subtle);border-radius:8px;margin-bottom:6px">'
            + '<div class="flex flex-between mb-2"><div class="fw-700">'+esc(l.nom||l.titre||'Lot')+(l.quantite>1?' x'+l.quantite:'')+'</div><div>'+(l.valeur||0)+' €</div></div>'
-           + '<div class="text-xs text-muted">'+(e?'<a onclick="openDrawerFor(\'event\',\''+e.id+'\')">'+esc(e.nom)+'</a>':(isOwn?'Lot propre au partenaire':'-'))+(l.retire?' · <span class="chip live">Retiré</span>':'')+'</div>'
+           + '<div class="text-xs text-muted">'+(e?'<a onclick="openDrawerFor(\'event\',\''+e.id+'\')">'+esc(e.nom)+'</a>':(isOwn?'Lot propre au partenaire':'-'))+sePhaseLot(l,e)+(l.retire?' · <span class="chip live">Retiré</span>':'')+'</div>'
            + (isOwn?'<div style="display:flex;gap:6px;margin-top:8px"><button class="btn btn-sm" style="font-size:11px" onclick="ptEditOwnLot(\''+esc(p.id)+'\','+oi+')">✏ Modifier</button><button class="btn btn-sm btn-danger" style="font-size:11px" onclick="ptDeleteOwnLot(\''+esc(p.id)+'\','+oi+')">× Supprimer</button></div>':'')
            + '</div>';
     }); }

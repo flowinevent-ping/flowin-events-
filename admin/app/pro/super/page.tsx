@@ -22,6 +22,9 @@ import { BlocOperation } from '@/components/operations/BlocsOperations'
  * Sans `?se=` et avec plusieurs super events : la liste, un bloc chacun.
  * Avec un seul : son bilan directement.
  */
+import PhasesOrganisateur from '@/components/pro/PhasesOrganisateur'
+import { lirePhases, compterParPhase } from '@/lib/superEventPhases'
+
 export default async function ProSuperPage({ searchParams }: { searchParams: { pro?: string; se?: string } }) {
   const proId = searchParams.pro ?? ''
   const data = await fetchProDashboard(proId)
@@ -106,6 +109,18 @@ export default async function ProSuperPage({ searchParams }: { searchParams: { p
   const nomsDuPro = new Set(choisi.stations.map(e => e.nom))
   const myStations = allStations.filter(s => evIds.has(s.event_id))
   const estOrganisateur = organises.some(x => x.id === seId)
+  /* Deux phases (19/11) : passages et tickets par phase, toutes stations, pour l'organisateur. */
+  let phasesOrga: ReturnType<typeof lirePhases> | null = null
+  let compteOrga: ReturnType<typeof compterParPhase> | null = null
+  if (estOrganisateur && seId) {
+    const { data: seCfg } = await supabase.from('super_events').select('id,date_d,date_f,cfg_jeu').eq('id', seId).maybeSingle()
+    phasesOrga = lirePhases(seCfg as { id: string; date_d: string | null; date_f: string | null; cfg_jeu: unknown } | null)
+    const idsSe = allStations.map(x => x.event_id)
+    const { data: pp } = idsSe.length
+      ? await supabase.from('participations').select('played_date,created_at,tickets').in('event_id', idsSe)
+      : { data: [] as { played_date: string | null; created_at: string | null; tickets: number | null }[] }
+    compteOrga = compterParPhase((pp ?? []) as { played_date: string | null; created_at: string | null; tickets: number | null }[], phasesOrga)
+  }
   const toutes = allStations.slice().sort((a, b) => (b.scans ?? 0) - (a.scans ?? 0))
   const tri = myStations.slice().sort((a, b) => (b.commencees ?? 0) - (a.commencees ?? 0))
 
@@ -182,6 +197,7 @@ export default async function ProSuperPage({ searchParams }: { searchParams: { p
       {estOrganisateur && (
         <div data-organisateur style={{ ...CARD, overflowX: 'auto', borderLeft: '3px solid #C2410C' }}>
           <div style={{ fontSize: 11, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '.05em', color: '#C2410C', marginBottom: 10 }}>Organisateur · passages par station</div>
+          {phasesOrga && compteOrga && <PhasesOrganisateur phases={phasesOrga} compte={compteOrga} />}
           {toutes.length === 0 ? <div style={{ fontSize: 13, ...MUTED }}>Aucune station pour l’instant.</div> : (
             <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: 480 }}>
               <thead><tr><th style={TH}>Station</th><th style={TH}>Flashs QR</th><th style={TH}>Joueurs</th><th style={TH}>Parties</th></tr></thead>

@@ -14,13 +14,16 @@ import { useEffect, useState } from 'react'
 import { supabase, sessionPourTirage, MESSAGE_CONNEXION_TIRAGE } from '@/lib/supabase'
 import { SectionHeader } from './DashboardUI'
 import { Ico } from '@/lib/proicons'
+import { lirePhases, phaseDuLot, periodePhase, LIBELLE_PHASE, ORANGE_SE, type Phase, type PhasesSE } from '@/lib/superEventPhases'
 
-interface LotSE { id: string; event_id: string; titre: string | null; nom: string | null; quantite: number | null; valeur: number | null }
+interface LotSE { id: string; event_id: string; titre: string | null; nom: string | null; quantite: number | null; valeur: number | null; phase?: string | null; orga?: boolean }
 interface Station { id: string; nom: string | null }
 interface Tire { id: number; joueur_nom: string | null; lot_nom: string | null; event_id: string | null; statut: string | null }
 
 export default function TirageSuperEvent({ seId, stations }: { seId: string; stations: Station[] }) {
   const [global, setGlobal] = useState<boolean | null>(null)
+  /* Deux phases (19/11) : actives seulement si cfg_jeu.phases et la colonne phase (SQL du 19/11) existent. */
+  const [phases, setPhases] = useState<PhasesSE | null>(null)
   const [lots, setLots] = useState<LotSE[]>([])
   const [tires, setTires] = useState<Tire[]>([])
   const [nb, setNb] = useState<Record<string, number>>({})
@@ -30,14 +33,34 @@ export default function TirageSuperEvent({ seId, stations }: { seId: string; sta
   const cle = ids.join(',')
 
   async function charger() {
-    if (!ids.length) { setLots([]); setTires([]); return }
-    const [{ data: l }, { data: t }, { data: se }] = await Promise.all([
-      supabase.from('lots').select('id,event_id,titre,nom,quantite,valeur').in('event_id', ids),
+    const [{ data: t }, { data: se }, orga] = await Promise.all([
       supabase.from('tirages').select('id,joueur_nom,lot_nom,event_id,statut').eq('super_event_id', seId).neq('statut', 'annule'),
-      supabase.from('super_events').select('tirage_global').eq('id', seId).maybeSingle(),
+      supabase.from('super_events').select('id,tirage_global,date_d,date_f,cfg_jeu').eq('id', seId).maybeSingle(),
+      supabase.from('se_lots').select('id,libelle,valeur,phase').eq('super_event_id', seId).order('rang'),
     ])
+    let l: LotSE[] = []
+    if (ids.length) {
+      let r = await supabase.from('lots').select('id,event_id,titre,nom,quantite,valeur,phase').in('event_id', ids)
+      if (r.error) r = await supabase.from('lots').select('id,event_id,titre,nom,quantite,valeur').in('event_id', ids) as typeof r
+      l = (r.data ?? []) as LotSE[]
+    }
     setGlobal((se as { tirage_global: boolean | null } | null)?.tirage_global ?? null)
-    setLots((l ?? []) as LotSE[])
+    const ph = lirePhases(se as { id: string; date_d: string | null; date_f: string | null; cfg_jeu: unknown } | null)
+    /* orga.error = colonne phase absente : SQL du 19/11 non applique -> une seule phase. */
+    const actif = ph.actif && !orga.error
+    setPhases(actif ? ph : null)
+    if (actif) {
+      /* Lots de l'organisateur (se_lots, un rang = un exemplaire) regroupes par libelle. */
+      const m = new Map<string, LotSE>()
+      ;((orga.data ?? []) as { id: string; libelle: string | null; valeur: number | null; phase: string | null }[]).forEach(x => {
+        const k = x.libelle ?? 'Lot'
+        const e = m.get(k)
+        if (e) e.quantite = (e.quantite ?? 1) + 1
+        else m.set(k, { id: x.id, event_id: '', titre: x.libelle, nom: x.libelle, quantite: 1, valeur: x.valeur, phase: x.phase, orga: true })
+      })
+      l = Array.from(m.values()).concat(l)
+    }
+    setLots(l)
     setTires((t ?? []) as Tire[])
   }
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -45,7 +68,8 @@ export default function TirageSuperEvent({ seId, stations }: { seId: string; sta
 
   const nomLot = (l: LotSE) => (l.titre || l.nom || 'Lot')
   /* 18/11 : le SQL corrige enregistre lots.nom d'abord ; on compte les deux libelles. */
-  const dejaTires = (l: LotSE) => tires.filter(t => t.event_id === l.event_id && (t.lot_nom === l.nom || t.lot_nom === l.titre)).length
+  const dejaTires = (l: LotSE) => tires.filter(t => (l.orga ? !t.event_id : t.event_id === l.event_id) && (t.lot_nom === l.nom || t.lot_nom === l.titre)).length
+  const phaseLot = (l: LotSE): Phase => phaseDuLot({ phase: l.phase, source: l.orga ? 'organisateur' : 'station' })
 
   async function tirer(l: LotSE) {
     const n = Math.max(1, nb[l.id] ?? 1)
@@ -73,32 +97,12 @@ export default function TirageSuperEvent({ seId, stations }: { seId: string; sta
       : { ok: false, texte: 'Rien à enregistrer : aucun gagnant tiré depuis le dernier tirage terminé.' })
   }
 
-  return (
-    <>
-      <SectionHeader>Tirage au sort</SectionHeader>
-      <div style={{ fontSize: 12, color: 'var(--sa-muted)', marginBottom: 10, lineHeight: 1.5 }}>
-        {global === false
-          ? 'Tirage par station : chaque lot est tiré parmi les joueurs de sa station.'
-          : 'Tirage global : chaque lot est tiré parmi tous les joueurs de l’opération.'}
-        {' '}Chances proportionnelles aux tickets · un joueur ne gagne qu’une fois par opération · comptes de test exclus.
-      </div>
-      {message && (
-        <div className={`sa-alert ${message.ok ? 'info' : 'warn'}`} style={{ fontSize: 12.5, marginBottom: 10 }}>{message.texte}</div>
-      )}
-      {lots.length === 0 && (
-        <div style={{ fontSize: 12.5, color: 'var(--sa-muted)' }}>Aucun lot enregistré sur les stations de ce super event.</div>
-      )}
-      {stations.filter(s => lots.some(l => l.event_id === s.id)).map(s => (
-        <div key={s.id} style={{ marginBottom: 10 }}>
-          <div style={{ fontSize: 11, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '.06em', color: 'var(--sa-muted)', margin: '10px 0 2px' }}>
-            <Ico k="pin" size={13} style={{ marginRight: 5, verticalAlign: -2 }} />{s.nom ?? s.id}
-          </div>
-          {lots.filter(l => l.event_id === s.id).map(l => {
+  const ligne = (l: LotSE) => {
             const reste = Math.max(0, (l.quantite ?? 1) - dejaTires(l))
             return (
               <div key={l.id} className="sa-list-item">
                 <div style={{ flex: 1 }}>
-                  <div style={{ fontWeight: 700 }}>{nomLot(l)}</div>
+                  <div style={{ fontWeight: 700 }}>{nomLot(l)}{l.orga ? ' · organisateur' : ''}</div>
                   <div style={{ fontSize: 11, color: 'var(--sa-muted)' }}>
                     {l.valeur ? `${l.valeur} € · ` : ''}{dejaTires(l)} tiré{dejaTires(l) > 1 ? 's' : ''} sur {l.quantite ?? 1} · {reste} restant{reste > 1 ? 's' : ''}
                   </div>
@@ -117,9 +121,44 @@ export default function TirageSuperEvent({ seId, stations }: { seId: string; sta
                 )}
               </div>
             )
-          })}
-        </div>
-      ))}
+  }
+
+  return (
+    <>
+      <SectionHeader>Tirage au sort</SectionHeader>
+      <div style={{ fontSize: 12, color: 'var(--sa-muted)', marginBottom: 10, lineHeight: 1.5 }}>
+        {global === false
+          ? 'Tirage par station : chaque lot est tiré parmi les joueurs de sa station.'
+          : 'Tirage global : chaque lot est tiré parmi tous les joueurs de l’opération.'}
+        {' '}Chances proportionnelles aux tickets · un joueur ne gagne qu’une fois par opération · comptes de test exclus.{phases ? ' Chaque phase est tirée parmi les joueurs de sa période.' : ''}
+      </div>
+      {message && (
+        <div className={`sa-alert ${message.ok ? 'info' : 'warn'}`} style={{ fontSize: 12.5, marginBottom: 10 }}>{message.texte}</div>
+      )}
+      {lots.length === 0 && (
+        <div style={{ fontSize: 12.5, color: 'var(--sa-muted)' }}>Aucun lot enregistré sur les stations de ce super event.</div>
+      )}
+      {(phases ? (['avant', 'pendant'] as Phase[]) : [null]).map(ph => {
+        const dans = (l: LotSE) => ph === null || phaseLot(l) === ph
+        return (
+          <div key={ph ?? 'unique'} data-tirage-phase={ph ?? undefined}>
+            {ph && phases && (
+              <div style={{ fontSize: 12.5, fontWeight: 900, color: ORANGE_SE, margin: '14px 0 2px' }}>
+                {LIBELLE_PHASE[ph]}{periodePhase(phases, ph) ? ` · ${periodePhase(phases, ph)}` : ''}
+              </div>
+            )}
+            {lots.filter(l => l.orga && dans(l)).map(l => ligne(l))}
+            {stations.filter(s => lots.some(l => !l.orga && l.event_id === s.id && dans(l))).map(s => (
+              <div key={s.id} style={{ marginBottom: 10 }}>
+                <div style={{ fontSize: 11, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '.06em', color: 'var(--sa-muted)', margin: '10px 0 2px' }}>
+                  <Ico k="pin" size={13} style={{ marginRight: 5, verticalAlign: -2 }} />{s.nom ?? s.id}
+                </div>
+                {lots.filter(l => !l.orga && l.event_id === s.id && dans(l)).map(l => ligne(l))}
+              </div>
+            ))}
+          </div>
+        )
+      })}
       {tires.length > 0 && (
         <div style={{ marginTop: 14, paddingTop: 12, borderTop: '1px solid var(--sa-border)' }}>
           <div style={{ fontSize: 12, color: 'var(--sa-muted)', marginBottom: 8, lineHeight: 1.5 }}>
