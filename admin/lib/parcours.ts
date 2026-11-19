@@ -373,6 +373,13 @@ export interface ResultatPartie { success: boolean; duplicate: boolean; ticket: 
  *  NDS 2026 (prefixe ND) garde sa regle historique : 1/jour/station quel que
  *  soit le QR. */
 async function controleRegleQr(joueurId: string, evId: string, sourceQr: string | null, prefix: string): Promise<{ bloque: boolean; digital: boolean; ticket?: string }> {
+  /* Sécurité joueurs partie C (19/11) : contrôle en base (RPC), repli direct si la RPC est absente. */
+  const debut0 = new Date(); debut0.setHours(0, 0, 0, 0)
+  const rq = await supabase.rpc('joueur_regle_qr', { p_joueur_id: joueurId, p_event_id: evId, p_source_qr: sourceQr, p_digital: estSourceDigitale(sourceQr), p_nds: prefix === 'ND', p_depuis: debut0.toISOString() })
+  if (!rpcAbsente(rq.error)) {
+    const d = (rq.data ?? {}) as { bloque?: boolean; digital?: boolean; ticket?: string | null }
+    return { bloque: !!d.bloque, digital: !!d.digital, ticket: d.ticket ?? undefined }
+  }
   if (estSourceDigitale(sourceQr)) {
     const { data } = await supabase.from('participations').select('ticket_code').eq('joueur_id', joueurId).eq('event_id', evId).limit(1)
     if (data?.length) return { bloque: true, digital: true, ticket: (data[0] as { ticket_code?: string }).ticket_code }
@@ -405,11 +412,13 @@ export async function writeJoueur(payload: JoueurPayload): Promise<ResultatParti
      joueur/station n'existaient que sur un seul jour.
      APRES : on resout l'identite par email, puis on ne bloque que si une participation
      existe deja pour CE joueur, CETTE station, AUJOURD'HUI. */
-  const { data: dejaConnu } = await supabase
+  /* Sécurité joueurs partie C (19/11) : reconnaissance par RPC (id + prénom seulement). */
+  const reco = await reconnaitreParEmail(emailLower, evId)
+  const dejaConnu = reco.absente ? (await supabase
     .from('joueurs')
     .select('id,ticket_code,prenom,nom,tel,code_postal,age_tranche,genre')
     .eq('email_lower', emailLower)
-    .limit(1)
+    .limit(1)).data : (reco.j ? [{ id: reco.j.id, prenom: reco.j.prenom }] : [])
 
   if (dejaConnu?.length) {
     const d0 = dejaConnu[0] as {
@@ -482,16 +491,25 @@ export async function writeJoueur(payload: JoueurPayload): Promise<ResultatParti
     source: payload.source,
   }
 
-  const { data: existant } = await supabase
-    .from('joueurs')
-    .select('id')
-    .eq('email_lower', emailLower)
-    .limit(1)
-
   let joueurRows: { id: string }[] | null = null
   let joueurErr: { message: string } | null = null
 
-  if (existant?.length) {
+  /* Sécurité joueurs partie C (19/11) : inscription par RPC (liste blanche, joueur connu = events /
+     last_seen / ticket seulement, comme joueur_marquer_partie). Repli direct si la RPC est absente. */
+  const ins = await supabase.rpc('joueur_inscrire', { p_joueur: { ...joueurFields, first_seen: today } })
+  const viaRpc = !rpcAbsente(ins.error)
+  const existant: { id: string }[] | null = viaRpc ? null : ((await supabase
+    .from('joueurs')
+    .select('id')
+    .eq('email_lower', emailLower)
+    .limit(1)).data as { id: string }[] | null)
+
+  if (viaRpc) {
+    const d = (ins.data ?? {}) as { ok?: boolean; id?: string; raison?: string }
+    if (ins.error) joueurErr = ins.error
+    else if (d.ok) joueurRows = [{ id: d.id || '' }] /* id vide : seulement en mode démo (réponse simulée) */
+    else joueurErr = { message: 'joueur_inscrire: ' + (d.raison || 'refus') }
+  } else if (existant?.length) {
     // Joueur deja connu (quel que soit l'evenement d'origine) -> mise a jour ciblee.
     const dejaId = (existant[0] as { id: string }).id
     const r = await supabase.from('joueurs').update(joueurFields).eq('id', dejaId).select('id')
@@ -523,7 +541,7 @@ export async function writeJoueur(payload: JoueurPayload): Promise<ResultatParti
   /* Repli : colonne `optin_version` absente en base (sql/07-joueurs-optin-version.sql non applique).
      Sans ce repli, TOUTE inscription echouait (PGRST204). On reessaie sans la version du
      consentement : l'inscription aboutit, seule la trace de version manque. */
-  if (joueurErr && /optin_version/i.test(joueurErr.message || '')) {
+  if (!viaRpc && joueurErr && /optin_version/i.test(joueurErr.message || '')) {
     const { optin_version: _v, ...sansVersion } = joueurFields
     void _v
     const r2 = existant?.length
@@ -688,6 +706,14 @@ export async function fetchJoueurHistory(joueurId: string): Promise<{ answeredQu
   }
 }
 
+/** RPC joueur_reconnaitre (partie C) : { absente: true } si la RPC n'existe pas encore en base. */
+async function reconnaitreParEmail(emailLower: string, evId: string): Promise<{ absente: boolean; j: { id: string; prenom?: string; dejaJoue: boolean } | null }> {
+  const r = await supabase.rpc('joueur_reconnaitre', { p_email: emailLower, p_event_id: evId, p_jour: new Date().toISOString().slice(0, 10) })
+  if (rpcAbsente(r.error)) return { absente: true, j: null }
+  const d = r.data as { id?: string; prenom?: string | null; deja_joue?: boolean } | null
+  return { absente: false, j: d && d.id ? { id: d.id, prenom: d.prenom ?? undefined, dejaJoue: !!d.deja_joue } : null }
+}
+
 /* ── Bloc 2 — Reconnaissance par EMAIL (compte, pas appareil) ──
    Lecture seule. À l'accueil/inscription, on retrouve le compte par email_lower
    pour pré-remplir et router vers claimJoueur (garde-fou ticket par compte).
@@ -698,6 +724,10 @@ export async function lookupJoueurByEmail(
 ): Promise<{ id: string; email: string; prenom?: string; nom?: string; tel?: string; cp?: string; age?: string; genre?: string; alreadyPlayed: boolean; ticket?: string } | null> {
   const emailLower = (email || '').toLowerCase().trim()
   if (emailLower.indexOf('@') === -1) return null
+  /* Sécurité joueurs partie C (19/11) : la RPC ne renvoie que l'id et le prénom (jamais le
+     téléphone ni le nom d'un autre) ; le formulaire n'est donc plus pré-rempli au-delà du prénom. */
+  const reco = await reconnaitreParEmail(emailLower, evId)
+  if (!reco.absente) return reco.j ? { id: reco.j.id, email: emailLower, prenom: reco.j.prenom, alreadyPlayed: reco.j.dejaJoue } : null
   const { data, error } = await supabase
     .from('joueurs')
     .select('id,email,prenom,nom,tel,code_postal,age_tranche,genre,events,ticket_code')

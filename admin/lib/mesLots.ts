@@ -15,6 +15,7 @@
  * sans elles et la validité affichée est la date de fin de l'animation.
  */
 import { supabase } from '@/lib/supabase'
+import { rpcAbsente } from './rpcRepli'
 
 export type EtatLot = 'a_utiliser' | 'a_confirmer' | 'utilise' | 'expire'
 
@@ -89,13 +90,15 @@ export function lienQr(token: string): string {
 export async function chargerMesLots(joueurId: string): Promise<MonLot[]> {
   /* Colonnes optionnelles d'abord ; repli sans elles si le SQL n'est pas appliqué. */
   /* Billets gagnés ET billets offerts par un ami (offert_a_joueur_id, sql/2026-11-10-finitions.sql). */
-  let r: { data: unknown[] | null; error: unknown } = await supabase.from('tirages').select(COLS + ',valable_jusqu_au,offert_le,joueur_id,offert_a_joueur_id')
+  /* Sécurité joueurs partie C (19/11) : RPC mes_lots (jamais l'uuid de l'ami), repli direct si absente. */
+  const rl = await supabase.rpc('mes_lots', { p_joueur_id: joueurId })
+  let r: { data: unknown[] | null; error: unknown } = !rpcAbsente(rl.error) ? { data: (rl.data ?? []) as unknown[], error: rl.error } : await supabase.from('tirages').select(COLS + ',valable_jusqu_au,offert_le,joueur_id,offert_a_joueur_id')
     .or(`joueur_id.eq.${joueurId},offert_a_joueur_id.eq.${joueurId}`).order('created_at', { ascending: false }).limit(200)
-  if (r.error) {
+  if (r.error && rpcAbsente(rl.error)) {
     r = await supabase.from('tirages').select(COLS + ',valable_jusqu_au,offert_le')
       .eq('joueur_id', joueurId).order('created_at', { ascending: false }).limit(200)
   }
-  if (r.error) {
+  if (r.error && rpcAbsente(rl.error)) {
     r = await supabase.from('tirages').select(COLS)
       .eq('joueur_id', joueurId).order('created_at', { ascending: false }).limit(200)
   }

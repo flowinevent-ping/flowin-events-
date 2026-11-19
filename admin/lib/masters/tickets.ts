@@ -14,6 +14,7 @@
  * pas reafficher le message a chaque ouverture.
  */
 import { supabase } from '@/lib/supabase'
+import { rpcAbsente } from '../rpcRepli'
 import type { GroupeTickets, ResultatVue, TicketLigne } from './engine'
 
 export interface ResultatRow {
@@ -75,7 +76,9 @@ export function composerGroupes(parts: PartRow[], evs: EvRow[], supers: Record<s
 }
 
 export async function chargerMesTickets(joueurId: string): Promise<{ groupes: GroupeTickets[]; resultats: ResultatRow[]; dispo: boolean }> {
-  const { data: pd } = await supabase.from('participations').select('event_id,ticket_code,created_at,tickets').eq('joueur_id', joueurId).order('created_at', { ascending: false }).limit(300)
+  /* Sécurité joueurs partie C (19/11) : RPC mes_participations, repli direct si absente. */
+  const rp = await supabase.rpc('mes_participations', { p_joueur_id: joueurId })
+  const { data: pd } = !rpcAbsente(rp.error) ? rp : await supabase.from('participations').select('event_id,ticket_code,created_at,tickets').eq('joueur_id', joueurId).order('created_at', { ascending: false }).limit(300)
   const parts = ((pd ?? []) as PartRow[])
   const ids = Array.from(new Set(parts.map(p => p.event_id).filter((x): x is string => !!x)))
   let evs: EvRow[] = []

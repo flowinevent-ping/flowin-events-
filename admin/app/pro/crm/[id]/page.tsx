@@ -1,5 +1,5 @@
 import { fetchOperationsPro } from '@/lib/operations'
-import { fetchJoueurTirages } from '@/lib/dashboard'
+import { fetchJoueurTiragesPro } from '@/lib/dashboard'
 import { fetchCrmPro, libelleOrigine } from '@/lib/crmPro'
 import { communeParCodePostal } from '@/lib/geo'
 import ProShell from '@/components/pro/ProShell'
@@ -14,7 +14,7 @@ import { CHARTE_PRO as C } from '@/lib/charte'
  */
 export default async function FicheJoueurProPage({ params, searchParams }: { params: { id: string }; searchParams: { pro?: string } }) {
   const proId = searchParams.pro ?? ''
-  const [ops, contacts, tousTirages] = await Promise.all([fetchOperationsPro(proId), fetchCrmPro(proId), fetchJoueurTirages(params.id)])
+  const [ops, contacts, tousTirages] = await Promise.all([fetchOperationsPro(proId), fetchCrmPro(proId), fetchJoueurTiragesPro(proId, params.id)])
   const j = contacts.find(x => x.joueur_id === params.id)
   /* Seuls les lots de ce pro, non annules. */
   const ptId = ops.partenaire?.id ?? null

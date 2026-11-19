@@ -631,7 +631,18 @@ async function flowinProFetchJoueurs(evIds) {
   /* Joueurs : cs.{evId} pour chaque event (text[] contains) */
   var allJoueurs = [];
   var seen = {};
-  for(var i=0; i<evIds.length; i++) {
+  /* Sécurité joueurs partie C (19/11) : statistiques par RPC pro_joueurs_stats (aucune coordonnée,
+     identifiant pseudonymisé) ; repli sur la lecture directe si la RPC n'existe pas encore. */
+  var rS = null;
+  try {
+    /* Lecture seule : GET (fonction STABLE), comme toute lecture de la page. */
+    rS = await fetch(FLOWIN_SUPA_URL+'/rest/v1/rpc/pro_joueurs_stats?p_pro_id='+encodeURIComponent(FLOWIN_PRO_ID), {headers:H});
+  } catch(eS){ rS = null; }
+  var sRows = null;
+  if(rS && rS.status !== 404){ try { sRows = await rS.json(); } catch(eJ){ sRows = null; } }
+  if(sRows && !Array.isArray(sRows) && (sRows.code === 'PGRST202' || sRows.code === '42883')) sRows = null;
+  if(Array.isArray(sRows)) allJoueurs = sRows;
+  for(var i=0; !Array.isArray(sRows) && i<evIds.length; i++) {
     var rJ = await fetch(FLOWIN_SUPA_URL+'/rest/v1/joueurs?events=cs.{'+encodeURIComponent(evIds[i])+'}&select=*&limit=500', {headers:H});
     var jrows = await rJ.json() || [];
     if(Array.isArray(jrows)) jrows.forEach(function(j){ if(!seen[j.id]){ seen[j.id]=1; allJoueurs.push(j); } });

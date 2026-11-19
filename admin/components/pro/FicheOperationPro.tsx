@@ -28,6 +28,10 @@ export default function FicheOperationPro({ initial, cle, onglet: ongletInitial,
   const [data, setData] = useState(initial)
   const [onglet, setOnglet] = useState<OngletOp>(ongletInitial)
   const recharger = () => { fetchOperationsPro(initial.proId).then(setData) }
+  /* Sécurité joueurs partie C (19/11) : le rendu serveur (sans session) n'a pas les coordonnées
+     des gagnants ; on recharge une fois avec la session pro du navigateur. */
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useEffect(() => { recharger() }, [initial.proId])
   /* Petit ecran : la barre d'onglets defile ; l'onglet actif (ex. « Participants ») doit rester visible. */
   useEffect(() => {
     try { document.querySelector(`[data-onglet="${onglet}"]`)?.scrollIntoView({ inline: 'center', block: 'nearest' }) } catch { /* rien */ }

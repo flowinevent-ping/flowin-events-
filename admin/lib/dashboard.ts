@@ -287,6 +287,15 @@ export async function publierLienEphemere(id: string, publie: boolean): Promise<
   return !error
 }
 
+/** Fiche CRM pro rendue côté serveur (partie C, 19/11) : lots de ce joueur dans le périmètre du pro,
+ *  sans jeton de retrait. Repli sur fetchJoueurTirages si la RPC est absente. */
+export async function fetchJoueurTiragesPro(proId: string, joueurId: string): Promise<TirageRow[]> {
+  const r = await supabase.rpc('pro_tirages_joueur', { p_pro_id: proId, p_joueur_id: joueurId })
+  if (rpcAbsente(r.error)) return fetchJoueurTirages(joueurId)
+  if (r.error) { console.error('[fetchJoueurTiragesPro]', r.error.message); return [] }
+  return (r.data ?? []) as TirageRow[]
+}
+
 export async function fetchJoueurTirages(joueurId: string): Promise<TirageRow[]> {
   const { data, error } = await supabase
     .from('tirages')
@@ -347,6 +356,12 @@ export async function fetchEventSuperEventStats(eventId: string): Promise<{ tick
   ])
   const partenaireId = (pro as { data: { partenaire_id: string | null } | null } | undefined)?.data?.partenaire_id
   if (!partenaireId || !ev?.super_event_id) return { tickets: tk.count ?? 0, gains: 0, gainsUtilises: 0 }
+  /* Sécurité joueurs partie C (19/11) : page pro serveur sans session -> deux comptes par RPC. */
+  const tc = await supabase.rpc('tirages_comptes_partenaire', { p_partenaire_id: partenaireId, p_super_event_id: ev.super_event_id })
+  if (!rpcAbsente(tc.error)) {
+    const c0 = (Array.isArray(tc.data) ? tc.data[0] : tc.data) as { gains?: number; utilises?: number } | null
+    return { tickets: tk.count ?? 0, gains: Number(c0?.gains) || 0, gainsUtilises: Number(c0?.utilises) || 0 }
+  }
   const { data: tirages } = await supabase.from('tirages').select('statut')
     .eq('partenaire_id', partenaireId).eq('super_event_id', ev.super_event_id)
   /* Les tirages annules ne sont ni des gains ni des lots remis. */

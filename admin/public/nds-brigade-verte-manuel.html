@@ -346,12 +346,12 @@
     $('optinCheck').innerHTML = optin ? '<svg class="ic"><use href="#i-check"/></svg>' : '';
   };
 
-  async function sbInsert(table, rows){
+  async function sbInsert(table, rows, minimal){
     var r;
     try{
       r = await fetch(SUPA_URL+'/rest/v1/'+table, {
         method:'POST',
-        headers:{ 'apikey':SUPA_ANON, 'Authorization':'Bearer '+SUPA_ANON, 'Content-Type':'application/json', 'Prefer':'return=representation' },
+        headers:{ 'apikey':SUPA_ANON, 'Authorization':'Bearer '+SUPA_ANON, 'Content-Type':'application/json', 'Prefer':(minimal ? 'return=minimal' : 'return=representation') },
         body: JSON.stringify(rows)
       });
     } catch(netErr){
@@ -359,12 +359,35 @@
       // ou pas de connexion sur le terrain. On distingue explicitement ce cas.
       throw new Error('Connexion impossible (réseau coupé, ou page ouverte en local plutôt qu\'en ligne). ' + (netErr && netErr.message ? netErr.message : ''));
     }
-    var data = null; try{ data = await r.json(); }catch(e){}
+    var data = null; try{ var _txt = await r.text(); data = _txt ? JSON.parse(_txt) : null; }catch(e){}
     if (!r.ok){
       var reason = (data && (data.message || data.hint || data.details)) || ('HTTP ' + r.status);
       throw new Error('Supabase a refusé l\'enregistrement (' + table + ') : ' + reason);
     }
     return { ok:true, data:data };
+  }
+
+  async function sbInscrire(joueurRow){
+    var r;
+    try{
+      r = await fetch(SUPA_URL+'/rest/v1/rpc/joueur_inscrire', {
+        method:'POST',
+        headers:{ 'apikey':SUPA_ANON, 'Authorization':'Bearer '+SUPA_ANON, 'Content-Type':'application/json' },
+        body: JSON.stringify({ p_joueur: joueurRow })
+      });
+    } catch(netErr){
+      throw new Error('Connexion impossible (réseau coupé, ou page ouverte en local plutôt qu\'en ligne). ' + (netErr && netErr.message ? netErr.message : ''));
+    }
+    var d = null; try{ var t = await r.text(); d = t ? JSON.parse(t) : null; }catch(e){}
+    var code = (d && !r.ok && d.code) ? String(d.code) : '';
+    if (r.status === 404 || code === 'PGRST202' || code === '42883'){
+      var jr = await sbInsert('joueurs', [joueurRow]);
+      return (jr.data && jr.data[0]) ? jr.data[0].id : null;
+    }
+    if (!r.ok || !d || d.ok === false){
+      throw new Error('Supabase a refusé l\'enregistrement (joueurs) : ' + ((d && (d.message || d.raison)) || ('HTTP ' + r.status)));
+    }
+    return d.id || null;
   }
 
   window.submitSurvey = async function(){
@@ -391,13 +414,14 @@
     };
 
     try{
-      var jr = await sbInsert('joueurs', [joueurRow]);
-      var joueurId = (jr.data && jr.data[0]) ? jr.data[0].id : null;
+      /* Sécurité joueurs partie C (19/11) : inscription par RPC joueur_inscrire (uuid renvoyé sans relire
+         joueurs) ; repli sur l'insert direct si la RPC n'existe pas encore (404 / PGRST202 / 42883). */
+      var joueurId = await sbInscrire(joueurRow);
       if (joueurId){
         await sbInsert('participations', [{
           joueur_id: joueurId, event_id: EV_ID, bonus_answers: answers,
           completed: true, tickets: 1, source_qr: 'brigade-manuel'
-        }]);
+        }], true);
       }
       await sbInsert('sondage_brigade', [{ event_id: EV_ID, reponses: answers }]);
 

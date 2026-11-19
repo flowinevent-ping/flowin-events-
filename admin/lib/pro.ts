@@ -1,4 +1,5 @@
 import { supabase } from './supabase'
+import { rpcAbsente } from './rpcRepli'
 import type { FlowinEvent, FlowinJoueur, FlowinLot, FlowinPro } from './types'
 import { sansGabarit } from './operations'
 import { BASE_CANONIQUE } from './qrPermalien'
@@ -42,6 +43,13 @@ export async function fetchProDashboard(proId: string): Promise<ProDashboardData
   /* CONFIDENTIALITE (31/10) : l'espace pro ne recoit ici AUCUNE coordonnee (ni email, ni
      telephone, ni nom, ni prenom, ni date de naissance, ni adresse) : seulement ce qui sert
      aux statistiques. Les contacts consentants passent par crm_pro_consentants. */
+  /* Sécurité joueurs partie C (19/11) : rendu serveur sans session -> RPC pro_joueurs_stats
+     (mêmes colonnes, identifiant pseudonymisé, aucune coordonnée). Repli direct si absente. */
+  const js0 = await supabase.rpc('pro_joueurs_stats', { p_pro_id: proId })
+  if (!rpcAbsente(js0.error)) {
+    const { data: lotsR } = await supabase.from('lots').select('*').in('event_id', evIds)
+    return { pro: pros?.[0] ?? null, events: events as FlowinEvent[], joueurs: (js0.data ?? []) as FlowinJoueur[], lots: (lotsR ?? []) as FlowinLot[] }
+  }
   const COLS_JOUEURS = 'id,genre,sexe,age_tranche,tranche_age,code_postal,ville,optin,optin_date,events,source,client_type,first_seen,last_seen,gains,actif'
   const joueurPromises = evIds.map(eid =>
     supabase.from('joueurs').select(COLS_JOUEURS).contains('events', [eid]).returns<FlowinJoueur[]>()

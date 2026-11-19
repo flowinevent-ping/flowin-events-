@@ -45,6 +45,10 @@ type Msg = { ok: boolean; texte: string } | null
 export default function GagnantsClient({ initial, cle, titre = true }: { initial: OperationsPro; cle?: string | null; titre?: boolean }) {
   const [data, setData] = useState<OperationsPro>(initial)
   const recharger = () => { fetchOperationsPro(initial.proId).then(setData) }
+  /* Sécurité joueurs partie C (19/11) : le rendu serveur (sans session) n'a pas les coordonnées
+     des gagnants ; on recharge une fois avec la session pro du navigateur. */
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useEffect(() => { recharger() }, [initial.proId])
 
   return (
     <div>

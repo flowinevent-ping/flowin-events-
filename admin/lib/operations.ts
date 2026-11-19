@@ -27,6 +27,7 @@
  * toujours designee explicitement (famille D de l audit).
  */
 import { supabase } from './supabase'
+import { rpcAbsente } from './rpcRepli'
 import type { FlowinEvent } from './types'
 
 /* ── Gabarit marque blanche : jamais une operation (famille B) ─────────────── */
@@ -310,6 +311,12 @@ export async function fetchOperationsPro(proId: string): Promise<OperationsPro> 
   const evIds = ops.flatMap(o => o.stations.map(s => s.id))
   const seIds = ops.filter(o => o.type === 'super').map(o => o.id)
 
+  /* Sécurité joueurs partie C (19/11) : rendu serveur sans session -> gagnants par RPC, SANS
+     coordonnées ni jeton (les écrans clients rechargent la liste complète avec la session pro).
+     Repli direct si la RPC est absente. Dans le navigateur : lecture directe (session pro). */
+  const serveur = typeof window === 'undefined'
+  const tirRpc = serveur ? await supabase.rpc('pro_tirages_operation', { p_pro_id: proId }) : null
+  const tirViaRpc = !!tirRpc && !rpcAbsente(tirRpc.error)
   const [partRes, lotsRes, tirSeRes, tirEvRes, stockRes, bonsRes] = await Promise.all([
     partenaireId
       ? supabase.from('partenaires')
@@ -319,12 +326,13 @@ export async function fetchOperationsPro(proId: string): Promise<OperationsPro> 
     evIds.length
       ? supabase.from('lots').select('id,event_id,titre,nom,emoji,valeur,valeur_euros,quantite,conditions').in('event_id', evIds)
       : Promise.resolve({ data: [] }),
-    partenaireId && seIds.length
+    partenaireId && seIds.length && !tirViaRpc
       ? supabase.from('tirages')
         .select('id,joueur_id,joueur_nom,joueur_email,joueur_tel,lot_nom,lot_valeur,ticket_code,retrait_token,notifie_at,retire_at,relance_envoyee_at,created_at,super_event_id,event_id,statut,type')
         .eq('partenaire_id', partenaireId).in('super_event_id', seIds).neq('statut', 'annule').eq('type', 'grand')
       : Promise.resolve({ data: [] }),
-    evIds.length
+    tirViaRpc ? Promise.resolve({ data: (tirRpc?.data ?? []) as Record<string, unknown>[] })
+    : evIds.length
       ? supabase.from('tirages')
         .select('id,joueur_id,joueur_nom,joueur_email,joueur_tel,lot_nom,lot_valeur,ticket_code,retrait_token,notifie_at,retire_at,relance_envoyee_at,created_at,super_event_id,event_id,statut,type')
         .in('event_id', evIds).neq('statut', 'annule')
@@ -361,7 +369,10 @@ export async function fetchOperationsPro(proId: string): Promise<OperationsPro> 
 
   /* Parties reelles, comptees dans `participations` : la colonne
      events.participants n est pas tenue a jour (restait a 0). */
-  const comptes = await Promise.all(evIds.map(id =>
+  const cRpc = serveur && evIds.length ? await supabase.rpc('pro_participations_comptes', { p_event_ids: evIds }) : null
+  const comptes: [string, number][] = cRpc && !rpcAbsente(cRpc.error)
+    ? evIds.map(id => [id, Number(((cRpc.data ?? []) as { event_id: string; n: number }[]).find(x => x.event_id === id)?.n ?? 0)] as [string, number])
+    : await Promise.all(evIds.map(id =>
     supabase.from('participations').select('id', { count: 'exact', head: true }).eq('event_id', id)
       .then(r => [id, r.count ?? 0] as [string, number])))
   const partiesDe = new Map<string, number>(comptes)
@@ -412,7 +423,9 @@ export async function fetchOperationsPro(proId: string): Promise<OperationsPro> 
   }))
   /* Colonnes du SQL du 10/11 (validite, offert a un ami) : lecture separee,
      silencieuse tant que le SQL n est pas applique (la liste ne casse jamais). */
-  if (tirages.length) {
+  if (tirViaRpc) {
+    tirages.forEach(t => { const x = tirMap.get(t.id); if (x) { t.valableJusquAu = (x.valable_jusqu_au as string) ?? null; t.offertLe = (x.offert_le as string) ?? null } })
+  } else if (tirages.length) {
     const opt = await supabase.from('tirages').select('id,valable_jusqu_au,offert_le').in('id', tirages.map(t => t.id))
     if (!opt.error) {
       const m = new Map<number, { valable_jusqu_au: string | null; offert_le: string | null }>()

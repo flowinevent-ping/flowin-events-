@@ -3604,28 +3604,8 @@ function _flowinMerge(dst, src){
   return dst;
 }
 
-/* Écriture joueur + participation en parallèle */
-function supaWriteFlowin(prefix, email, ticket, extraFields){
-  if(!FLOWIN_EVENT || !email) return;
-  var nowIso = new Date().toISOString();
-  var dateIso = nowIso.slice(0,10);
-  
-  /* Génère id joueur déterministe à partir de l'email */
-  var emailLower = String(email).toLowerCase().trim();
-  var jid = 'j-' + emailLower.replace(/[^a-z0-9]/g,'-').substring(0,40);
-  
-  var joueurPayload = {
-    id: jid,
-    email: emailLower,
-    events: [FLOWIN_EVENT.id],
-    optin: true,
-    optin_date: dateIso,
-    first_seen: dateIso,
-    last_seen: dateIso,
-    client_type: 'btoc'
-  };
-  if(extraFields) _flowinMerge(joueurPayload, extraFields);
-  
+/* Ancien envoi direct (avant la partie C), conservé pour le repli. */
+function _flowinEcritureDirecte(joueurPayload, jid, ticket){
   /* UPSERT joueur */
   fetch(FLOWIN_SUPA_URL+'/rest/v1/joueurs?on_conflict=external_id', {
     method:'POST',
@@ -3655,6 +3635,56 @@ function supaWriteFlowin(prefix, email, ticket, extraFields){
     },
     body: JSON.stringify(partPayload)
   }).catch(function(e){ console.warn('[Flowin] insert participation:', e); });
+  
+}
+
+/* Écriture joueur + participation en parallèle */
+function supaWriteFlowin(prefix, email, ticket, extraFields){
+  if(!FLOWIN_EVENT || !email) return;
+  var nowIso = new Date().toISOString();
+  var dateIso = nowIso.slice(0,10);
+  
+  /* Génère id joueur déterministe à partir de l'email */
+  var emailLower = String(email).toLowerCase().trim();
+  var jid = 'j-' + emailLower.replace(/[^a-z0-9]/g,'-').substring(0,40);
+  
+  var joueurPayload = {
+    id: jid,
+    email: emailLower,
+    events: [FLOWIN_EVENT.id],
+    optin: true,
+    optin_date: dateIso,
+    first_seen: dateIso,
+    last_seen: dateIso,
+    client_type: 'btoc'
+  };
+  if(extraFields) _flowinMerge(joueurPayload, extraFields);
+  
+  /* Sécurité joueurs partie C (19/11) : inscription par RPC joueur_inscrire (uuid réel renvoyé,
+     joueur connu : events / last_seen / ticket seulement), puis participation avec cet uuid.
+     Repli sur l'ancien envoi direct si la RPC n'existe pas encore (404 / PGRST202 / 42883). */
+  var rpcPayload = {};
+  _flowinMerge(rpcPayload, joueurPayload);
+  delete rpcPayload.id;
+  rpcPayload.external_id = jid;
+  fetch(FLOWIN_SUPA_URL+'/rest/v1/rpc/joueur_inscrire', {
+    method:'POST',
+    headers:{'apikey':FLOWIN_SUPA_ANON,'Authorization':'Bearer '+FLOWIN_SUPA_ANON,'Content-Type':'application/json'},
+    body: JSON.stringify({ p_joueur: rpcPayload })
+  }).then(function(r){
+    return r.text().then(function(t){
+      var d = null;
+      try { d = t ? JSON.parse(t) : null; } catch(e){ d = null; }
+      var code = (d && !r.ok && d.code) ? String(d.code) : '';
+      if(r.status === 404 || code === 'PGRST202' || code === '42883'){ _flowinEcritureDirecte(joueurPayload, jid, ticket); return; }
+      if(!r.ok || !d || !d.ok || !d.id){ console.warn('[Flowin] joueur_inscrire:', r.status, t); return; }
+      fetch(FLOWIN_SUPA_URL+'/rest/v1/participations', {
+        method:'POST',
+        headers:{'apikey':FLOWIN_SUPA_ANON,'Authorization':'Bearer '+FLOWIN_SUPA_ANON,'Content-Type':'application/json','Prefer':'return=minimal'},
+        body: JSON.stringify({ event_id: FLOWIN_EVENT.id, joueur_id: d.id, completed: true, ticket_code: ticket || '' })
+      }).catch(function(e){ console.warn('[Flowin] insert participation:', e); });
+    });
+  }).catch(function(e){ console.warn('[Flowin] joueur_inscrire:', e); });
   
   console.log('[Flowin] supaWriteFlowin OK:', prefix, jid, ticket);
 }

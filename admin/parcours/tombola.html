@@ -2513,24 +2513,10 @@ async function tbSubmitForm(){
   /* 5. Anti-doublon Supabase — email + tel scopés à cet event */
   try {
     var _evId = FLOWIN_EV_ID || (FLOWIN_EVENT && FLOWIN_EVENT.id) || '';
-    var _rE = await fetch(FLOWIN_SUPA_URL+'/rest/v1/joueurs?email_lower=eq.'+encodeURIComponent(email)+'&events=cs.{+_evId+}&select=id', {
-      headers:{'apikey':FLOWIN_SUPA_ANON,'Authorization':'Bearer '+FLOWIN_SUPA_ANON}
-    });
-    var _rEd = await _rE.json();
-    if(Array.isArray(_rEd)&&_rEd.length>0){
-      tbSetFieldState('tb-email',true,'Cet email est déjà inscrit à cette tombola');
-      if(_btn){ _btn.textContent='Valider mon inscription \u2192'; _btn.style.opacity=''; _btn.style.pointerEvents=''; }
-      return;
-    }
-    var _rT = await fetch(FLOWIN_SUPA_URL+'/rest/v1/joueurs?tel=eq.'+encodeURIComponent(tel)+'&events=cs.{+_evId+}&select=id', {
-      headers:{'apikey':FLOWIN_SUPA_ANON,'Authorization':'Bearer '+FLOWIN_SUPA_ANON}
-    });
-    var _rTd = await _rT.json();
-    if(Array.isArray(_rTd)&&_rTd.length>0){
-      tbSetFieldState('tb-tel',true,'Ce téléphone est déjà inscrit à cette tombola');
-      if(_btn){ _btn.textContent='Valider mon inscription \u2192'; _btn.style.opacity=''; _btn.style.pointerEvents=''; }
-      return;
-    }
+    /* Sécurité joueurs partie C (19/11) : l'ancien contrôle lisait joueurs en direct avec un filtre
+       events=cs.{"+_evId+"} écrit dans une chaîne littérale : il ne trouvait JAMAIS de doublon. Retiré
+       (même comportement, plus aucune lecture de joueurs) ; voir docs/SECURITE-joueurs-partie-c-2026-11-19.md. */
+    void _evId;
   } catch(_de){ console.warn('[Flowin] doublon check:', _de); }
 
   /* 6. Ticket tombola : TB-AAAA-XXXX (généré ici, pas depuis le DOM) */
@@ -2802,29 +2788,36 @@ function flowinGenerateTicket(prefix) {
   var rand = Math.floor(Math.random()*9000)+1000;
   return prefix.toUpperCase()+'-'+year+'-'+rand;
 }
-function supaWriteFlowin(prefix, email, ticket, extraFields){
-  if(!FLOWIN_EVENT || !email) return;
-  var nowIso = new Date().toISOString();
-  var dateIso = nowIso.slice(0,10);
-  var emailLower = String(email).toLowerCase().trim();
-  var extId = 'j-' + emailLower.replace(/[^a-z0-9]/g,'-').substring(0,40);
-  var evId = FLOWIN_EVENT.id;
-
-  /* Champs collectés depuis le form (cp, prenom, nom, tel, age) */
-  var joueurPayload = {
-    external_id: extId,
-    email: emailLower,
-    events: [evId],
-    optin: true,
-    optin_date: dateIso,
-    first_seen: dateIso,
-    last_seen: dateIso,
-    client_type: 'btoc'
-  };
-  if(extraFields) _flowinMerge(joueurPayload, extraFields);
-
-  /* 1. Upsert joueur — récupérer l'UUID Supabase */
-  fetch(FLOWIN_SUPA_URL+'/rest/v1/joueurs', {
+/* Sécurité joueurs partie C (19/11) : lectures et inscription par RPC (SECURITY DEFINER).
+   Si la RPC n'existe pas encore en base (404 / PGRST202 / 42883), repli sur l'ancien accès direct. */
+function _flowinRpc(fn, body){
+  return fetch(FLOWIN_SUPA_URL+'/rest/v1/rpc/'+fn, {
+    method:'POST',
+    headers:{'apikey':FLOWIN_SUPA_ANON,'Authorization':'Bearer '+FLOWIN_SUPA_ANON,'Content-Type':'application/json'},
+    body: JSON.stringify(body)
+  }).then(function(r){
+    return r.text().then(function(t){
+      var d = null;
+      try { d = t ? JSON.parse(t) : null; } catch(e){ d = null; }
+      var code = (d && !r.ok && d.code) ? String(d.code) : '';
+      return { ok:r.ok, status:r.status, data:d, absente:(r.status===404 || code==='PGRST202' || code==='42883') };
+    });
+  }, function(){ return { ok:false, status:0, data:null, absente:false }; });
+}
+/* Inscription joueur -> uuid (null si échec). Joueur déjà connu : seuls events / last_seen / ticket bougent. */
+function _flowinInscrire(joueurPayload, extId){
+  return _flowinRpc('joueur_inscrire', { p_joueur: joueurPayload }).then(function(res){
+    if(!res.absente){
+      if(res.ok && res.data && res.data.ok) return res.data.id || null;
+      console.warn('[Flowin] joueur_inscrire:', res.status, res.data);
+      return null;
+    }
+    return _flowinInscrireDirect(joueurPayload, extId);
+  });
+}
+/* Ancien accès direct (avant la partie C) : conservé pour le repli. */
+function _flowinInscrireDirect(joueurPayload, extId){
+  return fetch(FLOWIN_SUPA_URL+'/rest/v1/joueurs', {
     method:'POST',
     headers:{
       'apikey':FLOWIN_SUPA_ANON,
@@ -2851,7 +2844,32 @@ function supaWriteFlowin(prefix, email, ticket, extraFields){
       });
     }
     return uuid;
-  }).then(function(uuid){
+  });
+}
+
+function supaWriteFlowin(prefix, email, ticket, extraFields){
+  if(!FLOWIN_EVENT || !email) return;
+  var nowIso = new Date().toISOString();
+  var dateIso = nowIso.slice(0,10);
+  var emailLower = String(email).toLowerCase().trim();
+  var extId = 'j-' + emailLower.replace(/[^a-z0-9]/g,'-').substring(0,40);
+  var evId = FLOWIN_EVENT.id;
+
+  /* Champs collectés depuis le form (cp, prenom, nom, tel, age) */
+  var joueurPayload = {
+    external_id: extId,
+    email: emailLower,
+    events: [evId],
+    optin: true,
+    optin_date: dateIso,
+    first_seen: dateIso,
+    last_seen: dateIso,
+    client_type: 'btoc'
+  };
+  if(extraFields) _flowinMerge(joueurPayload, extraFields);
+
+  /* 1. Inscription joueur (RPC joueur_inscrire, repli direct) — récupérer l'UUID Supabase */
+  _flowinInscrire(joueurPayload, extId).then(function(uuid){
     if(!uuid){ console.warn('[Flowin] UUID joueur introuvable'); return; }
     /* 2. INSERT participation avec le vrai UUID */
     var partPayload = {

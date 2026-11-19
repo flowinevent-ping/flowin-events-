@@ -1,4 +1,5 @@
 import { supabase } from './supabase'
+import { rpcAbsente } from './rpcRepli'
 import type { SubmitFormData, FlowinEvent } from './types'
 
 export interface WriteResult {
@@ -11,6 +12,9 @@ export async function checkDuplicate(
   tel: string,
   eventId: string
 ): Promise<'email_duplicate' | 'tel_duplicate' | null> {
+  /* Sécurité joueurs partie C (19/11) : RPC (réponse réduite à un mot), repli direct si absente. */
+  const rd = await supabase.rpc('joueur_doublon_event', { p_email: email, p_tel: tel, p_event_id: eventId })
+  if (!rpcAbsente(rd.error)) return rd.data === 'email' ? 'email_duplicate' : rd.data === 'tel' ? 'tel_duplicate' : null
   /* Anti-doublon email — cs.{} pour text[] */
   const { data: emailRows } = await supabase
     .from('joueurs')
@@ -63,7 +67,11 @@ export async function writeJoueurParticipation(
     client_type: ev.client_type ?? 'btoc',
   }
 
-  const { data: joueurRows, error: joueurErr } = await supabase
+  const ins = await supabase.rpc('joueur_inscrire', { p_joueur: joueurPayload })
+  const insD = (ins.data ?? {}) as { ok?: boolean; id?: string }
+  const { data: joueurRows, error: joueurErr } = !rpcAbsente(ins.error)
+    ? { data: insD.ok && insD.id ? [{ id: insD.id }] : null, error: ins.error }
+    : await supabase
     .from('joueurs')
     .upsert(joueurPayload, {
       onConflict: 'external_id',

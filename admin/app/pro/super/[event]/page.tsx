@@ -46,9 +46,11 @@ export default async function ProStationPage({ params, searchParams }: { params:
   let bonusTally: Record<string, Record<string, number>> = {}
   let nbReponses = 0
   {
+    /* Sécurité joueurs partie C (19/11) : rendu serveur sans session -> RPC, repli direct si absente. */
+    const lp = await supabase.rpc('pro_participations_lignes', { p_event_ids: [ev.id], p_jour: jourSel ?? null })
     let query = supabase.from('participations').select('score,bonus_answers,played_date').eq('event_id', ev.id)
     if (jourSel) query = query.eq('played_date', jourSel)
-    const { data: parts } = await query
+    const { data: parts } = !rpcAbsente(lp.error) ? lp : await query
     ;(parts ?? []).forEach((p: any) => {
       const s = String(p.score ?? '—')
       scoreDist[s] = (scoreDist[s] ?? 0) + 1

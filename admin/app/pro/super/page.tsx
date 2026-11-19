@@ -97,9 +97,14 @@ export default async function ProSuperPage({ searchParams }: { searchParams: { p
 
   /* Tout ce qui suit est borne aux stations du pro DANS CE super event. */
   const evIds = new Set(choisi.stations.map(e => e.id))
-  const { data: partsSe } = evIds.size
-    ? await supabase.from('participations').select('joueur_id').in('event_id', Array.from(evIds))
-    : { data: [] as { joueur_id: string }[] }
+  /* Sécurité joueurs partie C (19/11) : rendu serveur sans session -> parties par RPC, joueur
+     pseudonymisé (même pseudonyme que pro_joueurs_stats). Repli direct si absente. */
+  const lignesSe = evIds.size ? await supabase.rpc('pro_participations_lignes', { p_event_ids: Array.from(evIds), p_jour: null }) : null
+  const { data: partsSe } = !evIds.size
+    ? { data: [] as { joueur_id: string }[] }
+    : lignesSe && !rpcAbsente(lignesSe.error)
+      ? { data: ((lignesSe.data ?? []) as { joueur_ref: string | null }[]).map(p => ({ joueur_id: p.joueur_ref })) }
+      : await supabase.from('participations').select('joueur_id').in('event_id', Array.from(evIds))
   const idsJoueursSe = new Set(((partsSe ?? []) as { joueur_id: string | null }[]).map(p => p.joueur_id).filter(Boolean) as string[])
   const joueursSe = data.joueurs.filter(j => idsJoueursSe.has(j.id))
 
@@ -117,9 +122,11 @@ export default async function ProSuperPage({ searchParams }: { searchParams: { p
     const { data: seCfg } = await supabase.from('super_events').select('id,date_d,date_f,cfg_jeu').eq('id', seId).maybeSingle()
     phasesOrga = lirePhases(seCfg as { id: string; date_d: string | null; date_f: string | null; cfg_jeu: unknown } | null)
     const idsSe = allStations.map(x => x.event_id)
-    const { data: pp } = idsSe.length
-      ? await supabase.from('participations').select('played_date,created_at,tickets').in('event_id', idsSe)
-      : { data: [] as { played_date: string | null; created_at: string | null; tickets: number | null }[] }
+    const ppRpc = idsSe.length ? await supabase.rpc('pro_participations_lignes', { p_event_ids: idsSe, p_jour: null }) : null
+    const { data: pp } = !idsSe.length
+      ? { data: [] as { played_date: string | null; created_at: string | null; tickets: number | null }[] }
+      : ppRpc && !rpcAbsente(ppRpc.error) ? { data: ppRpc.data }
+      : await supabase.from('participations').select('played_date,created_at,tickets').in('event_id', idsSe)
     compteOrga = compterParPhase((pp ?? []) as { played_date: string | null; created_at: string | null; tickets: number | null }[], phasesOrga)
   }
   const toutes = allStations.slice().sort((a, b) => (b.scans ?? 0) - (a.scans ?? 0))

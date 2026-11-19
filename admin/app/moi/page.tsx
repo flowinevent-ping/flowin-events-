@@ -9,6 +9,7 @@
 import { chargerTicketsGainsJoueur } from '@/lib/moiTicketsGains'
 import { useState, useEffect, useMemo } from 'react'
 import { supabase } from '@/lib/supabase'
+import { rpcAbsente } from '@/lib/rpcRepli'
 import { Ico } from '@/lib/proicons'
 import { buildInviteLink } from '@/lib/parrainage'
 import { estDemo } from '@/lib/demo'
@@ -80,7 +81,10 @@ export default function MonComptePage() {
     const jid = local.id
     ;(async () => {
       const [jr, tg, ml] = await Promise.all([
-        supabase.from('joueurs').select('id,prenom,nom,email,external_id').eq('id', jid).single(),
+        /* Sécurité joueurs partie C (19/11) : RPC moi_profil, repli direct si absente. */
+        supabase.rpc('moi_profil', { p_joueur_id: jid }).then(async r => rpcAbsente(r.error)
+          ? await supabase.from('joueurs').select('id,prenom,nom,email,external_id').eq('id', jid).single()
+          : { data: (Array.isArray(r.data) ? r.data[0] : r.data) ?? null }),
         chargerTicketsGainsJoueur(jid).catch(() => ({ tickets: [], gains: [], stationsTerminees: [] })),
         chargerMesLots(jid).catch(() => [] as MonLot[]),
       ])
