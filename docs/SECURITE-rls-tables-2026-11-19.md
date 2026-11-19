@@ -61,3 +61,7 @@ Déjà sains (non modifiés) : `pros`, `partenaires`, `clients_commerce` (RLS on
 ## Après application, vérifier
 SA : modifier un lot et un super event depuis le dashboard ; pro : relancer un gagnant, marquer un lot remis, créer un QR ;
 joueur anonyme : jouer une animation de bout en bout (inscription + participation + ticket).
+
+## Appliqué en production le 19/11/2026 (accord de Romain : les 18 pros sans accès sont des comptes de test)
+Ordre appliqué : tirage-correctifs → super-event-phases → banque-interets (brouillon privé) → annonces-pro (sans `offrir_ticket_ami_contact`, déjà à jour en prod) → securite-events-rls → securite-rls-tables.
+Vérifié après application : anon refusé sur les 6 fonctions de tirage, `appliquer_regle_gain` ouverte à anon, lectures publiques (events, lots, super_events, qr_stations, tirages, participations) en 200.
