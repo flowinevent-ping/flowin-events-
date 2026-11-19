@@ -10,6 +10,7 @@
  * gain immediat (appliquer_regle_gain), parrainage. En apercu (?preview) ou en
  * maquette (?m=), rien n'est ecrit.
  */
+import { chargerTicketsGainsJoueur } from '@/lib/moiTicketsGains'
 import { useEffect, useRef, createElement } from 'react'
 import { createRoot, type Root } from 'react-dom/client'
 import SuperEventMap from '@/app/se/_components/SuperEventMap'
@@ -285,7 +286,7 @@ export default function JouerClient(p: Props) {
       const local = getJoueurLocal()
       if (!zone) return
       if (!local || !local.id) { zone.innerHTML = '<div class="card" style="padding:14px 16px;margin-top:12px;font-weight:600;color:#3a4d63">Joue dans une station pour gagner ton premier super ticket.</div>'; return }
-      const { data } = await supabase.from('se_tickets').select('event_id,type,jour').eq('joueur_id', local.id).eq('super_event_id', seReel)
+      const data = seReel ? (await chargerTicketsGainsJoueur(local.id, seReel)).tickets : []
       const rows = (data ?? []) as { event_id: string; type: string; jour: string }[]
       if (nb) nb.textContent = String(rows.length)
       const nomSt = (id: string) => (stations.find(x => x.id === id) || { nom: id }).nom

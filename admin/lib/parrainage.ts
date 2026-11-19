@@ -1,4 +1,5 @@
 import { supabase } from './supabase'
+import { rpcAbsente } from './rpcRepli'
 
 /**
  * Capture un parrainage quand l'inscription d'un filleul provient d'un lien
@@ -17,6 +18,10 @@ export async function captureParrainage(filleulExternalId: string): Promise<void
 
     const etab = (p.get('etab') || '').trim() || null
     const ch = (p.get('ch') || '').trim() || null
+
+    /* Sécurité joueurs (19/11) : mêmes règles, appliquées en base (parrainage_capturer). */
+    const rpc = await supabase.rpc('parrainage_capturer', { p_ref: ref, p_filleul: filleulExternalId, p_etab: etab, p_canal: ch })
+    if (!rpcAbsente(rpc.error)) return
 
     const { data: exist } = await supabase
       .from('parrainage')
@@ -82,6 +87,9 @@ export function buildInviteLink(
 export async function getParrainageRecu(monExternalId: string): Promise<{ ts: string } | null> {
   if (typeof window === 'undefined' || !monExternalId) return null
   try {
+    const rpc = await supabase.rpc('parrainage_recu', { p_external_id: monExternalId })
+    if (!rpc.error) return rpc.data ? { ts: String(rpc.data) } : null
+    if (!rpcAbsente(rpc.error)) return null
     const { data } = await supabase
       .from('parrainage')
       .select('ts')

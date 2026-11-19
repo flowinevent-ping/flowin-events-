@@ -10,6 +10,7 @@
  * Styles en ligne sur les variables --sa-* : ProShell et le dashboard SA les
  * declarent tous les deux, le meme composant se lit donc pareil des deux cotes.
  */
+import { rpcAbsente } from '@/lib/rpcRepli'
 import { useEffect, useState } from 'react'
 import { supabase, sessionPourTirage, MESSAGE_CONNEXION_TIRAGE } from '@/lib/supabase'
 import {
@@ -578,10 +579,18 @@ export function ContenuTracking({ op, proId, onStation, masquerGlobal }: {
     fetchSuiviOperation(op, proId).then(r => { if (vivant) setS(r) })
     /* Origines : visiteurs identifies des SEULES stations de ce bloc, chacun
        compte une fois, sur sa premiere source. */
-    supabase.from('visites').select('source,visiteur_id,created_at')
-      .in('event_id', op.stations.map(x => x.id)).is('etape', null).not('visiteur_id', 'is', null)
-      .order('created_at', { ascending: true })
-      .then(({ data }) => {
+    const ids = op.stations.map(x => x.id)
+    /* Sécurité joueurs (19/11) : agrégat par RPC visites_origines ; repli direct si absente. */
+    supabase.rpc('visites_origines', { p_event_ids: ids, p_sans_etape: true }).then(async agr => {
+      if (!vivant) return
+      if (!rpcAbsente(agr.error)) {
+        setOrigines(((agr.data ?? []) as { source: string; n: number }[]).map(r => ({ source: r.source, n: Number(r.n) || 0 })).sort((a, b) => b.n - a.n))
+        return
+      }
+      const { data } = await supabase.from('visites').select('source,visiteur_id,created_at')
+        .in('event_id', ids).is('etape', null).not('visiteur_id', 'is', null)
+        .order('created_at', { ascending: true })
+      {
         if (!vivant) return
         const vus = new Set<string>(); const m = new Map<string, number>()
         ;((data ?? []) as { source: string | null; visiteur_id: string }[]).forEach(v => {
@@ -591,7 +600,8 @@ export function ContenuTracking({ op, proId, onStation, masquerGlobal }: {
           m.set(k, (m.get(k) ?? 0) + 1)
         })
         setOrigines(Array.from(m.entries()).map(([source, n]) => ({ source, n })).sort((a, b) => b.n - a.n))
-      })
+      }
+    })
     return () => { vivant = false }
   }, [cle, op.type, op.id, proId]) // eslint-disable-line react-hooks/exhaustive-deps
   if (s === undefined) return <Vide>Chargement…</Vide>

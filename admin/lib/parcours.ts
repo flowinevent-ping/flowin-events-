@@ -177,9 +177,17 @@ export async function attribuerSuperEvent(
   if (!row || !row.super_event_id) return
   const seId = row.super_event_id
 
+  const quizTk = tickets?.quiz !== false      // défaut true (autres parcours = 1 ticket au scan)
+  const bonusTk = tickets?.bonus === true
+  /* Sécurité joueurs (19/11) : tickets et gain immédiat décidés en base (joueur existant, partie
+     enregistrée, dates du super event, 1 quiz + 1 bonus / station / jour, libellé du gain lu en base).
+     Repli sur l'ancien écrit direct seulement si la RPC n'existe pas encore. */
+  const rpc = await supabase.rpc('se_attribuer_partie', {
+    p_joueur_id: joueurId, p_event_id: evId, p_quiz: onSite && quizTk, p_bonus: onSite && bonusTk, p_sur_place: onSite, p_jour: today,
+  })
+  if (!rpcAbsente(rpc.error)) return
+
   if (onSite && row.gain_ticket !== false) {
-    const quizTk = tickets?.quiz !== false      // défaut true (autres parcours = 1 ticket au scan)
-    const bonusTk = tickets?.bonus === true
     const rows: { super_event_id: string; joueur_id: string; event_id: string; jour: string; type: string }[] = []
     if (quizTk) rows.push({ super_event_id: seId, joueur_id: joueurId, event_id: evId, jour: today, type: 'quiz' })
     if (bonusTk) rows.push({ super_event_id: seId, joueur_id: joueurId, event_id: evId, jour: today, type: 'bonus' })
@@ -203,6 +211,7 @@ export async function attribuerSuperEvent(
 }
 
 import { captureParrainage } from './parrainage'
+import { rpcAbsente } from './rpcRepli'
 
 /* ── Referentiel 8 : gain immediat applique par les jeux ──
    Le choix « gain immediat / tirage » du pro etait enregistre et jamais lu.
@@ -609,6 +618,17 @@ async function writeSeReponses(opts: {
       bonus_reponses: opts.bonus_reponses ?? null,
       score: scoreNum,
     }
+    /* Sécurité joueurs (19/11) : écrit par la RPC se_enregistrer_reponses (contenu identique,
+       consentement compris) ; repli sur l'insert direct si la RPC n'existe pas encore. */
+    const viaRpc = () => supabase.rpc('se_enregistrer_reponses', {
+      p_joueur_id: payload.joueur_id, p_event_id: payload.event_id, p_jour: payload.jour, p_source: payload.source,
+      p_decouverte: payload.decouverte, p_form: payload.form, p_quiz_reponses: payload.quiz_reponses,
+      p_bonus_reponses: payload.bonus_reponses, p_score: payload.score,
+    })
+    let r1 = await viaRpc()
+    if (r1.error && !rpcAbsente(r1.error)) { await new Promise(r => setTimeout(r, 800)); r1 = await viaRpc() }
+    if (!r1.error) return
+    if (!rpcAbsente(r1.error)) { console.error('[se_reponses] rpc échouée:', r1.error.message); return }
     // Insert avec 1 ré-essai : évite la perte silencieuse du détail form+quiz sur micro-coupure réseau
     let { error } = await supabase.from('se_reponses').insert(payload)
     if (error) {
@@ -641,6 +661,13 @@ export function getJoueurLocal(): { id: string; email: string; prenom?: string; 
    aujourd'hui, sans blocage ni régression pour les joueurs non reconnus). */
 export async function fetchJoueurHistory(joueurId: string): Promise<{ answeredQuizIds: string[]; bonusDone: boolean }> {
   try {
+    /* Sécurité joueurs (19/11) : la RPC ne renvoie que les ids de questions vues et le drapeau bonus. */
+    const h = await supabase.rpc('mon_historique_reponses', { p_joueur_id: joueurId })
+    if (!h.error) {
+      const o = (h.data || {}) as { answered_quiz_ids?: string[]; bonus_done?: boolean }
+      return { answeredQuizIds: Array.isArray(o.answered_quiz_ids) ? o.answered_quiz_ids : [], bonusDone: o.bonus_done === true }
+    }
+    if (!rpcAbsente(h.error)) return { answeredQuizIds: [], bonusDone: false }
     const { data, error } = await supabase
       .from('se_reponses')
       .select('quiz_reponses,bonus_reponses')

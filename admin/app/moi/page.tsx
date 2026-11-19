@@ -6,6 +6,7 @@
  * plein écran pour la caisse. Compteurs et badges calculés uniquement sur les vraies données.
  * Identité : flowin_joueur (localStorage), créée en jouant. Pas de mot de passe côté participant.
  */
+import { chargerTicketsGainsJoueur } from '@/lib/moiTicketsGains'
 import { useState, useEffect, useMemo } from 'react'
 import { supabase } from '@/lib/supabase'
 import { Ico } from '@/lib/proicons'
@@ -78,12 +79,12 @@ export default function MonComptePage() {
     if (!local?.id) { setLoading(false); return }
     const jid = local.id
     ;(async () => {
-      const [jr, tk, ga, ml] = await Promise.all([
+      const [jr, tg, ml] = await Promise.all([
         supabase.from('joueurs').select('id,prenom,nom,email,external_id').eq('id', jid).single(),
-        supabase.from('se_tickets').select('event_id,super_event_id').eq('joueur_id', jid),
-        supabase.from('se_gains').select('id,libelle,code,utilise,event_id,super_event_id').eq('joueur_id', jid),
+        chargerTicketsGainsJoueur(jid).catch(() => ({ tickets: [], gains: [], stationsTerminees: [] })),
         chargerMesLots(jid).catch(() => [] as MonLot[]),
       ])
+      const tk = { data: tg.tickets }, ga = { data: tg.gains }
       setLots(ml)
       chargerNotifications(jid).then(setNotifs).catch(() => { /* */ })
       chargerConsentements(jid).then(setConsent).catch(() => { /* */ })

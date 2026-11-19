@@ -1,3 +1,4 @@
+import { rpcAbsente } from '@/lib/rpcRepli'
 import Link from 'next/link'
 import { fetchProDashboard } from '@/lib/pro'
 import { fetchStations, fetchSondageLanding } from '@/lib/nds'
@@ -150,11 +151,18 @@ export default async function ProSuperPage({ searchParams }: { searchParams: { p
     .map(t => ({ valeur: t, n: joueursSe.filter(j => (j as any).age_tranche === t).length }))
     .filter(p => p.n > 0)
 
-  const { data: visites } = evIds.size
+  /* Sécurité joueurs (19/11) : rendu serveur sans session -> agrégat par RPC (chaque visiteur une
+     fois, sur sa première source) ; repli sur la lecture directe si la RPC n'existe pas encore. */
+  const agr = evIds.size ? await supabase.rpc('visites_origines', { p_event_ids: Array.from(evIds), p_sans_etape: false }) : { data: [], error: null }
+  const origMap = new Map<string, number>()
+  if (!rpcAbsente(agr.error)) ((agr.data ?? []) as { source: string; n: number }[]).forEach(r => {
+    const lbl = r.source === 'parrainage' ? 'Parrainage' : 'Accès direct'
+    origMap.set(lbl, (origMap.get(lbl) ?? 0) + (Number(r.n) || 0))
+  })
+  const { data: visites } = evIds.size && rpcAbsente(agr.error)
     ? await supabase.from('visites').select('source, visiteur_id').in('event_id', Array.from(evIds)).not('visiteur_id', 'is', null)
     : { data: [] as any[] }
   const seen = new Set<string>()
-  const origMap = new Map<string, number>()
   ;(visites ?? []).forEach((v: any) => {
     if (seen.has(v.visiteur_id)) return
     seen.add(v.visiteur_id)

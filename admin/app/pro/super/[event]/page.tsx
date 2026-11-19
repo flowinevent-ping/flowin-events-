@@ -1,3 +1,4 @@
+import { rpcAbsente } from '@/lib/rpcRepli'
 import Link from 'next/link'
 import { fetchProDashboard } from '@/lib/pro'
 import { fetchJours, fetchStations, fetchRapportPoints } from '@/lib/nds'
@@ -66,7 +67,12 @@ export default async function ProStationPage({ params, searchParams }: { params:
 
   /* Ouverture / finition / coupures reseau : source reelle visites.etape (etape='quiz'/'resultats'/'err:reprise-reseau') */
   let ontOuvert = 0, ontFini = 0, coupures = 0
-  {
+  const ent = await supabase.rpc('visites_entonnoir', { p_event_id: ev.id, p_jour: jourSel ?? null })
+  if (!rpcAbsente(ent.error)) {
+    /* Sécurité joueurs (19/11) : rendu serveur sans session -> comptes agrégés par RPC. */
+    const e0 = (Array.isArray(ent.data) ? ent.data[0] : ent.data) as { ont_ouvert?: number; ont_fini?: number; coupures?: number } | null
+    ontOuvert = Number(e0?.ont_ouvert) || 0; ontFini = Number(e0?.ont_fini) || 0; coupures = Number(e0?.coupures) || 0
+  } else {
     let vq = supabase.from('visites').select('etape,visiteur_id,created_at').eq('event_id', ev.id)
     const { data: vis } = await vq
     const filtered = jourSel ? (vis ?? []).filter((v: any) => (v.created_at ?? '').slice(0, 10) === jourSel) : (vis ?? [])

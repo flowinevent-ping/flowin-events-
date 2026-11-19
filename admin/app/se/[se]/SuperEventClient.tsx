@@ -1,4 +1,5 @@
 'use client'
+import { chargerTicketsGainsJoueur } from '@/lib/moiTicketsGains'
 import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabase'
 import SuperEventMap, { Lieu } from '../_components/SuperEventMap'
@@ -124,13 +125,10 @@ export default function SuperEventClient({ se, lots, lotsPhases = [], lieux, spo
     const ids = idsKey ? idsKey.split(',') : []
     const jid = j.id
     ;(async () => {
-      const [tk, pa, ga] = await Promise.all([
-        supabase.from('se_tickets').select('event_id').eq('joueur_id', jid).eq('super_event_id', se.id),
-        ids.length
-          ? supabase.from('participations').select('event_id').eq('joueur_id', jid).in('event_id', ids).eq('completed', true)
-          : Promise.resolve({ data: [] as { event_id: string | null }[] }),
-        supabase.from('se_gains').select('id,libelle,code,utilise,event_id,type').eq('joueur_id', jid).eq('super_event_id', se.id),
-      ])
+      /* Sécurité joueurs (19/11) : une RPC limitée au joueur (repli direct si absente). */
+      const tg = await chargerTicketsGainsJoueur(jid, se.id, ids)
+      const tk = { data: tg.tickets }, ga = { data: tg.gains }
+      const pa = { data: tg.stationsTerminees.map(event_id => ({ event_id })) }
       const tkRows = (tk.data ?? []) as { event_id: string | null }[]
       const paRows = (pa.data ?? []) as { event_id: string | null }[]
       setTicketCount(tkRows.length)
