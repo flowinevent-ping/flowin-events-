@@ -15,7 +15,7 @@
 import nodemailer from "npm:nodemailer@6.9.16";
 
 export interface PieceJointe { filename: string; content: string } // content en base64 (format Resend)
-export interface Message { to: string[]; subject: string; html: string; attachments?: PieceJointe[] }
+export interface Message { to: string[]; subject: string; html: string; attachments?: PieceJointe[]; replyTo?: string }
 export interface Resultat { ok: boolean; via: "gmail" | "resend" | "aucun"; id?: string; skipped?: boolean; error?: string }
 
 const GMAIL_USER = Deno.env.get("GMAIL_USER") || "";
@@ -80,7 +80,7 @@ async function viaGmail(m: Message): Promise<Resultat> {
   dernier = Date.now();
   try {
     const info = await smtp().sendMail({
-      from: GMAIL_FROM, to: m.to.join(", "), subject: m.subject, html: m.html,
+      from: GMAIL_FROM, to: m.to.join(", "), subject: m.subject, html: m.html, replyTo: m.replyTo || undefined,
       attachments: (m.attachments || []).map((a) => ({ filename: a.filename, content: a.content, encoding: "base64" })),
     });
     console.log(`[mailer] gmail ok ${info.messageId} : ${m.subject}`);
@@ -95,7 +95,7 @@ async function viaResend(m: Message): Promise<Resultat> {
   try {
     const res = await fetch("https://api.resend.com/emails", {
       method: "POST", headers: { Authorization: `Bearer ${RESEND_API_KEY}`, "Content-Type": "application/json" },
-      body: JSON.stringify({ from: NOTIFY_FROM, to: m.to, subject: m.subject, html: m.html, attachments: m.attachments && m.attachments.length ? m.attachments : undefined }),
+      body: JSON.stringify({ from: NOTIFY_FROM, to: m.to, subject: m.subject, html: m.html, reply_to: m.replyTo || undefined, attachments: m.attachments && m.attachments.length ? m.attachments : undefined }),
     });
     const j = await res.json().catch(() => ({}));
     if (!res.ok) { console.error(`[mailer] resend ${res.status}`, JSON.stringify(j).slice(0, 200)); return { ok: false, via: "resend", error: `resend ${res.status} ${JSON.stringify(j).slice(0, 200)}` }; }

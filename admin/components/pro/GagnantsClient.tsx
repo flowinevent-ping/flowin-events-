@@ -153,7 +153,7 @@ function Tirage({ op, data, setMessage, onChange }: {
   const [dernierToken, setDernierToken] = useState<string | null>(null)
   /* « Terminer le tirage » : le commerce clot SON tirage quand il le souhaite. Cela pose
      events.cfg.tirage.fait_le ; la base enregistre alors le resultat de chaque participant
-     (sql/10-resultats-tirage.sql) : profil joueur + alerte (gagne / pas tire). */
+     (sql/10-resultats-tirage.sql) : profil joueur + alerte (gagne / pas tire) ; le non-tire recoit un message dans l'application, jamais d'e-mail. */
   const [fin, setFin] = useState<'idle' | 'envoi' | 'ok' | 'ko'>('idle')
   const terminer = async () => {
     setFin('envoi')
@@ -258,9 +258,9 @@ function Tirage({ op, data, setMessage, onChange }: {
       {!propose && op.gagnants.length > 0 && (
         <div style={{ marginTop: 14, paddingTop: 12, borderTop: '1px solid #E3E8EF' }}>
           <div style={{ fontSize: 12, ...MUTED, marginBottom: 8, lineHeight: 1.5 }}>
-            Tirage terminé pour cette fois ? Chaque participant verra son résultat (gagné ou pas tiré) dans l’application{(op.stations[0]?.cfg as { tirage?: { notifierPerdants?: boolean } } | undefined)?.tirage?.notifierPerdants === false ? '' : ', et ceux qui n’ont pas été tirés reçoivent un e-mail de service'}. Vous pourrez refaire un tirage plus tard.
+            Tirage terminé pour cette fois ? Chaque participant voit son résultat (gagné ou pas de lot) dans ses notifications Flowin{(op.stations[0]?.cfg as { tirage?: { notifierPerdants?: boolean } } | undefined)?.tirage?.notifierPerdants === false ? ' (message « pas de lot » désactivé dans votre réglage)' : ''}. Aucun e-mail n’est envoyé. Vous pourrez refaire un tirage plus tard.
           </div>
-          <button style={btn} disabled={fin === 'envoi'} onClick={terminer}>{fin === 'envoi' ? 'Enregistrement…' : 'Terminer le tirage et prévenir les participants'}</button>
+          <button style={btn} disabled={fin === 'envoi'} onClick={terminer}>{fin === 'envoi' ? 'Enregistrement…' : 'Terminer le tirage (participants prévenus dans l’app)'}</button>
           {fin === 'ok' && <span style={{ marginLeft: 10, fontSize: 12, fontWeight: 700, color: '#15803D' }}>Tirage terminé : les résultats sont enregistrés.</span>}
           {fin === 'ko' && <span style={{ marginLeft: 10, fontSize: 12, fontWeight: 700, color: '#B45309' }}>Échec, réessayez.</span>}
         </div>

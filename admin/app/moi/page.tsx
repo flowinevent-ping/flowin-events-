@@ -310,8 +310,8 @@ export default function MonComptePage() {
             {titre('Mes notifications')}
             <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
               {notifs.slice(0, 6).map(n => (
-                n.palier === 'annonce' ? (
-                <div key={n.id} data-notif="annonce" style={{ ...carte, display: 'flex', alignItems: 'flex-start', gap: 10 }}>
+                (n.palier === 'annonce' || n.palier === 'resultat') ? (
+                <div key={n.id} data-notif={n.palier} style={{ ...carte, display: 'flex', alignItems: 'flex-start', gap: 10 }}>
                   <span style={{ flexShrink: 0, color: HERO, marginTop: 2 }}><Ico k="bell" size={18} /></span>
                   <span style={{ flex: 1, minWidth: 0 }}>
                     <span style={{ display: 'block', fontSize: 12, fontWeight: 800, color: HERO }}>{n.commerce || '[commerce à compléter]'}</span>

@@ -190,7 +190,7 @@ export async function chargerRelances(joueurId: string): Promise<Relance[]> {
   return ((data || []) as Relance[]).filter(n => n.palier === 'relance' && !n.vu_le)
 }
 
-/** Toutes les notifications in-app (paliers 30j / 15j / 48h / cadeau / relance / annonce), plus récentes d'abord.
+/** Toutes les notifications in-app (paliers 30j / 15j / 48h / cadeau / relance / annonce / resultat), plus récentes d'abord.
  *  « annonce » (sql/2026-11-18-annonces-pro.sql) : titre, message, lien, commerce ; absents avant activation. */
 export interface Notif { id: string; tirage_id: number | null; palier: string; created_at: string; vu_le: string | null; lot_nom: string | null; retrait_token: string | null; valable_jusqu_au: string | null; titre?: string | null; message?: string | null; lien?: string | null; commerce?: string | null }
 export async function chargerNotifications(joueurId: string): Promise<Notif[]> {
@@ -200,6 +200,7 @@ export async function chargerNotifications(joueurId: string): Promise<Notif[]> {
 }
 export function libelleNotif(n: Notif): string {
   if (n.palier === 'annonce') return n.titre || 'Annonce'
+  if (n.palier === 'resultat') return n.titre || 'Pas de lot cette fois'
   const lot = n.lot_nom ? `« ${n.lot_nom} »` : 'ton lot'
   if (n.palier === 'cadeau') return `Un ami t’offre ${lot}`
   if (n.palier === 'relance') return `Le commerce te rappelle ${lot}`

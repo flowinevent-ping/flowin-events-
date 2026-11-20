@@ -17,7 +17,7 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase'
 
-/** notifierPerdants : e-mail de service « tu n'as pas ete tire » aux participants non tires (defaut oui). */
+/** notifierPerdants : message dans l'application « Pas de lot cette fois » aux participants non tires (defaut oui, jamais d'e-mail). */
 export interface ConfigTirage { mode: 'manuel' | 'auto'; date: string; publier: boolean; notifierPerdants?: boolean }
 
 const BRD = 'var(--sa-border, #E2E8F0)'
@@ -125,8 +125,8 @@ export function ChoixTirage({ value, onChange, finEvenement }: { value: ConfigTi
       <label style={{ display: 'flex', gap: 10, alignItems: 'flex-start', marginTop: 12, cursor: 'pointer' }}>
         <input type="checkbox" checked={value.notifierPerdants !== false} onChange={e => onChange({ ...value, notifierPerdants: e.target.checked })} style={{ width: 18, height: 18, marginTop: 1 }} />
         <span>
-          <b style={{ display: 'block', fontSize: 13 }}>Prévenir par e-mail les participants qui n’ont pas été tirés</b>
-          <span style={{ fontSize: 12, color: MUT }}>Message de service sobre (le résultat de leur participation, un lien vers l’application), seulement à ceux qui ont laissé un e-mail. Ils voient aussi le résultat dans l’application, quoi que vous choisissiez.</span>
+          <b style={{ display: 'block', fontSize: 13 }}>Prévenir dans l’application les participants qui n’ont pas été tirés</b>
+          <span style={{ fontSize: 12, color: MUT }}>Message court dans leurs notifications Flowin : « Pas de lot cette fois ». Aucun e-mail n’est envoyé. Le résultat reste visible dans « Mes tickets », quoi que vous choisissiez.</span>
         </span>
       </label>
       <label style={{ display: 'flex', gap: 10, alignItems: 'flex-start', marginTop: 12, cursor: 'pointer' }}>

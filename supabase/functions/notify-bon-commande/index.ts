@@ -4,12 +4,21 @@
 // (insert dans la table bons_commande depuis bon-commande-nds.html).
 // Le mail contient un LIEN DIRECT vers le doc rempli+signe : ?id=<id>.
 //
-// Declenchement : trigger SQL trg_notify_bon_commande (net.http_post) sur INSERT bons_commande.
-// Secret projet partage : RESEND_API_KEY (deja configure).
+// Declenchement : trigger SQL trg_notify_bon_commande (net.http_post, cle anon) quand la signature apparait.
+// Envoi (20/11/2026) : module commun _shared/mailer.ts (Gmail SMTP, sinon Resend).
+// SECURITE (20/11/2026) : la requete ne fournit QUE l'id. Le bon est relu en base (cle service) et TOUTES les
+// valeurs, adresse client comprise, viennent de la base : plus de destinataire pris dans le corps de la requete
+// (relais ouvert avec la cle anon publique). Un id inconnu = 404, aucun envoi.
+// Regle de Romain : pas d'email aux clients. Le mail « client » est donc adresse a Flowin, a transmettre au pro
+// (comme notify-commande-animation), sauf ENVOI_CLIENT=oui qui le renvoie au pro.
+// Deploye avec verify_jwt true (comme avant).
 
-const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY") || "";
+import { canal, envoyerEmail } from "../_shared/mailer.ts";
+
 const NOTIFY_TO = Deno.env.get("NOTIFY_TO") || "flowinevent@gmail.com";
-const NOTIFY_FROM = Deno.env.get("NOTIFY_FROM") || "NDS x Flowin <onboarding@resend.dev>";
+const ENVOI_CLIENT = (Deno.env.get("ENVOI_CLIENT") || "") === "oui";
+const SERVICE = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || "";
+const COLS = "id,raison_sociale,offre,offre_label,montant_ttc,contact,email,tel,siret,signataire,date_signature,signature";
 const DOC_BASE = Deno.env.get("BON_COMMANDE_URL") || "https://flowin-events.vercel.app/bon-commande-nds.html";
 const SUPA_URL = Deno.env.get("SUPABASE_URL") || "https://ywcqtupgoxfzkddqkztk.supabase.co";
 const SUPA_ANON = Deno.env.get("SUPABASE_ANON_KEY") || "sb_publishable_yQcGyoh4UdlUCwA96RKSwg_3jMJVVb1";
@@ -25,6 +34,17 @@ async function fetchCgvText(): Promise<string> {
     const rows = await r.json();
     return rows && rows[0] && rows[0].contenu ? String(rows[0].contenu) : "";
   } catch { return ""; }
+}
+
+async function lireBon(id: string): Promise<Record<string, unknown> | null> {
+  try {
+    const r = await fetch(SUPA_URL + "/rest/v1/bons_commande?id=eq." + encodeURIComponent(id) + "&select=" + COLS, {
+      headers: { apikey: SERVICE, Authorization: "Bearer " + SERVICE },
+    });
+    if (!r.ok) return null;
+    const rows = await r.json();
+    return rows && rows[0] ? rows[0] : null;
+  } catch { return null; }
 }
 
 function esc(v: unknown): string {
@@ -45,12 +65,20 @@ Deno.serve(async (req: Request): Promise<Response> => {
   try { payload = await req.json(); } catch {
     return new Response(JSON.stringify({ error: "invalid json" }), { status: 400, headers: { "Content-Type": "application/json" } });
   }
-  const r = (payload.record ?? payload) as Record<string, unknown>;
-  if (!r || !r.id) {
+  const recu = (payload.record ?? payload) as Record<string, unknown>;
+  if (!recu || !recu.id || typeof recu.id !== "string") {
     return new Response(JSON.stringify({ error: "no record" }), { status: 422, headers: { "Content-Type": "application/json" } });
   }
-  if (!RESEND_API_KEY) {
-    return new Response(JSON.stringify({ skipped: true, reason: "RESEND_API_KEY absent" }), { status: 200, headers: { "Content-Type": "application/json" } });
+  if (canal() === "aucun") {
+    return new Response(JSON.stringify({ skipped: true, reason: "aucun canal d'envoi" }), { status: 200, headers: { "Content-Type": "application/json" } });
+  }
+  // Source de verite = la base. Le corps de la requete ne sert qu'a donner l'id.
+  const r = await lireBon(String(recu.id).slice(0, 80));
+  if (!r) {
+    return new Response(JSON.stringify({ error: "bon inconnu" }), { status: 404, headers: { "Content-Type": "application/json" } });
+  }
+  if (!r.signature) {
+    return new Response(JSON.stringify({ skipped: true, reason: "bon non signe" }), { status: 200, headers: { "Content-Type": "application/json" } });
   }
 
   const link = DOC_BASE + "?id=" + encodeURIComponent(String(r.id));
@@ -77,25 +105,17 @@ Deno.serve(async (req: Request): Promise<Response> => {
     '<div style="padding:18px 4px"><a href="' + link + '" style="display:inline-block;background:#3B5CC4;color:#fff;text-decoration:none;font-weight:700;padding:12px 20px;border-radius:10px;font-size:14px">Ouvrir le bon de commande signe</a></div>' +
     '<div style="color:#8A90A8;font-size:12px;padding:6px 4px 18px">Document rempli et signe par le partenaire. En attente de reglement (virement).</div>' +
     "</div>";
-  const text = "Bon de commande signe NDS 2026\n\n" +
-    rows.map((x) => x[0] + " : " + x[1].replace(/&amp;/g, "&").replace(/&lt;/g, "<").replace(/&gt;/g, ">")).join("\n") +
-    "\n\nLien : " + link;
 
   const clientNom = String(r.raison_sociale ?? r.contact ?? "Partenaire");
   const clientEmail = String(r.email ?? "").trim();
   const emailValide = /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(clientEmail);
 
-  async function envoyer(to: string, subject: string, htmlBody: string, textBody: string) {
-    const res = await fetch("https://api.resend.com/emails", {
-      method: "POST",
-      headers: { Authorization: "Bearer " + RESEND_API_KEY, "Content-Type": "application/json" },
-      body: JSON.stringify({
-        from: NOTIFY_FROM, to: [to],
-        reply_to: emailValide ? clientEmail : undefined,
-        subject, html: htmlBody, text: textBody,
-      }),
-    });
-    return { to, ok: res.ok, status: res.status, body: await res.text() };
+  async function envoyer(to: string, subject: string, htmlBody: string) {
+    // Pas d'email aux clients : le mail destine au pro est adresse a Flowin (a transmettre), sauf ENVOI_CLIENT=oui.
+    let dest = to, sujet = subject;
+    if (to !== NOTIFY_TO && !ENVOI_CLIENT) { dest = NOTIFY_TO; sujet = "[" + clientNom + "] " + subject + " (a transmettre au pro : " + to + ")"; }
+    const res = await envoyerEmail({ to: [dest], subject: sujet, html: htmlBody, replyTo: emailValide ? clientEmail : undefined });
+    return { to: dest, ok: res.ok || res.skipped === true, via: res.via, skipped: res.skipped };
   }
 
   const results: Array<Record<string, unknown>> = [];
@@ -104,7 +124,7 @@ Deno.serve(async (req: Request): Promise<Response> => {
   results.push(await envoyer(
     NOTIFY_TO,
     "Bon de commande — " + clientNom + " (" + (r.offre_label ?? r.offre ?? "") + ")",
-    html, text,
+    html,
   ));
 
   // 2) Envoi au client (adresse saisie dans le bon de commande), s'il y a un email valide
@@ -128,9 +148,7 @@ Deno.serve(async (req: Request): Promise<Response> => {
       reglementHtml + cgvHtml +
       '<div style="color:#8A90A8;font-size:12px;padding:16px 4px 18px;border-top:1px dashed #e0e3ee;margin-top:16px">Merci pour votre confiance. Le partenariat est confirmé à réception du règlement (virement). BAITA EURL · OPConsult · info@opconsult.co · 06 16 35 49 36.</div>' +
       "</div>";
-    const textClient = "Votre bon de commande — Nuits du Sud 2026\n\n" +
-      text + "\n\nBAITA EURL · OPConsult · info@opconsult.co · 06 16 35 49 36";
-    results.push(await envoyer(clientEmail, "Votre bon de commande — Nuits du Sud 2026 (" + clientNom + ")", htmlClient, textClient));
+    results.push(await envoyer(clientEmail, "Votre bon de commande — Nuits du Sud 2026 (" + clientNom + ")", htmlClient));
   } else {
     results.push({ to: "client", skipped: true, reason: "email client absent ou invalide" });
   }

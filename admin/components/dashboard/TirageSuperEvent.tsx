@@ -162,9 +162,9 @@ export default function TirageSuperEvent({ seId, stations }: { seId: string; sta
       {tires.length > 0 && (
         <div style={{ marginTop: 14, paddingTop: 12, borderTop: '1px solid var(--sa-border)' }}>
           <div style={{ fontSize: 12, color: 'var(--sa-muted)', marginBottom: 8, lineHeight: 1.5 }}>
-            Tirage terminé ? Chaque participant verra son résultat dans l’application ; ceux qui n’ont pas été tirés reçoivent un e-mail de service (réglage de l’opération).
+            Tirage terminé ? Chaque participant voit son résultat dans ses notifications Flowin (« Pas de lot cette fois » pour les non tirés). Aucun e-mail n’est envoyé.
           </div>
-          <button className="sa-btn sm" disabled={occupe === 'fin'} onClick={terminer}>{occupe === 'fin' ? '…' : 'Terminer le tirage et prévenir les participants'}</button>
+          <button className="sa-btn sm" disabled={occupe === 'fin'} onClick={terminer}>{occupe === 'fin' ? '…' : 'Terminer le tirage (participants prévenus dans l’app)'}</button>
         </div>
       )}
     </>

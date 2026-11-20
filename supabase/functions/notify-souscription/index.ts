@@ -11,19 +11,20 @@
 //
 // Peut aussi etre appelee en POST direct avec { record: {...} } ou directement {...}.
 //
-// SECRETS REQUIS (Dashboard > Edge Functions > notify-souscription > Secrets,
-// ou `supabase secrets set ...`) :
-//   RESEND_API_KEY   (obligatoire) cle API Resend
+// ENVOI (20/11/2026) : module commun _shared/mailer.ts = Gmail SMTP (GMAIL_USER + GMAIL_APP_PASSWORD),
+// sinon Resend (RESEND_API_KEY). Destinataire FIXE (NOTIFY_TO), jamais pris dans la requete : pas de relais ouvert.
+// Mail interne a Flowin uniquement. Deploye avec verify_jwt true (le trigger SQL appelle avec la cle anon).
+//
+// SECRETS (Dashboard > Edge Functions > Secrets) :
 //   NOTIFY_TO        (optionnel) destinataire, defaut flowinevent@gmail.com
-//   NOTIFY_FROM      (optionnel) expediteur verifie Resend, defaut onboarding@resend.dev
 //   DASHBOARD_URL    (optionnel) lien dashboard, defaut https://flowin-events.vercel.app/dashboard.html
 //   PROFORMA_URL     (optionnel) lien proforma / bon de commande si dispo
 //
-// Sans RESEND_API_KEY la fonction renvoie 200 + skipped:true (no-op sur).
+// Sans aucun canal d'envoi configure la fonction renvoie 200 + skipped:true (no-op sur).
 
-const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY") || "";
+import { canal, envoyerEmail } from "../_shared/mailer.ts";
+
 const NOTIFY_TO = Deno.env.get("NOTIFY_TO") || "flowinevent@gmail.com";
-const NOTIFY_FROM = Deno.env.get("NOTIFY_FROM") || "NDS x Flowin <onboarding@resend.dev>";
 const DASHBOARD_URL = Deno.env.get("DASHBOARD_URL") || "https://flowin-events.vercel.app/dashboard.html";
 const PROFORMA_URL = Deno.env.get("PROFORMA_URL") || "https://flowin-events.vercel.app/bon-commande-nds.html";
 
@@ -49,7 +50,7 @@ function buildEmail(r: Record<string, unknown>): { subject: string; html: string
   const ville = (r.ville ?? "—") as string;
   const statut = (r.statut_paiement ?? "en_attente_reglement") as string;
 
-  const subject = "🤝 Nouvelle souscription NDS — " + nom + " (" + pack + ")";
+  const subject = "Nouvelle souscription NDS — " + nom + " (" + pack + ")";
 
   const rows: Array<[string, string]> = [
     ["Etablissement", esc(nom)],
@@ -101,7 +102,7 @@ function buildEmail(r: Record<string, unknown>): { subject: string; html: string
     "Nouvelle souscription NDS 2026\n\n" +
     rows.map((x) => x[0] + " : " + unesc(x[1])).join("\n") +
     "\n\nDashboard : " + DASHBOARD_URL +
-    (PROFORMA_URL ? "\nProforma : " + PROFORMA_URL : "");
+    (PROFORMA_URL ? "\nBon de commande : " + PROFORMA_URL : "");
 
   return { subject, html, text };
 }
@@ -133,9 +134,9 @@ Deno.serve(async (req: Request): Promise<Response> => {
     });
   }
 
-  if (!RESEND_API_KEY) {
-    // Deploiement sans secret : ne casse rien, signale juste.
-    return new Response(JSON.stringify({ skipped: true, reason: "RESEND_API_KEY absent" }), {
+  if (canal() === "aucun") {
+    // Deploiement sans canal : ne casse rien, signale juste.
+    return new Response(JSON.stringify({ skipped: true, reason: "aucun canal d'envoi" }), {
       status: 200,
       headers: { "Content-Type": "application/json" },
     });
@@ -143,31 +144,21 @@ Deno.serve(async (req: Request): Promise<Response> => {
 
   const mail = buildEmail(record);
 
-  const res = await fetch("https://api.resend.com/emails", {
-    method: "POST",
-    headers: {
-      Authorization: "Bearer " + RESEND_API_KEY,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      from: NOTIFY_FROM,
-      to: [NOTIFY_TO],
-      reply_to: (record.contact_email ?? record.email ?? undefined) as string | undefined,
-      subject: mail.subject,
-      html: mail.html,
-      text: mail.text,
-    }),
+  const replyTo = String(record.contact_email ?? record.email ?? "").trim();
+  const res = await envoyerEmail({
+    to: [NOTIFY_TO],
+    subject: mail.subject,
+    html: mail.html,
+    replyTo: /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(replyTo) ? replyTo : undefined,
   });
-
-  const body = await res.text();
-  if (!res.ok) {
-    return new Response(JSON.stringify({ error: "resend failed", status: res.status, body }), {
+  if (!res.ok && !res.skipped) {
+    return new Response(JSON.stringify({ error: "envoi echoue", via: res.via }), {
       status: 502,
       headers: { "Content-Type": "application/json" },
     });
   }
 
-  return new Response(JSON.stringify({ ok: true, resend: body }), {
+  return new Response(JSON.stringify({ ok: res.ok, via: res.via, skipped: res.skipped || undefined }), {
     status: 200,
     headers: { "Content-Type": "application/json" },
   });

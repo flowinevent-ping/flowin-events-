@@ -4,20 +4,22 @@
 // (admin/public/plaquette-animation-magasin.html, page #rappel).
 // Envoie un email « Demande de prise de rendez-vous » avec toutes les infos saisies.
 //
-// NON DÉPLOYÉE à la date d'écriture. Déploiement (une fois relu) :
+// Déployée le 20/11/2026 (verify_jwt false). Envoi par le module commun _shared/mailer.ts (Gmail SMTP, sinon Resend).
+// Destinataire FIXE (RAPPEL_TO), jamais pris dans la requête : pas de relais ouvert. Mail interne à Flowin uniquement.
 //   supabase functions deploy notify-rappel --no-verify-jwt
 // --no-verify-jwt : la page appelle la fonction avec la clé publishable (qui n'est pas un JWT) ;
 // la fonction fait elle-même la validation, l'anti-spam (champ piège, délai minimal) et la limite de taille.
 //
 // Secrets projet (aucune valeur ici) :
-//   RESEND_API_KEY   déjà configuré pour notify-bon-commande / notify-souscription
+//   GMAIL_USER + GMAIL_APP_PASSWORD   canal Gmail (prioritaire), sinon RESEND_API_KEY
 //   RAPPEL_TO        destinataire (défaut : flowinevent@gmail.com, l'adresse unique de Flowin dans le dépôt)
-//   NOTIFY_FROM      expéditeur Resend (défaut onboarding@resend.dev : sans domaine vérifié,
-//                    Resend n'envoie qu'à l'adresse du compte, voir README notify-souscription)
 
-const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY") || "";
+import { canal, envoyerEmail } from "../_shared/mailer.ts";
+
 const RAPPEL_TO = Deno.env.get("RAPPEL_TO") || "flowinevent@gmail.com";
-const NOTIFY_FROM = Deno.env.get("NOTIFY_FROM") || "Flowin <onboarding@resend.dev>";
+// Limite par instance (anti-spam supplémentaire, en plus du champ piège, du délai et du plafond Gmail du jour)
+let fenetre = 0, compte = 0;
+const MAX_PAR_HEURE = 30;
 const ORIGINES = ["https://flowin-events.vercel.app", "http://localhost:3000"];
 
 function cors(origin: string | null): Record<string, string> {
@@ -65,7 +67,10 @@ Deno.serve(async (req: Request): Promise<Response> => {
   if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(d.email)) manque.push("email");
   if (b.consentement !== true) manque.push("consentement");
   if (manque.length) return json({ ok: false, error: "champs invalides", champs: manque }, 422, origin);
-  if (!RESEND_API_KEY) return json({ ok: false, error: "RESEND_API_KEY absent" }, 503, origin);
+  if (canal() === "aucun") return json({ ok: false, error: "aucun canal d'envoi" }, 503, origin);
+  const maintenant = Date.now();
+  if (maintenant - fenetre > 3600000) { fenetre = maintenant; compte = 0; }
+  if (++compte > MAX_PAR_HEURE) return json({ ok: false, error: "trop de demandes" }, 429, origin);
 
   const rows: Array<[string, string]> = [
     ["Prénom", d.prenom], ["Nom", d.nom], ["Entreprise", d.entreprise], ["Ville", d.ville],
@@ -82,13 +87,8 @@ Deno.serve(async (req: Request): Promise<Response> => {
   const html = '<div style="font-family:-apple-system,Segoe UI,Roboto,sans-serif;max-width:560px;margin:0 auto">' +
     '<div style="background:#3B5CC4;border-radius:14px 14px 0 0;padding:16px 20px;color:#fff;font-size:17px;font-weight:800">Demande de prise de rendez-vous</div>' +
     '<table style="width:100%;border-collapse:collapse;background:#F4F6F9;border:1px solid #DCE3EC;border-top:none">' + trs + "</table></div>";
-  const text = "Demande de prise de rendez-vous\n\n" + rows.map(([k, v]) => k + " : " + v).join("\n");
 
-  const res = await fetch("https://api.resend.com/emails", {
-    method: "POST",
-    headers: { Authorization: "Bearer " + RESEND_API_KEY, "Content-Type": "application/json" },
-    body: JSON.stringify({ from: NOTIFY_FROM, to: [RAPPEL_TO], reply_to: d.email, subject: "Demande de prise de rendez-vous", html, text }),
-  });
-  if (!res.ok) return json({ ok: false, error: "envoi email " + res.status }, 502, origin);
+  const res = await envoyerEmail({ to: [RAPPEL_TO], subject: "Demande de prise de rendez-vous", html, replyTo: d.email });
+  if (!res.ok) return json({ ok: false, error: "envoi email" }, 502, origin);
   return json({ ok: true }, 200, origin);
 });
