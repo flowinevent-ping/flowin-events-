@@ -28,3 +28,12 @@ Pro : listes no-store et Historique à une animation · animation sans paiement 
 3. Fonctions edge : `send-ticket-gagnant` v5 déployée ; `send-resultat-tirage`, `notify-souscription`, `notify-bon-commande`, `notify-rappel` utilisent encore Resend ; `send-resultat-tirage` n'est pas déployée et la RPC `mes_resultats_tirage` n'existe pas (404).
 4. Textes joueur d'un jeu à gain immédiat (date du tirage, ticket) et texte email NDS des autres super events.
 5. Jeton d'appel pour `rappel-tickets` (cron).
+
+## Rejeu du 20/11/2026 (apres application des SQL valider_lot et super_events)
+| # | Scénario | Verdict | Preuve |
+|---|---|---|---|
+| 5 | Pro « Ma première fois » valide un billet sans PIN | PASS | Pro sans ligne `partenaires` (partenaire_id null), animation live, billet QS-2026-8846 gagné par le joueur test ; `lot.html` : `consulter_lot` puis `valider_lot` 200 `{ok:true, raison:valide}` sans PIN, `tirages.statut = retire`. Observation : `destocke:false`, « Commerce partenaire — » affiché (cosmétique) |
+| 7 | Organisateur crée un Super Event depuis l'UI | FAIL puis PASS | `POST super_events` 201 (politique OK). Défaut trouvé : `POST se_lots` 401 RLS 42501, l'insertion des lots partait avec le client anonyme sans session (`ParcoursCreation.tsx`). Corrigé (client avec session) et rejoué : super_events 201, events 201, se_lots 201, 10 lots, 1 station |
+
+Autres changements du jour : `notify-souscription` v5, `notify-bon-commande` v5 (bon relu en base, plus de destinataire pris dans la requête, mail « client » adressé à Flowin), `notify-rappel` v1 déployée (Gmail), toutes sur `_shared/mailer.ts` ; `send-resultat-tirage` neutralisée (no-op, non déployée). SQL `2026-11-20-resultats-tirage-inapp.sql` appliqué : le participant non tiré voit « Pas de lot cette fois » dans /moi (aucun email). Texte du bouton « Terminer le tirage » mis à jour.
+Nettoyage : le premier DELETE a de nouveau attendu une confirmation sans réponse (timeout 230 s) : arrêt, rien supprimé. Instructions restantes : `sql/2026-11-20-e2e-nettoyage-TEST-2.sql`.
