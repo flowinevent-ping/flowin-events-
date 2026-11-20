@@ -667,7 +667,7 @@ export default function ParcoursCreation({ mode = 'pro', pro, banques, supers, p
         pros: participants.map(pid => ({ pro_id: pid, nom: cat.get(pid)?.nom ?? (pid === p.id ? p.nom ?? pid : pid) })),
       })
       if (!r.ok) { setEnvoi('echec'); setErreur(r.erreur ?? ''); return }
-      /* Lots du super event = lots du grand tirage (se_lots, lu par le tirage
+      /* Lots du super event (client avec session pro : se_lots est en ecriture SA ou pro proprietaire). Lots du grand tirage (se_lots, lu par le tirage
          global et les pages /se). Une ligne par rang : quantite 3 = 3 rangs. */
       const lignes: { id: string; super_event_id: string; rang: number; valeur: number; libelle: string; phase?: Phase }[] = []
       const deuxPhases = avecPhases && !!debutJeu && !!dateD && debutJeu < dateD
@@ -681,7 +681,7 @@ export default function ParcoursCreation({ mode = 'pro', pro, banques, supers, p
       })
       let info = r.erreur
       if (lignes.length) {
-        const { error } = await supabasePublic.from('se_lots').insert(lignes)
+        const { error } = await supabase.from('se_lots').insert(lignes)
         if (error) info = `Super event créé, mais ses lots n’ont pas été enregistrés — ${messageFr(error)}`
       }
       setFait({ eventId: null, superId: id, info }); setEnvoi('')
