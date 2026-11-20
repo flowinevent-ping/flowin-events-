@@ -336,10 +336,20 @@
     return m ? decodeURIComponent(m[1]) : '';
   }
   function rpc(fn, body){
-    return fetch(SUPA+'/rest/v1/rpc/'+fn, {
-      method:'POST',
-      headers:{ 'apikey':ANON, 'Authorization':'Bearer '+ANON, 'Content-Type':'application/json' },
-      body: JSON.stringify(body)
+    /* 20/11 : si un pro est connecte sur ce navigateur (meme origine que /pro/scanner), son jeton part avec l'appel :
+       le pro proprietaire de l'animation valide sans PIN (valider_lot). Jeton absent ou perime : cle publique, comme avant. */
+    var jeton = '';
+    try { var sb = JSON.parse(localStorage.getItem('sb-ywcqtupgoxfzkddqkztk-auth-token') || 'null'); if (sb && sb.access_token && (!sb.expires_at || sb.expires_at * 1000 > Date.now() + 30000)) jeton = sb.access_token; } catch (e) { jeton = ''; }
+    function appel(bearer){
+      return fetch(SUPA+'/rest/v1/rpc/'+fn, {
+        method:'POST',
+        headers:{ 'apikey':ANON, 'Authorization':'Bearer '+bearer, 'Content-Type':'application/json' },
+        body: JSON.stringify(body)
+      });
+    }
+    return appel(jeton || ANON).then(function(r){
+      if (!r.ok && jeton && (r.status === 401 || r.status === 403)) return appel(ANON);
+      return r;
     }).then(function(r){
       if(!r.ok) throw new Error('http '+r.status);
       return r.json();
