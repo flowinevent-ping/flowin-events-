@@ -358,3 +358,8 @@ que sur instruction explicite de Romain.
 
 ## Bonus d'assiduité (Romain, 20/11/2026)
 Les « +5 points d'assiduité » concernent l'application Flow-révision (autre produit), pas Flowin Event. Flowin Event fonctionne en tickets (1 quiz + 1 bonus par station et par jour, +1 par parrainage). Rien à ajouter.
+
+## Qui lance le tirage (Romain, 20/11/2026)
+- **Super Event** : le tirage est piloté par Flowin (super admin). L'organisateur n'a pas de bouton de tirage. Voulu.
+- **Animation d'un commerce en tirage au sort** : c'est le pro qui définit quand le tirage a lieu et qui le lance.
+- **Animation en gain immédiat** : il n'y a jamais de tirage au sort. Aucun texte « tirage », « date du tirage » ni « ticket pour le tirage » ne doit s'afficher au joueur.
