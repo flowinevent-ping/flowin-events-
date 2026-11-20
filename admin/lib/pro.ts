@@ -3,6 +3,7 @@ import { rpcAbsente } from './rpcRepli'
 import type { FlowinEvent, FlowinJoueur, FlowinLot, FlowinPro } from './types'
 import { sansGabarit } from './operations'
 import { BASE_CANONIQUE } from './qrPermalien'
+import { aujourdhuiParis } from './etatAnimation'
 
 export interface ProDashboardData {
   pro: FlowinPro | null
@@ -136,7 +137,10 @@ export async function creerAnimation(params: CreationAnimation): Promise<{ ok: b
     pro_id: params.proId,
     nom: params.nom,
     module: params.module,
-    status: params.paiement ? 'pending' : 'upcoming',
+    /* 20/11 (E2E prod) : sans paiement a declarer, l'animation est EN LIGNE (cf. Configurateur PAIEMENT_ACTIF=false).
+       'upcoming' sans date la rendait injouable (« pas encore commencee ») alors que l'ecran annoncait « Votre jeu est en ligne ».
+       Date de debut dans le futur : 'upcoming' (etatAnimation la garde fermee jusqu'au jour J). */
+    status: params.paiement ? 'pending' : (params.dateD && params.dateD.slice(0, 10) > aujourdhuiParis() ? 'upcoming' : 'live'),
     date_d: params.dateD,
     date_f: params.dateF,
     gain_ticket: params.lots.some(l => l.type === 'tirage'),
