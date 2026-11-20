@@ -17,6 +17,8 @@
 // Optionnels : NOTIFY_FROM_ADDR, NOTIFY_FROM_NAME, NOTIFY_TO, SITE_ORIGIN (defaut
 // https://flowin-events.vercel.app)
 
+import { canal, envoyerEmail } from "../_shared/mailer.ts"; // 20/11/2026 : Gmail SMTP (ou Resend) via le module commun
+
 const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY") || "";
 const NOTIFY_FROM_ADDR = Deno.env.get("NOTIFY_FROM_ADDR") || "onboarding@resend.dev";
 const NOTIFY_FROM_DEFAULT_NAME = Deno.env.get("NOTIFY_FROM_NAME") || "NDS x Flowin";
@@ -71,7 +73,7 @@ Deno.serve(async (req: Request): Promise<Response> => {
   //     reply_to du corps ignores.
   const retraitToken = String(body.retrait_token || "").trim();
   let gagnantEmail = "", gagnantNom = "", partenaireNom = "", partenaireAdresse = "", partenaireTel = "";
-  let lotNom = "un lot", conditions = "", code = "";
+  let lotNom = "un lot", conditions = "", code = "", superEvent = "";
 
   const json = (o: unknown, status: number) =>
     new Response(JSON.stringify(o), { status, headers: { ...corsHeaders, "Content-Type": "application/json" } });
@@ -79,13 +81,14 @@ Deno.serve(async (req: Request): Promise<Response> => {
   if (retraitToken) {
     if (!SUPABASE_URL || !SERVICE_KEY) return json({ ok: false, error: "configuration serveur incomplete" }, 500);
     const hSrv = { apikey: SERVICE_KEY, Authorization: "Bearer " + SERVICE_KEY, "Content-Type": "application/json" };
-    const rT = await fetch(SUPABASE_URL + "/rest/v1/tirages?select=joueur_email,joueur_nom,ticket_code,lot_nom&retrait_token=eq." + encodeURIComponent(retraitToken) + "&limit=1", { headers: hSrv });
+    const rT = await fetch(SUPABASE_URL + "/rest/v1/tirages?select=joueur_email,joueur_nom,ticket_code,lot_nom,super_event_id&retrait_token=eq." + encodeURIComponent(retraitToken) + "&limit=1", { headers: hSrv });
     const lignes = rT.ok ? (await rT.json().catch(() => [])) as Array<Record<string, string | null>> : [];
     const t = lignes && lignes[0];
     if (!t) return json({ ok: false, error: "jeton de retrait inconnu" }, 404);
     gagnantEmail = String(t.joueur_email || "").trim();
     gagnantNom = String(t.joueur_nom || "").trim();
     lotNom = String(t.lot_nom || "") || "un lot";
+    superEvent = String(t.super_event_id || "");
     code = String(t.ticket_code || "");
     const rL = await fetch(SUPABASE_URL + "/rest/v1/rpc/consulter_lot", { method: "POST", headers: hSrv, body: JSON.stringify({ p_token: retraitToken }) });
     const l = rL.ok ? (await rL.json().catch(() => null)) as Record<string, string | null> | null : null;
@@ -119,8 +122,8 @@ Deno.serve(async (req: Request): Promise<Response> => {
   if (!gagnantEmail || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(gagnantEmail)) {
     return json({ ok: false, error: "email gagnant invalide ou absent pour ce tirage" }, 422);
   }
-  if (!RESEND_API_KEY) {
-    return new Response(JSON.stringify({ ok: false, error: "RESEND_API_KEY absent (configuration serveur)" }), { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+  if (canal() === "aucun") {
+    return new Response(JSON.stringify({ ok: false, error: "aucun canal email configure (GMAIL_USER + GMAIL_APP_PASSWORD ou RESEND_API_KEY)" }), { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } });
   }
 
   // ---- Texte du corps, PORTE MOT POUR MOT depuis mail-gagnant.js (fonction corps(), branche "grand") ----
@@ -129,7 +132,9 @@ Deno.serve(async (req: Request): Promise<Response> => {
   const prenom = prenomDe(gagnantNom);
 
   const lignes: string[] = [`Bonjour ${prenom},`, ""];
-  lignes.push("Waouh, bravo ! Au grand tirage du jeu des Nuits du Sud 2026, tu as gagn\u00e9 :", "",
+  // 20/11/2026 : une animation de commerce (tirage sans super event) ne parle pas des Nuits du Sud. Le texte NDS reste inchange.
+  const animationCommerce = !!retraitToken && !superEvent;
+  lignes.push(animationCommerce ? "Bravo ! Au tirage au sort du jeu, tu as gagn\u00e9 :" : "Waouh, bravo ! Au grand tirage du jeu des Nuits du Sud 2026, tu as gagn\u00e9 :", "",
     "   " + lotNom);
   if (partenaireNom) lignes.push("   chez " + partenaireNom);
   if (coord) lignes.push("   " + coord);
@@ -139,7 +144,7 @@ Deno.serve(async (req: Request): Promise<Response> => {
       "Clique sur ce lien : tu peux l'imprimer ou le garder sur ton t\u00e9l\u00e9phone.",
       "C'est ce billet, avec son QR code, que tu pr\u00e9senteras en boutique.", "");
   }
-  lignes.push("Merci d'avoir participé, et bravo encore : tu faisais partie de plus de 600 joueurs.", "",
+  lignes.push(animationCommerce ? "Merci d'avoir particip\u00e9, et bravo encore !" : "Merci d'avoir participé, et bravo encore : tu faisais partie de plus de 600 joueurs.", "",
     "COMMENT EN PROFITER, EN 3 \u00c9TAPES", "",
     "   1. Rends-toi chez " + (partenaireNom || "notre commer\u00e7ant partenaire"),
     "   2. Pr\u00e9sente ton billet, papier ou \u00e9cran",
@@ -148,23 +153,19 @@ Deno.serve(async (req: Request): Promise<Response> => {
   if (c.length) { lignes.push("\u00c0 SAVOIR", ""); c.forEach((x) => lignes.push("   - " + x)); lignes.push(""); }
   if (code) lignes.push("Ton num\u00e9ro de billet : " + code, "");
   lignes.push("Encore bravo, et \u00e0 bient\u00f4t chez notre partenaire.", "",
-    "Les Nuits du Sud, la Ville de Vence et Flowin",
+    animationCommerce ? "Flowin Event" : "Les Nuits du Sud, la Ville de Vence et Flowin",
     "flowinevent@gmail.com \u00b7 06 16 35 49 36");
 
   const text = lignes.join("\n");
   const html = "<pre style=\"font-family:-apple-system,Segoe UI,Roboto,sans-serif;white-space:pre-wrap;font-size:14px;line-height:1.6;color:#16203A\">"
     + esc(text).replace(lien, `<a href="${esc(lien)}">${esc(lien)}</a>`) + "</pre>";
 
-  const sujet = "Nuits du Sud & Flowin \u2014 Grand Jeu Concours \u2014 Vous avez gagn\u00e9 !";
+  const sujet = animationCommerce ? "Flowin Event \u2014 Vous avez gagn\u00e9 !" : "Nuits du Sud & Flowin \u2014 Grand Jeu Concours \u2014 Vous avez gagn\u00e9 !";
 
   async function envoyer(to: string, subject: string) {
-    const res = await fetch("https://api.resend.com/emails", {
-      method: "POST",
-      headers: { Authorization: "Bearer " + RESEND_API_KEY, "Content-Type": "application/json" },
-      body: JSON.stringify({ from, to: [to], reply_to: replyTo, subject, html, text }),
-    });
-    const bodyTxt = await res.text();
-    return { to, ok: res.ok, status: res.status, body: bodyTxt };
+    // Canal commun : Gmail SMTP si configure (sinon Resend). Avant : Resend en dur (403 hors adresse du compte).
+    const r = await envoyerEmail({ to: [to], subject, html });
+    return { to, ok: r.ok, status: r.ok ? 200 : 502, body: r.ok ? (r.id || r.via) : (r.error || "echec") };
   }
 
   const results = [];

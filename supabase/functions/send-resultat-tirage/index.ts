@@ -25,6 +25,8 @@
 // SUPABASE_SERVICE_ROLE_KEY (fournis par Supabase aux fonctions edge).
 // Optionnels : NOTIFY_FROM_ADDR, NOTIFY_FROM_NAME, NOTIFY_TO, SITE_ORIGIN.
 
+import { canal, envoyerEmail } from "../_shared/mailer.ts"; // 20/11/2026 : Gmail SMTP (ou Resend) via le module commun
+
 const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY") || "";
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL") || "";
 const SERVICE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || "";
@@ -88,7 +90,7 @@ Deno.serve(async (req: Request): Promise<Response> => {
   const ref = String(body.tirage_ref || "").trim();
   if ((!eventId && !superId) || !ref) return json({ ok: false, error: "event_id (ou super_event_id) et tirage_ref requis" }, 422);
   if (!SUPABASE_URL || !SERVICE_KEY) return json({ ok: false, error: "configuration serveur absente (SUPABASE_URL / SERVICE_ROLE)" }, 200);
-  if (!RESEND_API_KEY) return json({ ok: false, error: "RESEND_API_KEY absent (configuration serveur)" }, 200);
+  if (canal() === "aucun") return json({ ok: false, error: "aucun canal email configure (GMAIL_USER + GMAIL_APP_PASSWORD ou RESEND_API_KEY)" }, 200);
 
   // Reglage du commerce : cfg.tirage.notifierPerdants (defaut oui).
   let commerce = "", animation = "";
@@ -134,11 +136,8 @@ Deno.serve(async (req: Request): Promise<Response> => {
     const text = texteResultat({ prenom: String(j?.prenom || "").trim(), commerce, animation, dateTirage, tickets: l.tickets || 1, lien });
     const html = "<pre style=\"font-family:-apple-system,Segoe UI,Roboto,sans-serif;white-space:pre-wrap;font-size:14px;line-height:1.6;color:#1B3A5C\">"
       + esc(text).replace(esc(lien), `<a href="${esc(lien)}">${esc(lien)}</a>`) + "</pre>";
-    const r = await fetch("https://api.resend.com/emails", {
-      method: "POST",
-      headers: { Authorization: "Bearer " + RESEND_API_KEY, "Content-Type": "application/json" },
-      body: JSON.stringify({ from, to: [email], reply_to: NOTIFY_TO, subject: `Résultat du tirage — ${commerce}`, html, text }),
-    });
+    // 20/11/2026 : canal commun (_shared/mailer.ts : Gmail SMTP si configure, sinon Resend). Avant : Resend en dur (403 hors adresse du compte).
+    const r = await envoyerEmail({ to: [email], subject: `Résultat du tirage — ${commerce}`, html });
     if (r.ok) envoyes++;
     else {
       echecs++;
