@@ -357,4 +357,4 @@ que sur instruction explicite de Romain.
 - **Vidéo L4, bloc 7** : on garde les exemples de réponses. Rien à faire.
 
 ## Bonus d'assiduité (Romain, 20/11/2026)
-On garde les +5 points pour l'assiduité. À localiser dans le code : aucune règle « +5 » trouvée dans lib/masters, app/jouer, lib/parcours au 20/11 — à vérifier pendant les scénarios de test de bout en bout, et à implémenter si absente.
+Les « +5 points d'assiduité » concernent l'application Flow (autre produit), pas Flowin Event. Flowin Event fonctionne en tickets (1 quiz + 1 bonus par station et par jour, +1 par parrainage). Rien à ajouter.
