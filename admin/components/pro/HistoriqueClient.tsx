@@ -38,14 +38,16 @@ import { lireDroitsPro, peutOuvrirNouvelle } from '@/lib/droitsPro'
 
 export default function HistoriqueClient({ initial, cle: cleInitiale }: { initial: OperationsPro; cle?: string | null }) {
   const [data, setData] = useState<OperationsPro>(initial)
-  const uneSeule = initial.operations.length === 1
+  const uneSeule = data.operations.length === 1
   const [cle, setCle] = useState<string>(cleInitiale || (uneSeule ? initial.operations[0].cle : ''))
   const recharger = () => { fetchOperationsPro(initial.proId).then(setData) }
   /* Sécurité joueurs partie C (19/11) : le rendu serveur (sans session) n'a pas les coordonnées
      des gagnants ; on recharge une fois avec la session pro du navigateur. */
   // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => { recharger() }, [initial.proId])
-  const op = data.operations.find(o => o.cle === cle)
+  /* 20/11 : le rendu serveur peut arriver sans operation ; une seule operation apres rechargement = vue detail directe. */
+  const cleEff = cle || (data.operations.length === 1 ? data.operations[0].cle : '')
+  const op = data.operations.find(o => o.cle === cleEff)
   const q = `?pro=${encodeURIComponent(initial.proId)}`
   /* Droit « creer / rejoindre » retire par le Super Admin (sql/06) : pas de bouton de creation. */
   const [peutCreer, setPeutCreer] = useState(true)

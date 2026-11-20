@@ -26,7 +26,7 @@
  * Aucun appel ne passe par `find(e => e.super_event_id)` : l operation est
  * toujours designee explicitement (famille D de l audit).
  */
-import { supabase } from './supabase'
+import { supabase, supabaseVivant } from './supabase'
 import { rpcAbsente } from './rpcRepli'
 import type { FlowinEvent } from './types'
 
@@ -288,15 +288,18 @@ const num = (v: unknown): number | null => {
  * client supabase anon.
  */
 export async function fetchOperationsPro(proId: string): Promise<OperationsPro> {
+  /* 20/11 (E2E prod) : le « Data Cache » de Next servait au rendu serveur une liste perimee (vide pour un pro
+     tout juste inscrit : son animation creee n'apparaissait pas dans « Mes animations »). Cote serveur : no-store. */
+  const db = typeof window === 'undefined' ? supabaseVivant : supabase
   const vide: OperationsPro = { proId, proNom: null, proEmail: null, partenaire: null, operations: [] }
   if (!proId) return vide
 
   const [{ data: pro }, { data: evs }, { data: ses }] = await Promise.all([
-    supabase.from('pros').select('id,nom,email,partenaire_id').eq('id', proId).maybeSingle(),
-    supabase.from('events')
+    db.from('pros').select('id,nom,email,partenaire_id').eq('id', proId).maybeSingle(),
+    db.from('events')
       .select('id,pro_id,nom,module,status,date_d,date_f,super_event_id,participants,cfg,paiement_statut,created_at')
       .eq('pro_id', proId),
-    supabase.from('super_events').select('id,nom,date_d,date_f,status'),
+    db.from('super_events').select('id,nom,date_d,date_f,status'),
   ])
   /* La fiche `pros` elle-meme peut echouer a charger (ligne isolee, latence,
      etc.) sans que ca signifie qu il n y a aucune operation : les events
@@ -315,34 +318,34 @@ export async function fetchOperationsPro(proId: string): Promise<OperationsPro> 
      coordonnées ni jeton (les écrans clients rechargent la liste complète avec la session pro).
      Repli direct si la RPC est absente. Dans le navigateur : lecture directe (session pro). */
   const serveur = typeof window === 'undefined'
-  const tirRpc = serveur ? await supabase.rpc('pro_tirages_operation', { p_pro_id: proId }) : null
+  const tirRpc = serveur ? await db.rpc('pro_tirages_operation', { p_pro_id: proId }) : null
   const tirViaRpc = !!tirRpc && !rpcAbsente(tirRpc.error)
   const [partRes, lotsRes, tirSeRes, tirEvRes, stockRes, bonsRes] = await Promise.all([
     partenaireId
-      ? supabase.from('partenaires')
+      ? db.from('partenaires')
         .select('id,nom,email,super_event_id,code_pin,lots,offre,montant_sponsoring,paiement_mode,statut_paiement,facture_emise')
         .eq('id', partenaireId).maybeSingle()
       : Promise.resolve({ data: null }),
     evIds.length
-      ? supabase.from('lots').select('id,event_id,titre,nom,emoji,valeur,valeur_euros,quantite,conditions').in('event_id', evIds)
+      ? db.from('lots').select('id,event_id,titre,nom,emoji,valeur,valeur_euros,quantite,conditions').in('event_id', evIds)
       : Promise.resolve({ data: [] }),
     partenaireId && seIds.length && !tirViaRpc
-      ? supabase.from('tirages')
+      ? db.from('tirages')
         .select('id,joueur_id,joueur_nom,joueur_email,joueur_tel,lot_nom,lot_valeur,ticket_code,retrait_token,notifie_at,retire_at,relance_envoyee_at,created_at,super_event_id,event_id,statut,type')
         .eq('partenaire_id', partenaireId).in('super_event_id', seIds).neq('statut', 'annule').eq('type', 'grand')
       : Promise.resolve({ data: [] }),
     tirViaRpc ? Promise.resolve({ data: (tirRpc?.data ?? []) as Record<string, unknown>[] })
     : evIds.length
-      ? supabase.from('tirages')
+      ? db.from('tirages')
         .select('id,joueur_id,joueur_nom,joueur_email,joueur_tel,lot_nom,lot_valeur,ticket_code,retrait_token,notifie_at,retire_at,relance_envoyee_at,created_at,super_event_id,event_id,statut,type')
         .in('event_id', evIds).neq('statut', 'annule')
       : Promise.resolve({ data: [] }),
     evIds.length
-      ? supabase.from('lots').select('id').in('event_id', evIds)
+      ? db.from('lots').select('id').in('event_id', evIds)
         .then(async r => {
           const lotIds = ((r.data ?? []) as { id: string }[]).map(x => x.id)
           if (!lotIds.length) return { data: [] }
-          return supabase.from('lots_stock').select('id,lot_id,utilise,attribue_a').in('lot_id', lotIds)
+          return db.from('lots_stock').select('id,lot_id,utilise,attribue_a').in('lot_id', lotIds)
         })
       : Promise.resolve({ data: [] }),
     /* Bons : ceux du commerce, et ceux rattaches aux events du pro (event_id).
@@ -357,11 +360,11 @@ export async function fetchOperationsPro(proId: string): Promise<OperationsPro> 
         partenaireId ? `partenaire_id.eq.${partenaireId}` : '',
         evIds.length ? `event_id.in.(${evIds.map(i => `"${i}"`).join(',')})` : '',
       ].filter(Boolean).join(',') || 'id.eq.__aucun__'
-      const avecJeton = await supabase.from('bons_commande')
+      const avecJeton = await db.from('bons_commande')
         .select('id,super_event_id,event_id,partenaire_id,montant_ttc,statut,created_at,jeton_public')
         .or(filtre).order('created_at', { ascending: false })
       if (!avecJeton.error) return avecJeton
-      return supabase.from('bons_commande')
+      return db.from('bons_commande')
         .select('id,super_event_id,event_id,partenaire_id,montant_ttc,statut,created_at')
         .or(filtre).order('created_at', { ascending: false })
     })(),
@@ -369,11 +372,11 @@ export async function fetchOperationsPro(proId: string): Promise<OperationsPro> 
 
   /* Parties reelles, comptees dans `participations` : la colonne
      events.participants n est pas tenue a jour (restait a 0). */
-  const cRpc = serveur && evIds.length ? await supabase.rpc('pro_participations_comptes', { p_event_ids: evIds }) : null
+  const cRpc = serveur && evIds.length ? await db.rpc('pro_participations_comptes', { p_event_ids: evIds }) : null
   const comptes: [string, number][] = cRpc && !rpcAbsente(cRpc.error)
     ? evIds.map(id => [id, Number(((cRpc.data ?? []) as { event_id: string; n: number }[]).find(x => x.event_id === id)?.n ?? 0)] as [string, number])
     : await Promise.all(evIds.map(id =>
-    supabase.from('participations').select('id', { count: 'exact', head: true }).eq('event_id', id)
+    db.from('participations').select('id', { count: 'exact', head: true }).eq('event_id', id)
       .then(r => [id, r.count ?? 0] as [string, number])))
   const partiesDe = new Map<string, number>(comptes)
   ops.forEach(o => o.stations.forEach(st => {
@@ -426,7 +429,7 @@ export async function fetchOperationsPro(proId: string): Promise<OperationsPro> 
   if (tirViaRpc) {
     tirages.forEach(t => { const x = tirMap.get(t.id); if (x) { t.valableJusquAu = (x.valable_jusqu_au as string) ?? null; t.offertLe = (x.offert_le as string) ?? null } })
   } else if (tirages.length) {
-    const opt = await supabase.from('tirages').select('id,valable_jusqu_au,offert_le').in('id', tirages.map(t => t.id))
+    const opt = await db.from('tirages').select('id,valable_jusqu_au,offert_le').in('id', tirages.map(t => t.id))
     if (!opt.error) {
       const m = new Map<number, { valable_jusqu_au: string | null; offert_le: string | null }>()
       ;((opt.data ?? []) as { id: number; valable_jusqu_au: string | null; offert_le: string | null }[]).forEach(x => m.set(Number(x.id), x))
@@ -440,10 +443,10 @@ export async function fetchOperationsPro(proId: string): Promise<OperationsPro> 
      `factures`. */
   const facturesParBon = new Map<string, { numero: string; date_emission: string | null; jeton_public?: string | null }>()
   if (bons.length) {
-    let facs = (await supabase.from('factures')
+    let facs = (await db.from('factures')
       .select('numero,date_emission,client,jeton_public').in('client->>bon_id', bons.map(b => b.id))) as { data: unknown[] | null; error: unknown }
     if (facs.error) {
-      facs = await supabase.from('factures')
+      facs = await db.from('factures')
         .select('numero,date_emission,client').in('client->>bon_id', bons.map(b => b.id))
     }
     ;((facs.data ?? []) as { numero: string; date_emission: string | null; client: { bon_id?: string } | null; jeton_public?: string | null }[])
@@ -601,20 +604,21 @@ export interface SuiviOperation {
  * Event autonome : evenement_tracking([id]) -- tout son historique.
  */
 export async function fetchSuiviOperation(op: Operation, proId: string): Promise<SuiviOperation | null> {
+  const db = typeof window === 'undefined' ? supabaseVivant : supabase
   const ids = op.stations.map(s => s.id)
   const toutesStations = async (): Promise<StatsOperation | null> => {
     if (op.type !== 'super') return null
-    const { data: evs } = await supabase.from('events').select('id').eq('super_event_id', op.id)
+    const { data: evs } = await db.from('events').select('id').eq('super_event_id', op.id)
     const tous = ((evs ?? []) as { id: string }[]).map(e => e.id)
     if (!tous.length) return null
-    const { data: g } = await supabase.rpc('operation_stats', { p_events: tous, p_se: op.id })
+    const { data: g } = await db.rpc('operation_stats', { p_events: tous, p_se: op.id })
     return (g as StatsOperation) ?? null
   }
   const [{ data, error }, st, global] = await Promise.all([
     op.type === 'super'
-      ? supabase.rpc('station_tracking', { p_se: op.id, p_pro: proId, p_partenaire: null, p_jour: null, p_tout: false })
-      : supabase.rpc('evenement_tracking', { p_events: ids }),
-    supabase.rpc('operation_stats', { p_events: ids, p_se: op.type === 'super' ? op.id : null }),
+      ? db.rpc('station_tracking', { p_se: op.id, p_pro: proId, p_partenaire: null, p_jour: null, p_tout: false })
+      : db.rpc('evenement_tracking', { p_events: ids }),
+    db.rpc('operation_stats', { p_events: ids, p_se: op.type === 'super' ? op.id : null }),
     toutesStations(),
   ])
   if (error) { console.error('[fetchSuiviOperation]', error.message); return null }
