@@ -3,23 +3,24 @@
 ## Problème
 La fonction `rappel-tickets` (verify_jwt false) lançait le lot de relances sans aucune authentification : n'importe qui pouvait la déclencher.
 
-## Changement (code, `supabase/functions/rappel-tickets/index.ts`)
-- Mode normal : exige l'en-tête `x-flowin-cron` égal au secret `RAPPEL_CRON_SECRET` (comparaison à temps constant). Sinon 403 `interdit`, aucun rappel ni email. Secret absent côté fonction : refus (fail-closed).
-- Mode test (`test_email` + `x-flowin-test`) inchangé.
-- Le cron lit le secret dans le Vault : `sql/2026-11-20-rappel-tickets-secret.sql` (rien en clair dans `cron.job`).
+## Changement (appliqué en production le 20/11/2026)
+- **Secret** : `rappel_cron_secret`, généré dans Postgres (`vault.create_secret`, 32 octets hex). Il n'a jamais été affiché ni écrit dans le code, git ou un journal. Aucun secret d'Edge Function n'est nécessaire.
+- **RPC** `public.rappel_cron_verifier(p_token text) returns boolean` (SECURITY DEFINER) : compare les empreintes SHA-256 du jeton reçu et du secret du Vault. EXECUTE réservé à `service_role` (retiré à public, anon, authenticated ; vérifié).
+- **Cron** `tickets-rappels` : même horaire (`7 9 * * *`), même URL, appel `tickets_rappels_du_jour()` conservé, plus l'en-tête `x-flowin-cron` lu dans `vault.decrypted_secrets` (aucun secret en clair dans `cron.job`, vérifié par SELECT).
+- **Fonction** `rappel-tickets` v4 (verify_jwt false) : mode normal exige `x-flowin-cron` valide (via la RPC, clé service). Absent, faux ou RPC en erreur : 403 `{"ok":false,"error":"interdit"}`, rien n'est lancé. Mode test (`test_email` + `x-flowin-test`) inchangé.
+- Fichiers : `supabase/functions/rappel-tickets/index.ts`, `sql/2026-11-20-rappel-tickets-secret.sql` (appliqué, idempotent).
 
-## État au 20/11 (rien n'est déployé ni appliqué)
-Le secret d'Edge Function se saisit dans le tableau de bord Supabase (l'outil MCP ne le reçoit jamais) : il ne peut donc pas être généré puis copié dans le Vault par l'assistant. Déployer le code avant le secret ferait échouer le cron de demain. Le cron actuel (`7 9 * * *`, envoie `{}` avec la clé publishable) n'a pas été modifié.
+## Vérifications faites
+- Appel sans en-tête : HTTP 403 `interdit`. La fonction n'a jamais été appelée avec l'en-tête et le cron n'a pas été déclenché à la main.
+- `rappel_cron_verifier('mauvais')` et `('')` renvoient false.
 
-## À faire par Romain, dans cet ordre
-1. Choisir une valeur aléatoire longue. Dashboard Supabase > Edge Functions > Secrets : `RAPPEL_CRON_SECRET`.
-2. Même valeur dans le Vault, nom `rappel_cron_secret`.
-3. Déployer `rappel-tickets` (verify_jwt false) puis exécuter `sql/2026-11-20-rappel-tickets-secret.sql`.
-4. Contrôle : un appel sans en-tête doit répondre 403 `{"ok":false,"error":"interdit"}`. Ne jamais appeler la fonction avec un corps vide et le secret : cela lancerait le lot sur les vrais clients.
-
-## Vérifier le premier passage planifié (09:07 UTC)
-Dashboard > Edge Functions > rappel-tickets > Logs : une requête POST 200 à 09:07 UTC, réponse `{"ok":true,"in_app":N,"emails":M}`. Côté base : `select status, return_message from cron.job_run_details order by start_time desc limit 3;` doit donner `succeeded`. Si 403 : le secret Vault et le secret de la fonction diffèrent, ou le Vault est vide ; ligne attendue dans les logs : `rappel-tickets : appel refuse (en-tete x-flowin-cron absent ou invalide)`.
+## Vérifier le premier passage planifié (21/11/2026, 09:07 UTC)
+- Base : `select status, return_message, start_time from cron.job_run_details order by start_time desc limit 3;` puis dans les journaux Edge de `rappel-tickets` : une requête POST **200** avec la réponse `{"ok":true,"in_app":N,"emails":M}`.
+- Succès : pas de ligne d'avertissement. Échec de la protection : le journal contient exactement `rappel-tickets : appel refuse (en-tete x-flowin-cron absent ou invalide)` avec un statut 403 (le secret Vault manque ou le cron n'envoie pas l'en-tête).
+- Note : `net.http_post` est asynchrone ; le statut HTTP se lit dans les journaux Edge ou `net._http_response`, pas dans `cron.job_run_details`.
 
 ## Retour arrière
-1. Exécuter le bloc ROLLBACK en bas du fichier SQL (le cron renvoie `{}` sans en-tête).
-2. Redéployer l'ancienne version de `rappel-tickets` (retirer le bloc `cronAutorise` et son appel avant « 1. In-app d'abord »).
+1. Redéployer l'ancienne version de `rappel-tickets` (supprimer `cronAutorise` et son appel avant « 1. In-app d'abord »).
+2. Remettre la commande du cron sans en-tête (bloc ROLLBACK en bas du fichier SQL).
+3. Facultatif : `drop function public.rappel_cron_verifier(text);` et supprimer le secret `rappel_cron_secret` du Vault.
+Ne jamais appeler la fonction avec l'en-tête ni avec un corps vide valide : cela lancerait le lot sur les vrais clients.

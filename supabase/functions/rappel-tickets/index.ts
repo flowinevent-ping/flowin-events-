@@ -12,7 +12,7 @@
 // Déploiement (une fois relu) : supabase functions deploy rappel-tickets --no-verify-jwt
 // Appelée chaque jour par pg_cron (job « tickets-rappels », même SQL).
 //
-// Secrets (aucune valeur ici) : RAPPEL_CRON_SECRET (obligatoire, mode normal), GMAIL_USER + GMAIL_APP_PASSWORD (prioritaires, _shared/mailer.ts) ou RESEND_API_KEY, NOTIFY_FROM (optionnel),
+// Secrets (aucune valeur ici) : GMAIL_USER + GMAIL_APP_PASSWORD (prioritaires, _shared/mailer.ts) ou RESEND_API_KEY, NOTIFY_FROM (optionnel),
 // SITE_ORIGIN (optionnel). SUPABASE_URL et SUPABASE_SERVICE_ROLE_KEY sont fournis par Supabase.
 
 import { canal, envoyerEmail } from "../_shared/mailer.ts";
@@ -30,18 +30,19 @@ const SITE_ORIGIN = Deno.env.get("SITE_ORIGIN") || "https://flowin-events.vercel
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL") || "";
 const SERVICE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || "";
 
-// Lot de relances (mode normal) : exige l'en-tête x-flowin-cron égal au secret RAPPEL_CRON_SECRET (21/11/2026).
-// Comparaison à temps constant (empreintes SHA-256 comparées octet par octet). Secret absent : refus (fail-closed).
-const CRON_SECRET = Deno.env.get("RAPPEL_CRON_SECRET") || "";
+// Lot de relances (mode normal) : exige l'en-tete x-flowin-cron. Le secret vit dans le Vault Postgres ;
+// la verification passe par la RPC rappel_cron_verifier (service_role). Echec ou absence : refus (fail-closed).
 async function cronAutorise(req: Request): Promise<boolean> {
   const recu = req.headers.get("x-flowin-cron") || "";
-  if (!CRON_SECRET || !recu) return false;
-  const enc = new TextEncoder();
-  const a = new Uint8Array(await crypto.subtle.digest("SHA-256", enc.encode(recu)));
-  const b = new Uint8Array(await crypto.subtle.digest("SHA-256", enc.encode(CRON_SECRET)));
-  let d = 0;
-  for (let i = 0; i < a.length; i++) d |= a[i] ^ b[i];
-  return d === 0;
+  if (!recu) return false;
+  try {
+    const r = await fetch(`${SUPABASE_URL}/rest/v1/rpc/rappel_cron_verifier`, {
+      method: "POST",
+      headers: { apikey: SERVICE_KEY, Authorization: `Bearer ${SERVICE_KEY}`, "Content-Type": "application/json" },
+      body: JSON.stringify({ p_token: recu }),
+    });
+    return r.ok && (await r.json().catch(() => false)) === true;
+  } catch { return false; }
 }
 
 function esc(v: unknown): string {
