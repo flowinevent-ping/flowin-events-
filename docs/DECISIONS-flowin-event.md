@@ -355,3 +355,6 @@ que sur instruction explicite de Romain.
   - Détail technique et ordre d'application SQL : `docs/SUPER-EVENT-phases-2026-11-19.md`.
 - **Centres d'intérêt** : banque bonus de 5 questions proposée (courtes, à choix, neutres, aucune donnée sensible), **à valider par Romain** avant mise en ligne (`sql/2026-11-19-banque-interets.sql`, non appliqué).
 - **Vidéo L4, bloc 7** : on garde les exemples de réponses. Rien à faire.
+
+## Bonus d'assiduité (Romain, 20/11/2026)
+On garde les +5 points pour l'assiduité. À localiser dans le code : aucune règle « +5 » trouvée dans lib/masters, app/jouer, lib/parcours au 20/11 — à vérifier pendant les scénarios de test de bout en bout, et à implémenter si absente.
