@@ -2,7 +2,10 @@
 
 Pourquoi : pas de domaine, et Resend refuse d'envoyer depuis une adresse gmail.com.
 Les emails partiront donc directement par Gmail, depuis **flowinevent@gmail.com**, expéditeur « Flowin Event ».
-Rien n'est encore en service : il faut d'abord ton mot de passe d'application, puis mon déploiement.
+**En service depuis le 20/11/2026** : secrets posés, compteur SQL appliqué, `rappel-tickets` v3 et
+`notify-commande-animation` v6 déployées (verify_jwt false). Envoi test vers flowinevent@gmail.com parti par Gmail
+(journal `[mailer] gmail ok`, compteur du jour à 1). `rappel-tickets` accepte un envoi test protégé
+(`{"test_email":true}` + en-tête `x-flowin-test`, jeton ponctuel non conservé ; destinataire fixe = GMAIL_USER).
 
 ## 1. Créer le mot de passe d'application Gmail (5 minutes)
 
