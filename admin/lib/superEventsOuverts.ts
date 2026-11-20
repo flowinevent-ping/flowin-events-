@@ -4,20 +4,23 @@
  * sinon celle de sa PREMIERE STATION (adresse reelle, geocodage paresseux). Jamais inventee.
  * `geocoder: true` (espace pro) ecrit les coordonnees trouvees pour la prochaine fois ; la page publique ne fait que lire.
  */
-import { supabase } from './supabase'
+import { supabase, supabaseVivant } from './supabase'
 import { geocoderAdresse } from './geocodage'
 import type { SuperOuvert } from '@/components/creation/ParcoursCreation'
 
 type Ligne = SuperOuvert & { events: string[] | null; lieu?: string | null }
 
 export async function chargerSupersOuverts(opts: { geocoder?: boolean } = {}): Promise<SuperOuvert[]> {
+  /* 20/11 (E2E prod) : le Data Cache de Next servait une liste perimee cote serveur (un super event cree apres le premier
+     affichage n'apparaissait pas dans « Rejoindre »). Cote serveur : lecture no-store ; navigateur inchange. */
+  const db = typeof window === 'undefined' ? supabaseVivant : supabase
   /* select('*') : tolere l'absence des colonnes lat / lng / lieu (SQL 11 pas encore applique). */
-  const { data: ses } = await supabase.from('super_events').select('*')
+  const { data: ses } = await db.from('super_events').select('*')
     .neq('id', 'se-master-superevent').not('status', 'in', '("past","pending")').order('date_d', { ascending: false })
   const lignes = (ses ?? []) as Ligne[]
   const premieres = lignes.map(s => (s.events ?? [])[0]).filter(Boolean) as string[]
   const { data: stationsRes } = premieres.length
-    ? await supabase.from('events').select('id,adresse,lat,lng').in('id', premieres)
+    ? await db.from('events').select('id,adresse,lat,lng').in('id', premieres)
     : { data: [] as { id: string; adresse: string | null; lat: number | null; lng: number | null }[] }
   const parId = new Map((stationsRes ?? []).map(e => [e.id, e]))
   if (opts.geocoder) {
