@@ -86,6 +86,10 @@ export interface VueMaster {
   achat: string
   achatAvec: boolean
   tirage: string
+  /** Gain immediat : aucun lot a tirer au sort, aucun texte « tirage » ne doit s'afficher. */
+  immediat: boolean
+  /** Fin de validite reelle du billet gagnant (vide si inconnue : la ligne n'est pas affichee). */
+  validite: string
   lots: LotAffiche[]
   billet: LotAffiche
   billetChez: string
@@ -108,6 +112,17 @@ export interface VueMaster {
   superEvent: SuperEventVue | null
 }
 
+/** Gain immediat : retire tout vocabulaire de tirage des textes de gabarit (comment jouer, parrainage). */
+function sansTirage(t: string): string {
+  return String(t || '')
+    .replace(/= 1 ticket pour le tirage/g, '= ton gain immédiat')
+    .replace(/ou ticket pour le tirage/g, 'dans ton profil')
+    .replace(/ou rendez-vous au tirage/g, 'dans ton profil')
+    .replace(/1 ticket de plus pour la loterie/g, 'une chance de plus')
+    .replace(/1 ticket de plus/g, 'une chance de plus')
+    .replace(/des tickets à gagner/g, 'des lots à gagner')
+}
+
 export function monogramme(nom: string): string {
   const mots = (nom || '').replace(/[^0-9A-Za-zÀ-ÖØ-öø-ÿ ]/g, ' ').split(/\s+/).filter(Boolean)
   if (!mots.length) return 'FL'
@@ -125,12 +140,16 @@ function dateFr(iso: string | null | undefined): string | null {
 }
 
 /** Lot reel (table lots + cfg.lots pour le type) -> lot affiche. */
-function lotReel(l: FlowinLot & { conditions?: string | null; note?: string | null }, cfgLot?: { type?: string }): LotAffiche {
+function lotReel(l: FlowinLot & { conditions?: string | null; note?: string | null; validite_jours?: number | null; valide_au?: string | null }, cfgLot?: { type?: string }): LotAffiche {
   const imm = (cfgLot && cfgLot.type === 'instantane') || /instantan/i.test(String(l.note || ''))
   const nom = (l.titre || l.nom || 'Lot').trim()
   const val = Number(l.valeur) || 0
   const glyphe = val > 0 ? L('bon', String(val), '€') : L('produit', '1', 'lot')
-  return { ...glyphe, nom, cond: (l.conditions || '').trim() || (imm ? 'Gain immédiat' : 'Tiré au sort parmi les tickets'), mode: imm ? 'imm' : 'tir' }
+  /* Validite reelle du billet (comme /moi) : periode « au » du lot, sinon duree en jours a partir d'aujourd'hui. */
+  let valide = ''
+  if (l.valide_au) valide = dateFr(l.valide_au) || ''
+  else if (Number(l.validite_jours) > 0) { const d = new Date(); d.setDate(d.getDate() + Math.round(Number(l.validite_jours))); valide = dateFr(d.toISOString()) || '' }
+  return { ...glyphe, nom, cond: (l.conditions || '').trim() || (imm ? 'Gain immédiat' : 'Tiré au sort parmi les tickets'), mode: imm ? 'imm' : 'tir', ...(valide ? { valide } : {}) }
 }
 
 function questionsReelles(data: ParcoursPageData): VueMaster['questions'] {
@@ -209,7 +228,7 @@ export function construireVue(data: ParcoursPageData | null, o: OptionsVue = {})
   const cfgLots = Array.isArray(cfg.lots) ? (cfg.lots as Array<{ nom?: string; type?: string }>) : []
   let lots: LotAffiche[] = c.lots || []
   if (data && data.lots && data.lots.length) {
-    lots = data.lots.map(l => lotReel(l as FlowinLot & { conditions?: string | null }, cfgLots.find(x => (x.nom || '').trim() === (l.titre || l.nom || '').trim())))
+    lots = data.lots.map(l => lotReel(l as FlowinLot & { conditions?: string | null; validite_jours?: number | null; valide_au?: string | null }, cfgLots.find(x => (x.nom || '').trim() === (l.titre || l.nom || '').trim())))
   } else if (!demo && !(ref?.perso?.lots?.length || o.perso?.lots?.length)) {
     lots = [L('produit', '?', 'lot', '[lots à compléter]', 'Le commerce n\'a pas encore saisi ses lots', 'tir')]
   }
@@ -225,6 +244,10 @@ export function construireVue(data: ParcoursPageData | null, o: OptionsVue = {})
   const nbQ = Math.max(1, Number(cfg.quizNbQuestions) || 3)
   const questions = (qReelles.length ? qReelles : (c.questions || []).map(q => ({ txt: q.txt, opts: q.opts, ok: q.ok, expl: q.expl || '' }))).slice(0, def.cle === 'quiz' || def.cle === 'solo' ? Math.min(nbQ, 10) : 0)
   const billetLot = lots.find(l => l.mode === 'imm') || lots[0] || L('produit', '1', 'lot', 'Ton lot', '', 'tir')
+
+  const casesFin = cReelles.length >= 2 ? cReelles : (c.cases || [])
+  const immediat = lots.length > 0 && lots.every(l => l.mode === 'imm') && !(def.cle === 'spin' && casesFin.some(x => x.issue === 'tir'))
+  const validite = billetLot.valide || (ev && ev.date_f ? (dateFr(String(ev.date_f)) || '') : '')
 
   const partenaires: PartenaireAffiche[] = (data?.partenaires?.length ? data.partenaires.map(p => {
     const pp = p as unknown as Record<string, unknown>
@@ -250,12 +273,14 @@ export function construireVue(data: ParcoursPageData | null, o: OptionsVue = {})
     achat: achatAvec ? ('Avec obligation d\'achat' + (achatMin ? ' (minimum ' + achatMin + ')' : '')) : 'Sans obligation d\'achat',
     achatAvec,
     tirage,
+    immediat,
+    validite,
     lots,
     billet: billetLot,
     billetChez: nom,
-    how: c.how || [],
-    accueilSous: c.accueilSous || (questions.length + ' questions, des tickets à gagner'),
-    parrain: c.parrain || '',
+    how: (c.how || []).map(h => (immediat ? [sansTirage(h[0]), sansTirage(h[1])] : h) as [string, string]),
+    accueilSous: immediat ? sansTirage(c.accueilSous || (questions.length + ' questions, des tickets à gagner')) : (c.accueilSous || (questions.length + ' questions, des tickets à gagner')),
+    parrain: immediat ? sansTirage(c.parrain || '') : (c.parrain || ''),
     questions,
     bonus: def.cle === 'quiz' ? (bReels.length ? bReels : (c.bonus || [])).slice(0, 4) : [],
     cases: cReelles.length >= 2 ? cReelles : (c.cases || []),

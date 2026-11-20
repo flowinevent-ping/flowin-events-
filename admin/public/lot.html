@@ -94,7 +94,7 @@
   button:active{transform:translateY(1px)}
   button[disabled]{opacity:.55;cursor:default}
 
-  .big{font-size:42px;text-align:center;margin:8px 0 4px}
+  .big{font-size:42px;text-align:center;margin:8px 0 4px;line-height:0}.big svg{display:inline-block}
   .msg{text-align:center;font-weight:800;font-size:18px;margin-bottom:5px}
   .sub{text-align:center;color:var(--muted);font-size:13.5px;line-height:1.55}
 
@@ -212,7 +212,7 @@
       </div>
 
       <div id="s-done" class="state">
-        <div class="big" id="done-big">✅</div>
+        <div class="big" id="done-big"><svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M7.5 12.5l3 3 6-6.5"/></svg></div>
         <div class="msg">Retrait validé</div>
         <div class="sub" id="done-sub">Le lot peut être remis au client.</div>
         <div class="shop" style="margin-top:18px">
@@ -245,13 +245,13 @@
       </div>
 
       <div id="s-introuvable" class="state">
-        <div class="big">🔍</div>
+        <div class="big"><svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="#6b7280" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg></div>
         <div class="msg">Billet introuvable</div>
         <div class="sub">Ce lien ne correspond à aucun billet. Vérifiez que le QR a bien été scanné en entier.</div>
       </div>
 
       <div id="s-erreur" class="state">
-        <div class="big">⚠️</div>
+        <div class="big"><svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="#d97706" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10.3 3.9L1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/><path d="M12 9v4M12 17h.01"/></svg></div>
         <div class="msg">Connexion impossible</div>
         <div class="sub">Vérifiez votre connexion internet puis réessayez.</div>
       </div>
@@ -413,11 +413,11 @@
     if (d.avertissement) {
       $('done-warn-txt').textContent = d.avertissement;
       $('done-warn').classList.add('on');
-      $('done-big').textContent = '⚠️';
+      $('done-big').innerHTML = '<svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="#d97706" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10.3 3.9L1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/><path d="M12 9v4M12 17h.01"/></svg>';
       $('done-sub').textContent = 'Billet validé, mais vérifiez le stock avant de remettre le lot.';
     } else {
       $('done-warn').classList.remove('on');
-      $('done-big').textContent = '✅';
+      $('done-big').innerHTML = '<svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M7.5 12.5l3 3 6-6.5"/></svg>';
       $('done-sub').textContent = 'Le lot peut être remis au client.';
     }
     setupPartage(d);

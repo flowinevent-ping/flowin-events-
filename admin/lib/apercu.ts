@@ -14,7 +14,7 @@ import { preparerBanquesJoueur } from './banquesModeles/resoudre'
 
 export interface SaisieApercu {
   nom?: string
-  lots?: { nom: string; quantite?: number; valeur?: number; conditions?: string }[]
+  lots?: { nom: string; quantite?: number; valeur?: number; conditions?: string; validiteJours?: number; validiteAu?: string }[]
   /** Cles de cfg lues par les jeux : quizBanques, bonusBanques, spinSegments, voteItems, logoUrl… */
   cfg?: Record<string, unknown>
 }
@@ -65,6 +65,8 @@ export async function appliquerApercu<T extends Pick<ParcoursPageData, 'ev' | 'l
         quantite: l.quantite ?? 1,
         valeur: l.valeur ?? 0,
         conditions: l.conditions ?? null,
+        validite_jours: l.validiteJours ?? null,
+        valide_au: l.validiteAu ?? null,
       }) as unknown as FlowinLot)
     }
   }

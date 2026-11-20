@@ -45,6 +45,8 @@ function puces(conditions: string): string[] {
   return conditions.split("\u00b7").map((c) => c.trim()).filter((c) => c.length > 5);
 }
 
+const SE_NDS = "se-nds-2026"; // seul super event qui garde le texte Nuits du Sud
+
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
@@ -73,7 +75,7 @@ Deno.serve(async (req: Request): Promise<Response> => {
   //     reply_to du corps ignores.
   const retraitToken = String(body.retrait_token || "").trim();
   let gagnantEmail = "", gagnantNom = "", partenaireNom = "", partenaireAdresse = "", partenaireTel = "";
-  let lotNom = "un lot", conditions = "", code = "", superEvent = "";
+  let lotNom = "un lot", conditions = "", code = "", superEvent = "", superEventNom = "";
 
   const json = (o: unknown, status: number) =>
     new Response(JSON.stringify(o), { status, headers: { ...corsHeaders, "Content-Type": "application/json" } });
@@ -90,6 +92,12 @@ Deno.serve(async (req: Request): Promise<Response> => {
     lotNom = String(t.lot_nom || "") || "un lot";
     superEvent = String(t.super_event_id || "");
     code = String(t.ticket_code || "");
+    // 20/11/2026 : nom du super event relu en base (texte neutre hors Nuits du Sud).
+    if (superEvent && superEvent !== SE_NDS) {
+      const rS = await fetch(SUPABASE_URL + "/rest/v1/super_events?select=nom&id=eq." + encodeURIComponent(superEvent) + "&limit=1", { headers: hSrv });
+      const ls = rS.ok ? (await rS.json().catch(() => [])) as Array<Record<string, string | null>> : [];
+      superEventNom = String((ls && ls[0] && ls[0].nom) || "").trim();
+    }
     const rL = await fetch(SUPABASE_URL + "/rest/v1/rpc/consulter_lot", { method: "POST", headers: hSrv, body: JSON.stringify({ p_token: retraitToken }) });
     const l = rL.ok ? (await rL.json().catch(() => null)) as Record<string, string | null> | null : null;
     if (l) {
@@ -134,7 +142,11 @@ Deno.serve(async (req: Request): Promise<Response> => {
   const lignes: string[] = [`Bonjour ${prenom},`, ""];
   // 20/11/2026 : une animation de commerce (tirage sans super event) ne parle pas des Nuits du Sud. Le texte NDS reste inchange.
   const animationCommerce = !!retraitToken && !superEvent;
-  lignes.push(animationCommerce ? "Bravo ! Au tirage au sort du jeu, tu as gagn\u00e9 :" : "Waouh, bravo ! Au grand tirage du jeu des Nuits du Sud 2026, tu as gagn\u00e9 :", "",
+  // Super event autre que les Nuits du Sud : texte neutre, nom lu en base.
+  const autreSuperEvent = !!retraitToken && !!superEvent && superEvent !== SE_NDS;
+  const nomSE = superEventNom || "le super event";
+  const neutre = animationCommerce || autreSuperEvent;
+  lignes.push(autreSuperEvent ? "Bravo ! Au tirage au sort du jeu " + nomSE + ", tu as gagn\u00e9 :" : animationCommerce ? "Bravo ! Au tirage au sort du jeu, tu as gagn\u00e9 :" : "Waouh, bravo ! Au grand tirage du jeu des Nuits du Sud 2026, tu as gagn\u00e9 :", "",
     "   " + lotNom);
   if (partenaireNom) lignes.push("   chez " + partenaireNom);
   if (coord) lignes.push("   " + coord);
@@ -144,7 +156,7 @@ Deno.serve(async (req: Request): Promise<Response> => {
       "Clique sur ce lien : tu peux l'imprimer ou le garder sur ton t\u00e9l\u00e9phone.",
       "C'est ce billet, avec son QR code, que tu pr\u00e9senteras en boutique.", "");
   }
-  lignes.push(animationCommerce ? "Merci d'avoir particip\u00e9, et bravo encore !" : "Merci d'avoir participé, et bravo encore : tu faisais partie de plus de 600 joueurs.", "",
+  lignes.push(neutre ? "Merci d'avoir particip\u00e9, et bravo encore !" : "Merci d'avoir participé, et bravo encore : tu faisais partie de plus de 600 joueurs.", "",
     "COMMENT EN PROFITER, EN 3 \u00c9TAPES", "",
     "   1. Rends-toi chez " + (partenaireNom || "notre commer\u00e7ant partenaire"),
     "   2. Pr\u00e9sente ton billet, papier ou \u00e9cran",
@@ -153,14 +165,14 @@ Deno.serve(async (req: Request): Promise<Response> => {
   if (c.length) { lignes.push("\u00c0 SAVOIR", ""); c.forEach((x) => lignes.push("   - " + x)); lignes.push(""); }
   if (code) lignes.push("Ton num\u00e9ro de billet : " + code, "");
   lignes.push("Encore bravo, et \u00e0 bient\u00f4t chez notre partenaire.", "",
-    animationCommerce ? "Flowin Event" : "Les Nuits du Sud, la Ville de Vence et Flowin",
+    autreSuperEvent ? (nomSE + " et Flowin") : animationCommerce ? "Flowin Event" : "Les Nuits du Sud, la Ville de Vence et Flowin",
     "flowinevent@gmail.com \u00b7 06 16 35 49 36");
 
   const text = lignes.join("\n");
   const html = "<pre style=\"font-family:-apple-system,Segoe UI,Roboto,sans-serif;white-space:pre-wrap;font-size:14px;line-height:1.6;color:#16203A\">"
     + esc(text).replace(lien, `<a href="${esc(lien)}">${esc(lien)}</a>`) + "</pre>";
 
-  const sujet = animationCommerce ? "Flowin Event \u2014 Vous avez gagn\u00e9 !" : "Nuits du Sud & Flowin \u2014 Grand Jeu Concours \u2014 Vous avez gagn\u00e9 !";
+  const sujet = autreSuperEvent ? nomSE + " & Flowin \u2014 Vous avez gagn\u00e9 !" : animationCommerce ? "Flowin Event \u2014 Vous avez gagn\u00e9 !" : "Nuits du Sud & Flowin \u2014 Grand Jeu Concours \u2014 Vous avez gagn\u00e9 !";
 
   async function envoyer(to: string, subject: string) {
     // Canal commun : Gmail SMTP si configure (sinon Resend). Avant : Resend en dur (403 hors adresse du compte).

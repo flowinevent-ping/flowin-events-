@@ -12,7 +12,7 @@
 // Déploiement (une fois relu) : supabase functions deploy rappel-tickets --no-verify-jwt
 // Appelée chaque jour par pg_cron (job « tickets-rappels », même SQL).
 //
-// Secrets (aucune valeur ici) : GMAIL_USER + GMAIL_APP_PASSWORD (prioritaires, _shared/mailer.ts) ou RESEND_API_KEY, NOTIFY_FROM (optionnel),
+// Secrets (aucune valeur ici) : RAPPEL_CRON_SECRET (obligatoire, mode normal), GMAIL_USER + GMAIL_APP_PASSWORD (prioritaires, _shared/mailer.ts) ou RESEND_API_KEY, NOTIFY_FROM (optionnel),
 // SITE_ORIGIN (optionnel). SUPABASE_URL et SUPABASE_SERVICE_ROLE_KEY sont fournis par Supabase.
 
 import { canal, envoyerEmail } from "../_shared/mailer.ts";
@@ -29,6 +29,20 @@ async function sha256(t: string): Promise<string> {
 const SITE_ORIGIN = Deno.env.get("SITE_ORIGIN") || "https://flowin-events.vercel.app";
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL") || "";
 const SERVICE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || "";
+
+// Lot de relances (mode normal) : exige l'en-tête x-flowin-cron égal au secret RAPPEL_CRON_SECRET (21/11/2026).
+// Comparaison à temps constant (empreintes SHA-256 comparées octet par octet). Secret absent : refus (fail-closed).
+const CRON_SECRET = Deno.env.get("RAPPEL_CRON_SECRET") || "";
+async function cronAutorise(req: Request): Promise<boolean> {
+  const recu = req.headers.get("x-flowin-cron") || "";
+  if (!CRON_SECRET || !recu) return false;
+  const enc = new TextEncoder();
+  const a = new Uint8Array(await crypto.subtle.digest("SHA-256", enc.encode(recu)));
+  const b = new Uint8Array(await crypto.subtle.digest("SHA-256", enc.encode(CRON_SECRET)));
+  let d = 0;
+  for (let i = 0; i < a.length; i++) d |= a[i] ^ b[i];
+  return d === 0;
+}
 
 function esc(v: unknown): string {
   return String(v ?? "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
@@ -64,6 +78,9 @@ Deno.serve(async (req: Request): Promise<Response> => {
       html: "<p>Test d'envoi depuis la fonction rappel-tickets (Gmail SMTP). Aucune action requise.</p>" });
     return json({ ok: res.ok, test: true, via: res.via, skipped: !!res.skipped, error: res.error ? "voir journaux" : undefined });
   }
+
+  // Mode normal : réservé au cron (en-tête secret). Sans lui, rien n'est lancé.
+  if (!(await cronAutorise(req))) { console.warn("rappel-tickets : appel refuse (en-tete x-flowin-cron absent ou invalide)"); return json({ ok: false, error: "interdit" }, 403); }
 
   // 1. In-app d'abord.
   let inApp = 0;

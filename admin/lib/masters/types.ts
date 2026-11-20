@@ -25,6 +25,8 @@ export interface LotAffiche {
   nom: string
   cond: string
   mode: ModeLot
+  /** Date de fin de validite du billet gagnant (gain immediat), reelle : lots.valide_au ou validite_jours. */
+  valide?: string
 }
 
 export interface QuestionMaster { txt: string; opts: string[]; ok: number; expl?: string }

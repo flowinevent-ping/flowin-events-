@@ -217,7 +217,7 @@ function confetti(n: number, seed?: number, base?: number): string {
   return h + '</div>'
 }
 function homeDeco(): string { return geo([['c', 272, 214, 130, 'var(--c)', 0, 0], ['h', 318, 320, 84, 'var(--c3)', 0, .1], ['o', 246, 222, 36, 'var(--c2)', 0, .2]]) }
-function tirLigne(v: VueMaster): string { return '<div class="tirline">' + icon('cal', 20) + 'Tirage au sort le ' + txt(v.tirage) + '</div>' }
+function tirLigne(v: VueMaster): string { if (v.immediat) return ''; return '<div class="tirline">' + icon('cal', 20) + 'Tirage au sort le ' + txt(v.tirage) + '</div>' }
 function nbLots(n: number): string { return n + ' lot' + (n > 1 ? 's' : '') }
 function codeTicket(r: EtatPartie): string { return r.ticket || 'TK-0000' }
 function numCourt(code: string): string { const m = String(code).match(/(\d{3,})\s*$/); return m ? m[1].slice(-4) : code }
@@ -256,7 +256,7 @@ S['s-regles'] = { r: function (v) {
     '<div class="card infobox">' +
     '<div class="inforow">' + icon('store', 21) + '<span><b style="color:var(--ink)">1 partie par jour et par commerce</b><br>À jouer sur place, en flashant le QR</span></div>' +
     '<div class="inforow">' + icon('ticket', 21) + '<span><b style="color:var(--ink)">' + esc(v.achat) + '</b><br>Chaque commerce choisit sa règle</span></div>' +
-    '<div class="inforow">' + icon('cal', 21) + '<span><b style="color:var(--ink)">Tirage au sort le ' + txt(v.tirage) + '</b><br>Les gagnants sont prévenus par email</span></div>' +
+    (v.immediat ? '<div class="inforow">' + icon('ticket', 21) + '<span><b style="color:var(--ink)">Gain immédiat</b><br>Ton billet est dans ton profil</span></div>' : '<div class="inforow">' + icon('cal', 21) + '<span><b style="color:var(--ink)">Tirage au sort le ' + txt(v.tirage) + '</b><br>Les gagnants sont prévenus par email</span></div>') +
     '<div class="inforow">' + icon('users', 21) + '<span><b style="color:var(--ink)">Parrainage</b><br>' + esc(v.parrain) + '</span></div>' +
     (reg ? '<div class="inforow">' + icon('info', 21) + '<span>Cases, lots et chances sont réglés par le commerce et par Flowin.</span></div>' : '') +
     '</div></div>' + foot(btn('C\'est parti', PREMIER_ECRAN[v.key] || 'q-question')) + '</div>'
@@ -294,10 +294,10 @@ S['q-resultat'] = { r: function (v, r) {
     '<div class="ring"><svg width="206" height="206" viewBox="0 0 206 206"><circle cx="103" cy="103" r="92" fill="none" stroke="#E7ECF3" stroke-width="14"/><circle class="arc" cx="103" cy="103" r="92" fill="none" stroke="var(--ring,var(--c))" stroke-width="14" stroke-linecap="round" style="stroke-dashoffset:' + n1(578 * (1 - pct)) + '"/></svg><div class="v"><b class="score num" data-score="' + r.bonnes + '" data-tot="' + tot + '">' + r.bonnes + '/' + tot + '</b><small>bonnes réponses</small></div></div>' +
     '<h2 class="h2 a-rise" style="--d:1.1s;margin-top:14px;font-size:34px">' + (parfait ? 'Sans faute&nbsp;!' : 'Presque&nbsp;!') + '</h2>' +
     (parfait
-      ? '<div class="card reward a-rise" style="--d:1.3s">' + glyph(L('ticket', '1', 'ticket')) + '<div class="tx"><small>Tu gagnes</small><b>1 ticket pour le tirage</b><span>Tirage le ' + txt(v.tirage) + '</span></div></div>'
-      : '<div class="card reward a-rise" style="--d:1.3s">' + glyph(L('ticket', '0', 'ticket')) + '<div class="tx"><small>Il faut ' + tot + '/' + tot + ' pour le ticket</small><b>' + (bonus ? 'Les questions bonus te donnent un ticket' : 'Reviens demain pour retenter') + '</b><span>Tirage le ' + txt(v.tirage) + '</span></div></div>') +
+      ? '<div class="card reward a-rise" style="--d:1.3s">' + glyph(v.immediat ? v.billet : L('ticket', '1', 'ticket')) + '<div class="tx"><small>' + (v.immediat ? 'Bravo' : 'Tu gagnes') + '</small><b>' + (v.immediat ? 'Ton gain t\'attend' : '1 ticket pour le tirage') + '</b>' + (v.immediat ? '' : '<span>Tirage le ' + txt(v.tirage) + '</span>') + '</div></div>'
+      : '<div class="card reward a-rise" style="--d:1.3s">' + glyph(L('ticket', '0', 'ticket')) + '<div class="tx"><small>Il faut ' + tot + '/' + tot + (v.immediat ? ' pour gagner' : ' pour le ticket') + '</small><b>' + (bonus ? (v.immediat ? 'Les questions bonus te donnent une chance de plus' : 'Les questions bonus te donnent un ticket') : 'Reviens demain pour retenter') + '</b>' + (v.immediat ? '' : '<span>Tirage le ' + txt(v.tirage) + '</span>') + '</div></div>') +
     '</div>' +
-    foot(bonus ? btn('Questions bonus : +1 ticket', 'q-bonusintro', 'a-pulse', ' style="background:#fff;color:var(--fl-ink)"') + '<button class="lnk" data-go="c-inscription" data-after="c-ticket">Passer et valider mon ticket</button>' : btn(parfait ? 'Valider mon ticket' : 'Enregistrer ma participation', 'c-inscription', '', ' data-after="c-ticket"')) + '</div>'
+    foot(bonus ? btn(v.immediat ? 'Questions bonus' : 'Questions bonus : +1 ticket', 'q-bonusintro', 'a-pulse', ' style="background:#fff;color:var(--fl-ink)"') + '<button class="lnk" data-go="c-inscription" data-after="' + (v.immediat && parfait ? 'c-billet' : 'c-ticket') + '">' + (v.immediat ? 'Passer et recevoir mon gain' : 'Passer et valider mon ticket') + '</button>' : btn(v.immediat ? (parfait ? 'Recevoir mon gain' : 'Enregistrer ma participation') : (parfait ? 'Valider mon ticket' : 'Enregistrer ma participation'), 'c-inscription', '', ' data-after="' + (v.immediat && parfait ? 'c-billet' : 'c-ticket') + '"')) + '</div>'
 } }
 S['q-bonusintro'] = { r: function (v) {
   return '<div class="scr bg-s">' + barre() + geo([['c', 90, 140, 210, '#fff'], ['h', 230, 300, 120, 'var(--c)', 0, .15], ['o', 60, 120, 60, 'var(--c3)', 0, .25]]) + hdr(v) +
@@ -341,7 +341,7 @@ S['c-inscription'] = { tall: true, r: function (v, r) {
   const ages = ['Moins de 18', '18–24', '25–34', '35–44', '45–54', '55–64', '65 et +'], src = ['Instagram', 'Facebook', 'Affiche', 'Bouche à oreille', 'Autre']
   const imm = r.after === 'c-billet'
   const lotGagne = imm ? (r.caseIdx != null && v.cases[r.caseIdx] ? L('produit', '1', 'offert', v.cases[r.caseIdx].label, 'Gain immédiat', 'imm') : v.billet) : null
-  const rec = imm && lotGagne ? { gl: lotGagne, t: lotGagne.nom, s: 'Gain immédiat · ton billet est prêt' } : { gl: L('ticket', '1', 'ticket'), t: v.key === 'vote' ? 'Ton ticket pour la loterie' : 'Ton ticket pour le tirage', s: 'Tirage au sort le ' + v.tirage }
+  const rec = imm && lotGagne ? { gl: lotGagne, t: lotGagne.nom, s: 'Gain immédiat · ton billet est prêt' } : v.immediat ? { gl: v.billet, t: 'Ta participation', s: 'Gain immédiat : ' + v.billet.nom } : { gl: L('ticket', '1', 'ticket'), t: v.key === 'vote' ? 'Ton ticket pour la loterie' : 'Ton ticket pour le tirage', s: 'Tirage au sort le ' + v.tirage }
   const p = r.profil || {}
   /* Audit 17/11 : formulaire en 2 temps (carrousel), sans défilement à 390 x 844. Mêmes champs,
      mêmes consentements ; tout reste dans la page (lireForm lit les deux volets). Une erreur sur
@@ -371,7 +371,7 @@ S['c-billet'] = { tall: true, r: function (v, r) {
   return '<div class="scr bg-m">' + confetti(42, 3) + barre() + hdr(v, { title: 'Gagné !', small: 'Gain immédiat', back: 's-accueil' }) +
     '<div class="body" style="padding-top:2px"><h2 class="h2 a-rise" style="text-align:center;font-size:33px">Bravo, c\'est gagné&nbsp;!</h2>' +
     '<div class="billet"><div class="bt">' + geo([['c', 250, -40, 140, '#fff'], ['h', 300, 70, 70, '#fff']]) + '<small>Billet gagnant · ' + esc(v.billetChez) + '</small><h3>' + esc(nom) + '</h3><span>' + esc(cond) + '</span></div><div class="perf"><i></i><i></i></div>' +
-    '<div class="bb"><div class="qrw" data-qr="' + esc(code) + '">' + qr(42, 110) + '</div><dl class="kv"><dt>N° de billet</dt><dd class="num">' + esc(code) + '</dd><dt>Valable jusqu\'au</dt><dd>' + txt(v.tirage) + '</dd><dt>Où</dt><dd>' + esc(v.billetChez) + '</dd></dl></div></div>' +
+    '<div class="bb"><div class="qrw" data-qr="' + esc(code) + '">' + qr(42, 110) + '</div><dl class="kv"><dt>N° de billet</dt><dd class="num">' + esc(code) + '</dd>' + (v.validite ? '<dt>Valable jusqu\'au</dt><dd>' + esc(v.validite) + '</dd>' : '') + '<dt>Où</dt><dd>' + esc(v.billetChez) + '</dd></dl></div></div>' +
     '<p class="mention" style="color:var(--ink2);font-size:13.5px">Montre ce billet en caisse : le commerçant le valide avec son code. Il est rangé dans ton profil.</p><button class="lnk" data-go="c-profil">Voir mon lot dans mon profil</button></div>' + autresCommerces(v) +
     dock({ cta: btn('Parrainer mes amis', 'c-parrainage'), nav: '' }) + '</div>'
 } }
@@ -380,14 +380,22 @@ S['c-billet'] = { tall: true, r: function (v, r) {
  *  (commerces partenaires actifs reellement connus), jamais en demonstration. */
 function autresCommerces(v: VueMaster): string {
   const nb = v.demo ? 0 : Math.max(0, v.commerces.length - 1)
-  return '<div class="card autres a-rise" style="--d:.7s"><span class="ai">' + icon('store', 24) + '</span><div style="flex:1;min-width:0"><b>Gagne d\'autres tickets chez les commerces partenaires Flowin</b>' +
-    '<small>' + (nb > 0 ? nb + ' commerce' + (nb > 1 ? 's' : '') + ' partenaire' + (nb > 1 ? 's' : '') + ' actif' + (nb > 1 ? 's' : '') + ' : ' : '') + 'chaque commerce joué = des chances de plus au tirage.</small>' +
+  return '<div class="card autres a-rise" style="--d:.7s"><span class="ai">' + icon('store', 24) + '</span><div style="flex:1;min-width:0"><b>' + (v.immediat ? 'Gagne d\'autres lots chez les commerces partenaires Flowin' : 'Gagne d\'autres tickets chez les commerces partenaires Flowin') + '</b>' +
+    '<small>' + (nb > 0 ? nb + ' commerce' + (nb > 1 ? 's' : '') + ' partenaire' + (nb > 1 ? 's' : '') + ' actif' + (nb > 1 ? 's' : '') + ' : ' : '') + (v.immediat ? 'chaque commerce joué = des chances de gagner de plus.' : 'chaque commerce joué = des chances de plus au tirage.') + '</small>' +
     '<button class="btn line" style="margin-top:10px;min-height:46px;font-size:15px" data-go="c-commerces">Voir les commerces</button></div></div>'
 }
 S['c-ticket'] = { tall: true, r: function (v, r) {
   const parfait = r.bonnes >= v.questions.length && v.questions.length > 0
   const n = (v.key === 'quiz' || v.key === 'solo') ? ((parfait ? 1 : 0) + (r.bonusFait ? 1 : 0)) : 1
   const code = codeTicket(r)
+  if (v.immediat) {
+    return '<div class="scr bg-o">' + barre() + hdr(v, { title: 'Participation validée', small: 'Gain immédiat', back: 's-accueil' }) +
+      '<div class="body" style="padding-top:2px"><h2 class="h2 a-rise" style="font-size:33px">Merci<br>d\'avoir joué&nbsp;!</h2>' +
+      '<div class="card stack a-rise" style="--d:.5s"><p>Pas de gain cette fois. Retente ta chance demain.</p></div>' +
+      '<div class="card infobox a-rise" style="--d:.6s"><div class="inforow">' + icon('users', 21) + '<span>' + esc(v.parrain) + '</span></div><div class="inforow">' + icon('clock', 21) + 'Reviens demain : une partie par jour et par commerce</div></div></div>' +
+      autresCommerces(v) + '<button class="lnk" data-go="c-profil">Voir mon profil</button>' +
+      dock({ cta: btn('Parrainer mes amis', 'c-parrainage'), nav: '' }) + '</div>'
+  }
   return '<div class="scr bg-o">' + barre() + hdr(v, { title: n ? 'Ticket validé' : 'Participation validée', small: v.key === 'vote' ? 'Loterie' : 'Tirage au sort', back: 's-accueil' }) +
     '<div class="body" style="padding-top:2px"><h2 class="h2 a-rise" style="font-size:33px">' + (n ? 'Tu es<br>dans le tirage&nbsp;!' : 'Merci<br>d\'avoir joué&nbsp;!') + '</h2>' +
     (n ? '<div class="tk"><div class="main"><small>Ticket · ' + esc(v.who.nom) + '</small><b class="num">' + esc(code) + '</b><span>Tirage au sort le ' + txt(v.tirage) + '</span></div><div class="stub"><b>N° ' + esc(numCourt(code)) + '</b></div></div>' : '') +
@@ -430,7 +438,7 @@ function mesTicketsHtml(v: VueMaster, r: EtatPartie, nbT: number): string {
   const g = r.mesTickets
   if (!g) {
     /* Pas (encore) de donnees groupees : ancien affichage, un seul ticket de la partie en cours. */
-    return '<div class="sect"><h4>Mes tickets</h4><span>Tirage le ' + esc(courte(v.tirage)) + '</span></div>' +
+    return '<div class="sect"><h4>Mes tickets</h4>' + (v.immediat ? '' : '<span>Tirage le ' + esc(courte(v.tirage)) + '</span>') + '</div>' +
       (nbT ? '<div class="mt"><span class="l"></span><div class="c"><b class="num">' + esc(r.ticket) + '</b><small>' + esc(v.who.nom) + ' · aujourd\'hui</small></div><div class="r">' + icon('ticket', 22) + '</div></div>' : '<div class="card" style="padding:14px 16px;font-size:14px;font-weight:600;color:var(--ink2)">Pas encore de ticket aujourd\'hui.</div>')
   }
   const total = g.reduce(function (n, x) { return n + x.tickets.length }, 0)
@@ -612,7 +620,7 @@ S['m-code'] = { r: function (v) {
 S['m-valider'] = { r: function (v) {
   const l = v.billet
   return '<div class="scr bg-o">' + barre() + proHdr('m-code') + '<div class="body" style="padding-top:0"><span class="badge-ok a-pop" style="align-self:flex-start"><i></i>Billet valable</span><h2 class="h2" style="margin-top:14px;font-size:29px">' + esc(l.nom) + '</h2>' +
-    '<div class="card rows"><div><span>Bénéficiaire</span><b>Prénom E.</b></div><div><span>N° de billet</span><b class="num">BL-0000-0000</b></div><div><span>Commerce</span><b>' + esc(v.billetChez) + '</b></div><div><span>Valable jusqu\'au</span><b>' + txt(v.tirage) + '</b></div></div>' +
+    '<div class="card rows"><div><span>Bénéficiaire</span><b>Prénom E.</b></div><div><span>N° de billet</span><b class="num">BL-0000-0000</b></div><div><span>Commerce</span><b>' + esc(v.billetChez) + '</b></div><div>' + (v.validite ? '<div><span>Valable jusqu\'au</span><b>' + esc(v.validite) + '</b></div>' : '') + '</div>' +
     '<div class="card rows"><div style="display:block"><span style="display:block;font-size:12px;letter-spacing:.1em;text-transform:uppercase">Conditions</span><b style="display:block;text-align:left;font-weight:700;margin-top:4px;color:var(--ink2);font-size:14px">' + esc(l.cond) + '. Un billet ne peut être utilisé qu\'une seule fois.</b></div></div></div>' +
     foot(btn('Valider le retrait', 'm-ok', 'teal') + '<p class="mention">Remettez le lot au client après validation.</p>') + '</div>'
 } }
@@ -648,7 +656,7 @@ S['t-res-tirage'] = { r: function (v, r) {
 S['t-res-instant'] = { r: function (v) {
   return '<div class="scr bg-m">' + confetti(46, 21) + barre() + hdr(v) + BAND + etapes(1) + '<div class="body" style="text-align:center;align-items:center">' +
     '<span class="tag tir a-pop" style="--d:.2s;font-size:13px;padding:7px 16px;margin-top:22px;letter-spacing:.08em;text-transform:uppercase">Ticket gagnant</span>' +
-    '<h2 class="big a-rise" style="--d:.4s;font-size:50px;margin-top:18px">Gagné,<br>tout de<br>suite&nbsp;!</h2><div class="card reward a-rise" style="--d:.7s;width:100%">' + glyph(v.billet) + '<div class="tx"><small>Gain immédiat</small><b>' + esc(v.billet.nom) + '</b><span>Il va dans ton profil. Ton ticket reste en jeu pour le tirage.</span></div></div></div>' +
+    '<h2 class="big a-rise" style="--d:.4s;font-size:50px;margin-top:18px">Gagné,<br>tout de<br>suite&nbsp;!</h2><div class="card reward a-rise" style="--d:.7s;width:100%">' + glyph(v.billet) + '<div class="tx"><small>Gain immédiat</small><b>' + esc(v.billet.nom) + '</b><span>' + (v.immediat ? 'Il va dans ton profil.' : 'Il va dans ton profil. Ton ticket reste en jeu pour le tirage.') + '</span></div></div></div>' +
     foot(btn('Recevoir mon billet', 'c-inscription', '', ' data-after="c-billet"')) + '</div>'
 } }
 
@@ -673,7 +681,7 @@ function caseCourante(v: VueMaster, r: EtatPartie) { return r.caseIdx != null ? 
 S['r-roue'] = { r: function (v) {
   const tir = v.lots.find(function (l) { return l.mode === 'tir' })
   return '<div class="scr bg-m">' + barre() + hdr(v, { back: 's-regles' }) + BAND + etapes(0) + '<div class="body" style="text-align:center"><div class="kicker" style="margin-top:12px">Un tour offert</div><h2 class="h2" style="font-size:33px;margin-top:4px">Tente ta chance</h2>' + wheelBlock(v, -12) +
-    '<div class="legend">' + icon('ticket', 18) + '<span>Case « Ticket » : 1 ticket pour le tirage du ' + txt(courte(v.tirage)) + (tir ? '' : '') + '</span></div></div>' + foot(btn('Lancer la roue', 'r-lancer', 'a-pulse')) + '</div>'
+    (v.immediat ? '' : '<div class="legend">' + icon('ticket', 18) + '<span>Case « Ticket » : 1 ticket pour le tirage du ' + txt(courte(v.tirage)) + (tir ? '' : '') + '</span></div>') + '</div>' + foot(btn('Lancer la roue', 'r-lancer', 'a-pulse')) + '</div>'
 } }
 S['r-tourne'] = { r: function (v, r) {
   const c = caseCourante(v, r)
