@@ -16,7 +16,7 @@
   *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
   html,body{height:100%;overflow:hidden;background:var(--ink)}
   body{font-family:'Manrope',system-ui,sans-serif;color:#fff;-webkit-font-smoothing:antialiased}
-  .ic{width:20px;height:20px;display:inline-block;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;vertical-align:-4px}
+  .ic{width:24px;height:24px;display:inline-block;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;vertical-align:-4px}
 
   .stage{position:fixed;inset:0;overflow:hidden;cursor:pointer}
   .glow{position:absolute;inset:0;transition:background 1s ease;pointer-events:none}
@@ -24,7 +24,7 @@
        padding:4vh 6.5vw 130px;opacity:0;pointer-events:none;transform:translateY(26px) scale(.985);
        transition:opacity .5s cubic-bezier(.2,.7,.3,1),transform .5s cubic-bezier(.2,.7,.3,1);overflow-y:auto}
   .scr.on{opacity:1;pointer-events:auto;transform:translateY(0) scale(1)}
-  .scr .inner{max-width:580px;width:100%;text-align:center;position:relative;z-index:2;margin:auto}
+  .scr .inner{max-width:640px;width:100%;text-align:center;position:relative;z-index:2;margin:auto}
 
   .eyebrow{font-size:11px;font-weight:800;letter-spacing:.26em;text-transform:uppercase;color:var(--gold);
            display:flex;align-items:center;gap:10px;justify-content:center;margin-bottom:16px}
@@ -45,17 +45,17 @@
   .pp-badge .pill{background:linear-gradient(135deg,var(--gold),#EC5B45);font-size:9.5px;font-weight:800;padding:3px 9px;border-radius:100px;margin-left:2px}
 
   /* Home track buttons */
-  .track-btns{display:flex;flex-direction:column;gap:12px;margin-top:30px;max-width:400px;margin-left:auto;margin-right:auto}
+  .track-btns{display:flex;flex-direction:column;gap:16px;margin-top:34px;max-width:560px;margin-left:auto;margin-right:auto}
   .trackbtn{display:flex;align-items:center;gap:14px;background:rgba(255,255,255,.05);border:1.5px solid rgba(255,255,255,.14);
-            border-radius:16px;padding:16px 18px;text-align:left;cursor:pointer;transition:.2s}
+            border-radius:22px;padding:22px 26px;gap:20px;text-align:left;cursor:pointer;transition:.2s}
   .trackbtn:hover{background:rgba(255,255,255,.09)}
-  .trackbtn .tbi{width:44px;height:44px;border-radius:13px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
-  .trackbtn .tbi svg{width:22px;height:22px;color:#fff}
-  .trackbtn .tbt{font-size:15.5px;font-weight:800}
+  .trackbtn .tbi{width:72px;height:72px;border-radius:20px;box-shadow:0 10px 24px rgba(0,0,0,.35);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+  .trackbtn .tbi svg{width:38px;height:38px;color:#fff}
+  .trackbtn .tbt{font-size:clamp(19px,2.6vw,25px);letter-spacing:-.01em;font-weight:800}
   .trackbtn .tbt em{font-style:normal;color:var(--magenta)}
-  .trackbtn .tbs{font-size:11.5px;color:var(--muted);margin-top:2px;font-weight:600}
+  .trackbtn .tbs{font-size:clamp(13px,1.7vw,16px);color:var(--muted);margin-top:5px;font-weight:600}
   .trackbtn .tba{margin-left:auto;color:var(--muted);flex-shrink:0}
-  .trackbtn .tba svg{width:18px;height:18px}
+  .trackbtn .tba svg{width:24px;height:24px}
 
   .navdots{position:fixed;left:0;right:0;bottom:24px;display:flex;justify-content:center;gap:9px;z-index:20}
   .navdots .d{width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,.22);transition:.25s;cursor:pointer}
@@ -79,14 +79,13 @@
   .se-badge .super-logo{font-family:inherit;font-weight:800;font-style:normal;color:#FFD34D;
                         -webkit-text-stroke:0;text-shadow:none;transform:none;letter-spacing:0;padding:0}
 
-  .super-logo{font-family:'Bangers',cursive;font-weight:400;
-             font-style:normal;color:#fff;letter-spacing:.02em;display:inline-block;padding:0 2px;
-             -webkit-text-stroke:1.6px #1a0f24;
+  .super-logo{font-family:'Bangers',cursive;font-weight:400;font-style:normal;text-transform:uppercase;
+             color:#FFD23F;letter-spacing:.05em;display:inline-block;padding:0 .14em 0 .06em;line-height:1;
+             -webkit-text-stroke:.055em #12091a;paint-order:stroke fill;
              text-shadow:
-               2px 0 0 #1a0f24, -2px 0 0 #1a0f24, 0 2px 0 #1a0f24, 0 -2px 0 #1a0f24,
-               2.5px 2.5px 0 #F5C518, 3.5px 3.5px 0 #1a0f24,
-               5px 5px 4px rgba(0,0,0,.4);
-             transform:skewX(-6deg)}
+               .035em .035em 0 #E2231A, .07em .07em 0 #E2231A, .105em .105em 0 #A8101A,
+               .14em .14em 0 #12091a, .17em .2em .22em rgba(0,0,0,.5);
+             transform:rotate(-4deg) skewX(-8deg)}
   .prog{position:fixed;top:0;left:0;height:3px;background:linear-gradient(90deg,var(--magenta),var(--gold));z-index:21;transition:width .4s ease}
   .prog.se{background:linear-gradient(90deg,var(--blue),var(--violet))}
 
@@ -215,9 +214,9 @@
           display:flex;flex-direction:column;align-items:center;gap:10px;opacity:0;transform:translateY(12px) scale(.95);
           transition:opacity .45s ease,transform .45s ease}
   .reason.on{opacity:1;transform:translateY(0) scale(1)}
-  .reason .ri{width:44px;height:44px;border-radius:13px;background:linear-gradient(135deg,var(--c1),var(--c2));
+  .reason .ri{width:56px;height:56px;border-radius:16px;background:linear-gradient(135deg,var(--c1),var(--c2));
              display:flex;align-items:center;justify-content:center}
-  .reason .ri svg{width:21px;height:21px;color:#fff}
+  .reason .ri svg{width:28px;height:28px;color:#fff}
   .reason .rt{font-size:12.5px;font-weight:800;line-height:1.35}
 
   /* ===== RECAP horizontal ===== */
@@ -252,7 +251,7 @@
   .pulse.in{background:var(--teal);animation:pIn 2.6s linear infinite;animation-delay:1.3s}
   @keyframes pOut{0%{transform:translate(0,0);opacity:0}8%{opacity:1}92%{opacity:1}100%{transform:translate(var(--dx),var(--dy));opacity:0}}
   @keyframes pIn{0%{transform:translate(var(--dx),var(--dy));opacity:0}8%{opacity:1}92%{opacity:1}100%{transform:translate(0,0);opacity:0}}
-  .netlabels{display:flex;flex-direction:column;gap:7px;margin-top:14px;max-width:380px;margin-left:auto;margin-right:auto;text-align:left}
+  .netlabels{display:flex;flex-direction:column;gap:7px;margin-top:34px;max-width:380px;margin-left:auto;margin-right:auto;text-align:left}
   .netlabels .nl{display:flex;gap:9px;align-items:center;font-size:12px;font-weight:700;color:var(--muted)}
   .netlabels .nl .dotc{width:8px;height:8px;border-radius:50%;flex-shrink:0}
 
@@ -260,8 +259,8 @@
   .modes{display:flex;flex-direction:column;gap:10px;margin-top:20px}
   .mode{background:rgba(255,255,255,.05);border:1.5px solid rgba(255,255,255,.14);border-radius:16px;padding:16px 18px;text-align:left}
   .mode .mh{display:flex;align-items:center;gap:10px;margin-bottom:6px}
-  .mode .mi{width:34px;height:34px;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
-  .mode .mi svg{width:17px;height:17px;color:#fff}
+  .mode .mi{width:46px;height:46px;border-radius:13px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+  .mode .mi svg{width:24px;height:24px;color:#fff}
   .mode .mt{font-size:14px;font-weight:800}
   .mode .md{font-size:12px;color:var(--muted);line-height:1.5;font-weight:600}
 
@@ -360,6 +359,12 @@
 .flowin-topbar a.flowin-topbar-back:hover{opacity:1}
 .flowin-topbar .flowin-topbar-brand{font-size:14px;font-weight:800;white-space:nowrap}
 .flowin-topbar .flowin-topbar-brand b{color:#A855F7}
+  @media (min-width:1000px) and (min-height:700px){.scr .inner{zoom:1.22}}
+/* Le bandeau Dashboard (37 px) ne doit plus masquer la marque, le retour ni le haut des écrans. */
+.flowin-topbar~.stage{top:37px}
+.flowin-topbar~.prog{top:37px}
+.flowin-topbar~.brand-fixed{top:56px}
+.flowin-topbar~.backbtn{top:52px}
 </style>
 </head>
 <body>
@@ -394,7 +399,7 @@
           <div class="tbi" style="background:linear-gradient(135deg,var(--blue),var(--violet))">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><circle cx="19" cy="6" r="2"/><circle cx="6" cy="12" r="2"/><circle cx="19" cy="18" r="2"/><path d="M9.5 10.5 17 6.8M9.5 13.5 17 17.2M9 12H4"/></svg>
           </div>
-          <div><div class="tbt" style="display:flex;align-items:baseline;gap:6px"><span class="super-logo" style="font-size:22px">Super</span><span>Event</span></div><div class="tbs">Le réseau qui fédère un territoire</div></div>
+          <div><div class="tbt" style="display:flex;align-items:center;gap:12px"><span class="super-logo" style="font-size:1.45em">Super</span><span>Event</span></div><div class="tbs">Le réseau qui fédère un territoire</div></div>
           <div class="tba"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg></div>
         </div>
       </div>
