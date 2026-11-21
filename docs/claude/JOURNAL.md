@@ -62,3 +62,4 @@ Ce journal n'est pas une preuve de production : l'état vérifié est dans `ETAT
 - 21/11 | Règle « mémoire à jour à chaque travail » ajoutée à CLAUDE.md (demande de Romain) | ce commit
 - 21/11 | Sécurité appliquée en prod 19-20/11 (tirage, RLS lots/events/tables, RPC joueurs parties A/B/C1/C2, phases Super Event, annonces, banque intérêts) ; e-mails via Gmail (Auth + fonctions) ; nettoyage TEST-2 en attente de Romain | voir ETAT.md
 - 21/11 | Équipe critique : agents critique-ergonomie, critique-innovation, critique-performance-donnees, veille-marche ; mémoires ; carnet AMELIORATIONS.md ; premier passage (16 propositions) | ce commit
+- 21/11 | Contrôles automatiques niveau 2 : `scripts/controle/`, workflow `controle-qualite.yml`, rapport PDF `docs/rapports/`, `docs/claude/CONTROLES.md` | ce commit

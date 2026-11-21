@@ -38,3 +38,4 @@ Source principale : `docs/E2E-verification-2026-11-20.md` (E2E). Comptes de test
 - Textes joueur gain immédiat et e-mail Super Event en dur NDS : voir lignes ci-dessus.
 - `send-resultat-tirage` neutralisée, non déployée. `notify-souscription` v5, `notify-bon-commande` v5, `notify-rappel` v1, `notify-commande-animation` v6, `send-ticket-gagnant` v5 : déployées sur le mailer Gmail.
 - Détail des décisions en attente : `agents/*/MEMOIRE.md` (rubrique Ouvert).
+| Contrôles automatiques niveau 2 (smoke pages, workflow GitHub, rapport PDF) | VÉRIFIÉ en local et sur les pages de production ; workflow GitHub non encore exécuté ; contrôles de la base en attente d'application du SQL | 21/11 | `docs/rapports/controle-2026-11-21.pdf` : 15 vert, 1 orange (gitleaks non exécuté) | après application de `sql/2026-11-21-controles-qualite.sql`, premier passage du workflow |

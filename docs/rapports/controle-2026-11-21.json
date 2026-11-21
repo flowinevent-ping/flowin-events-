@@ -1,0 +1,146 @@
+[
+  {
+    "famille": "pages",
+    "code": "PAGES-200-landing",
+    "libelle": "Page d'accueil : répond",
+    "statut": "vert",
+    "gravite": "bloquant",
+    "detail": "Code 200 sur /landing.",
+    "action": ""
+  },
+  {
+    "famille": "pages",
+    "code": "PAGES-200-nds",
+    "libelle": "Jeu Nuits du Sud : répond",
+    "statut": "vert",
+    "gravite": "bloquant",
+    "detail": "Code 200 sur /nds.",
+    "action": ""
+  },
+  {
+    "famille": "pages",
+    "code": "PAGES-200-jouer",
+    "libelle": "Page Jouer : répond",
+    "statut": "vert",
+    "gravite": "bloquant",
+    "detail": "Code 200 sur /jouer.",
+    "action": ""
+  },
+  {
+    "famille": "pages",
+    "code": "PAGES-200-quiz",
+    "libelle": "Parcours quiz : répond",
+    "statut": "vert",
+    "gravite": "bloquant",
+    "detail": "Code 200 sur /parcours/quiz.",
+    "action": ""
+  },
+  {
+    "famille": "pages",
+    "code": "PAGES-200-moi",
+    "libelle": "Profil joueur : répond",
+    "statut": "vert",
+    "gravite": "bloquant",
+    "detail": "Code 200 sur /moi.",
+    "action": ""
+  },
+  {
+    "famille": "pages",
+    "code": "PAGES-200-pro-connexion",
+    "libelle": "Connexion pro : répond",
+    "statut": "vert",
+    "gravite": "bloquant",
+    "detail": "Code 200 sur /pro/connexion.",
+    "action": ""
+  },
+  {
+    "famille": "pages",
+    "code": "PAGES-200-se-nds",
+    "libelle": "Super Event Nuits du Sud : répond",
+    "statut": "vert",
+    "gravite": "bloquant",
+    "detail": "Code 200 sur /se/se-nds-2026.",
+    "action": ""
+  },
+  {
+    "famille": "pages",
+    "code": "PAGES-200-dashboard",
+    "libelle": "Tableau de bord Flowin : répond",
+    "statut": "vert",
+    "gravite": "bloquant",
+    "detail": "Code 200 sur /dashboard.html.",
+    "action": ""
+  },
+  {
+    "famille": "pages",
+    "code": "PAGES-JS",
+    "libelle": "Aucune erreur JavaScript",
+    "statut": "vert",
+    "gravite": "important",
+    "detail": "Aucune erreur non rattrapée sur les 8 pages.",
+    "action": ""
+  },
+  {
+    "famille": "pages",
+    "code": "PAGES-DEMO",
+    "libelle": "Mode démo : aucune écriture en base",
+    "statut": "vert",
+    "gravite": "bloquant",
+    "detail": "Zéro requête d'écriture vers supabase.co en ?demo=1.",
+    "action": ""
+  },
+  {
+    "famille": "pages",
+    "code": "PAGES-VIDEOS",
+    "libelle": "Vidéos v8 accessibles",
+    "statut": "vert",
+    "gravite": "important",
+    "detail": "8 vidéos répondent (200/206).",
+    "action": ""
+  },
+  {
+    "famille": "pages",
+    "code": "PAGES-MIROIR",
+    "libelle": "Miroir du dashboard identique",
+    "statut": "vert",
+    "gravite": "bloquant",
+    "detail": "MD5 identique : f82bd8ed.",
+    "action": ""
+  },
+  {
+    "famille": "proprete",
+    "code": "CODE-TSC",
+    "libelle": "Types TypeScript (tsc)",
+    "statut": "vert",
+    "gravite": "bloquant",
+    "detail": "tsc --noEmit sans erreur (mesuré en local le 21/11).",
+    "action": ""
+  },
+  {
+    "famille": "proprete",
+    "code": "CODE-BUILD",
+    "libelle": "Compilation Next.js",
+    "statut": "vert",
+    "gravite": "bloquant",
+    "detail": "next build terminé, « Compiled successfully » lu dans le journal (local, 21/11).",
+    "action": ""
+  },
+  {
+    "famille": "proprete",
+    "code": "CODE-ACORN",
+    "libelle": "JavaScript du dashboard (Acorn 2020)",
+    "statut": "vert",
+    "gravite": "bloquant",
+    "detail": "3 blocs de script, 0 erreur (local, 21/11).",
+    "action": ""
+  },
+  {
+    "famille": "proprete",
+    "code": "CODE-SECRETS",
+    "libelle": "Recherche de secrets (gitleaks)",
+    "statut": "orange",
+    "gravite": "bloquant",
+    "detail": "Pas encore exécutée : elle tourne dans GitHub Actions après la mise en place du workflow.",
+    "action": "Romain ajoute le workflow par l'interface web GitHub si le push est refusé, puis lance « Contrôle qualité » une fois."
+  }
+]

@@ -1,0 +1,85 @@
+<!doctype html><html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Contrôle qualité Flowin Event - 2026-11-21</title><style>
+@page { size: A4; margin: 16mm 14mm 18mm 14mm; }
+:root { --bleu:#3B5CC4; --encre:#1B3A5C; --gris:#5B6B7F; --trait:#D9E0EC; --fond:#F5F7FB; }
+* { box-sizing: border-box; }
+body { font-family: "DejaVu Sans", "Liberation Sans", Arial, sans-serif; color: var(--encre); font-size: 12pt; line-height: 1.45; margin: 0; background: #fff; }
+h1 { font-size: 26pt; margin: 0 0 6pt; color: var(--bleu); line-height: 1.15; }
+h2 { font-size: 17pt; color: var(--bleu); border-bottom: 2px solid var(--bleu); padding-bottom: 4pt; margin: 0 0 8pt; }
+h3 { font-size: 12.5pt; margin: 4pt 0 3pt; }
+a { color: var(--bleu); }
+.couv { page-break-after: always; }
+.marque { color: var(--gris); font-size: 11pt; letter-spacing: .04em; text-transform: uppercase; margin-bottom: 30mm; }
+.date { font-size: 14pt; color: var(--gris); margin-bottom: 12mm; }
+.banniere { border-left: 8px solid; padding: 12pt 14pt; font-size: 16pt; font-weight: bold; border-radius: 4px; margin-bottom: 10mm; }
+.banniere.vert { background:#E3F3EA; border-color:#1E7A46; color:#14532D; }
+.banniere.orange { background:#FFF0DC; border-color:#C2410C; color:#7C2D0A; }
+.banniere.rouge { background:#FCE6E6; border-color:#B42318; color:#7A1410; }
+.chiffres { display: flex; gap: 8pt; margin-bottom: 10mm; }
+.chiffres div { flex: 1; border: 1px solid var(--trait); border-radius: 6px; padding: 8pt; text-align: center; }
+.chiffres b { display:block; font-size: 22pt; }
+.note { background: var(--fond); border: 1px solid var(--trait); border-radius: 6px; padding: 8pt 10pt; font-size: 11pt; margin-bottom: 8pt; }
+nav { page-break-after: always; }
+nav ol { padding-left: 18pt; font-size: 13pt; }
+nav li { margin-bottom: 7pt; }
+.mini { color: var(--gris); font-size: 10.5pt; margin-left: 6pt; }
+section { margin-bottom: 12mm; }
+.resp { color: var(--gris); font-size: 10.5pt; margin: 0 0 8pt; }
+.vide { color: var(--gris); font-style: italic; }
+.ligne { border: 1px solid var(--trait); border-left: 6px solid; border-radius: 6px; padding: 8pt 10pt; margin-bottom: 8pt; page-break-inside: avoid; }
+.ligne.vert { border-left-color:#1E7A46; } .ligne.orange { border-left-color:#C2410C; } .ligne.rouge { border-left-color:#B42318; }
+.tete { display:flex; gap:8pt; align-items:center; }
+.pill { display:inline-block; font-weight:bold; font-size:10pt; padding:2pt 9pt; border-radius:20pt; letter-spacing:.05em; }
+.pill.vert { background:#E3F3EA; color:#14532D; border:1px solid #1E7A46; }
+.pill.orange { background:#FFF0DC; color:#7C2D0A; border:1px solid #C2410C; }
+.pill.rouge { background:#FCE6E6; color:#7A1410; border:1px solid #B42318; }
+.gr { font-size: 10pt; color: var(--gris); }
+.detail, .action, .qui { margin: 2pt 0; font-size: 11.5pt; }
+.code { margin: 3pt 0 0; font-size: 8.5pt; color: var(--gris); font-family: "DejaVu Sans Mono", monospace; }
+.tr { font-size: 10pt; font-weight: bold; color: var(--gris); }
+.tr.mieux { color:#1E7A46; } .tr.moins { color:#B42318; }
+table { width:100%; border-collapse: collapse; font-size: 11pt; }
+th, td { border: 1px solid var(--trait); padding: 5pt 7pt; text-align: left; }
+th { background: var(--fond); }
+.romain { list-style: none; padding: 0; }
+</style></head><body>
+<div class="couv"><div class="marque">Flowin Event</div><h1>Rapport de contrôle qualité</h1><div class="date">21 novembre 2026</div>
+<div class="banniere orange" role="status">1 point à corriger (0 rouge, 1 orange)</div>
+<div class="chiffres"><div><b>15</b>vert</div><div><b>1</b>orange</div><div><b>0</b>rouge</div></div>
+<div class="note">Contrôles de la base : en cours de mise en place. Ce rapport ne contient pour l'instant que les contrôles des pages et du code.</div>
+<div class="note">Premier rapport : pas encore d'historique.</div>
+<div class="note">Vert : rien à faire. Orange : à traiter bientôt. Rouge : à traiter en priorité. La couleur est toujours écrite en toutes lettres.</div></div>
+<nav id="sommaire"><h2>Sommaire</h2><ol><li><a href="#a-faire">Ce qui dépend de Romain</a></li>
+<li><a href="#f-securite">Sécurité</a> <span class="mini">en cours de mise en place</span></li>
+<li><a href="#f-integrite">Intégrité</a> <span class="mini">en cours de mise en place</span></li>
+<li><a href="#f-envois">Envois</a> <span class="mini">en cours de mise en place</span></li>
+<li><a href="#f-proprete">Propreté</a> <span class="mini">0 rouge, 1 orange, 3 vert</span></li>
+<li><a href="#f-produit">Produit</a> <span class="mini">en cours de mise en place</span></li>
+<li><a href="#f-facturation">Facturation</a> <span class="mini">en cours de mise en place</span></li>
+<li><a href="#f-pages">Pages</a> <span class="mini">0 rouge, 0 orange, 12 vert</span></li>
+<li><a href="#f-derive">Dérive</a> <span class="mini">en cours de mise en place</span></li></ol></nav>
+<section id="a-faire"><h2>Ce qui dépend de Romain</h2><article class="ligne orange"><div class="tete"><span class="pill orange">ORANGE</span></div><h3>Recherche de secrets (gitleaks)</h3><p class="action"><b>À faire :</b> Romain ajoute le workflow par l'interface web GitHub si le push est refusé, puis lance « Contrôle qualité » une fois.</p><p class="code">CODE-SECRETS</p></article></section>
+<section id="f-securite"><h2>Sécurité</h2><p class="resp">Agent responsable : securite-donnees</p><p class="vide">Contrôles de la base : en cours de mise en place.</p></section>
+<section id="f-integrite"><h2>Intégrité</h2><p class="resp">Agent responsable : securite-donnees</p><p class="vide">Contrôles de la base : en cours de mise en place.</p></section>
+<section id="f-envois"><h2>Envois</h2><p class="resp">Agent responsable : flux-integrations</p><p class="vide">Contrôles de la base : en cours de mise en place.</p></section>
+<section id="f-proprete"><h2>Propreté</h2><p class="resp">Agent responsable : recette-tests</p><article class="ligne orange"><div class="tete"><span class="pill orange">ORANGE</span><span class="gr">bloquant</span></div><h3>Recherche de secrets (gitleaks)</h3><p class="detail">Pas encore exécutée : elle tourne dans GitHub Actions après la mise en place du workflow.</p><p class="action"><b>À faire :</b> Romain ajoute le workflow par l'interface web GitHub si le push est refusé, puis lance « Contrôle qualité » une fois.</p><p class="qui"><b>Qui :</b> recette-tests</p><p class="code">CODE-SECRETS</p></article>
+<article class="ligne vert"><div class="tete"><span class="pill vert">VERT</span><span class="gr">bloquant</span></div><h3>JavaScript du dashboard (Acorn 2020)</h3><p class="detail">3 blocs de script, 0 erreur (local, 21/11).</p><p class="code">CODE-ACORN</p></article>
+<article class="ligne vert"><div class="tete"><span class="pill vert">VERT</span><span class="gr">bloquant</span></div><h3>Compilation Next.js</h3><p class="detail">next build terminé, « Compiled successfully » lu dans le journal (local, 21/11).</p><p class="code">CODE-BUILD</p></article>
+<article class="ligne vert"><div class="tete"><span class="pill vert">VERT</span><span class="gr">bloquant</span></div><h3>Types TypeScript (tsc)</h3><p class="detail">tsc --noEmit sans erreur (mesuré en local le 21/11).</p><p class="code">CODE-TSC</p></article></section>
+<section id="f-produit"><h2>Produit</h2><p class="resp">Agent responsable : produit-ergonomie</p><p class="vide">Contrôles de la base : en cours de mise en place.</p></section>
+<section id="f-facturation"><h2>Facturation</h2><p class="resp">Agent responsable : facturation-crm</p><p class="vide">Contrôles de la base : en cours de mise en place.</p></section>
+<section id="f-pages"><h2>Pages</h2><p class="resp">Agent responsable : recette-tests</p><article class="ligne vert"><div class="tete"><span class="pill vert">VERT</span><span class="gr">bloquant</span></div><h3>Tableau de bord Flowin : répond</h3><p class="detail">Code 200 sur /dashboard.html.</p><p class="code">PAGES-200-dashboard</p></article>
+<article class="ligne vert"><div class="tete"><span class="pill vert">VERT</span><span class="gr">bloquant</span></div><h3>Page Jouer : répond</h3><p class="detail">Code 200 sur /jouer.</p><p class="code">PAGES-200-jouer</p></article>
+<article class="ligne vert"><div class="tete"><span class="pill vert">VERT</span><span class="gr">bloquant</span></div><h3>Page d'accueil : répond</h3><p class="detail">Code 200 sur /landing.</p><p class="code">PAGES-200-landing</p></article>
+<article class="ligne vert"><div class="tete"><span class="pill vert">VERT</span><span class="gr">bloquant</span></div><h3>Profil joueur : répond</h3><p class="detail">Code 200 sur /moi.</p><p class="code">PAGES-200-moi</p></article>
+<article class="ligne vert"><div class="tete"><span class="pill vert">VERT</span><span class="gr">bloquant</span></div><h3>Jeu Nuits du Sud : répond</h3><p class="detail">Code 200 sur /nds.</p><p class="code">PAGES-200-nds</p></article>
+<article class="ligne vert"><div class="tete"><span class="pill vert">VERT</span><span class="gr">bloquant</span></div><h3>Connexion pro : répond</h3><p class="detail">Code 200 sur /pro/connexion.</p><p class="code">PAGES-200-pro-connexion</p></article>
+<article class="ligne vert"><div class="tete"><span class="pill vert">VERT</span><span class="gr">bloquant</span></div><h3>Parcours quiz : répond</h3><p class="detail">Code 200 sur /parcours/quiz.</p><p class="code">PAGES-200-quiz</p></article>
+<article class="ligne vert"><div class="tete"><span class="pill vert">VERT</span><span class="gr">bloquant</span></div><h3>Super Event Nuits du Sud : répond</h3><p class="detail">Code 200 sur /se/se-nds-2026.</p><p class="code">PAGES-200-se-nds</p></article>
+<article class="ligne vert"><div class="tete"><span class="pill vert">VERT</span><span class="gr">bloquant</span></div><h3>Mode démo : aucune écriture en base</h3><p class="detail">Zéro requête d'écriture vers supabase.co en ?demo=1.</p><p class="code">PAGES-DEMO</p></article>
+<article class="ligne vert"><div class="tete"><span class="pill vert">VERT</span><span class="gr">bloquant</span></div><h3>Miroir du dashboard identique</h3><p class="detail">MD5 identique : f82bd8ed.</p><p class="code">PAGES-MIROIR</p></article>
+<article class="ligne vert"><div class="tete"><span class="pill vert">VERT</span><span class="gr">important</span></div><h3>Aucune erreur JavaScript</h3><p class="detail">Aucune erreur non rattrapée sur les 8 pages.</p><p class="code">PAGES-JS</p></article>
+<article class="ligne vert"><div class="tete"><span class="pill vert">VERT</span><span class="gr">important</span></div><h3>Vidéos v8 accessibles</h3><p class="detail">8 vidéos répondent (200/206).</p><p class="code">PAGES-VIDEOS</p></article></section>
+<section id="f-derive"><h2>Dérive</h2><p class="resp">Agent responsable : recette-tests</p><p class="vide">Contrôles de la base : en cours de mise en place.</p></section>
+
+</body></html>

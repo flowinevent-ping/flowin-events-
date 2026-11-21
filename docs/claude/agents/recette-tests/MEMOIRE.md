@@ -39,3 +39,9 @@
 - Rejouer le scénario 3 (textes gain immédiat), un envoi `notify-bon-commande` TEST (déploiement de `b810cd56` non confirmé), annonces des commerces, phases Super Event, résultat de tirage « Pas de lot cette fois ».
 - Test caméra scanner sur iPhone et Android réels (non fait).
 - Nettoyage TEST-2 par Romain ; puis vérifier qu'aucune ligne `TEST-` ne reste.
+
+## Contrôles automatiques (21/11/2026, niveau 2)
+- Mode d'emploi complet : `docs/claude/CONTROLES.md`. Scripts : `scripts/controle/` (`smoke.mjs`, `verifier-acorn.mjs`, `resume-ci.mjs`, `rapport-pdf.mjs`, `_playwright.mjs`). Workflow : `.github/workflows/controle-qualite.yml`.
+- Premier smoke réel : 8 pages en 200, 0 erreur JS, 0 écriture supabase.co en `?demo=1`, 8 vidéos v8 en 200/206, miroir dashboard identique (MD5 f82bd8ed) : 12 vert.
+- Piège : Playwright 1.60 attend Chromium 1223 mais l'environnement n'a que 1243 ; `_playwright.mjs` bascule sur le Chromium présent.
+- Premier rapport : `docs/rapports/controle-2026-11-21.pdf` (6 pages, signets + PDF balisé OK). Contrôles de la base absents : la fonction SQL n'était pas encore appliquée en prod (`controles_qualite` inexistante le 21/11).

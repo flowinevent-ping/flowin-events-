@@ -1,0 +1,108 @@
+name: Contrôle qualité
+
+# Contrôles automatiques niveau 2 : code, secrets, pages de production.
+# Aucun secret n'est nécessaire (GITHUB_TOKEN fourni par GitHub, clé Supabase publique non utilisée ici).
+on:
+  push:
+    branches: [main]
+  schedule:
+    - cron: '0 6 * * 1'   # chaque lundi 06:00 UTC
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: controle-qualite-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  controle:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: admin/package-lock.json
+
+      - name: Installation
+        working-directory: admin
+        run: npm ci
+
+      - name: TypeScript (tsc --noEmit)
+        id: tsc
+        continue-on-error: true
+        working-directory: admin
+        run: npx tsc --noEmit 2>&1 | tee ../tsc.log; exit "${PIPESTATUS[0]}"
+
+      - name: Compilation Next.js (next build)
+        id: build
+        continue-on-error: true
+        working-directory: admin
+        run: |
+          npm run build 2>&1 | tee ../build.log
+          code="${PIPESTATUS[0]}"
+          # Le code de sortie ne suffit pas : on lit le journal.
+          grep -q "Compiled successfully" ../build.log || { echo "Message « Compiled successfully » absent du journal"; exit 1; }
+          exit "$code"
+
+      - name: JavaScript du dashboard (Acorn ecmaVersion 2020)
+        id: acorn
+        continue-on-error: true
+        run: node scripts/controle/verifier-acorn.mjs 2>&1 | tee acorn.log; exit "${PIPESTATUS[0]}"
+
+      - name: Recherche de secrets (gitleaks)
+        id: gitleaks
+        continue-on-error: true
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITLEAKS_ENABLE_UPLOAD_ARTIFACT: false
+          GITLEAKS_ENABLE_SUMMARY: false
+
+      - name: Navigateur de test
+        run: npx --prefix admin playwright install --with-deps chromium
+
+      - name: Contrôle des pages de production (smoke)
+        run: node scripts/controle/smoke.mjs --out resultats-smoke.json > /dev/null
+
+      - name: Résumé en français
+        if: always()
+        env:
+          R_TSC: ${{ steps.tsc.outcome }}
+          R_BUILD: ${{ steps.build.outcome }}
+          R_ACORN: ${{ steps.acorn.outcome }}
+          R_GITLEAKS: ${{ steps.gitleaks.outcome }}
+        run: node scripts/controle/resume-ci.mjs >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Résultats (artefact)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: resultats-controle
+          path: |
+            resultats-smoke.json
+            resultats-code.json
+            build.log
+            tsc.log
+            acorn.log
+          if-no-files-found: ignore
+          retention-days: 90
+
+      - name: Échec si un contrôle du code est rouge
+        if: always()
+        run: |
+          for o in "$R_TSC" "$R_BUILD" "$R_ACORN" "$R_GITLEAKS"; do
+            if [ "$o" = "failure" ]; then echo "Au moins un contrôle du code est rouge."; exit 1; fi
+          done
+        env:
+          R_TSC: ${{ steps.tsc.outcome }}
+          R_BUILD: ${{ steps.build.outcome }}
+          R_ACORN: ${{ steps.acorn.outcome }}
+          R_GITLEAKS: ${{ steps.gitleaks.outcome }}
