@@ -1,7 +1,7 @@
 // Rapport de contrôle qualité : un seul PDF (A4) + sa source HTML + le JSON fusionné.
 // Usage :
 //   node scripts/controle/rapport-pdf.mjs resultats-smoke.json resultats-base.json [--prev ancien.json]
-//        [--date AAAA-MM-JJ] [--out-dir docs/rapports] [--no-prev]
+//        [--date AAAA-MM-JJ] [--out-dir docs/rapports] [--no-prev] [--romain liste.json]
 // Les fichiers absents ou illisibles sont ignorés (le rapport le dit). Format d'une ligne :
 //   {famille, code, libelle, statut: vert|orange|rouge, gravite: bloquant|important|info, detail, action}
 import { readFileSync, writeFileSync, existsSync, mkdirSync, readdirSync } from 'node:fs';
@@ -12,9 +12,10 @@ import { chargerPlaywright, lancer } from './_playwright.mjs';
 const RACINE = resolve(dirname(fileURLToPath(import.meta.url)), '..', '..');
 const argv = process.argv.slice(2);
 const fichiers = [];
-let prevArg = '', dateArg = '', sortieDir = join(RACINE, 'docs', 'rapports'), sansPrev = false;
+let romainArg = '', prevArg = '', dateArg = '', sortieDir = join(RACINE, 'docs', 'rapports'), sansPrev = false;
 for (let i = 0; i < argv.length; i++) {
   if (argv[i] === '--prev') prevArg = argv[++i];
+  else if (argv[i] === '--romain') romainArg = argv[++i];
   else if (argv[i] === '--date') dateArg = argv[++i];
   else if (argv[i] === '--out-dir') sortieDir = resolve(argv[++i]);
   else if (argv[i] === '--no-prev') sansPrev = true;
@@ -84,7 +85,10 @@ const total = compte(toutes);
 const aCorriger = total.orange + total.rouge;
 const pill = (s) => '<span class="pill ' + s + '">' + TEXTE[s] + '</span>';
 const trier = (rows) => rows.slice().sort((a, b) => ORDRE[a.statut] - ORDRE[b.statut] || GRAV[a.gravite] - GRAV[b.gravite] || a.code.localeCompare(b.code));
-const dependRomain = trier(toutes.filter((r) => r.statut !== 'vert' && /romain|confirm|valid|d[eé]cid|ex[eé]cut|go explicite/i.test(r.action)));
+const romainManuel = romainArg && existsSync(romainArg) ? JSON.parse(readFileSync(romainArg, 'utf8')) : null;
+const dependRomain = romainManuel
+  ? romainManuel.map((r) => ({ statut: r.statut, libelle: r.libelle, action: r.action, code: '' }))
+  : trier(toutes.filter((r) => r.statut !== 'vert' && /romain|confirm|valid|d[eé]cid|ex[eé]cut|go explicite/i.test(r.action)));
 const agentDe = (famille) => { const f = FAMILLES.find((x) => x.cle === famille); return f ? f.agent : 'recette-tests'; };
 const dateFr = new Date(date + 'T12:00:00Z').toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' });
 

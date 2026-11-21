@@ -108,39 +108,273 @@
     "action": ""
   },
   {
-    "famille": "proprete",
-    "code": "CODE-TSC",
-    "libelle": "Types TypeScript (tsc)",
-    "statut": "vert",
+    "famille": "securite",
+    "code": "anon_lecture_tables_sensibles",
+    "libelle": "Lecture anonyme des tables sensibles",
+    "statut": "rouge",
     "gravite": "bloquant",
-    "detail": "tsc --noEmit sans erreur (mesuré en local le 21/11).",
-    "action": ""
+    "detail": "1 table(s) lisible(s) par anon : pros",
+    "action": "Agent securite-donnees : retirer le SELECT anon / la politique true sur ces tables"
   },
   {
-    "famille": "proprete",
-    "code": "CODE-BUILD",
-    "libelle": "Compilation Next.js",
+    "famille": "securite",
+    "code": "anon_ecriture_hors_liste",
+    "libelle": "Écriture anonyme hors liste autorisée",
     "statut": "vert",
     "gravite": "bloquant",
-    "detail": "next build terminé, « Compiled successfully » lu dans le journal (local, 21/11).",
-    "action": ""
+    "detail": "aucune politique d'écriture ouverte à anon hors liste blanche (11 tables autorisées)",
+    "action": "Agent securite-donnees : remplacer par une écriture SA / pro propriétaire"
   },
   {
-    "famille": "proprete",
-    "code": "CODE-ACORN",
-    "libelle": "JavaScript du dashboard (Acorn 2020)",
+    "famille": "securite",
+    "code": "anon_modif_liste_blanche",
+    "libelle": "Modification anonyme sur tables à INSERT seul",
+    "statut": "vert",
+    "gravite": "important",
+    "detail": "les tables à INSERT anonyme n'acceptent ni UPDATE ni DELETE anonymes",
+    "action": "Agent securite-donnees : retirer UPDATE / DELETE anon, garder INSERT"
+  },
+  {
+    "famille": "securite",
+    "code": "truncate_accorde",
+    "libelle": "TRUNCATE accordé à anon / authenticated",
     "statut": "vert",
     "gravite": "bloquant",
-    "detail": "3 blocs de script, 0 erreur (local, 21/11).",
-    "action": ""
+    "detail": "aucune table publique ne donne TRUNCATE à anon ou authenticated",
+    "action": "Agent securite-donnees : revoke truncate sur ces tables"
   },
   {
-    "famille": "proprete",
-    "code": "CODE-SECRETS",
-    "libelle": "Recherche de secrets (gitleaks)",
+    "famille": "securite",
+    "code": "rls_active_partout",
+    "libelle": "RLS activée sur toutes les tables publiques",
+    "statut": "vert",
+    "gravite": "bloquant",
+    "detail": "62 tables publiques, toutes avec RLS (exceptions tolérées : aucune)",
+    "action": "Agent securite-donnees : alter table ... enable row level security + politiques"
+  },
+  {
+    "famille": "securite",
+    "code": "tirage_fonctions_fermees",
+    "libelle": "Fonctions de tirage fermées à anon",
+    "statut": "vert",
+    "gravite": "bloquant",
+    "detail": "6 fonctions de tirage sur 6, aucune exécutable par anon",
+    "action": "Agent securite-donnees : revoke execute ... from public, anon"
+  },
+  {
+    "famille": "securite",
+    "code": "rappel_cron_verifier",
+    "libelle": "Vérificateur de la relance protégée",
+    "statut": "vert",
+    "gravite": "bloquant",
+    "detail": "présente, non exécutable par anon / authenticated",
+    "action": "Agent securite-donnees : rejouer sql/2026-11-20-rappel-tickets-secret.sql ou revoke execute"
+  },
+  {
+    "famille": "securite",
+    "code": "vault_rappel_secret",
+    "libelle": "Secret de relance présent dans le Vault",
+    "statut": "vert",
+    "gravite": "bloquant",
+    "detail": "1 secret(s) nommé(s) rappel_cron_secret (valeur jamais lue)",
+    "action": "Agent securite-donnees : recréer le secret (sql/2026-11-20-rappel-tickets-secret.sql)"
+  },
+  {
+    "famille": "integrite",
+    "code": "tirages_depassent_lots",
+    "libelle": "Tirages au-delà de la quantité du lot",
+    "statut": "rouge",
+    "gravite": "bloquant",
+    "detail": "1 lot(s) : ev-nds-bergerie / Bon d'achat 20 € (8 tirés pour 7)",
+    "action": "Agent securite-donnees (puis recette-tests) : vérifier le stock et les tirages annulables"
+  },
+  {
+    "famille": "integrite",
+    "code": "double_gain_animation",
+    "libelle": "Joueur gagnant deux fois à la même animation",
+    "statut": "vert",
+    "gravite": "bloquant",
+    "detail": "aucun joueur avec plus d'un tirage actif par animation",
+    "action": "Agent securite-donnees : annuler le doublon (annuler_tirage), vérifier _tirage_un_gain_par_joueur"
+  },
+  {
+    "famille": "integrite",
+    "code": "double_gain_super_event",
+    "libelle": "Joueur gagnant deux fois au même Super Event",
+    "statut": "vert",
+    "gravite": "bloquant",
+    "detail": "aucun joueur avec plus d'un tirage actif par Super Event",
+    "action": "Agent securite-donnees : annuler le doublon, vérifier tirage_super_event"
+  },
+  {
+    "famille": "integrite",
+    "code": "tickets_plus_de_2_par_jour",
+    "libelle": "Plus de 2 tickets par joueur, lieu et jour",
+    "statut": "vert",
+    "gravite": "bloquant",
+    "detail": "au plus 2 tickets (quiz + bonus) par joueur, événement et jour",
+    "action": "Agent securite-donnees (puis flux-integrations) : chercher la source du doublon"
+  },
+  {
+    "famille": "integrite",
+    "code": "tirages_sans_joueur",
+    "libelle": "Tirages sans joueur rattaché",
+    "statut": "rouge",
+    "gravite": "important",
+    "detail": "1 tirage(s) sans joueur ou avec joueur absent",
+    "action": "Agent securite-donnees : identifier les lignes (ne pas supprimer sans accord de Romain)"
+  },
+  {
+    "famille": "integrite",
+    "code": "participations_orphelines",
+    "libelle": "Participations dont l'événement n'existe plus",
+    "statut": "vert",
+    "gravite": "important",
+    "detail": "toutes les participations pointent vers un événement existant",
+    "action": "Agent securite-donnees : confirmer avec Romain avant tout nettoyage"
+  },
+  {
+    "famille": "integrite",
+    "code": "events_actifs_sans_lot",
+    "libelle": "Événements à venir ou en cours sans lot",
     "statut": "orange",
-    "gravite": "bloquant",
-    "detail": "Pas encore exécutée : elle tourne dans GitHub Actions après la mise en place du workflow.",
-    "action": "Romain ajoute le workflow par l'interface web GitHub si le push est refusé, puis lance « Contrôle qualité » une fois."
+    "gravite": "important",
+    "detail": "13 événement(s) sans lot",
+    "action": "Agent produit-ergonomie : lots à créer ou événement à archiver"
+  },
+  {
+    "famille": "integrite",
+    "code": "super_events_phases_sans_date",
+    "libelle": "Super Events à phases sans date de début",
+    "statut": "vert",
+    "gravite": "important",
+    "detail": "tous les Super Events à phases ont une date de début",
+    "action": "Agent produit-ergonomie : renseigner la date de début"
+  },
+  {
+    "famille": "envois",
+    "code": "cron_rappels_recent",
+    "libelle": "Cron des rappels de tickets passé dans les 26 h",
+    "statut": "vert",
+    "gravite": "important",
+    "detail": "dernier passage : succeeded (2026-11-21 09:07:00.231374+00), 1 réussi(s) sur 26 h",
+    "action": "Agent flux-integrations : lire cron.job_run_details et net._http_response, puis les journaux de rappel-tickets"
+  },
+  {
+    "famille": "envois",
+    "code": "emails_compteur_jour",
+    "libelle": "E-mails envoyés aujourd'hui (plafond 450)",
+    "statut": "vert",
+    "gravite": "important",
+    "detail": "0 e-mail(s) aujourd'hui ; orange dès 400, rouge dès 450",
+    "action": "Agent flux-integrations : identifier l'émetteur, suspendre les envois non essentiels"
+  },
+  {
+    "famille": "envois",
+    "code": "tickets_proches_expiration",
+    "libelle": "Lots notifiés non retirés qui expirent sous 7 jours",
+    "statut": "vert",
+    "gravite": "info",
+    "detail": "0 ticket(s) notifié(s), non retiré(s), valable(s) jusqu'à 7 jours",
+    "action": "Information : les rappels 48 h partent par le cron ; rien à corriger"
+  },
+  {
+    "famille": "proprete",
+    "code": "test_events",
+    "libelle": "Événements de test restants (ev-test-%)",
+    "statut": "orange",
+    "gravite": "important",
+    "detail": "3 événement(s) de test, dont 0 de plus de 48 h",
+    "action": "Agent recette-tests : nettoyage à valider par Romain (DELETE confirmé)"
+  },
+  {
+    "famille": "proprete",
+    "code": "test_super_events",
+    "libelle": "Super Events de test restants (se-test-super-event-e2e%)",
+    "statut": "orange",
+    "gravite": "important",
+    "detail": "2 Super Event(s) de test, dont 0 de plus de 48 h",
+    "action": "Agent recette-tests : nettoyage à valider par Romain (DELETE confirmé)"
+  },
+  {
+    "famille": "proprete",
+    "code": "test_pros",
+    "libelle": "Pros de test restants (pro-test-%)",
+    "statut": "orange",
+    "gravite": "important",
+    "detail": "2 pro(s) de test, dont 0 entrés il y a plus de 48 h (date d'entrée)",
+    "action": "Agent recette-tests : nettoyage à valider par Romain (DELETE confirmé)"
+  },
+  {
+    "famille": "proprete",
+    "code": "test_comptes_auth",
+    "libelle": "Comptes Auth de test restants (flowinevent+...)",
+    "statut": "orange",
+    "gravite": "important",
+    "detail": "2 compte(s) de test, dont 0 de plus de 48 h",
+    "action": "Agent recette-tests : nettoyage à valider par Romain (DELETE confirmé)"
+  },
+  {
+    "famille": "produit",
+    "code": "animations_sans_position",
+    "libelle": "Animations actives sans position (carte)",
+    "statut": "orange",
+    "gravite": "info",
+    "detail": "10 animation(s) live / upcoming sans latitude ou longitude",
+    "action": "Agent produit-ergonomie : renseigner l'adresse pour la carte"
+  },
+  {
+    "famille": "produit",
+    "code": "animations_sans_lot",
+    "libelle": "Animations actives sans lot",
+    "statut": "orange",
+    "gravite": "info",
+    "detail": "9 animation(s) live / upcoming sans lot",
+    "action": "Agent produit-ergonomie : lot à ajouter"
+  },
+  {
+    "famille": "produit",
+    "code": "animations_sans_qr",
+    "libelle": "Animations actives sans QR",
+    "statut": "orange",
+    "gravite": "info",
+    "detail": "8 animation(s) live / upcoming sans station QR",
+    "action": "Agent creation-materiel : station QR à générer"
+  },
+  {
+    "famille": "produit",
+    "code": "pros_en_attente_7j",
+    "libelle": "Pros en attente depuis plus de 7 jours",
+    "statut": "vert",
+    "gravite": "info",
+    "detail": "0 pro(s) en attente de validation (date d'entrée de plus de 7 jours ; entrée vide ignorée)",
+    "action": "Romain / Flowin : valider ou refuser les inscriptions"
+  },
+  {
+    "famille": "facturation",
+    "code": "facture_numero_trous",
+    "libelle": "Numérotation des factures FL-AM",
+    "statut": "vert",
+    "gravite": "important",
+    "detail": "0 facture(s) FL-AM contrôlée(s), 0 numéro(s) manquant(s) dans la suite",
+    "action": "Agent facturation-crm : expliquer chaque trou (numérotation légale continue)"
+  },
+  {
+    "famille": "facturation",
+    "code": "commandes_payees_sans_facture",
+    "libelle": "Commandes payées sans facture",
+    "statut": "vert",
+    "gravite": "info",
+    "detail": "0 commande(s) au paiement validé sans numéro de facture",
+    "action": "Agent facturation-crm : émettre la facture"
+  },
+  {
+    "famille": "derive",
+    "code": "schema_derive",
+    "libelle": "Dérive des droits et politiques",
+    "statut": "vert",
+    "gravite": "important",
+    "detail": "schéma identique à la référence du 21/11/2026 18:18",
+    "action": "Aucune"
   }
 ]

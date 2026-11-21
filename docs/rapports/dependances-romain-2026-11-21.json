@@ -1,0 +1,42 @@
+[
+  {
+    "statut": "rouge",
+    "libelle": "Lecture anonyme de la table pros",
+    "action": "Décision sur la lecture anonyme des pros : correction en cours par l'agent securite-donnees. Romain valide le résultat (code : anon_lecture_tables_sensibles)."
+  },
+  {
+    "statut": "rouge",
+    "libelle": "Bon d'achat 20 € de la Bergerie : 8 tirages pour une quantité de 7",
+    "action": "Statuts : 7 actifs, 1 retiré (le tirage 21 est annulé). Dire si le stock a été décrémenté au retrait (alors le surplus est un faux positif) ou si le surplus est réel. Le festival est terminé. (code : tirages_depassent_lots)"
+  },
+  {
+    "statut": "rouge",
+    "libelle": "Tirage « soir » sans joueur, daté du 01/08",
+    "action": "Ne pas supprimer. Romain dit quoi en faire après identification de la ligne. (code : tirages_sans_joueur)"
+  },
+  {
+    "statut": "orange",
+    "libelle": "Nettoyage des données TEST (3 événements, 2 Super Events, 2 pros, 2 comptes Auth)",
+    "action": "Romain confirme puis exécute sql/2026-11-20-e2e-nettoyage-TEST-2.sql (contient des DELETE, aucun agent ne l'exécute). (codes : test_events, test_super_events, test_pros, test_comptes_auth)"
+  },
+  {
+    "statut": "orange",
+    "libelle": "13 événements à venir ou en cours sans lot",
+    "action": "Romain décide : créer les lots ou archiver l'événement. (code : events_actifs_sans_lot)"
+  },
+  {
+    "statut": "orange",
+    "libelle": "10 animations sans position sur la carte",
+    "action": "Romain fournit ou valide les adresses (aucune coordonnée n'est inventée). (code : animations_sans_position)"
+  },
+  {
+    "statut": "orange",
+    "libelle": "8 animations sans QR",
+    "action": "Romain valide la génération des stations QR par l'agent creation-materiel. (code : animations_sans_qr)"
+  },
+  {
+    "statut": "vert",
+    "libelle": "Référence de dérive des droits (tournante)",
+    "action": "Après tout changement de droits voulu, Romain exécute select public.schema_reference_rafraichir(); sinon le contrôle de dérive passera au rouge à tort. Aujourd'hui : vert."
+  }
+]
