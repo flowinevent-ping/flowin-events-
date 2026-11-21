@@ -46,5 +46,10 @@
 - Pièges : Supabase accorde par défaut tous les droits aux nouveaux objets `public` (revoke explicite obligatoire, y compris TRUNCATE sur les tables créées par migration). `pros` n'a pas de `created_at` : le contrôle utilise `entree_p`. Le contrôle des lots peut signaler un faux positif si `lots.quantite` est décrémentée au retrait.
 - Retrait : bloc ROLLBACK en pied du fichier SQL. Le journal grossit de 30 lignes par jour (purge à décider).
 
+## `pros` lecture anonyme (21/11/2026)
+- `sql/2026-11-21-pros-lecture-publique.sql` + `docs/SECURITE-pros-2026-11-21.md` : partie A appliquée (4 RPC : `pro_fiche_publique`, `pro_id_existe`, `pros_partenaires_de`, `jeux_propres_partenaires`), code `bd844bdc` déployé. Partie B (`drop policy pros_anon_select`) : apply_migration sans réponse de Romain (timeout 230 s), politique toujours présente, contrôle rouge. À refaire devant Romain, puis `schema_reference_rafraichir()` et relire le contrôle.
+- Pièges : sans politique SELECT, un INSERT anonyme `on conflict` est refusé par la RLS (testé PG16) ; la vue `v_se_commerces` est security_invoker ; ne pas retirer le droit de table SELECT à anon avant migration de ces points. Un id de pro peut dériver de l'e-mail : ne jamais le rendre en public.
+- Ouvert : `flowin_export_pros(p_token)` exécutable par anon, jeton en dur dans la fonction et dans `docs/backup/backup-crm-nds-google-sheet.gs` (ne pas le recopier) ; TRUNCATE sur `emails_compteur_jour`.
+
 ## Ouvert
 - Cron du 21/11 09:07 UTC : `succeeded` dans `cron.job_run_details` (statut HTTP réel non relu) ; corriger les rouges du contrôle quotidien (voir ci-dessus) ; état prod des SQL non consignés ; décision sur le plan Supabase ; durcir l'identité joueur ; revoir `crm_pro`.

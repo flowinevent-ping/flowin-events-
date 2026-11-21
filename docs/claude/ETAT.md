@@ -23,7 +23,7 @@ Source principale : `docs/E2E-verification-2026-11-20.md` (E2E). Comptes de test
 | `notify-bon-commande` : copie au signataire | NON VÉRIFIÉ : code `b810cd56` poussé le 21/11, déploiement non confirmé | 21/11 | diff du commit | déployer puis test avec un bon TEST |
 | Annonces des commerces (/moi > Alertes) | NON VÉRIFIÉ (SQL appliqué 19/11, hors E2E) | 19/11 | `docs/ANNONCES-PRO-2026-11-18.md` | envoi à un contact TEST |
 | Banque bonus centres d'intérêt | NON VÉRIFIÉ : brouillon privé, validation de Romain attendue | 19/11 | `sql/2026-11-19-banque-interets.sql` appliqué | décision de Romain |
-| Sécurité RLS / RPC (phases 1-2, joueurs A-B-C) | VÉRIFIÉ PROD : lecture anonyme vide sur les tables sensibles, pages en 200 | 19-20/11 | docs SÉCURITÉ, fin de chaque fichier | toute nouvelle table ou migration |
+| Sécurité RLS / RPC (phases 1-2, joueurs A-B-C) ; `pros` : partie A + code déployés, partie B (drop `pros_anon_select`) EN ATTENTE de confirmation de Romain (contrôle toujours rouge) | VÉRIFIÉ PROD sauf `pros` : lecture anonyme vide sur les autres tables sensibles, pages en 200 | 19-20/11 | docs SÉCURITÉ, fin de chaque fichier | toute nouvelle table ou migration |
 | Dashboard SA : aucune écriture au chargement, `?demo=1` | VÉRIFIÉ en local (Playwright, 0 non-GET) ; NON refait en prod connecté SA | 19/11 | `docs/SECURITE-events-2026-11-19.md` | toute modification du dashboard |
 | Jeux en démo (quiz, bonus, solo, roue, tombola) jusqu'au parrainage | VÉRIFIÉ en local (build `main`, 390 px, 0 écriture) | 17/11 | `docs/audit-2026-11-17/RAPPORT-FINAL.md` | changement `engine.ts` |
 | Profil /moi (5 rubriques, QR plein écran) | VÉRIFIÉ en local 17/11 ; /moi 200 en prod après RLS | 20/11 | RAPPORT-FINAL, SÉCURITÉ partie C | changement `app/moi` |
