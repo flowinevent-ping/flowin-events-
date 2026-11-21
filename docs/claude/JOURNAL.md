@@ -59,3 +59,5 @@ Ce journal n'est pas une preuve de production : l'état vérifié est dans `ETAT
 - 21/11 | `notify-bon-commande` : copie du bon signé de nouveau envoyée au signataire (comportement v2 voulu) | `b810cd56`
 - 21/11 | Prompt « mémoire et agents » (version légère) | `99fc4beb`
 - 21/11 | Mémoire partagée et agents dédiés : `docs/claude/`, `.claude/agents/` | ce commit
+- 21/11 | Règle « mémoire à jour à chaque travail » ajoutée à CLAUDE.md (demande de Romain) | ce commit
+- 21/11 | Sécurité appliquée en prod 19-20/11 (tirage, RLS lots/events/tables, RPC joueurs parties A/B/C1/C2, phases Super Event, annonces, banque intérêts) ; e-mails via Gmail (Auth + fonctions) ; nettoyage TEST-2 en attente de Romain | voir ETAT.md
