@@ -32,6 +32,7 @@ Source principale : `docs/E2E-verification-2026-11-20.md` (E2E). Comptes de test
 | Vidéos v8 L3 et L4 (voix Vivienne -5 %) | LIVRÉES ; écoute de Romain à confirmer | 19/11 | `docs/SCRIPT-L3-v8-2026-11-19.md`, `SCRIPT-L4-v8-…` ; QR décodés (jsQR) | retour de Romain |
 | Plaquettes V3 Animation et Super Event | LIVRÉES, « bonnes » selon Romain (09/11) ; à valider | 17/11 | REGISTRE L1, L2 | changement de prix ou de texte |
 | Nettoyage des données TEST en base | BLOQUÉ : confirmation DELETE sans réponse (2 fois) | 20/11 | `sql/2026-11-20-e2e-nettoyage-TEST-2.sql` à exécuter par Romain | Romain a exécuté |
+| Équipe critique : 4 agents, mémoires, carnet `AMELIORATIONS.md` | PREMIER PASSAGE FAIT (16 propositions, aucune validée) | 21/11 | `docs/claude/AMELIORATIONS.md` ; mesures SELECT et web du 21/11 | décision de Romain sur le carnet ; passage mensuel 01/12 |
 
 ## Réserves ouvertes (E2E 20/11)
 - Textes joueur gain immédiat et e-mail Super Event en dur NDS : voir lignes ci-dessus.

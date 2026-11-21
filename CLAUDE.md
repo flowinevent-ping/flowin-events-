@@ -49,7 +49,7 @@ Source de vérité du reste-à-faire : `HANDOFF-flowin-nds2026.md`.
 `flowin-events.vercel.app/landing`, `/nds`, `/dashboard.html`, `/pro-nds-live.html?ev=`, `/bon-commande-nds.html`.
 
 ## Agents dédiés et mémoire
-Sept agents de projet (`.claude/agents/`) avec mémoire dans le dépôt : **`docs/claude/README.md`** (protocole, index, élagage mensuel). Avant de demander quoi que ce soit à Romain : lire `docs/claude/ACCES.md`, `REGLES.md`, `CIBLES.md` et la mémoire de l'agent concerné.
+Quatre agents critiques (`critique-ergonomie`, `critique-innovation`, `critique-performance-donnees`, `veille-marche`) proposent des améliorations sans rien modifier : carnet `docs/claude/AMELIORATIONS.md`. Sept agents de projet (`.claude/agents/`) avec mémoire dans le dépôt : **`docs/claude/README.md`** (protocole, index, élagage mensuel). Avant de demander quoi que ce soit à Romain : lire `docs/claude/ACCES.md`, `REGLES.md`, `CIBLES.md` et la mémoire de l'agent concerné.
 
 ### Règle de mise à jour de la mémoire (Romain, 21/11/2026) : OBLIGATOIRE
 À la fin de CHAQUE travail dans ce projet, avant de répondre à Romain : (1) 1 ligne dans `docs/claude/JOURNAL.md` ; (2) mettre à jour `docs/claude/ETAT.md` (statut, date, preuve) ; (3) toute erreur rencontrée → `ERREURS.md` ; toute règle ou décision de Romain → `REGLES.md` (et `docs/DECISIONS-flowin-event.md` si c'est une décision métier) ; tout accès ou limite découvert → `ACCES.md` ; (4) la mémoire de l'agent concerné (`docs/claude/agents/<nom>/MEMOIRE.md`). Un agent propose ces lignes dans son rapport, l'agent principal les écrit et les pousse avec la livraison. Jamais de secret, clé ou mot de passe dans la mémoire : seulement où il est rangé. Un travail sans mise à jour de la mémoire n'est pas terminé.
