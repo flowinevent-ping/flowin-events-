@@ -24,6 +24,9 @@ Romain (non développeur) interroge ou commande un agent depuis la conversation 
 
 Protocole : passage mensuel (1er jour ouvré, avec l'élagage) ou à la demande ; lecture seule (SELECT, web, mesures) ; 5 propositions maximum par critique et par passage. Le rapport reprend le format ci-dessus avec, pour chaque proposition : preuve, impact / effort (1-5), risque, ce qui dépend de Romain. L'agent principal inscrit les propositions dans `AMELIORATIONS.md` (le carnet : statuts proposée / validée par Romain / refusée / faite ; les refusées restent avec la raison). Romain décide ; seule une proposition validée devient une mission pour un agent exécutant. Un critique ne re-propose jamais une ligne du carnet ni de sa MEMOIRE.md.
 
+## Reprise et continuité (créé le 21/11/2026)
+- `continuite-reprise` (exécutant) tient `PLAN-DE-REPRISE.md` : tags git, retour arrière code / base / fonctions / cron, secrets (noms et lieux seulement), sauvegardes, tests de restauration. Tag avant toute migration risquée ; vérification trimestrielle (prochaine 21/02/2027). `critique-architecture-code` (critique) revoit structure et processus du code, propose sans modifier ; ses propositions : `AMEL-ARC-nn`, celles de reprise : `AMEL-REP-nn`.
+
 ## Fichiers communs (lus par tous, chacun 150 lignes maximum)
 - `REGLES.md` : règles décidées par Romain + fichier de code qui les applique. Ne se redemandent jamais.
 - `ERREURS.md` : symptôme / cause / correction / garde-fou.

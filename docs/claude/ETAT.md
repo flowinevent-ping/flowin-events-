@@ -34,6 +34,7 @@ Source principale : `docs/E2E-verification-2026-11-20.md` (E2E). Comptes de test
 | Contrôles qualité quotidiens (niveau 1) : `controle_qualite_lancer`, cron 03:17 UTC | VÉRIFIÉ PROD : appliqué et exécuté une fois le 21/11, 30 contrôles ; 4 rouges et plusieurs orange à traiter (voir MEMOIRE securite-donnees) | 21/11 | `sql/2026-11-21-controles-qualite.sql`, ligne `schema_derive` = référence créée | modification volontaire de droits (rafraîchir la référence) |
 | Nettoyage des données TEST en base | BLOQUÉ : confirmation DELETE sans réponse (2 fois) | 20/11 | `sql/2026-11-20-e2e-nettoyage-TEST-2.sql` à exécuter par Romain | Romain a exécuté |
 | Équipe critique : 4 agents, mémoires, carnet `AMELIORATIONS.md` | PREMIER PASSAGE FAIT (16 propositions, aucune validée) | 21/11 | `docs/claude/AMELIORATIONS.md` ; mesures SELECT et web du 21/11 | décision de Romain sur le carnet ; passage mensuel 01/12 |
+| Reprise et continuité : plan écrit, tags de version | PLAN ÉCRIT, RIEN RESTAURÉ : tags créés en local, push refusé (403) ; sauvegardes / PITR NON vérifiés (à lire par Romain) ; fonctions déployées listées, non comparées au dépôt | 21/11 | `docs/claude/PLAN-DE-REPRISE.md` ; `list_migrations`, `list_branches` (vide), `list_edge_functions` | Romain pousse les tags et lit Database > Backups ; test de restauration sur copie |
 
 ## Réserves ouvertes (E2E 20/11)
 - Textes joueur gain immédiat et e-mail Super Event en dur NDS : voir lignes ci-dessus.

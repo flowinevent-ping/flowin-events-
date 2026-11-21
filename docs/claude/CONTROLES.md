@@ -38,3 +38,4 @@ sécurité, intégrité : securite-donnees · envois : flux-integrations · fact
 - Les pages sont contrôlées depuis le serveur (pas d'iPhone ni de caméra réels).
 - Le workflow ne lit pas la base : le rapport PDF est regénéré à la main ou par un agent.
 - gitleaks : si le dépôt appartient à une organisation, l'action demande une licence gratuite (secret `GITLEAKS_LICENSE`) : à vérifier au premier passage.
+- Reprise : tag avant migration risquée ; sauvegardes vérifiées par Romain chaque trimestre (prochaine 21/02/2027) ; fonctions Edge déployées comparées au dépôt à chaque vérification (non automatisé). Voir `PLAN-DE-REPRISE.md`.

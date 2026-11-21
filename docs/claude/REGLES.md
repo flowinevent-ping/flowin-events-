@@ -77,3 +77,4 @@ Ajout : seulement une règle écrite ou confirmée par Romain. Modification : su
 - Audit d'abord, Claude propose, Romain valide, Claude exécute ; deux tours de retours maximum par support | 08/11 | DEC « Méthode »
 - Confirmations de base de production regroupées et annoncées (Romain devant l'écran) | 08/11 | DEC « Méthode » 8
 - Les contrôles automatiques n'écrivent jamais en base et n'envoient aucun message ; ils ne demandent aucun secret | 21/11 | consigne | `scripts/controle/`, `.github/workflows/controle-qualite.yml`
+- Un tag git de version avant toute migration risquée ou grosse livraison ; sauvegardes Supabase vérifiées chaque trimestre (prochaine : 21/02/2027) ; jamais de réécriture d'historique | 21/11 | consigne agent principal (demande de Romain : pouvoir reprendre si ça casse) | `docs/claude/PLAN-DE-REPRISE.md`, agent `continuite-reprise`

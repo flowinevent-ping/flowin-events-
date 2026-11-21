@@ -64,3 +64,4 @@ Ce journal n'est pas une preuve de production : l'état vérifié est dans `ETAT
 - 21/11 | Équipe critique : agents critique-ergonomie, critique-innovation, critique-performance-donnees, veille-marche ; mémoires ; carnet AMELIORATIONS.md ; premier passage (16 propositions) | ce commit
 - 21/11 | Contrôles automatiques niveau 2 : `scripts/controle/`, workflow `controle-qualite.yml`, rapport PDF `docs/rapports/`, `docs/claude/CONTROLES.md` | ce commit
 - 21/11 | Contrôles qualité niveau 1 appliqués en prod (tables, 6 fonctions, cron 03:17 UTC), premier passage : 30 contrôles, 4 rouges (pros lisible par anon, TRUNCATE emails_compteur_jour, lot tiré au-delà du stock, tirage sans joueur) | `sql/2026-11-21-controles-qualite.sql`
+- 21/11 | Agents `critique-architecture-code` et `continuite-reprise`, `PLAN-DE-REPRISE.md`, tags `prod-2026-11-21`, `sec-2026-11-20`, `email-gmail-2026-11-20` (locaux : push refusé 403) | ce commit
