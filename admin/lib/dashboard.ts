@@ -1,6 +1,7 @@
 import { rpcAbsente } from './rpcRepli'
 import { supabase, supabasePublic, sessionPourTirage } from './supabase'
 import { sansGabarit } from './operations'
+import { partenairesDesPros } from './proFiche'
 import type { FlowinJoueur, FlowinEvent, FlowinPartenaire, FlowinLot, FlowinPro } from './types'
 
 /**
@@ -352,7 +353,8 @@ export async function fetchEventSuperEventStats(eventId: string): Promise<{ tick
     supabase.rpc('se_tickets_compte_event', { p_event_id: eventId }).then(async r => rpcAbsente(r.error)
       ? await supabase.from('se_tickets').select('id', { count: 'exact', head: true }).eq('event_id', eventId)
       : { count: typeof r.data === 'number' ? r.data : 0 }),
-    ev?.pro_id ? supabase.from('pros').select('partenaire_id').eq('id', ev.pro_id).single() : Promise.resolve({ data: null }),
+    /* Sécurité pros (21/11) : partenaire du pro par RPC (la table n'est plus lisible en anonyme). */
+    ev?.pro_id ? partenairesDesPros(supabase, [ev.pro_id]).then(l => ({ data: l[0] ? { partenaire_id: l[0].partenaire_id } : null })) : Promise.resolve({ data: null }),
   ])
   const partenaireId = (pro as { data: { partenaire_id: string | null } | null } | undefined)?.data?.partenaire_id
   if (!partenaireId || !ev?.super_event_id) return { tickets: tk.count ?? 0, gains: 0, gainsUtilises: 0 }
@@ -428,7 +430,7 @@ export async function fetchProGains(eventIds: string[]): Promise<ProGainRow[]> {
   const proIds = Array.from(new Set((evs ?? []).map(e => (e as { pro_id: string | null }).pro_id).filter(Boolean))) as string[]
   if (!proIds.length) return []
 
-  const { data: pros } = await supabase.from('pros').select('id,partenaire_id').in('id', proIds)
+  const pros = await partenairesDesPros(supabase, proIds)
   const partIds = Array.from(new Set((pros ?? [])
     .map(p => (p as { partenaire_id: string | null }).partenaire_id).filter(Boolean))) as string[]
   if (!partIds.length) return []

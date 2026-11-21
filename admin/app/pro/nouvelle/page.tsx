@@ -5,8 +5,9 @@ import { chargerSupersOuverts } from '@/lib/superEventsOuverts'
 import ProShell from '@/components/pro/ProShell'
 import OptionDesactivee from '@/components/pro/OptionDesactivee'
 import { lireDroitsPro, peutOuvrirNouvelle } from '@/lib/droitsPro'
-import ParcoursCreation, { type ProNouvelle } from '@/components/creation/ParcoursCreation'
-import Configurateur, { type ProConfigurateur } from '@/components/creation/Configurateur'
+import { type ProNouvelle } from '@/components/creation/ParcoursCreation'
+import { type ProConfigurateur } from '@/components/creation/Configurateur'
+import { NouvelleAnimationPleine } from '@/components/pro/FichePleine'
 
 export const dynamic = 'force-dynamic'
 
@@ -59,14 +60,14 @@ export default async function Page({ searchParams }: { searchParams: { pro?: str
   if ((type === 'animation' || (type === null && droits.creer_animation)) && !searchParams.se) {
     return (
       <ProShell proName={p.nom ?? 'Mon établissement'} proId={proId} active="nouvelle">
-        <Configurateur pro={p as unknown as ProConfigurateur} banques={banques} />
+        <NouvelleAnimationPleine variante="configurateur" pro={p as unknown as ProConfigurateur} banques={banques} />
       </ProShell>
     )
   }
   return (
     <ProShell proName={p.nom ?? 'Mon établissement'} proId={proId} active={type === 'rejoindre' || searchParams.se ? 'rejoindre' : 'nouvelle'}>
-      <ParcoursCreation
-        pro={p} banques={banques} supers={supers} packs={packs} droits={droits}
+      <NouvelleAnimationPleine
+        variante="parcours" pro={p} banques={banques} supers={supers} packs={packs} droits={droits}
         typeInitial={searchParams.se ? 'rejoindre' : type} seInitial={searchParams.se ?? null}
       />
     </ProShell>

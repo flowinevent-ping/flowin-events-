@@ -110,11 +110,14 @@ export default function RejoindreClient({ se }: { se: SE }) {
       const emailLower = f.email.toLowerCase().trim()
       const proId = 'pro-' + slug(emailLower)
 
-      await supabasePublic.from('pros').upsert({
+      /* securite 07/11 : anon = INSERT seul, une fiche pro existante n'est jamais ecrasee.
+         21/11 : INSERT simple (plus d'« on conflict do nothing », qui exige la lecture de `pros`, retiree a anon) ;
+         un identifiant deja pris renvoie 23505, ignore comme avant (la fiche existante reste intacte). */
+      await supabasePublic.from('pros').insert({
         id: proId, nom: f.commerce.trim(), adresse: f.adresse.trim(), secteur: f.categorie,
         contact: `${f.prenom.trim()} ${f.nom.trim()}`, email: emailLower, tel: f.tel.trim(),
         statut: 'en_attente',
-      }, { onConflict: 'id', ignoreDuplicates: true }) /* securite 07/11 : anon = INSERT seul, une fiche pro existante n'est jamais ecrasee */
+      })
 
       /* REFERENTIEL 24 — UN SEUL CHEMIN. Cette page creait directement une
          station avec un jeu choisi par le commerce (roue par defaut) : le jeu du

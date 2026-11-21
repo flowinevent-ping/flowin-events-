@@ -1,4 +1,5 @@
-import { supabase } from './supabase'
+import { supabase, supabaseVivant } from './supabase'
+import { lireFichePro } from './proFiche'
 import { rpcAbsente } from './rpcRepli'
 import type { FlowinEvent, FlowinJoueur, FlowinLot, FlowinPro } from './types'
 import { sansGabarit } from './operations'
@@ -12,16 +13,27 @@ export interface ProDashboardData {
   lots: FlowinLot[]
 }
 
+async function lireFichesPro(proId: string): Promise<{ data: FlowinPro[] | null }> {
+  const { fiche, repli } = await lireFichePro(proId, typeof window === 'undefined' ? supabaseVivant : supabase)
+  if (repli) {
+    const { data } = await supabase.from('pros').select('*').eq('id', proId).limit(1)
+    return { data: (data ?? null) as FlowinPro[] | null }
+  }
+  if (!fiche) return { data: [] }
+  if (typeof window !== 'undefined') {
+    const { data } = await supabase.from('pros').select('*').eq('id', proId).limit(1)
+    if (data && data.length) return { data: data as FlowinPro[] }
+  }
+  return { data: [fiche as unknown as FlowinPro] }
+}
+
 export async function fetchProDashboard(proId: string): Promise<ProDashboardData> {
   const empty = { pro: null, events: [], joueurs: [], lots: [] }
   if (!proId) return empty
 
-  /* Pro */
-  const { data: pros } = await supabase
-    .from('pros')
-    .select('*')
-    .eq('id', proId)
-    .limit(1)
+  /* Pro. Sécurité pros (21/11) : `pros` n'est plus lisible en anonyme. Fiche publique par RPC (sans coordonnées) ;
+     avec la session du pro (navigateur), la fiche complète. RPC absente : ancien accès direct. */
+  const { data: pros } = await lireFichesPro(proId)
 
   /* Events du pro */
   const { data: eventsBruts } = await supabase

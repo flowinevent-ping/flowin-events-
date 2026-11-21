@@ -76,19 +76,32 @@ export async function fetchParcoursData(evId: string): Promise<ParcoursPageData>
      lien aujourd'hui, la boucle ci-dessous ne pose aucune valeur et
      jeu_event_id reste undefined partout, sans rien afficher côté joueur. */
   if (partenaires.length) {
-    const { data: prosData } = await supabaseVivant
-      .from('pros').select('id,partenaire_id').in('partenaire_id', partenaires.map(p => p.id))
-    const proIds = ((prosData ?? []) as { id: string; partenaire_id: string }[])
-    if (proIds.length) {
-      const { data: evData } = await supabaseVivant
-        .from('events').select('id,pro_id,module').in('pro_id', proIds.map(p => p.id)).eq('status', 'live')
-      const evByPro = new Map(((evData ?? []) as { id: string; pro_id: string; module: string }[]).map(e => [e.pro_id, e]))
-      const proByPartenaire = new Map(proIds.map(p => [p.partenaire_id, p.id]))
+    /* Sécurité pros (21/11) : `pros` n'est plus lisible en anonyme. La RPC jeux_propres_partenaires rend, par
+       partenaire, l'animation en ligne de son pro (identifiant + jeu), sans jamais exposer le pro. RPC absente :
+       ancien accès direct. */
+    const ids = partenaires.map(p => p.id)
+    const jp = await supabaseVivant.rpc('jeux_propres_partenaires', { p_partenaire_ids: ids }, { get: true })
+    if (!jp.error) {
+      const jeuParPart = new Map(((jp.data ?? []) as { partenaire_id: string; event_id: string; module: string }[]).map(j => [j.partenaire_id, j]))
       partenaires = partenaires.map(p => {
-        const proId = proByPartenaire.get(p.id)
-        const ev2 = proId ? evByPro.get(proId) : undefined
-        return ev2 ? { ...p, jeu_event_id: ev2.id, jeu_module: ev2.module } : p
+        const j = jeuParPart.get(p.id)
+        return j ? { ...p, jeu_event_id: j.event_id, jeu_module: j.module } : p
       })
+    } else if (rpcAbsente(jp.error)) {
+      const { data: prosData } = await supabaseVivant
+        .from('pros').select('id,partenaire_id').in('partenaire_id', ids)
+      const proIds = ((prosData ?? []) as { id: string; partenaire_id: string }[])
+      if (proIds.length) {
+        const { data: evData } = await supabaseVivant
+          .from('events').select('id,pro_id,module').in('pro_id', proIds.map(p => p.id)).eq('status', 'live')
+        const evByPro = new Map(((evData ?? []) as { id: string; pro_id: string; module: string }[]).map(e => [e.pro_id, e]))
+        const proByPartenaire = new Map(proIds.map(p => [p.partenaire_id, p.id]))
+        partenaires = partenaires.map(p => {
+          const proId = proByPartenaire.get(p.id)
+          const ev2 = proId ? evByPro.get(proId) : undefined
+          return ev2 ? { ...p, jeu_event_id: ev2.id, jeu_module: ev2.module } : p
+        })
+      }
     }
   }
 

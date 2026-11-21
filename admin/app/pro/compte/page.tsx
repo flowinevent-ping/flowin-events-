@@ -4,7 +4,7 @@ import { fetchOperationsPro } from '@/lib/operations'
 import { fetchBanquesPro } from '@/lib/banques'
 import { lireDroitsPro } from '@/lib/droitsPro'
 import ProShell from '@/components/pro/ProShell'
-import EntrepriseForm from '@/components/pro/EntrepriseForm'
+import { EntrepriseFormPleine } from '@/components/pro/FichePleine'
 import { OngletOperationsPro } from '@/components/operations/BlocsOperations'
 import ListeFactures from '@/components/pro/ListeFactures'
 import CoordonneesBancaires from '@/components/pro/CoordonneesBancaires'
@@ -50,7 +50,7 @@ export default async function Page({ searchParams }: { searchParams: { pro?: str
         </Link>
       </div>
       {onglet === 'entreprise' && (p.id
-        ? <EntrepriseForm initial={{
+        ? <EntrepriseFormPleine initial={{
             id: p.id, nom: p.nom ?? null, secteur: p.secteur ?? null, adresse: p.adresse ?? null,
             code_postal: p.code_postal ?? null, ville: p.ville ?? null, siret: p.siret ?? null,
             contact: p.contact ?? null, email: p.email ?? null, tel: p.tel ?? null, partenaire_id: p.partenaire_id ?? null,

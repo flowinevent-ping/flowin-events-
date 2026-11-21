@@ -18,6 +18,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import Link from 'next/link'
 import { supabase } from '@/lib/supabase'
+import { proIdExiste } from '@/lib/proFiche'
 import { estDemo } from '@/lib/demo'
 import { capturerSource, tagSource } from '@/lib/source'
 import { CHARTE_PRO as C, VARIABLES_PRO_CSS } from '@/lib/charte'
@@ -295,7 +296,8 @@ export default function PremiereFois() {
       compteCree.current = { email: adresse.toLowerCase(), id: userId }
     }
     let idPro = identifiantPro(fiche)
-    const { data: existe } = await supabase.from('pros').select('id').eq('id', idPro).maybeSingle()
+    /* Sécurité pros (21/11) : identifiant déjà pris ? par RPC (la table n'est plus lisible en anonyme, et la session peut manquer avant la confirmation e-mail). */
+    const existe = await proIdExiste(supabase, idPro)
     if (existe) idPro = `${idPro}-${Math.random().toString(36).slice(2, 6)}`
     const ligne = lignePro(fiche, 'pro')
     const tSrc = tagSource(src)

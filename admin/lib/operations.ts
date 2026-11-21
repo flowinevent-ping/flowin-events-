@@ -28,6 +28,7 @@
  */
 import { supabase, supabaseVivant } from './supabase'
 import { rpcAbsente } from './rpcRepli'
+import { lireFichePro } from './proFiche'
 import type { FlowinEvent } from './types'
 
 /* ── Gabarit marque blanche : jamais une operation (famille B) ─────────────── */
@@ -282,6 +283,24 @@ const num = (v: unknown): number | null => {
   return Number.isFinite(n) ? n : null
 }
 
+/* Sécurité pros (21/11) : la table `pros` n'est plus lisible en anonyme. Rendu serveur (sans session) : fiche
+   publique par RPC, sans e-mail. Navigateur : la même RPC, plus l'e-mail lu avec la session du pro
+   (politique pros_self_select ; null sans session). RPC absente : ancien accès direct. */
+async function ficheProOperations(db: typeof supabase, proId: string): Promise<{ id: string; nom: string | null; email: string | null; partenaire_id: string | null } | null> {
+  const { fiche, repli } = await lireFichePro(proId, db)
+  if (repli) {
+    const { data } = await db.from('pros').select('id,nom,email,partenaire_id').eq('id', proId).maybeSingle()
+    return (data ?? null) as { id: string; nom: string | null; email: string | null; partenaire_id: string | null } | null
+  }
+  if (!fiche) return null
+  let email: string | null = null
+  if (typeof window !== 'undefined') {
+    const r = await db.from('pros').select('email').eq('id', proId).maybeSingle()
+    email = (r.data as { email: string | null } | null)?.email ?? null
+  }
+  return { id: fiche.id, nom: fiche.nom, email, partenaire_id: fiche.partenaire_id }
+}
+
 /**
  * Charge tout ce qu il faut pour les blocs d un pro, en une fois.
  * Utilisable cote serveur (pages /pro) comme cote client (fiche SA) : meme
@@ -295,7 +314,7 @@ export async function fetchOperationsPro(proId: string): Promise<OperationsPro> 
   if (!proId) return vide
 
   const [{ data: pro }, { data: evs }, { data: ses }] = await Promise.all([
-    db.from('pros').select('id,nom,email,partenaire_id').eq('id', proId).maybeSingle(),
+    ficheProOperations(db, proId).then(data => ({ data })),
     db.from('events')
       .select('id,pro_id,nom,module,status,date_d,date_f,super_event_id,participants,cfg,paiement_statut,created_at')
       .eq('pro_id', proId),

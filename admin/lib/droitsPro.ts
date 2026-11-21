@@ -12,6 +12,7 @@
  * Le verrou reel est en base (triggers de 06) ; ceci ne fait que masquer et expliquer.
  */
 import { supabaseVivant } from './supabase'
+import { lireFichePro } from './proFiche'
 
 export type CleDroit = 'creer_animation' | 'creer_super_event' | 'rejoindre_super_event' | 'creer_banques' | 'gerer_partenaires'
 export type DroitsPro = Record<CleDroit, boolean>
@@ -62,6 +63,9 @@ export async function lireDroitsPro(proId: string): Promise<DroitsPro> {
   if (deja) return deja.then(d => ({ ...d }))
   const p = (async () => {
     try {
+      /* Sécurité pros (21/11) : droits lus par la fiche publique (RPC, sans coordonnées) ; RPC absente : lecture directe. */
+      const { fiche, repli } = await lireFichePro(proId, supabaseVivant)
+      if (!repli) return fiche ? droitsEffectifs(fiche.droits) : { ...DROITS_DEFAUT }
       const { data, error } = await supabaseVivant.from('pros').select('droits').eq('id', proId).maybeSingle()
       if (error && navigateur && (error.code === '42703' || /droits/.test(error.message || ''))) {
         colonneAbsente = true

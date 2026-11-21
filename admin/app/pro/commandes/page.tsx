@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import { supabase } from '@/lib/supabase'
+import { lireFichePro } from '@/lib/proFiche'
 import ProShell from '@/components/pro/ProShell'
 import HistoriqueCommandes from '@/components/pro/HistoriqueCommandes'
 import { H1, SUB } from '@/lib/proui'
@@ -12,8 +13,12 @@ export default async function Page({ searchParams }: { searchParams: { pro?: str
   const proId = searchParams.pro ?? ''
   let nom = 'Mon établissement'
   if (proId) {
-    const { data } = await supabase.from('pros').select('nom').eq('id', proId).maybeSingle()
-    if (data?.nom) nom = data.nom
+    /* Sécurité pros (21/11) : nom par la fiche publique (RPC) ; RPC absente : lecture directe. */
+    const { fiche, repli } = await lireFichePro(proId)
+    if (repli) {
+      const { data } = await supabase.from('pros').select('nom').eq('id', proId).maybeSingle()
+      if (data?.nom) nom = data.nom
+    } else if (fiche?.nom) nom = fiche.nom
   }
   return (
     <ProShell proName={nom} proId={proId} active="commandes">

@@ -5,6 +5,7 @@
  * de valider la demande). Aucune donnee inventee : tout vient du formulaire.
  */
 import type { SupabaseClient } from '@supabase/supabase-js'
+import { proIdExiste } from './proFiche'
 import { FichePro, identifiantPro, lignePro, ligneProEntreprise } from '@/lib/proCreation'
 import { messageAuth, messageFr } from '@/lib/erreursFr'
 
@@ -45,7 +46,8 @@ export async function inscrirePro(
     memo.current = { email: adresse.toLowerCase(), id: userId }
   }
   let idPro = identifiantPro(fiche)
-  const { data: existe } = await supabase.from('pros').select('id').eq('id', idPro).maybeSingle()
+  /* Sécurité pros (21/11) : identifiant déjà pris ? par RPC (la table n'est plus lisible en anonyme). */
+  const existe = await proIdExiste(supabase, idPro)
   if (existe) idPro = `${idPro}-${Math.random().toString(36).slice(2, 6)}`
   const ligne = lignePro(fiche, 'pro')
   const base = { ...ligne, tags: [...(ligne.tags ?? []), `source:${source}`], id: idPro, auth_id: userId }

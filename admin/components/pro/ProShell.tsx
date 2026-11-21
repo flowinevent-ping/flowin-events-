@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { useEffect, useState } from 'react'
 import { useFermetureOverlay } from '@/lib/useFermetureOverlay'
 import { supabase } from '@/lib/supabase'
+import { lireFichePro } from '@/lib/proFiche'
 import AccesBloque from './AccesBloque'
 import TablesMobiles from '@/components/dashboard/TablesMobiles'
 import { lireDroitsPro, peutOuvrirNouvelle, DROITS_DEFAUT, type DroitsPro } from '@/lib/droitsPro'
@@ -108,10 +109,17 @@ export default function ProShell({ proName, proId, active, children }: { proName
     if (!proId) return
     let fini = false
     ;(async () => {
-      const { data, error } = await supabase.from('pros').select('statut,onboarding_source').eq('id', proId).maybeSingle()
+      /* Sécurité pros (21/11) : statut et source par la fiche publique (RPC, sans coordonnées) ; RPC absente : lecture directe. */
+      const { fiche, repli } = await lireFichePro(proId, supabase)
+      let d: { statut?: string | null; onboarding_source?: string | null } | null = fiche
+      let erreur = false
+      if (repli) {
+        const r = await supabase.from('pros').select('statut,onboarding_source').eq('id', proId).maybeSingle()
+        d = r.data as { statut?: string; onboarding_source?: string } | null
+        erreur = !!r.error
+      }
       if (fini) return
-      const d = data as { statut?: string; onboarding_source?: string } | null
-      setAcces(!error && d?.onboarding_source === 'premiere-fois' && (d?.statut ?? '') === 'en_attente' ? 'bloque' : 'ok')
+      setAcces(!erreur && d?.onboarding_source === 'premiere-fois' && (d?.statut ?? '') === 'en_attente' ? 'bloque' : 'ok')
     })()
     return () => { fini = true }
   }, [proId])

@@ -606,9 +606,17 @@ async function flowinProFetch(){
     if(!FLOWIN_PRO_ID) return;
 
     /* ── Pro ── */
-    var rPro = await fetch(FLOWIN_SUPA_URL+'/rest/v1/pros?id=eq.'+encodeURIComponent(FLOWIN_PRO_ID)+'&select=*', {headers:H});
-    var pros = await rPro.json();
-    if(pros && pros.length) FLOWIN_PRO_DATA.pro = pros[0];
+    /* Sécurité pros (21/11) : la table pros n'est plus lisible en anonyme ; fiche publique par RPC (GET, sans coordonnées).
+       RPC absente (PGRST202 / 404) : ancienne lecture directe. */
+    var rPro = await fetch(FLOWIN_SUPA_URL+'/rest/v1/rpc/pro_fiche_publique?p_pro_id='+encodeURIComponent(FLOWIN_PRO_ID), {headers:H});
+    if(rPro.status === 404){
+      var rPro2 = await fetch(FLOWIN_SUPA_URL+'/rest/v1/pros?id=eq.'+encodeURIComponent(FLOWIN_PRO_ID)+'&select=*', {headers:H});
+      var pros = await rPro2.json();
+      if(pros && pros.length) FLOWIN_PRO_DATA.pro = pros[0];
+    } else {
+      var proFiche = await rPro.json();
+      if(proFiche && proFiche.id) FLOWIN_PRO_DATA.pro = proFiche;
+    }
 
     /* ── Events du pro ── */
     var rEv = await fetch(FLOWIN_SUPA_URL+'/rest/v1/events?pro_id=eq.'+encodeURIComponent(FLOWIN_PRO_ID)+'&select=*&order=date_d.desc', {headers:H});
