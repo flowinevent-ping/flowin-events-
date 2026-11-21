@@ -4,6 +4,11 @@
   'use strict'
   var NS = 'http://www.w3.org/2000/svg'
   var W = 540, H = 960
+  /* Zones sures TikTok / Reels / Facebook : aucun texte dans les 10 % du haut,
+     les 20 % du bas ni les 15 % de droite (interface des applis par-dessus). */
+  var SAFE = { x0: 20, x1: 459, y0: 96, y1: 768 }
+  /* Voile bas : tout ce qui passe dessous est masque (opaque des VEIL_FULL). */
+  var VEIL_Y = 738, VEIL_FULL = 786
 
   var COL = {
     ink: '#1B3A5C', blue: '#3B5CC4', teal: '#00B4A0', orange: '#E85D04', amber: '#F59E0B',
@@ -27,7 +32,19 @@
   function pop(t, a) { var p = prog(t, a, 0.45); return p <= 0 ? 0 : p >= 1 ? 1 : 1 + 0.12 * Math.sin(p * Math.PI) * (1 - p) * 3 - 0.0 }
 
   var warnings = []
+  var veilOn = false
   function gid() { return 'u' + (uid++) }
+  /* Voile bas (couleur du fond) : masque le bas du telephone, sous lequel
+     passent les boutons et pseudos de TikTok / Reels. */
+  function veil(g, col) {
+    veilOn = true
+    var id = 'v' + (uid++)
+    var lg = E('linearGradient', { id: id, x1: 0, y1: 0, x2: 0, y2: 1 }, defs)
+    E('stop', { offset: 0, 'stop-color': col, 'stop-opacity': 0 }, lg)
+    E('stop', { offset: 1, 'stop-color': col, 'stop-opacity': 1 }, lg)
+    R(g, 0, VEIL_Y, W, VEIL_FULL - VEIL_Y, 0, 'url(#' + id + ')')
+    R(g, 0, VEIL_FULL - 0.5, W, H - VEIL_FULL + 1, 0, col)
+  }
   var defs = null, uid = 0
 
   /* Texte : maxW reduit la taille jusqu a tenir. Toute reduction forte est
@@ -279,27 +296,79 @@
     var duration = t0
     var root = null
 
-    function caption(g, lines, p, accent) {
-      var y0 = 30, h = lines.length > 1 ? 112 : 76
-      var op = easeOut(p * 3)
-      var cg = G(g, 'translate(0,' + ((1 - op) * -16).toFixed(1) + ')', op)
-      R(cg, 22, y0 + 4, 496, h, 20, 'rgba(10,20,40,.16)')
-      R(cg, 22, y0, 496, h, 20, '#fff')
-      R(cg, 22, y0, 8, h, 4, accent || COL.blue)
+    /* Legende : bandeau blanc dans la zone sure du haut, gros caracteres,
+       apparition en 0,25 s quelle que soit la duree de la scene. */
+    function caption(g, lines, lt, accent) {
+      var x0 = 24, y0 = 104, w = 428, lh = 38, h = 26 + lines.length * lh
+      var op = easeOut(lt / 0.25)
+      var cg = G(g, 'translate(0,' + ((1 - op) * -12).toFixed(1) + ')', op)
+      R(cg, x0, y0 + 4, w, h, 18, 'rgba(10,20,40,.18)')
+      R(cg, x0, y0, w, h, 18, '#fff')
+      R(cg, x0, y0, 9, h, 4, accent || COL.blue)
       lines.forEach(function (l, i) {
-        T(cg, 46, y0 + 44 + i * 40, l, { size: 27, w: 800, fill: COL.ink, maxW: 456 })
+        T(cg, x0 + 26, y0 + 44 + i * lh, l, { size: 29, w: 800, fill: COL.ink, maxW: w - 44 })
       })
+    }
+
+    /* V3 : deroule. Sous la legende, « ÉTAPE n/N » et une pastille par
+       etape (faites : cochees, en cours : pleine), pour lire le parcours
+       entier et pas des moments isoles. */
+    function etapes(g, n, total, lt, accent, h) {
+      var x0 = 24, y0 = 104 + h + 10, w = 428, hh = 34
+      var op = easeOut((lt - 0.1) / 0.25)
+      var eg = G(g, null, op)
+      R(eg, x0, y0, w, hh, 17, 'rgba(255,255,255,.94)', { stroke: 'rgba(10,20,40,.08)', 'stroke-width': 1 })
+      T(eg, x0 + 16, y0 + 23, 'ÉTAPE ' + n + '/' + total, { size: 15, w: 800, fill: accent, ls: 0.6 })
+      var a = x0 + 128, b = x0 + w - 18, pas = total > 1 ? (b - a) / (total - 1) : 0, cy = y0 + hh / 2
+      R(eg, a, cy - 1.5, b - a, 3, 1.5, '#E3E6EE')
+      if (n > 1) R(eg, a, cy - 1.5, pas * (n - 1), 3, 1.5, accent)
+      for (var i = 1; i <= total; i++) {
+        var cx = a + pas * (i - 1)
+        if (i < n) { C(eg, cx, cy, 8, accent); P(eg, 'M' + (cx - 3.5) + ' ' + cy + ' l2.6 2.6 l4.6 -4.8', 'none', { stroke: '#fff', 'stroke-width': 2, 'stroke-linecap': 'round', 'stroke-linejoin': 'round' }) }
+        else if (i === n) { C(eg, cx, cy, 11, accent); C(eg, cx, cy, 4, '#fff') }
+        else C(eg, cx, cy, 7, '#fff', { stroke: '#C9CED9', 'stroke-width': 2 })
+      }
     }
 
     function drawScene(s, t, g) {
       var lt = t - s.start
       s.draw(g, lt, s)
-      if (s.caption) caption(g, s.caption, lt / s.dur, S.accent)
+      if (s.caption) caption(g, s.caption, lt, S.accent)
+      if (s.step && S.steps) etapes(g, s.step, S.steps, lt, S.accent, 26 + s.caption.length * 38)
+    }
+
+    /* Controle des zones sures : chaque texte visible doit tenir dans SAFE.
+       Un texte entierement sous le voile opaque est invisible : ignore. */
+    function controleZones(svg) {
+      var box = svg.getBoundingClientRect(), k = W / box.width
+      var out = []
+      Array.prototype.forEach.call(svg.querySelectorAll('text'), function (n) {
+        if (!n.textContent.trim()) return
+        var op = 1, p = n
+        while (p && p !== svg) {
+          var o = p.getAttribute && p.getAttribute('opacity')
+          if (o !== null && o !== undefined && o !== '') op *= Number(o)
+          p = p.parentNode
+        }
+        if (op < 0.2) return
+        var r = n.getBoundingClientRect()
+        var x0 = (r.left - box.left) * k, x1 = (r.right - box.left) * k, y0 = (r.top - box.top) * k, y1 = (r.bottom - box.top) * k
+        if (y0 >= H || x1 <= 0 || x0 >= W || y1 <= 0) return
+        if (veilOn && y0 >= VEIL_FULL) return
+        var why = []
+        if (x0 < SAFE.x0) why.push('gauche')
+        if (x1 > SAFE.x1 + 1) why.push('droite')
+        if (y0 < SAFE.y0) why.push('haut')
+        if (y1 > SAFE.y1 + 1) why.push('bas')
+        if (why.length) out.push('hors zone sure (' + why.join(', ') + ') : ' + n.textContent)
+      })
+      return out
     }
 
     function render(t) {
       t = clamp(t, 0, duration - 1e-6)
       warnings.length = 0
+      veilOn = false
       uid = 0
       while (svg.firstChild) svg.removeChild(svg.firstChild)
       defs = E('defs', null, svg)
@@ -315,34 +384,62 @@
         var ng = G(root, null, easeInOut(lt / fade).toFixed(3))
         drawScene(s, t, ng)
       } else drawScene(s, t, G(root))
-      window.__warnings = warnings.slice()
+      window.__warnings = warnings.slice().concat(controleZones(svg))
       return i
     }
 
+    /* Ecran de fin. o.mode 'social' : pas de QR (on ne scanne pas son propre
+       ecran), un appel a l action et « lien en bio ». o.mode 'qr' : QR reel,
+       petit et secondaire, pour les ecrans d animation et les evenements.
+       Tout le texte reste dans la zone sure, centre sur la colonne utile. */
     function endCard(g, t, o) {
       R(g, 0, 0, W, H, 0, grad('end' + (uid++), [[0, COL.d1], [1, COL.d2]]))
       C(g, 480, 120, 180, 'rgba(59,92,196,.18)'); C(g, 40, 900, 200, 'rgba(0,180,160,.10)')
-      var p = easeOut(prog(t, 0, 0.6))
-      var lg = G(g, 'translate(0,' + ((1 - p) * 20).toFixed(1) + ')', p)
-      C(lg, 160, 150, 9, '#fff')
-      var tx = E('text', { x: 180, y: 170, 'font-family': 'Manrope, sans-serif', 'font-size': 64, 'font-weight': 800, fill: '#fff' }, lg)
+      var cx = 240
+      var p = easeOut(prog(t, 0, 0.45))
+      var lg = G(g, 'translate(0,' + ((1 - p) * 16).toFixed(1) + ')', p)
+      C(lg, 142, 196, 9, '#fff')
+      var tx = E('text', { x: 162, y: 216, 'font-family': 'Manrope, sans-serif', 'font-size': 62, 'font-weight': 800, fill: '#fff' }, lg)
       tx.textContent = 'Flow'
       var ts = E('tspan', { fill: '#6F8CF0' }, tx); ts.textContent = 'in'
-      o.accroche.forEach(function (l, i) { T(lg, 270, 246 + i * 40, l, { size: 30, w: 800, fill: '#fff', anchor: 'middle', maxW: 480 }) })
-      var q = window.QR
-      var size = 300, x = (W - size) / 2, y = 340
-      var qp = easeOut(prog(t, 0.3, 0.6))
-      var qg = G(g, null, qp)
-      R(qg, x - 6, y - 6, size + 12, size + 12, 22, 'rgba(0,0,0,.25)')
-      R(qg, x, y, size, size, 18, '#fff')
-      var m = size / (q.n + 8)
-      P(qg, q.d, '#0E1B30', { transform: 'translate(' + (x + 4 * m) + ',' + (y + 4 * m) + ') scale(' + m + ')', 'shape-rendering': 'crispEdges' })
-      T(g, 270, y + size + 50, o.scan, { size: 22, w: 800, fill: '#fff', anchor: 'middle', maxW: 480, op: qp })
-      T(g, 270, y + size + 92, o.url, { size: 20, w: 700, fill: '#9FB4FF', anchor: 'middle', maxW: 480, op: qp })
-      T(g, 270, 900, 'flowin-events.vercel.app', { size: 18, w: 700, fill: 'rgba(255,255,255,.7)', anchor: 'middle', maxW: 480 })
+      o.accroche.forEach(function (l, i) { T(lg, cx, 290 + i * 42, l, { size: 32, w: 800, fill: '#fff', anchor: 'middle', maxW: 420 }) })
+      var yb = 290 + o.accroche.length * 42 + 10
+      var qp = easeOut(prog(t, 0.25, 0.45))
+      if (o.mode === 'qr') {
+        var q = window.QR
+        var size = 196, x = cx - size / 2, y = yb
+        var qg = G(g, null, qp)
+        R(qg, x - 5, y - 5, size + 10, size + 10, 18, 'rgba(0,0,0,.25)')
+        R(qg, x, y, size, size, 14, '#fff')
+        var m = size / (q.n + 8)
+        P(qg, q.d, '#0E1B30', { transform: 'translate(' + (x + 4 * m) + ',' + (y + 4 * m) + ') scale(' + m + ')', 'shape-rendering': 'crispEdges' })
+        T(g, cx, y + size + 42, o.scan, { size: 22, w: 800, fill: '#fff', anchor: 'middle', maxW: 420, op: qp })
+        T(g, cx, y + size + 76, o.url, { size: 18, w: 700, fill: '#9FB4FF', anchor: 'middle', maxW: 420, op: qp })
+      } else {
+        var bg = G(g, null, qp)
+        var bw = 360, bh = 66, bx = cx - bw / 2, by = yb + 24
+        R(bg, bx, by, bw, bh, bh / 2, grad('cta' + (uid++), [[0, o.cta1 || COL.blue], [1, o.cta2 || COL.teal]], 1, 0))
+        T(bg, cx, by + 42, o.cta, { size: 25, w: 800, fill: '#fff', anchor: 'middle', maxW: bw - 40 })
+        T(bg, cx, by + bh + 56, 'Lien en bio', { size: 26, w: 800, fill: '#fff', anchor: 'middle' })
+        T(bg, cx, by + bh + 92, o.url, { size: 20, w: 700, fill: '#9FB4FF', anchor: 'middle', maxW: 420 })
+      }
     }
 
-    return { render: render, duration: duration, endCard: endCard }
+    /* Accroche des 1,5 premieres secondes : tres gros texte, visible des la
+       premiere image (pas de fondu : c est aussi la vignette de la video). */
+    function hookCard(g, t, o) {
+      R(g, 0, 0, W, H, 0, grad('hk' + (uid++), o.fond))
+      C(g, 470, 210, 190, 'rgba(255,255,255,.08)'); C(g, 60, 860, 230, 'rgba(255,255,255,.07)')
+      var s = 1 + 0.035 * (1 - easeOut(prog(t, 0, 0.5)))
+      var hg = G(g, 'translate(' + (240 * (1 - s)).toFixed(1) + ',' + (330 * (1 - s)).toFixed(1) + ') scale(' + s.toFixed(4) + ')')
+      if (o.kicker) T(hg, 36, 170, o.kicker, { size: 20, w: 800, fill: 'rgba(255,255,255,.75)', ls: 2, maxW: 410 })
+      o.lignes.forEach(function (l, i) {
+        T(hg, 34, 252 + i * 62, l, { size: 52, w: 800, fill: i === o.forte ? (o.couleurForte || '#FFE27A') : '#fff', maxW: 418 })
+      })
+      if (o.visuel) o.visuel(g, t)
+    }
+
+    return { render: render, duration: duration, endCard: endCard, hookCard: hookCard }
   }
 
   /* ---------- Page : lecteur ou mode #record ---------- */
@@ -354,7 +451,7 @@
     S.engine = eng
     var t = 0, playing = !record, last = null
     var ui = {}
-    window.ANIM = { duration: eng.duration, ready: false, seek: function (x) { t = x; draw() }, scenes: S.scenes.map(function (s) { return { id: s.id, label: s.label, start: s.start, dur: s.dur } }) }
+    window.ANIM = { duration: eng.duration, ready: false, seek: function (x) { t = x; draw() }, scenes: S.scenes.map(function (s) { return { id: s.id, label: s.label, start: s.start, dur: s.dur, caption: !!s.caption } }) }
 
     function fmt(x) { var s = Math.floor(x); return Math.floor(s / 60) + ':' + ('0' + (s % 60)).slice(-2) }
     function draw() {
@@ -397,7 +494,7 @@
   }
 
   window.FL = {
-    W: W, H: H, COL: COL, E: E, T: T, R: R, C: C, P: P, G: G, grad: grad, clip: clip,
+    W: W, H: H, COL: COL, E: E, T: T, R: R, C: C, P: P, G: G, grad: grad, clip: clip, veil: veil, SAFE: SAFE,
     clamp: clamp, lerp: lerp, easeOut: easeOut, easeInOut: easeInOut, prog: prog, pop: pop,
     statusBar: statusBar, btn: btn, tap: tap, check: check, qrIcon: qrIcon, phone: phone,
     person: person, bgFete: bgFete, bgSoft: bgSoft, bgBureau: bgBureau, bgBoutique: bgBoutique,
