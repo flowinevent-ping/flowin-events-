@@ -9,14 +9,14 @@
 // SECURITE (20/11/2026) : la requete ne fournit QUE l'id. Le bon est relu en base (cle service) et TOUTES les
 // valeurs, adresse client comprise, viennent de la base : plus de destinataire pris dans le corps de la requete
 // (relais ouvert avec la cle anon publique). Un id inconnu = 404, aucun envoi.
-// Regle de Romain : pas d'email aux clients. Le mail « client » est donc adresse a Flowin, a transmettre au pro
-// (comme notify-commande-animation), sauf ENVOI_CLIENT=oui qui le renvoie au pro.
+// Confirmation de bon de commande : copie envoyee au SIGNATAIRE (adresse lue en base sur le bon signe, jamais dans la requete),
+// comme la v2 voulue par Romain (copie interne Flowin conservee). ENVOI_CLIENT=non la redirige vers Flowin.
 // Deploye avec verify_jwt true (comme avant).
 
 import { canal, envoyerEmail } from "../_shared/mailer.ts";
 
 const NOTIFY_TO = Deno.env.get("NOTIFY_TO") || "flowinevent@gmail.com";
-const ENVOI_CLIENT = (Deno.env.get("ENVOI_CLIENT") || "") === "oui";
+const ENVOI_CLIENT = (Deno.env.get("ENVOI_CLIENT") || "oui") !== "non"; // defaut = envoi au signataire (comportement v2 voulu par Romain)
 const SERVICE = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || "";
 const COLS = "id,raison_sociale,offre,offre_label,montant_ttc,contact,email,tel,siret,signataire,date_signature,signature";
 const DOC_BASE = Deno.env.get("BON_COMMANDE_URL") || "https://flowin-events.vercel.app/bon-commande-nds.html";
