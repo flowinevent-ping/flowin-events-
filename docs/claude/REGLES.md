@@ -76,3 +76,4 @@ Ajout : seulement une règle écrite ou confirmée par Romain. Modification : su
 - Ne jamais recréer l'existant : chercher d'abord, modifier ; aucune ligne du registre supprimée sans Romain | 09/11 | DEC, REG
 - Audit d'abord, Claude propose, Romain valide, Claude exécute ; deux tours de retours maximum par support | 08/11 | DEC « Méthode »
 - Confirmations de base de production regroupées et annoncées (Romain devant l'écran) | 08/11 | DEC « Méthode » 8
+- Les contrôles automatiques n'écrivent jamais en base et n'envoient aucun message ; ils ne demandent aucun secret | 21/11 | consigne | `scripts/controle/`, `.github/workflows/controle-qualite.yml`

@@ -43,3 +43,4 @@ Sources : `docs/E2E-verification-2026-11-20.md` (E2E), `docs/SECURITE-*.md` (SEC
 - Migration rejouée par erreur | `apply_migration` = DDL persistant en prod (CLA) | SQL idempotents avec rollback en pied | ne pas rejouer
 - Confusion avec « Flow-révision » (assiduité +5, élèves, enseignants) | autre produit (DEC 20/11) | rien à ajouter à Flowin Event | Flowin Event = BAITA EURL, commerces et événements
 - Statut HTTP d'un cron introuvable | `net.http_post` est asynchrone | lire `net._http_response` ou les journaux Edge (SEC rappel) | ne pas conclure sur `cron.job_run_details`
+- Playwright 1.60 ne trouve pas son Chromium (attend 1223, présent 1243) | version du navigateur installé différente | `_playwright.mjs` bascule sur le Chromium présent | si le navigateur ne démarre pas : `npx playwright install chromium`
