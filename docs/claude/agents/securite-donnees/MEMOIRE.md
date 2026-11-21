@@ -38,5 +38,13 @@
 ## Sources et standards utiles
 - Supabase : advisors de sécurité (`get_advisors`), guide RLS ; PostgREST (codes PGRST202, 42501) ; OWASP API Security Top 10 (autorisation au niveau objet) ; RGPD art. 32.
 
+## Contrôles quotidiens (niveau 1, appliqué en prod le 21/11/2026)
+- `sql/2026-11-21-controles-qualite.sql` (migration `controles_qualite_2026_11_21`) : tables `controles_qualite` (une ligne par contrôle et par passage) et `schema_reference` (RLS sans politique) ; fonctions `controle_qualite_lancer()`, `controle_qualite_dernier()`, `schema_empreinte()`, `schema_reference_rafraichir()` (service_role seulement) ; cron `controle-qualite-quotidien` à 03:17 UTC. 30 contrôles : SECURITE, INTEGRITE, ENVOIS, PROPRETE, PRODUIT, FACTURATION, DERIVE. Lecture seule, ne corrige rien.
+- Lire : `select public.controle_qualite_dernier();` (service_role ou éditeur SQL). Liste blanche des INSERT anonymes = variable `v_liste_blanche` de la fonction.
+- Dérive : première référence prise le 21/11 (414 éléments, politiques + droits des fonctions). Après un changement VOULU de droits ou politiques : `select public.schema_reference_rafraichir();`, sinon la ligne `schema_derive` reste orange.
+- Premier passage du 21/11 : rouge = `pros` lisible par anon (politique `pros_anon_select`), TRUNCATE accordé sur `emails_compteur_jour`, lot `Bon d'achat 20 €` de `ev-nds-bergerie` tiré 8 fois pour 7, 1 tirage `soir` sans joueur (ev-nds-utile, 01/08). Orange = 13 events sans lot, données TEST à nettoyer, animations sans position / lot / QR. Rien corrigé (consigne), décisions à Romain.
+- Pièges : Supabase accorde par défaut tous les droits aux nouveaux objets `public` (revoke explicite obligatoire, y compris TRUNCATE sur les tables créées par migration). `pros` n'a pas de `created_at` : le contrôle utilise `entree_p`. Le contrôle des lots peut signaler un faux positif si `lots.quantite` est décrémentée au retrait.
+- Retrait : bloc ROLLBACK en pied du fichier SQL. Le journal grossit de 30 lignes par jour (purge à décider).
+
 ## Ouvert
-- Contrôler le cron du 21/11 ; état prod des SQL non consignés ; décision sur le plan Supabase ; durcir l'identité joueur ; revoir `crm_pro`.
+- Cron du 21/11 09:07 UTC : `succeeded` dans `cron.job_run_details` (statut HTTP réel non relu) ; corriger les rouges du contrôle quotidien (voir ci-dessus) ; état prod des SQL non consignés ; décision sur le plan Supabase ; durcir l'identité joueur ; revoir `crm_pro`.
