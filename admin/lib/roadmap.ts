@@ -20,7 +20,7 @@ export interface BlocRoadmap {
   items: ItemRoadmap[]
 }
 
-export const MAJ = '01/11/2026'
+export const MAJ = '21/11/2026'
 
 export const LIBELLE_ETAT: Record<EtatItem, string> = {
   ok: '✓ Fait',
@@ -148,6 +148,16 @@ export const BLOCS: BlocRoadmap[] = [
     items: [
       { etat: 'ok', titre: 'Canal WhatsApp + filtres CRM (source, statut gagnant) ajoutés', detail: 'Envoi en masse (SA) a maintenant un canal WhatsApp (liens wa.me un par un, pas de BCC possible côté WhatsApp) à côté du Gmail existant, plus les mêmes filtres que le reste du CRM (source, gagnant/lot en attente/confirmé/utilisé), ville et code postal affichés.' },
       { etat: 'todo', titre: 'Connecteur email tiers (Brevo, Mailchimp, ou autre) -- décision de Romain à venir', detail: 'Romain veut un vrai envoi groupé (suivi ouverture/clic, désabonnement automatique -- absent du lien Gmail actuel). Mailchimp écarté : plafond gratuit à 500 contacts (déjà 471 destinataires opt-in aujourd\\u2019hui). Brevo (ex-Sendinblue, français) recommandé en alternative : gratuit jusqu\\u2019à 300 emails/jour, aucune limite de contacts, pas de carte bancaire. Romain : "si tu as une autre solution que Brevo ou Mailchimp tu me diras" -- à rechercher/proposer si une meilleure option existe. Quel que soit l\\u2019outil choisi, ça reste une vraie intégration (compte à créer, expéditeur à vérifier, clé API) -- pas un simple bouton à ajouter. Écriture/câblage bloqués tant que Romain n\\u2019a pas créé de compte et fourni la clé API.' },
+    ],
+  },
+  {
+    titre: 'Sécurité et méthode de travail de Claude (Romain, 21/11/2026)',
+    items: [
+      { etat: 'ok', titre: 'Règle d’accès : Super Admin et administrateurs gardent tous les accès ; Claude modifie l’application par le chemin le plus sécurisé', detail: 'Romain (21/11) : stabiliser sans complexifier. Claude travaille seul sur tout ce qui est additif ou réversible. Pour toute suppression ou retrait de droit, il annonce l’opération, la regroupe, et attend la confirmation de Romain dans Supabase : jamais de contournement. Règle écrite dans docs/claude/REGLES.md et ACCES.md.' },
+      { etat: 'ok', titre: 'La clé publique n’est pas un secret : la protection vient des règles de la base', detail: 'Les pages de jeu (QR codes) ont besoin de la clé publique. Ce qui protège les données, ce sont les règles d’accès de la base (RLS) et les fonctions contrôlées, vérifiées chaque nuit par le contrôle qualité. La clé de service n’est jamais côté navigateur ni dans le dépôt.' },
+      { etat: 'hold', titre: 'Lecture publique de la table des pros : dernière étape en attente de confirmation', detail: 'Les fonctions sécurisées et le code sont en ligne ; il reste à retirer l’ancienne règle (pros_anon_select) avec la confirmation de Romain. Voir docs/SECURITE-pros-2026-11-21.md.' },
+      { etat: 'todo', titre: 'Fonction d’export des pros avec jeton écrit en dur : retirer l’accès public', detail: 'flowin_export_pros est exécutable sans connexion et son jeton figure dans le dépôt. À fermer (revoke) après confirmation que la sauvegarde Google Sheet n’est plus utilisée.' },
+      { etat: 'ok', titre: 'Nettoyage des données de test : jamais de confusion avec NDS 2026, Pâques 2026 ni les vrais participants', detail: 'Seuls les identifiants créés par les tests (préfixes ev-test-, se-test-super-event-e2e, pro-test-, comptes flowinevent+…) sont visés, après un aperçu des lignes concernées. Fêtes de Pâques 2026 (ev-paques), Nuits du Sud 2026 et leurs participants ne sont jamais touchés.' },
     ],
   },
 ]
