@@ -39,3 +39,6 @@ sécurité, intégrité : securite-donnees · envois : flux-integrations · fact
 - Le workflow ne lit pas la base : le rapport PDF est regénéré à la main ou par un agent.
 - gitleaks : si le dépôt appartient à une organisation, l'action demande une licence gratuite (secret `GITLEAKS_LICENSE`) : à vérifier au premier passage.
 - Reprise : tag avant migration risquée ; sauvegardes vérifiées par Romain chaque trimestre (prochaine 21/02/2027) ; fonctions Edge déployées comparées au dépôt à chaque vérification (non automatisé). Voir `PLAN-DE-REPRISE.md`.
+
+## Format de sortie (Romain, 21/11/2026)
+Pas de PDF ni de rapport chaque semaine. Si un contrôle est rouge : alerte courte (problème, cause, solution faite ou proposée, décision de Romain). Tout vert : silence et une ligne dans ETAT.md. Le PDF (scripts/controle/rapport-pdf.mjs) reste disponible sur demande.
