@@ -47,3 +47,6 @@ Source de vérité du reste-à-faire : `HANDOFF-flowin-nds2026.md`.
 
 ## URLs production
 `flowin-events.vercel.app/landing`, `/nds`, `/dashboard.html`, `/pro-nds-live.html?ev=`, `/bon-commande-nds.html`.
+
+## Agents dédiés et mémoire
+Sept agents de projet (`.claude/agents/`) avec mémoire dans le dépôt : **`docs/claude/README.md`** (protocole, index, élagage mensuel). Avant de demander quoi que ce soit à Romain : lire `docs/claude/ACCES.md`, `REGLES.md`, `CIBLES.md` et la mémoire de l'agent concerné.
