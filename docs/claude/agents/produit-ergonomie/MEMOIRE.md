@@ -38,3 +38,4 @@
 - Affichage « Commerce partenaire — » sur `lot.html` pour un pro sans partenaire (cosmétique).
 - 8 animations sans position sur la carte : pas urgent (19/11), rien à faire.
 - Parcours d'inscription pro : validation par Flowin manuelle (voulu) : message clair à vérifier.
+- 23/11 CRM pro : une cellule de tableau = un seul bloc (TablesMobiles la met en grille titre / valeur sur téléphone) ; coordonnées masquées = « Contact non partagé » (TEXTE_NON_PARTAGE, lib/crmPro.ts) ; normaliserContact() nettoie les lignes de crm_pro ; écrans SA qui lisent des coordonnées : SessionSAExpiree, jamais une liste vide ; sa-alert + gras = classe texte.

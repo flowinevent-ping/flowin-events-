@@ -113,3 +113,12 @@ export async function sessionPourTirage(): Promise<boolean> {
     return !!data.session?.access_token
   } catch { return false }
 }
+
+/* Session Super Admin absente ou refusee (23/11/2026) : les lectures de coordonnees (crm_participants, crm_pro) exigent
+   une session SA valide. Sans elle l ecran doit le DIRE (message + lien), jamais afficher une liste vide ou « aucun participant ». */
+export const MESSAGE_SESSION_SA_EXPIREE = 'Session expirée : reconnectez-vous.'
+export const LIEN_CONNEXION_SA = '/admin-connexion.html'
+/** Vrai pour une erreur de base qui veut dire « pas de droit / pas de session ». */
+export function erreurSessionSA(brut: string): boolean {
+  return /permission denied|42501|acces refuse|jwt|not authorized|401|403/i.test(brut || '')
+}

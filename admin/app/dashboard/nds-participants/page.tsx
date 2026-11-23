@@ -37,6 +37,8 @@ import { fetchGagnants, type GagnantRow } from '@/lib/dashboard'
 
 import { usePorteeInitiale } from '@/lib/portee'
 import { Ico } from '@/lib/proicons'
+import SessionSAExpiree from '@/components/dashboard/SessionSAExpiree'
+import { MESSAGE_SESSION_SA_EXPIREE } from '@/lib/supabase'
 const fr = (d: string | null) => {
   if (!d) return '—'
   const p = d.split('-')
@@ -161,10 +163,11 @@ export default function Page() {
       id: 'nom', label: 'Participant', multiligne: true,
       valeur: p => nomComplet(p) || p.email || p.joueur_id,
       rendu: p => (
-        <>
+        /* Un seul bloc par cellule : sur telephone (cartes titre / valeur) le 2e bloc tombait dans la colonne du titre. */
+        <div>
           <div style={{ fontWeight: 700 }}>{nomComplet(p) || '—'}</div>
           <div style={{ fontSize: 11, color: 'var(--sa-muted)' }}>{p.email ?? '—'}</div>
-        </>
+        </div>
       ),
     },
     { id: 'code_postal', label: 'Code postal', valeur: p => p.code_postal, style: { fontSize: 12.5 } },
@@ -236,7 +239,7 @@ export default function Page() {
       <div className="sa-page">
         <ListeCRM<CrmParticipant>
           titre="CRM Participants"
-          sousTitre={liste === null ? undefined
+          sousTitre={liste === null ? undefined : erreur ? 'Liste indisponible'
             : `${stats.joueurs} participant${stats.joueurs > 1 ? 's' : ''} · ${stats.lignes} passage${stats.lignes > 1 ? 's' : ''} en station`}
           lignes={visibles}
           colonnes={colonnes}
@@ -267,12 +270,14 @@ export default function Page() {
           }
           entete={
             <>
-              {erreur && (
-                <div className="sa-alert warn" style={{ marginBottom: 12, fontSize: 12.5 }}>
+              {erreur === MESSAGE_SESSION_SA_EXPIREE && <SessionSAExpiree />}
+              {erreur && erreur !== MESSAGE_SESSION_SA_EXPIREE && (
+                <div className="sa-alert warn texte" style={{ marginBottom: 12, fontSize: 12.5 }}>
                   La liste n&apos;a pas pu être chargée — {erreur}
                 </div>
               )}
-              <div className="sa-alert info" role="note" style={{ marginBottom: 12, fontSize: 12.5, lineHeight: 1.55 }}>
+              {/* Classe « texte » : sans elle l'alerte est en flex et chaque <b> devenait une colonne (texte coupe en quatre). */}
+              <div className="sa-alert info texte" role="note" style={{ marginBottom: 12, fontSize: 12.5, lineHeight: 1.55 }}>
                 <b>Droits d’accès.</b> Vue Super Admin : tous les participants, coordonnées complètes. Un pro ne voit, dans sa fiche
                 de super event (onglet « Participants »), que les joueurs passés par <b>ses</b> stations, et leurs coordonnées seulement
                 s’ils ont accepté d’être contactés. Choisissez un pro ci-dessous pour voir la liste de ses stations.
@@ -302,7 +307,7 @@ export default function Page() {
               </div>
             </>
           }
-          videTitre="Aucun participant pour cette sélection"
+          videTitre={erreur ? 'La liste n’est pas disponible' : 'Aucun participant pour cette sélection'}
         />
       </div>
     </div>

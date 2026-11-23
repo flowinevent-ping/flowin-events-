@@ -11,7 +11,8 @@ import { useEffect, useState } from 'react'
 import { useDashboard } from '@/contexts/DashboardContext'
 import { PageHeader, EmptyState } from '@/components/dashboard/DashboardUI'
 import { fetchOperationsPro, libelleDates, type OperationsPro } from '@/lib/operations'
-import { fetchCrmPro, type ContactPro } from '@/lib/crmPro'
+import { fetchCrmProDetail, type ContactPro } from '@/lib/crmPro'
+import SessionSAExpiree from '@/components/dashboard/SessionSAExpiree'
 import { groupesChoix } from '@/lib/rangementOperations'
 import CrmPro from '@/components/pro/CrmPro'
 
@@ -21,15 +22,18 @@ export default function Page() {
   const [ops, setOps] = useState<OperationsPro | null>(null)
   const [contacts, setContacts] = useState<ContactPro[]>([])
   const [charge, setCharge] = useState(false)
+  const [sansSession, setSansSession] = useState(false)
+  const [erreur, setErreur] = useState<string | null>(null)
 
   const prosTries = [...pros].sort((a, b) => a.nom.localeCompare(b.nom, 'fr'))
 
   useEffect(() => {
-    if (!proId) { setOps(null); setContacts([]); return }
+    if (!proId) { setOps(null); setContacts([]); setSansSession(false); setErreur(null); return }
     let vivant = true
     setCharge(true)
-    Promise.all([fetchOperationsPro(proId), fetchCrmPro(proId, { sa: true })])
-      .then(([o, c]) => { if (vivant) { setOps(o); setContacts(c) } })
+    /* fetchCrmProDetail (et non fetchCrmPro) : session expiree et erreur de lecture restent distinguees d'un pro sans contact. */
+    Promise.all([fetchOperationsPro(proId), fetchCrmProDetail(proId, { sa: true })])
+      .then(([o, c]) => { if (vivant) { setOps(o); setContacts(c.contacts); setSansSession(!!c.sansSession || /Reconnectez-vous/.test(c.erreur ?? '')); setErreur(c.erreur) } })
       .finally(() => { if (vivant) setCharge(false) })
     return () => { vivant = false }
   }, [proId])
@@ -52,9 +56,10 @@ export default function Page() {
 
         {!proId && <EmptyState title="Choisissez un pro" desc="Sélectionnez un pro ci-dessus pour voir son CRM complet." />}
         {proId && charge && <div className="sa-muted" style={{ fontSize: 13 }}>Chargement…</div>}
-        {proId && !charge && ops && (
+        {proId && !charge && sansSession && <SessionSAExpiree />}
+        {proId && !charge && ops && !sansSession && (
           <CrmPro
-            proId={proId} proNom={ops.proNom ?? ''} contacts={contacts}
+            proId={proId} proNom={ops.proNom ?? ''} contacts={contacts} erreur={erreur}
             operations={choix.flatMap(g => g.ops)} operationInitiale={null}
           />
         )}

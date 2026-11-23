@@ -75,7 +75,7 @@ export default function GardeSA({ children }: { children: React.ReactNode }) {
           <input type="email" autoComplete="username" placeholder="Email" value={email} onChange={e => setEmail(e.target.value)} style={champ} required />
           <input type="password" autoComplete="current-password" placeholder="Mot de passe" value={mdp} onChange={e => setMdp(e.target.value)} style={champ} required />
           {erreur && <div style={{ color: '#b42318', fontSize: 13.5, marginBottom: 12 }}>{erreur}</div>}
-          <button type="submit" disabled={envoi} style={{ width: '100%', padding: '12px', borderRadius: 11, border: 'none', background: '#7C5CFC', color: '#fff', fontWeight: 800, fontSize: 15, cursor: 'pointer' }}>
+          <button type="submit" disabled={envoi} style={{ width: '100%', padding: '12px', borderRadius: 11, border: 'none', background: '#3B5CC4', color: '#fff', fontWeight: 800, fontSize: 15, cursor: 'pointer' }}>
             {envoi ? 'Connexion…' : 'Se connecter'}
           </button>
         </form>

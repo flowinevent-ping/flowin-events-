@@ -8,7 +8,7 @@
  * Le serveur ne passe ici que des donnees sans coordonnees (nom du pro, tirages du joueur filtres par la base).
  */
 import { useEffect, useState } from 'react'
-import { fetchCrmProDetail, libelleOrigine, MESSAGE_CONNEXION_CRM, type ContactPro } from '@/lib/crmPro'
+import { fetchCrmProDetail, libelleOrigine, nomContact, MESSAGE_CONNEXION_CRM, TEXTE_NON_PARTAGE, type ContactPro } from '@/lib/crmPro'
 import { communeParCodePostal } from '@/lib/geo'
 import type { TirageRow } from '@/lib/dashboard'
 import { CARD, MUTED, H1, ACC } from '@/lib/proui'
@@ -85,7 +85,7 @@ export default function FicheContactPro({ proId, proNom, joueurId, partenaireId,
 
   /* Seuls les lots de ce pro, non annules. */
   const tirages = tousTirages.filter(t => t.statut !== 'annule' && ((partenaireId && t.partenaire_id === partenaireId) || (j.lots ?? []).includes(t.lot_nom ?? '')))
-  const nom = `${j.prenom ?? ''} ${j.nom ?? ''}`.trim() || 'Sans nom'
+  const nom = nomContact(j)
   const initiales = ((j.prenom?.[0] ?? '') + (j.nom?.[0] ?? '')).toUpperCase() || '?'
   const tel = (j.tel ?? '').replace(/[^\d+]/g, '')
   const telWa = tel.startsWith('0') ? `33${tel.slice(1)}` : tel.replace(/^\+/, '')
@@ -108,7 +108,7 @@ export default function FicheContactPro({ proId, proNom, joueurId, partenaireId,
         <div style={{ flex: 1, minWidth: 180 }}>
           <div style={{ fontSize: 18, fontWeight: 800 }}>{nom}</div>
           <div style={{ fontSize: 12.5, ...MUTED }}>
-            {j.optin ? 'Consentement donné : contactable' : 'Sans consentement : coordonnées masquées'} · {j.nb_parties} partie{j.nb_parties > 1 ? 's' : ''} · {j.nb_gains} lot{j.nb_gains > 1 ? 's' : ''} gagné{j.nb_gains > 1 ? 's' : ''}
+            {j.optin ? 'Contact autorisé' : 'Contact non partagé : le joueur n’a pas accepté d’être contacté'} · {j.nb_parties} partie{j.nb_parties > 1 ? 's' : ''} · {j.nb_gains} lot{j.nb_gains > 1 ? 's' : ''} gagné{j.nb_gains > 1 ? 's' : ''}
           </div>
         </div>
         <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
@@ -122,8 +122,8 @@ export default function FicheContactPro({ proId, proNom, joueurId, partenaireId,
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(300px,1fr))', gap: 14 }}>
         <div style={CARD}>
           {titre('Coordonnées')}
-          {ligne('Email', j.email || (j.optin ? '—' : 'Masqué (sans consentement)'))}
-          {ligne('Téléphone', j.tel || (j.optin ? '—' : 'Masqué (sans consentement)'))}
+          {ligne('Email', j.email || (j.optin ? '—' : TEXTE_NON_PARTAGE))}
+          {ligne('Téléphone', j.tel || (j.optin ? '—' : TEXTE_NON_PARTAGE))}
           {ligne('Code postal', j.code_postal || '—')}
           {ligne('Ville', j.ville || (villeDeduite ? <>{villeDeduite} <span style={MUTED}>(déduite du code postal)</span></> : '—'))}
           {ligne('Genre', j.genre === 'F' ? 'Femme' : j.genre === 'H' ? 'Homme' : (j.genre || '—'))}

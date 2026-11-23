@@ -14,7 +14,7 @@
 import { useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import type { ContactPro } from '@/lib/crmPro'
-import { libelleOrigine } from '@/lib/crmPro'
+import { libelleOrigine, nomContact, TEXTE_NON_PARTAGE } from '@/lib/crmPro'
 import { Camembert } from '@/components/dashboard/Camembert'
 import { CHARTE_PRO as C } from '@/lib/charte'
 import { CHAMP, LABEL } from '@/lib/proui'
@@ -257,14 +257,24 @@ export default function CrmPro({ proId, proNom, contacts, erreur, operations, op
                     <tr key={c.joueur_id} onClick={() => router.push(`/pro/crm/${c.joueur_id}${qs}`)}
                       style={{ cursor: 'pointer', background: sel.has(c.joueur_id) ? 'rgba(224,33,138,.05)' : undefined }}>
                       <td style={td} onClick={e => e.stopPropagation()}><input type="checkbox" checked={sel.has(c.joueur_id)} onChange={() => basculer(c.joueur_id)} /></td>
+                      {/* Chaque cellule = UN seul bloc : sur telephone le tableau devient des cartes (TablesMobiles, grille
+                          titre / valeur) ; deux blocs dans une cellule faisaient tomber le 2e sous le titre, dans la mauvaise colonne. */}
                       <td style={td}>
-                        <div style={{ fontWeight: 800 }}>{`${c.prenom ?? ''} ${c.nom ?? ''}`.trim() || '—'}</div>
-                        {c.offert_par && <div data-offert-par style={{ fontSize: 11.5, fontWeight: 800, color: '#C2410C' }}>Offert par {c.offert_par}</div>}
-                        <div style={{ fontSize: 11.5, color: C.attenue }}>{[c.code_postal, c.ville].filter(Boolean).join(' ') || '—'}</div>
+                        <div>
+                          <div style={{ fontWeight: 800 }}>{nomContact(c)}</div>
+                          {c.offert_par && <div data-offert-par style={{ fontSize: 11.5, fontWeight: 800, color: '#C2410C' }}>Offert par {c.offert_par}</div>}
+                          <div style={{ fontSize: 11.5, color: C.attenue }}>{[c.code_postal, c.ville].filter(Boolean).join(' ') || 'Adresse non renseignée'}</div>
+                        </div>
                       </td>
                       <td style={td}>
-                        <div>{c.email || '—'}</div>
-                        <div style={{ fontSize: 11.5, color: C.attenue }}>{c.tel || ''}</div>
+                        {c.email || c.tel ? (
+                          <div>
+                            {c.email && <div>{c.email}</div>}
+                            {c.tel && <div style={{ fontSize: 11.5, color: C.attenue }}>{c.tel}</div>}
+                          </div>
+                        ) : (
+                          <div data-non-partage style={{ fontSize: 12, color: C.attenue, fontStyle: 'italic' }}>{c.optin === true ? 'Aucune coordonnée' : TEXTE_NON_PARTAGE}</div>
+                        )}
                       </td>
                       <td style={{ ...td, fontSize: 11.5 }}>{c.origines.length ? c.origines.map(libelleOrigine).join(', ') : '—'}</td>
                       <td style={{ ...td, fontSize: 11.5 }}>{c.operations.map(o => o.nom).join(', ') || '—'}</td>

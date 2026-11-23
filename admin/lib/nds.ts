@@ -13,7 +13,7 @@
  *
  * Rien n est code en dur sur NDS : le super event est toujours un parametre.
  */
-import { supabase, sessionPourTirage, MESSAGE_CONNEXION_TIRAGE } from './supabase'
+import { supabase, sessionPourTirage, MESSAGE_CONNEXION_TIRAGE, sessionSAFraiche, MESSAGE_SESSION_SA_EXPIREE, erreurSessionSA } from './supabase'
 import { BASE_CANONIQUE } from './qrPermalien'
 import { GMAIL_COMPOSE_BASE } from './messaging'
 
@@ -604,10 +604,12 @@ export interface CrmParticipant {
 }
 
 export async function fetchCrmParticipants(se?: string | null): Promise<CrmParticipant[]> {
+  /* Depuis le 23/11/2026 la base refuse crm_participants sans session Super Admin : on le dit, sans appeler. */
+  if (typeof window !== 'undefined' && !(await sessionSAFraiche())) throw new Error(MESSAGE_SESSION_SA_EXPIREE)
   const { data, error } = await supabase.rpc('crm_participants', { p_se: se ?? null })
   // On propage l erreur : renvoyer [] silencieusement affiche « aucun
   // participant », strictement indiscernable d une operation reellement vide.
-  if (error) { console.error('[fetchCrmParticipants]', error.message); throw new Error(error.message) }
+  if (error) { console.error('[fetchCrmParticipants]', error.message); throw new Error(erreurSessionSA(error.message) ? MESSAGE_SESSION_SA_EXPIREE : error.message) }
   return Array.isArray(data) ? (data as CrmParticipant[]) : []
 }
 

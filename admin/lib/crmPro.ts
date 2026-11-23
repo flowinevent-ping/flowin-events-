@@ -36,14 +36,21 @@ export interface ResultatCrm {
   sansSession?: boolean
 }
 
-/** Une session est-elle ouverte ? SA : session admin (/dashboard) ; pro : session supabase-js du navigateur. */
-async function sessionCrmOuverte(sa: boolean): Promise<boolean> {
-  if (typeof window === 'undefined') return false
+/**
+ * Quelle session part avec la lecture ? 'sa' : session admin (/dashboard) ; 'pro' : session supabase-js du navigateur ;
+ * 'sa-dans-espace-pro' : le Super Admin qui ouvre l'espace d'un pro (/pro?pro=...) n'a pas de session pro, son jeton
+ * admin est alors envoye explicitement (sinon il voyait « Connectez-vous » alors qu'il est connecte) ; null : aucune.
+ */
+type SessionCrm = { type: 'sa' | 'pro' | 'sa-dans-espace-pro'; jeton?: string } | null
+async function sessionCrmOuverte(sa: boolean): Promise<SessionCrm> {
+  if (typeof window === 'undefined') return null
   try {
-    if (sa) return !!(await sessionSAFraiche())
+    if (sa) { const s = await sessionSAFraiche(); return s ? { type: 'sa' } : null }
     const { data } = await supabase.auth.getSession()
-    return !!data.session?.access_token
-  } catch { return false }
+    if (data.session?.access_token) return { type: 'pro' }
+    const admin = await sessionSAFraiche()
+    return admin ? { type: 'sa-dans-espace-pro', jeton: admin.access_token } : null
+  } catch { return null }
 }
 
 /**
@@ -59,14 +66,13 @@ async function sessionCrmOuverte(sa: boolean): Promise<boolean> {
  */
 export async function fetchCrmProDetail(proId: string, opts?: { sa?: boolean }): Promise<ResultatCrm> {
   if (!proId) return { contacts: [], erreur: null }
-  if (!(await sessionCrmOuverte(!!opts?.sa))) return { contacts: [], erreur: null, sansSession: true }
-  const { data, error } = await supabase.rpc('crm_pro', { p_pro: proId })
+  const session = await sessionCrmOuverte(!!opts?.sa)
+  if (!session) return { contacts: [], erreur: null, sansSession: true }
+  let appel = supabase.rpc('crm_pro', { p_pro: proId })
+  if (session.jeton) appel = appel.setHeader('Authorization', 'Bearer ' + session.jeton)
+  const { data, error } = await appel
   if (error) { console.error('[fetchCrmPro]', error.message); return { contacts: [], erreur: messageErreurCrm(error.message) } }
-  const contacts = ((Array.isArray(data) ? data : []) as ContactPro[]).map(c => (opts?.sa ? c : limiterAuConsentement(c))).map(c => ({
-    ...c,
-    origines: c.origines ?? [], operations: c.operations ?? [], lots: c.lots ?? [],
-    nb_parties: Number(c.nb_parties ?? 0), nb_tickets: Number(c.nb_tickets ?? 0), nb_gains: Number(c.nb_gains ?? 0),
-  }))
+  const contacts = ((Array.isArray(data) ? data : []) as ContactPro[]).map(normaliserContact).map(c => (opts?.sa ? c : limiterAuConsentement(c)))
   /* Ticket offert (offrir_ticket_ami_contact) : le beneficiaire entre au fichier avec parrain_id
      = le donneur, qui y est aussi. On affiche « Offert par <prénom> ». Silencieux sans la RPC. */
   const par = await supabase.rpc('crm_parrains_pro', { p_pro: proId })
@@ -76,6 +82,36 @@ export async function fetchCrmProDetail(proId: string, opts?: { sa?: boolean }):
     contacts.forEach(c => { if (m.has(c.joueur_id)) c.offert_par = m.get(c.joueur_id) || 'un ami' })
   }
   return { contacts, erreur: null }
+}
+
+/**
+ * Forme sure d'une ligne de crm_pro : texte vide -> null, tableaux jamais null, compteurs en nombres, dates en AAAA-MM-JJ.
+ * Une date « derniere » absente (joueur vu seulement par un gain, sans partie) est reprise de ses animations.
+ */
+export function normaliserContact(c: ContactPro): ContactPro {
+  const t = (v: unknown): string | null => { const x = typeof v === 'string' ? v.trim() : ''; return x ? x : null }
+  const d = (v: unknown): string | null => { const x = t(v); return x ? x.slice(0, 10) : null }
+  const operations = (Array.isArray(c.operations) ? c.operations : []).map(o => ({
+    cle: String(o?.cle ?? ''), nom: t(o?.nom) ?? 'Animation', parties: Number(o?.parties ?? 0) || 0, derniere: d(o?.derniere),
+  }))
+  const dernieresOps = operations.map(o => o.derniere).filter((x): x is string => !!x).sort()
+  return {
+    ...c,
+    prenom: t(c.prenom), nom: t(c.nom), email: t(c.email), tel: t(c.tel),
+    code_postal: t(c.code_postal), ville: t(c.ville), genre: t(c.genre), tranche_age: t(c.tranche_age), source: t(c.source),
+    origines: (Array.isArray(c.origines) ? c.origines : []).filter(Boolean), operations,
+    lots: (Array.isArray(c.lots) ? c.lots : []).filter(Boolean),
+    nb_parties: Number(c.nb_parties ?? 0) || 0, nb_tickets: Number(c.nb_tickets ?? 0) || 0, nb_gains: Number(c.nb_gains ?? 0) || 0,
+    premiere: d(c.premiere), derniere: d(c.derniere) ?? (dernieresOps.length ? dernieresOps[dernieresOps.length - 1] : null),
+  }
+}
+
+/** Texte affiche a la place des coordonnees d'un joueur qui n'a pas consenti (jamais une case vide). */
+export const TEXTE_NON_PARTAGE = 'Contact non partagé'
+
+/** Nom a afficher : « Prénom Nom » ; un nom deja reduit a l'initiale par la base reste tel quel. */
+export function nomContact(c: ContactPro): string {
+  return `${c.prenom ?? ''} ${c.nom ?? ''}`.trim() || 'Sans nom'
 }
 
 export async function fetchCrmPro(proId: string, opts?: { sa?: boolean }): Promise<ContactPro[]> {
@@ -100,5 +136,7 @@ export function libelleOrigine(o: string): string {
  */
 export function limiterAuConsentement(c: ContactPro): ContactPro {
   if (c.optin === true) return c
-  return { ...c, email: null, tel: null, nom: c.nom ? `${c.nom.trim().charAt(0).toUpperCase()}.` : null }
+  /* Nom deja reduit a l'initiale par la base (« D. ») : on ne le re-reduit pas. */
+  const nom = c.nom ? (/^.\.$/.test(c.nom.trim()) ? c.nom.trim() : `${c.nom.trim().charAt(0).toUpperCase()}.`) : null
+  return { ...c, email: null, tel: null, nom }
 }
