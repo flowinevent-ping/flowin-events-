@@ -1,0 +1,116 @@
+<!doctype html><html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Maquette Super Event, page publique</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,Segoe UI,Roboto,sans-serif;background:#d9d9d9;padding:20px;display:flex;gap:24px;flex-wrap:wrap;justify-content:center}
+.col{width:390px}.lab{font:700 13px sans-serif;color:#333;margin:0 0 8px;text-align:center}
+.ph{width:390px;height:780px;background:#fff;position:relative;overflow:hidden;border-radius:26px;box-shadow:0 4px 20px #0003}
+.hd{position:absolute;top:0;left:0;right:0;height:54px;background:#F97316;z-index:5;display:flex;align-items:center;padding:0 14px;gap:10px;color:#fff}
+.hd .lg{height:30px;background:#fff;border-radius:8px;padding:3px 8px;display:flex;align-items:center}.hd .lg img{height:22px}
+.hd b{font-size:14px;line-height:1.1}.hd small{display:block;font-weight:500;font-size:11px;opacity:.9}
+.hd .n{margin-left:auto;background:#fff;color:#C2410C;font-weight:800;font-size:12px;border-radius:12px;padding:4px 9px}
+.map{position:absolute;inset:54px 0 0 0;background:#EDE8DF}
+.map svg.st{position:absolute;inset:0;width:100%;height:100%}
+.pin{position:absolute;width:44px;height:44px;margin:-22px 0 0 -22px;border-radius:50%;background:#fff;border:3px solid #F97316;box-shadow:0 2px 6px #0004;display:flex;align-items:center;justify-content:center;overflow:hidden}
+.pin img{width:78%;height:78%;object-fit:contain}
+.pin.fait{border-color:#15803D}.pin.fait:after{content:"✓";position:absolute;right:-1px;top:-1px;width:16px;height:16px;border-radius:50%;background:#15803D;color:#fff;font:700 11px/16px sans-serif;text-align:center}
+.pin.sel{width:60px;height:60px;margin:-30px 0 0 -30px;border-color:#1D4ED8;z-index:4;box-shadow:0 0 0 6px #1D4ED833,0 3px 10px #0005}
+.pin.ini{background:#FED7AA;font:800 16px sans-serif;color:#9A3412}
+.fest{position:absolute;margin:-15px 0 0 -15px;width:30px;height:30px;border-radius:50%;background:#F97316;color:#fff;font:800 12px/30px sans-serif;text-align:center;border:2px solid #fff;box-shadow:0 2px 5px #0004}
+.moi{position:absolute;width:18px;height:18px;margin:-9px 0 0 -9px;border-radius:50%;background:#2563EB;border:3px solid #fff;box-shadow:0 0 0 8px #2563EB33}
+.moit{position:absolute;font:700 11px sans-serif;background:#2563EB;color:#fff;border-radius:8px;padding:2px 7px;margin:12px 0 0 -30px;white-space:nowrap}
+.bar{position:absolute;left:0;right:0;bottom:0;background:#fff;border-radius:18px 18px 0 0;box-shadow:0 -3px 14px #0003;z-index:6;padding:10px 0 14px}
+.bar .t{padding:0 14px 8px;font:700 13px sans-serif;color:#111;display:flex;justify-content:space-between;align-items:center}
+.bar .t span{font-weight:600;color:#6b7280;font-size:12px}
+.car{display:flex;gap:10px;overflow:hidden;padding:0 14px}
+.lo{flex:0 0 74px;text-align:center}
+.lo .c{width:74px;height:74px;border-radius:16px;background:#fff;border:2px solid #E5E7EB;display:flex;align-items:center;justify-content:center;position:relative}
+.lo .c img{width:80%;height:80%;object-fit:contain}
+.lo.on .c{border-color:#1D4ED8;box-shadow:0 0 0 3px #1D4ED833}
+.lo.fait .c{border-color:#15803D}.lo.fait .c:after{content:"✓";position:absolute;right:-5px;top:-5px;width:20px;height:20px;border-radius:50%;background:#15803D;color:#fff;font:700 12px/20px sans-serif}
+.lo small{display:block;font-size:11px;color:#374151;margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.lo .d{font-size:10px;color:#6b7280}
+.cta{margin:10px 14px 0;height:50px;border-radius:14px;background:#1D4ED8;color:#fff;font:700 16px/50px sans-serif;text-align:center}
+.card{margin:0 14px 0;border:1px solid #E5E7EB;border-radius:14px;padding:10px;display:flex;gap:10px;align-items:center}
+.card .lg2{width:56px;height:56px;border:1px solid #eee;border-radius:12px;display:flex;align-items:center;justify-content:center}.card img{width:80%;height:80%;object-fit:contain}
+.card b{font-size:15px}.card p{font-size:12px;color:#4B5563;margin-top:2px}
+.prog{display:flex;gap:5px;padding:0 14px 8px}.prog i{flex:1;height:7px;border-radius:4px;background:#E5E7EB}.prog i.f{background:#15803D}
+.gain{margin:8px 14px 0;background:#FFF7ED;border:1px solid #FDBA74;border-radius:12px;padding:8px 10px;font-size:12px;color:#7C2D12}
+.mini{position:absolute;top:66px;left:12px;right:12px;z-index:5;background:#fff;border-radius:14px;box-shadow:0 2px 10px #0003;padding:8px 12px;display:flex;align-items:center;gap:10px}
+.mini .ring{width:38px;height:38px;border-radius:50%;background:conic-gradient(#15803D 0 37.5%,#E5E7EB 0);display:flex;align-items:center;justify-content:center}
+.mini .ring b{width:30px;height:30px;border-radius:50%;background:#fff;font-size:12px;display:flex;align-items:center;justify-content:center}
+.mini div.x{font-size:12px;color:#374151}.mini div.x b{display:block;font-size:13px;color:#111}
+.note{width:390px;font:12px/1.4 sans-serif;color:#333;margin-top:8px}
+</style></head><body>
+
+<!-- ÉCRAN 1 : arrivée -->
+<div class="col"><div class="lab">1. J'arrive sur la page</div>
+<div class="ph">
+ <div class="hd"><div class="lg"><img src="flowin-super-event-logo.svg" alt=""></div><b>Nuits du Sud 2026<small>9 – 18 juillet · Vence</small></b><span class="n">22</span></div>
+ <div class="map">
+  <svg class="st" viewBox="0 0 390 726" preserveAspectRatio="none"><g fill="none" stroke="#fff" stroke-linecap="round"><path d="M-10 120 L400 180" stroke-width="12"/><path d="M60 -10 L130 740" stroke-width="10"/><path d="M-10 420 C120 380 260 470 400 400" stroke-width="14"/><path d="M290 -10 L250 740" stroke-width="9"/><path d="M-10 600 L400 560" stroke-width="8"/></g><path d="M0 660 Q120 600 200 690 T390 640 V726 H0Z" fill="#CFE5C9"/></svg>
+  <div class="pin" style="left:95px;top:150px"><img src="charvolin.png"></div>
+  <div class="pin" style="left:130px;top:185px"><img src="giordano.png"></div>
+  <div class="pin" style="left:250px;top:270px"><img src="pegase.png"></div>
+  <div class="pin" style="left:310px;top:330px"><img src="carrosserie-gp.png"></div>
+  <div class="pin" style="left:215px;top:395px"><img src="nook.png"></div>
+  <div class="pin" style="left:175px;top:345px"><img src="utile.png"></div>
+  <div class="pin" style="left:70px;top:560px"><img src="bergerie.png"></div>
+  <div class="fest" style="left:262px;top:355px">15</div>
+  <div class="moi" style="left:205px;top:470px"></div><div class="moit" style="left:205px;top:470px">Vous êtes ici</div>
+ </div>
+ <div class="bar"><div class="t">Les commerces qui jouent <span>22 · glissez →</span></div>
+  <div class="car"><div class="lo"><div class="c"><img src="nook.png"></div><small>Nook Café</small><div class="d">90 m</div></div>
+  <div class="lo"><div class="c"><img src="utile.png"></div><small>Utile Vence</small><div class="d">180 m</div></div>
+  <div class="lo"><div class="c"><img src="carrosserie-gp.png"></div><small>Carrosserie GP</small><div class="d">310 m</div></div>
+  <div class="lo"><div class="c"><img src="pegase.png"></div><small>Auto-École</small><div class="d">420 m</div></div>
+  <div class="lo"><div class="c"><img src="giordano.png"></div><small>Giordano</small><div class="d">700 m</div></div></div>
+  <div class="cta">Jouer au plus proche</div></div>
+</div><div class="note">Bandeau réduit de 150 px à 54 px. Carte plein écran. Le rond « 15 » regroupe les points du festival (bars, caisses, écran) tant qu'on ne zoome pas. Carrousel trié du plus proche au plus loin.</div></div>
+
+<!-- ÉCRAN 2 : je touche un logo -->
+<div class="col"><div class="lab">2. Je touche un logo : la carte s'y déplace</div>
+<div class="ph">
+ <div class="hd"><div class="lg"><img src="flowin-super-event-logo.svg" alt=""></div><b>Nuits du Sud 2026<small>9 – 18 juillet · Vence</small></b><span class="n">22</span></div>
+ <div class="map" style="background:#EDE8DF">
+  <svg class="st" viewBox="0 0 390 726" preserveAspectRatio="none"><g fill="none" stroke="#fff" stroke-linecap="round"><path d="M-10 250 L400 300" stroke-width="16"/><path d="M120 -10 L180 740" stroke-width="12"/><path d="M-10 520 C120 480 260 560 400 500" stroke-width="14"/></g></svg>
+  <div class="pin sel" style="left:195px;top:230px"><img src="carrosserie-gp.png"></div>
+  <div class="pin" style="left:90px;top:330px"><img src="pegase.png"></div>
+  <div class="pin" style="left:80px;top:130px"><img src="nook.png"></div>
+  <div class="moi" style="left:70px;top:440px"></div><div class="moit" style="left:70px;top:440px">Vous êtes ici</div>
+  <svg class="st" viewBox="0 0 390 726" preserveAspectRatio="none"><path d="M70 440 C110 380 160 330 195 262" fill="none" stroke="#1D4ED8" stroke-width="4" stroke-dasharray="2 9" stroke-linecap="round"/></svg>
+ </div>
+ <div class="bar"><div class="t">Les commerces qui jouent <span>glissez →</span></div>
+  <div class="car"><div class="lo"><div class="c"><img src="nook.png"></div><small>Nook Café</small></div>
+  <div class="lo on"><div class="c"><img src="carrosserie-gp.png"></div><small>Carrosserie GP</small></div>
+  <div class="lo"><div class="c"><img src="pegase.png"></div><small>Auto-École</small></div>
+  <div class="lo"><div class="c"><img src="giordano.png"></div><small>Giordano</small></div></div>
+  <div class="card" style="margin-top:10px"><div class="lg2"><img src="carrosserie-gp.png"></div><div><b>Carrosserie GP</b><p>310 m · 4 min à pied · ouvert</p><p>À gagner : tickets du Grand tirage</p></div></div>
+  <div class="cta">Jouer ici</div></div>
+</div><div class="note">Un appui sur le logo : la carte se centre, le logo grossit, un tracé pointillé montre le chemin depuis « Vous êtes ici ». Un seul bouton : Jouer ici.</div></div>
+
+<!-- ÉCRAN 3 : phase de jeu -->
+<div class="col"><div class="lab">3. En jeu : je vois où j'en suis</div>
+<div class="ph">
+ <div class="hd"><div class="lg"><img src="flowin-super-event-logo.svg" alt=""></div><b>Nuits du Sud 2026<small>9 – 18 juillet · Vence</small></b><span class="n">22</span></div>
+ <div class="mini"><div class="ring"><b>3/8</b></div><div class="x"><b>3 commerces joués</b>2 tickets de plus pour le Grand tirage</div></div>
+ <div class="map">
+  <svg class="st" viewBox="0 0 390 726" preserveAspectRatio="none"><g fill="none" stroke="#fff" stroke-linecap="round"><path d="M-10 300 L400 340" stroke-width="14"/><path d="M110 -10 L170 740" stroke-width="10"/><path d="M-10 560 C120 520 260 600 400 540" stroke-width="12"/><path d="M300 -10 L270 740" stroke-width="9"/></g></svg>
+  <div class="pin fait" style="left:110px;top:200px"><img src="charvolin.png"></div>
+  <div class="pin fait" style="left:70px;top:290px"><img src="giordano.png"></div>
+  <div class="pin fait" style="left:240px;top:260px"><img src="nook.png"></div>
+  <div class="pin" style="left:300px;top:400px"><img src="utile.png"></div>
+  <div class="pin" style="left:120px;top:470px"><img src="pegase.png"></div>
+  <div class="pin ini" style="left:330px;top:210px">S</div>
+  <div class="moi" style="left:215px;top:400px"></div><div class="moit" style="left:215px;top:400px">Vous êtes ici</div>
+ </div>
+ <div class="bar"><div class="t">Prochains commerces <span>vert = joué</span></div>
+  <div class="car"><div class="lo"><div class="c"><img src="utile.png"></div><small>Utile Vence</small><div class="d">120 m</div></div>
+  <div class="lo"><div class="c"><img src="pegase.png"></div><small>Auto-École</small><div class="d">260 m</div></div>
+  <div class="lo"><div class="c"><img src="carrosserie-gp.png"></div><small>Carrosserie GP</small><div class="d">310 m</div></div>
+  <div class="lo fait"><div class="c"><img src="nook.png"></div><small>Nook Café</small><div class="d">joué</div></div>
+  <div class="lo fait"><div class="c"><img src="giordano.png"></div><small>Giordano</small><div class="d">joué</div></div></div>
+  <div class="gain">Utile Vence : 1 ticket + un lot immédiat à gagner</div>
+  <div class="cta">Aller à Utile Vence</div></div>
+</div><div class="note">Plus de « chasse au trésor » : pas de liste à deviner. Les commerces déjà joués passent au vert avec une coche et vont en fin de carrousel. Les plus proches restent devant. Une pastille « 3/8 » donne la progression, discrète, en haut de la carte.</div></div>
+</body></html>
