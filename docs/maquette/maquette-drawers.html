@@ -1,0 +1,847 @@
+<title>Drawer Flowin</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;600;700;800;900&family=JetBrains+Mono:wght@400&display=swap">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<style>
+:root{
+  --bg:#F1F5F9; --card:#FFF; --subtle:#F8FAFC; --line:#E2E8F0; --line2:#CBD5E1;
+  --ink:#0F172A; --muted:#64748B; --acc:#7C2D92; --acc-lt:#A855F7;
+  --se:#A855F7; --ev:#10B981; --bar:#7C2D92; --grid:#E2E8F0;
+  --sh:0 2px 6px rgba(15,23,42,.06),0 18px 46px -20px rgba(15,23,42,.35);
+  --ph:#16202E;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0B1220; --card:#131C2B; --subtle:#0F1826; --line:#243247; --line2:#33445E;
+  --ink:#E8EEF7; --muted:#8496AE; --acc:#C084FC; --acc-lt:#D8B4FE;
+  --se:#C084FC; --ev:#34D399; --bar:#C084FC; --grid:#243247;
+  --sh:0 2px 6px rgba(0,0,0,.4),0 20px 50px -22px rgba(0,0,0,.85);
+  --ph:#05090F;
+}}
+:root[data-theme="dark"]{
+  --bg:#0B1220; --card:#131C2B; --subtle:#0F1826; --line:#243247; --line2:#33445E;
+  --ink:#E8EEF7; --muted:#8496AE; --acc:#C084FC; --acc-lt:#D8B4FE;
+  --se:#C084FC; --ev:#34D399; --bar:#C084FC; --grid:#243247;
+  --sh:0 2px 6px rgba(0,0,0,.4),0 20px 50px -22px rgba(0,0,0,.85);
+  --ph:#05090F;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:"Public Sans",-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;font-size:14px}
+.wrap{max-width:1180px;margin:0 auto;padding:24px 18px 70px}
+.shell{display:grid;grid-template-columns:212px 1fr;gap:14px;align-items:start}
+@media(max-width:860px){.shell{grid-template-columns:1fr}}
+.sb{background:linear-gradient(180deg,#1E293B,#152032);border-radius:14px;padding-bottom:10px;overflow:hidden;position:sticky;top:16px}
+.sb-logo{padding:14px 16px;border-bottom:1px solid rgba(255,255,255,.09);color:#fff;font-weight:900;font-size:16px;display:flex;align-items:center;gap:7px}
+.sb-logo i{width:8px;height:8px;border-radius:50%;background:#A855F7;box-shadow:0 0 9px #A855F7;font-style:normal}
+.sb-g{display:flex;align-items:center;gap:7px;padding:14px 14px 6px;font-size:10.5px;font-weight:800;letter-spacing:.09em;text-transform:uppercase}
+.sb-g i{width:4px;height:12px;border-radius:2px;display:block;font-style:normal}
+.sb-i{display:flex;align-items:center;gap:8px;padding:7px 14px 7px 18px;color:rgba(255,255,255,.78);font-size:12px;
+  font-weight:600;cursor:pointer;border:0;border-left:3px solid transparent;background:none;width:100%;text-align:left;font-family:inherit}
+.sb-i:hover{background:rgba(255,255,255,.06);color:#fff}
+.sb-i.on{background:linear-gradient(90deg,rgba(168,85,247,.22),transparent);color:#fff;border-left-color:#A855F7;font-weight:800}
+.sb-i b{margin-left:auto;font-size:9.5px;background:rgba(255,255,255,.13);border-radius:99px;padding:1px 6px;font-weight:700}
+.sb-i.stat{cursor:default;opacity:.55}
+.sb-i.stat:hover{background:none;color:rgba(255,255,255,.78)}
+.switch{display:flex;gap:8px;margin-bottom:8px;flex-wrap:wrap}
+.switch button{min-width:210px}
+.switch button{flex:1;padding:13px 15px;border-radius:12px;border:2px solid var(--line);background:var(--card);
+  color:var(--ink);font-family:inherit;font-size:14px;font-weight:800;cursor:pointer;text-align:left;line-height:1.3}
+.switch button span{display:block;font-size:11.5px;font-weight:600;color:var(--muted);margin-top:3px}
+.switch button.on[data-d="se"]{border-color:var(--se)}
+.switch button.on[data-d="ev"]{border-color:var(--ev)}
+.switch button.on[data-d="pro"]{border-color:var(--acc)}
+.note{font-size:12px;color:var(--muted);margin:0 0 14px}
+
+.dr{background:var(--card);border:1px solid var(--line);border-radius:14px;box-shadow:var(--sh);overflow:hidden}
+.dr-h{padding:15px 20px;border-bottom:1px solid var(--line);display:flex;align-items:flex-start;justify-content:space-between;gap:14px}
+.dr-back{background:none;border:1px solid var(--line);border-radius:7px;padding:3px 10px;font-size:11.5px;
+  font-weight:700;cursor:pointer;color:var(--ink);font-family:inherit;margin-bottom:9px}
+.dr-back:hover{background:var(--subtle)}
+.dr-t{font-size:17px;font-weight:900;display:flex;align-items:center;gap:9px}
+.dr-s{font-size:12px;color:var(--muted);margin-top:5px;display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.dr-x{width:30px;height:30px;border-radius:50%;border:0;background:var(--subtle);color:var(--muted);
+  font-size:18px;line-height:1;cursor:pointer;flex-shrink:0}
+.pill{font-size:10px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;padding:2px 8px;border-radius:99px;white-space:nowrap}
+.pill.se{background:color-mix(in srgb,var(--se) 18%,transparent);color:var(--se)}
+.pill.ev{background:color-mix(in srgb,var(--ev) 18%,transparent);color:var(--ev)}
+.pill.g{background:var(--subtle);border:1px solid var(--line);color:var(--muted)}
+
+.n1{display:flex;gap:2px;padding:0 14px;border-bottom:1px solid var(--line);overflow-x:auto}
+.n1 button{padding:12px 12px;font-size:12.5px;font-weight:800;color:var(--muted);border:0;border-bottom:3px solid transparent;
+  background:none;cursor:pointer;white-space:nowrap;font-family:inherit;display:flex;align-items:center;gap:6px}
+.n1 button:hover{color:var(--ink)}
+.n1 button.on{color:var(--acc);border-bottom-color:var(--acc)}
+.n1 .n{font-size:10px;font-weight:800;background:var(--subtle);border:1px solid var(--line);border-radius:99px;padding:0 6px}
+.n1 button.on .n{background:var(--acc);color:#fff;border-color:transparent}
+.n2{display:flex;gap:6px;padding:10px 18px;background:var(--subtle);border-bottom:1px solid var(--line);overflow-x:auto}
+.n2 button{padding:5px 12px;border-radius:99px;border:1px solid var(--line2);background:var(--card);color:var(--muted);
+  font-family:inherit;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap}
+.n2 button:hover{color:var(--ink);border-color:var(--ink)}
+.n2 button.on{background:var(--acc);border-color:var(--acc);color:#fff}
+.n2-lbl{font-size:10px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);align-self:center;margin-right:4px;flex-shrink:0}
+.dr-b{padding:16px 20px;min-height:360px}
+/* niveau 3 — la fiche dans la fiche */
+.n3-bar{display:flex;align-items:center;gap:10px;background:color-mix(in srgb,var(--ev) 10%,var(--card));
+  border:1px solid color-mix(in srgb,var(--ev) 35%,transparent);border-radius:10px;padding:9px 12px;margin-bottom:10px;flex-wrap:wrap}
+.n3-bar .r{background:var(--card);border:1px solid var(--line2);border-radius:7px;padding:3px 9px;font-size:11.5px;
+  font-weight:700;cursor:pointer;color:var(--ink);font-family:inherit}
+.n3-bar .r:hover{background:var(--subtle)}
+.n3-bar .t{font-weight:800;font-size:13px}
+.n3-bar .d{font-size:11.5px;color:var(--muted)}
+.n3{display:flex;gap:2px;border-bottom:1px solid var(--line);margin-bottom:12px;overflow-x:auto}
+.n3 button{padding:8px 11px;font-size:12px;font-weight:700;color:var(--muted);border:0;border-bottom:2px solid transparent;
+  background:none;cursor:pointer;white-space:nowrap;font-family:inherit}
+.n3 button:hover{color:var(--ink)}
+.n3 button.on{color:var(--ev);border-bottom-color:var(--ev)}
+.grp{font-size:10px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:14px 0 7px}
+.grp:first-child{margin-top:0}
+.chemin{font-family:"JetBrains Mono",monospace;font-size:11px;color:var(--muted);margin-bottom:12px}
+.chemin b{color:var(--acc)}
+
+/* tableur */
+.tb-bar{display:flex;gap:8px;margin-bottom:10px;align-items:center;flex-wrap:wrap}
+.tb-bar input{flex:1;min-width:160px;padding:7px 11px;border:1px solid var(--line2);border-radius:8px;
+  background:var(--subtle);color:var(--ink);font-family:inherit;font-size:12.5px;outline:none}
+.tb-bar input:focus{border-color:var(--acc)}
+.tb-bar .cnt{font-size:11.5px;color:var(--muted);font-weight:700;white-space:nowrap}
+.tbw{border:1px solid var(--line);border-radius:10px;overflow:hidden;overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:12.5px}
+th{text-align:left;font-size:9.5px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);
+  padding:9px 12px;background:var(--subtle);border-bottom:1px solid var(--line2);white-space:nowrap;cursor:pointer;user-select:none}
+th:hover{color:var(--ink)}
+th .ar{opacity:.28;font-size:9px;margin-left:3px}
+th.on .ar{opacity:1;color:var(--acc)}
+th.r,td.r{text-align:right;font-variant-numeric:tabular-nums}
+td{padding:9px 12px;border-bottom:1px solid var(--line);white-space:nowrap}
+tbody tr{cursor:pointer}
+tbody tr:hover{background:var(--subtle)}
+tbody tr:last-child td{border-bottom:0}
+.lien{color:var(--acc);font-weight:700}
+
+/* kanban */
+.kb{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.kb-col{background:var(--subtle);border:1px solid var(--line);border-radius:10px;padding:9px}
+.kb-t{font-size:10px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-bottom:8px;display:flex;justify-content:space-between}
+.kb-c{background:var(--card);border:1px solid var(--line);border-radius:8px;padding:9px 10px;margin-bottom:6px;cursor:pointer}
+.kb-c:hover{border-color:var(--acc)}
+.kb-c .n{font-weight:800;font-size:12px}
+.kb-c .d{font-size:10.5px;color:var(--muted);margin-top:3px}
+
+/* stats */
+.kpi{display:grid;grid-template-columns:repeat(4,1fr);gap:9px;margin-bottom:14px}
+.kpi div{background:var(--subtle);border:1px solid var(--line);border-radius:10px;padding:11px 12px}
+.kpi .v{font-size:20px;font-weight:900;line-height:1;font-variant-numeric:tabular-nums}
+.kpi .l{font-size:9.5px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;margin-top:5px}
+.ch{position:relative;margin-top:6px}
+.ch svg{display:block;width:100%;height:150px;overflow:visible}
+.ch .bar{fill:var(--bar);rx:3}
+.ch .bar:hover{opacity:.75}
+.ch .gl{stroke:var(--grid);stroke-width:1}
+.ch .ax{fill:var(--muted);font-size:9px;font-weight:700}
+.tip{position:absolute;pointer-events:none;background:var(--ink);color:var(--card);font-size:11px;font-weight:700;
+  padding:4px 8px;border-radius:6px;transform:translate(-50%,-115%);opacity:0;transition:opacity .1s;white-space:nowrap}
+.tip.on{opacity:1}
+.ch-t{font-size:11px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:2px}
+
+/* apercu telephone */
+.prev{display:flex;gap:20px;flex-wrap:wrap;align-items:flex-start}
+.phone{width:236px;height:472px;border:9px solid var(--ph);border-radius:26px;background:#fff;overflow:hidden;flex-shrink:0;
+  box-shadow:0 10px 30px -14px rgba(15,23,42,.5);position:relative}
+.scr{position:absolute;inset:0;padding:16px 14px;color:#0F172A;font-size:12px;display:flex;flex-direction:column;background:#fff}
+.scr h5{margin:0 0 4px;font-size:16px;font-weight:900}
+.scr p{margin:0 0 10px;font-size:11px;color:#64748B;line-height:1.45}
+.scr .b{background:#7C2D92;color:#fff;border-radius:9px;padding:9px;text-align:center;font-weight:800;font-size:12px;margin-top:auto}
+.scr .q{border:1px solid #E2E8F0;border-radius:8px;padding:8px 10px;font-size:11.5px;font-weight:700;margin-bottom:6px}
+.scr .q.ok{border-color:#15803D;background:rgba(34,197,94,.1);color:#15803D}
+.scr .hd{background:linear-gradient(135deg,#7C2D92,#A855F7);margin:-16px -14px 12px;padding:16px 14px;color:#fff}
+.scr .hd h5{color:#fff}
+.scr .hd p{color:rgba(255,255,255,.85);margin:0}
+.nav{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}
+.nav button{padding:5px 11px;border-radius:99px;border:1px solid var(--line2);background:var(--card);color:var(--muted);
+  font-family:inherit;font-size:11.5px;font-weight:700;cursor:pointer}
+.nav button.on{background:var(--ink);border-color:var(--ink);color:var(--card)}
+.pcol{flex:1;min-width:230px}
+#qrbox{width:150px;height:150px;background:#fff;border:1px solid var(--line);border-radius:10px;padding:8px;display:grid;place-items:center}
+#qrbox img,#qrbox canvas{width:100%;height:100%;display:block}
+.dl{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
+.dl button{padding:6px 11px;border-radius:8px;border:1px solid var(--line2);background:var(--card);color:var(--ink);
+  font-family:inherit;font-size:11.5px;font-weight:700;cursor:pointer}
+.dl button:hover{border-color:var(--acc);color:var(--acc)}
+
+.fr{display:flex;justify-content:space-between;gap:14px;padding:9px 0;border-bottom:1px solid var(--line);font-size:12.5px}
+.fr span:first-child{color:var(--muted)}
+.fr span:last-child{font-weight:700;text-align:right}
+.mono{font-family:"JetBrains Mono",monospace;font-size:11.5px}
+h4{margin:16px 0 8px;font-size:10px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+h4:first-child{margin-top:0}
+footer{max-width:1000px;margin:0 auto;padding:0 18px 60px;font-size:12.5px;color:var(--muted);line-height:1.6}
+footer b{color:var(--ink)}
+</style>
+
+<div class="wrap">
+
+  <p class="note">Le menu latéral reste : le drawer s'ouvre par-dessus quand tu cliques une ligne. Pour un commerce, la fiche réunit le compte pro et la fiche partenaire — un seul écran au lieu de deux.</p>
+  <div class="shell">
+    <nav class="sb">
+      <div class="sb-logo"><i></i>Flow<span style="color:#A855F7">in</span></div>
+      <div class="sb-g" style="color:#94A3B8"><i style="background:#94A3B8"></i>Accueil</div>
+      <button class="sb-i stat">🏠 Vue d'ensemble</button>
+      <div class="sb-g" style="color:#C084FC"><i style="background:#C084FC"></i>Super events</div>
+      <button class="sb-i on" data-d="se">⭐ Mes super events <b>3</b></button>
+      <div class="sb-g" style="color:#34D399"><i style="background:#34D399"></i>Events</div>
+      <button class="sb-i" data-d="ev">🎬 Stations de jeu <b>21</b></button>
+      <button class="sb-i stat">🎮 Bibliothèque de jeux</button>
+      <div class="sb-g" style="color:#60A5FA"><i style="background:#60A5FA"></i>Général</div>
+      <button class="sb-i" data-d="pro">🏢 Pros &amp; partenaires <b>16</b></button>
+      <button class="sb-i stat">👥 CRM participants</button>
+      <button class="sb-i stat">📣 Communication</button>
+      <button class="sb-i stat">🎯 Prospection &amp; B2B</button>
+      <button class="sb-i stat">🧾 Facturation &amp; admin</button>
+      <button class="sb-i stat">📊 Stats globales</button>
+      <div class="sb-g" style="color:#FBBF24"><i style="background:#FBBF24"></i>Outils</div>
+      <button class="sb-i stat">🌐 Landing pages</button>
+      <button class="sb-i stat">📕 Plaquettes &amp; pitchs</button>
+      <div class="sb-g" style="color:#94A3B8"><i style="background:#94A3B8"></i>Système</div>
+      <button class="sb-i stat">🧭 Toutes les pages</button>
+      <button class="sb-i stat">🗺️ Feuille de route</button>
+    </nav>
+    <div>
+
+  <div class="dr">
+    <div class="dr-h">
+      <div>
+        <button class="dr-back" id="back" hidden>← Retour</button>
+        <div class="dr-t" id="t"></div>
+        <div class="dr-s" id="s"></div>
+      </div>
+      <button class="dr-x" id="x">×</button>
+    </div>
+    <div class="n1" id="n1"></div>
+    <div class="n2" id="n2"></div>
+    <div class="dr-b" id="b"></div>
+  </div>
+    </div>
+  </div>
+</div>
+<footer id="foot"></footer>
+
+<script>
+/* ─── données réelles NDS 2026 (relevées en base le 01/09) ─── */
+const STATIONS=[
+ {nom:'NDS · Caisse 2',pro:'Ville de Vence',type:'Station NDS',module:'quiz',flashs:432,parties:159,joueurs:147,rejoue:54,pic:'20h',etat:'Terminé'},
+ {nom:'NDS · Brigade Verte 2',pro:'Ville de Vence',type:'Station NDS',module:'quiz',flashs:367,parties:146,joueurs:144,rejoue:30,pic:'19h',etat:'Terminé'},
+ {nom:'NDS · Bar 1',pro:'Ville de Vence',type:'Station NDS',module:'quiz',flashs:317,parties:125,joueurs:111,rejoue:76,pic:'21h',etat:'Terminé'},
+ {nom:'NDS · Caisse 1',pro:'Ville de Vence',type:'Station NDS',module:'quiz',flashs:300,parties:122,joueurs:104,rejoue:56,pic:'19h',etat:'Terminé'},
+ {nom:'NDS · Brigade Verte 3',pro:'Ville de Vence',type:'Station NDS',module:'quiz',flashs:249,parties:118,joueurs:109,rejoue:24,pic:'19h',etat:'Terminé'},
+ {nom:"NDS · L'Écran",pro:'Ville de Vence',type:'Station NDS',module:'vote',flashs:233,parties:106,joueurs:97,rejoue:25,pic:'21h',etat:'Terminé'},
+ {nom:'NDS · Bar 3',pro:'Ville de Vence',type:'Station NDS',module:'quiz',flashs:194,parties:86,joueurs:72,rejoue:48,pic:'20h',etat:'Terminé'},
+ {nom:'NDS · Bar 2',pro:'Ville de Vence',type:'Station NDS',module:'quiz',flashs:115,parties:57,joueurs:49,rejoue:42,pic:'22h',etat:'Terminé'},
+ {nom:'SAFER',pro:'SAFER',type:'Partenaire',module:'spin',flashs:88,parties:31,joueurs:29,rejoue:2,pic:'17h',etat:'Terminé'},
+ {nom:'Nook Café',pro:'Nook Café',type:'Partenaire',module:'spin',flashs:49,parties:18,joueurs:17,rejoue:1,pic:'16h',etat:'En cours'},
+ {nom:'Électroménager J Giordano',pro:'J Giordano',type:'Partenaire',module:'spin',flashs:27,parties:9,joueurs:9,rejoue:0,pic:'15h',etat:'En cours'},
+ {nom:'Utile Vence',pro:'Utile Vence',type:'Partenaire',module:'spin',flashs:23,parties:8,joueurs:8,rejoue:0,pic:'11h',etat:'En cours'},
+ {nom:'NDS · Le Bar',pro:'Ville de Vence',type:'Station NDS',module:'quiz',flashs:21,parties:6,joueurs:6,rejoue:0,pic:'20h',etat:'À venir'},
+ {nom:'Carrosserie GP',pro:'Carrosserie GP',type:'Partenaire',module:'spin',flashs:7,parties:3,joueurs:3,rejoue:0,pic:'14h',etat:'À venir'},
+];
+const JOUEURS=[
+ {nom:'Camille R.',ville:'Vence',cp:'06140',parties:7,lots:1,optin:'Oui'},
+ {nom:'Marc T.',ville:'Saint-Jeannet',cp:'06640',parties:5,lots:0,optin:'Oui'},
+ {nom:'Inès B.',ville:'Vence',cp:'06140',parties:4,lots:2,optin:'Non'},
+ {nom:'Yanis M.',ville:'Vence',cp:'06140',parties:3,lots:0,optin:'Oui'},
+ {nom:'Sofia L.',ville:'Cagnes',cp:'06800',parties:2,lots:0,optin:'Oui'},
+];
+const PROS=[
+ {nom:'Nuits du Sud — Ville de Vence',role:'Organisateur',stations:9,flashs:2228,joueurs:539,statut:'Actif'},
+ {nom:'SAFER',role:'Partenaire',stations:1,flashs:88,joueurs:29,statut:'Actif'},
+ {nom:'Nook Café',role:'Partenaire',stations:1,flashs:49,joueurs:17,statut:'Actif'},
+ {nom:'Électroménager J Giordano',role:'Partenaire',stations:1,flashs:27,joueurs:9,statut:'Actif'},
+ {nom:'Utile Vence',role:'Partenaire',stations:1,flashs:23,joueurs:8,statut:'Actif'},
+ {nom:'Assurance Charvolin',role:'Partenaire',stations:1,flashs:19,joueurs:7,statut:'Actif'},
+ {nom:'Domaine de la Bergerie',role:'Partenaire',stations:1,flashs:25,joueurs:9,statut:'Actif'},
+ {nom:'Carrosserie GP',role:'Partenaire',stations:1,flashs:11,joueurs:4,statut:'Actif'},
+ {nom:"Auto-École de l'ARA",role:'Partenaire',stations:1,flashs:7,joueurs:3,statut:'Actif'},
+ {nom:'Cycles 963',role:'Partenaire',stations:1,flashs:4,joueurs:2,statut:'Actif'},
+ {nom:'Croix Rouge Française — Vence',role:'Association',stations:1,flashs:6,joueurs:3,statut:'Actif'},
+ {nom:'Ville de Vence',role:'Institution',stations:1,flashs:3,joueurs:1,statut:'Actif'},
+ {nom:'NDS Bar 2026',role:'Compte technique',stations:0,flashs:0,joueurs:0,statut:'Sans station'},
+ {nom:'NDS Caisses 2026',role:'Compte technique',stations:0,flashs:0,joueurs:0,statut:'Sans station'},
+ {nom:'NDS Écrans 2026',role:'Compte technique',stations:0,flashs:0,joueurs:0,statut:'Sans station'},
+ {nom:'NDS Tablette 2026',role:'Compte technique',stations:0,flashs:0,joueurs:0,statut:'Sans station'},
+];
+/* Toutes les pages prévisualisables aujourd'hui — aucune ne doit disparaître.
+   13 = 1 landing active en table + 12 pages statiques codées en dur dans la page
+   Landing pages. S'y ajoutent les 7 parcours joueur et les 4 pages dynamiques. */
+const PAGES=[
+ {nom:'Landing Flowin',url:'/landing',fam:'Landing',apercu:'Oui'},
+ {nom:'Landing NDS',url:'/nds',fam:'Landing',apercu:'Oui'},
+ {nom:'Pro (connexion)',url:'/pro',fam:'Espace pro',apercu:'Oui'},
+ {nom:'NDS Pro (présentation)',url:'/nds-pro.html',fam:'Commercial',apercu:'Oui'},
+ {nom:'Super-event Pro (stats/gagnants)',url:'/nds-super-event-pro.html',fam:'Espace pro',apercu:'Oui'},
+ {nom:'Partenaire (présentation)',url:'/nds-partenaire-presentation.html',fam:'Commercial',apercu:'Oui'},
+ {nom:'Flowin partenaire',url:'/flowin-partenaire-presentation.html',fam:'Commercial',apercu:'Oui'},
+ {nom:'Pitch NDS',url:'/pitch-nds.html',fam:'Commercial',apercu:'Oui'},
+ {nom:'Pro NDS live',url:'/pro-nds-live.html',fam:'Espace pro',apercu:'Oui'},
+ {nom:'Prospection',url:'/prospection.html',fam:'Commercial',apercu:'Oui'},
+ {nom:'Démos',url:'/demos.html',fam:'Commercial',apercu:'Oui'},
+ {nom:'Carte',url:'/carte.html',fam:'Landing',apercu:'Oui'},
+ {nom:'Nuits du Sud 2026 — Partenaires',url:'(brouillon, pas d\u2019URL)',fam:'Landing',apercu:'Non'},
+ {nom:'Page du super event',url:'/se/se-nds-2026',fam:'Super event',apercu:'Oui'},
+ {nom:'Fiche station dans le super event',url:'/se/se-nds-2026/<event>',fam:'Super event',apercu:'Oui'},
+ {nom:'Rejoindre (commerce)',url:'/rejoindre/se-nds-2026',fam:'Super event',apercu:'Oui'},
+ {nom:'Sponsor',url:'/sponsor/se-nds-2026',fam:'Super event',apercu:'Oui'},
+ {nom:'Parcours quiz',url:'/parcours/quiz?ev=…',fam:'Parcours jeu',apercu:'Oui'},
+ {nom:'Parcours quiz solo',url:'/parcours/quizsolo?ev=…',fam:'Parcours jeu',apercu:'Oui'},
+ {nom:'Parcours quiz master',url:'/parcours/quizmaster?ev=…',fam:'Parcours jeu',apercu:'Oui'},
+ {nom:'Parcours roue',url:'/parcours/spin?ev=…',fam:'Parcours jeu',apercu:'Oui'},
+ {nom:'Parcours vote',url:'/parcours/vote?ev=…',fam:'Parcours jeu',apercu:'Oui'},
+ {nom:'Parcours tombola',url:'/parcours/tombola?ev=…',fam:'Parcours jeu',apercu:'Oui'},
+ {nom:'Parcours NDS 2026',url:'/parcours/nds2026',fam:'Parcours jeu',apercu:'Oui'},
+];
+const LOTS=[
+ {nom:"Bon d'achat 30 €",partenaire:'SAFER',type:'Tirage',qte:10,restant:3,valeur:30},
+ {nom:'Place de concert',partenaire:'Ville de Vence',type:'Tirage',qte:20,restant:6,valeur:45},
+ {nom:'Café offert',partenaire:'Nook Café',type:'Gain immédiat',qte:50,restant:12,valeur:3},
+ {nom:'Panier gourmand',partenaire:'Utile Vence',type:'Tirage',qte:5,restant:1,valeur:60},
+];
+/* Les events d'un pro, tels qu'ils sont en base : un meme commerce a un event
+   par super event. SAFER en a 2 — un sur NDS 2026, un clone dans le modele. */
+const EV_PRO={
+ 'SAFER':[
+  {nom:'SAFER',se:'Nuits du Sud 2026',module:'nds2026',etat:'Terminé',flashs:88,parties:31,joueurs:29},
+  {nom:'SAFER',se:'Modèle (gabarit)',module:'nds2026',etat:'Terminé',flashs:0,parties:0,joueurs:0}],
+ 'Nook Café':[
+  {nom:'Nook Café',se:'Nuits du Sud 2026',module:'nds2026',etat:'En cours',flashs:49,parties:18,joueurs:17},
+  {nom:'Nook Café',se:'Modèle (gabarit)',module:'nds2026',etat:'Terminé',flashs:0,parties:0,joueurs:0}],
+ 'Nuits du Sud — Ville de Vence':[
+  {nom:'NDS · Caisse 2',se:'Nuits du Sud 2026',module:'quiz',etat:'Terminé',flashs:432,parties:159,joueurs:147},
+  {nom:'NDS · Brigade Verte 2',se:'Nuits du Sud 2026',module:'quiz',etat:'Terminé',flashs:367,parties:146,joueurs:144},
+  {nom:'NDS · Bar 1',se:'Nuits du Sud 2026',module:'quiz',etat:'Terminé',flashs:317,parties:125,joueurs:111},
+  {nom:"NDS · L'Écran",se:'Nuits du Sud 2026',module:'vote',etat:'Terminé',flashs:233,parties:106,joueurs:97},
+  {nom:'NDS · Le Bar',se:'Nuits du Sud 2026',module:'nds2026',etat:'À venir',flashs:21,parties:6,joueurs:6},
+  {nom:'NDS · Caisse 2',se:'Modèle (gabarit)',module:'nds2026',etat:'Terminé',flashs:0,parties:0,joueurs:0},
+  {nom:'À la Fût',se:'Hors super event',module:'nds2026',etat:'À venir',flashs:0,parties:0,joueurs:0},
+  {nom:'DEKRA Vence',se:'Hors super event',module:'nds2026',etat:'À venir',flashs:0,parties:0,joueurs:0},
+  {nom:'VIP Coiffure',se:'Hors super event',module:'nds2026',etat:'À venir',flashs:0,parties:0,joueurs:0},
+  {nom:'htghc',se:'Hors super event',module:'quiz',etat:'À venir',flashs:0,parties:0,joueurs:0}],
+};
+const evDuPro=n=>EV_PRO[n]||[{nom:n,se:'Nuits du Sud 2026',module:'nds2026',etat:'Terminé',flashs:20,parties:8,joueurs:7}];
+
+/* Onglets de la FICHE DANS LA FICHE : ce qui est propre a UN event du pro.
+   Le jeu et la comm changent d'un event a l'autre — c'est tout l'interet. */
+const ONG_EV=[
+ {id:'infos',l:'Infos'},{id:'jeu',l:'Jeu'},{id:'comm',l:'Comm'},
+ {id:'stats',l:'Stats'},{id:'joueurs',l:'Joueurs'},{id:'lots',l:'Lots'},{id:'qr',l:'QR'},
+];
+
+const JOURS=[['09/07',142],['10/07',188],['11/07',231],['12/07',276],['13/07',254],
+ ['14/07',301],['15/07',218],['16/07',264],['17/07',243],['18/07',329]];
+const HEURES=[['17h',31],['18h',54],['19h',72],['20h',78],['21h',95],['22h',64],['23h',38]];
+
+/* ─── structure des drawers ─── */
+const D={
+ se:{titre:'🎪 Nuits du Sud 2026',
+   sous:'<span class="pill se">Super event</span><span>09/07 → 18/07</span><span>21 stations</span>',
+   onglets:[
+    {id:'apercu',l:"Vue d'ensemble",sous:[{id:'chiffres',l:'Chiffres clés'},{id:'jours',l:'Activité par jour'},{id:'kanban',l:'Kanban des stations'}]},
+    {id:'stations',l:'Stations de jeu',n:14,sous:[{id:'toutes',l:'Toutes'},{id:'nds',l:'Stations NDS'},{id:'part',l:'Chez les partenaires'},{id:'kanban',l:'Kanban'}]},
+    {id:'joueurs',l:'Joueurs',n:617,sous:[{id:'tous',l:'Tous'},{id:'optin',l:'Opt-in'},{id:'fideles',l:'Fidèles'}]},
+    {id:'lots',l:'Lots & tirages',n:42,sous:[{id:'stock',l:'Stock'},{id:'tirage',l:'Tirage au sort'},{id:'gagnants',l:'Gagnants'}]},
+    {id:'pros',l:'Pros & partenaires',n:16,sous:[{id:'tous',l:'Tous'},{id:'pros',l:'Pros'},{id:'commerces',l:'Commerces'}]},
+    {id:'landing',l:'Landing & QR',n:24,sous:[{id:'publique',l:'Page publique'},{id:'rejoindre',l:'Rejoindre'},{id:'sponsor',l:'Sponsor'},{id:'toutes',l:'Toutes les pages'}]},
+   ]},
+ ev:{titre:'🎬 NDS · Caisse 2',
+   sous:'<span class="pill ev">Station de jeu</span><span>quiz</span><span>Ville de Vence</span>',
+   onglets:[
+    {id:'infos',l:'Infos',sous:[{id:'general',l:'Général'},{id:'ratt',l:'Rattachement'},{id:'visib',l:'Visibilité pro'}]},
+    {id:'jeu',l:'Jeu en cours',sous:[{id:'apercu',l:'Aperçu navigable'},{id:'contenu',l:'Contenu'},{id:'regles',l:'Règles'}]},
+    {id:'stats',l:'Stats',sous:[{id:'chiffres',l:'Chiffres'},{id:'heure',l:'Par heure'},{id:'origines',l:'Origines'}]},
+    {id:'joueurs',l:'Joueurs',n:147,sous:[{id:'liste',l:'Liste'},{id:'optin',l:'Opt-in'}]},
+    {id:'lots',l:'Lots',n:3,sous:[{id:'lots',l:'Lots'},{id:'gagnants',l:'Gagnants'}]},
+    {id:'qr',l:'Landing & QR',sous:[{id:'apercu',l:'Aperçu de la page'},{id:'qr',l:'QR & téléchargements'}]},
+   ]},
+ pro:{titre:'🏢 Pro / Partenaire',sous:'<span class="pill g">Pro</span>',
+   onglets:[
+    {id:'infos',l:'Infos',sous:[{id:'general',l:'Général'},{id:'contact',l:'Contact'},{id:'contrat',l:'Contrat & CGV'}]},
+    {id:'souscription',l:'Souscription',sous:[{id:'demande',l:'Sa demande'},{id:'pack',l:'Pack souscrit'},{id:'etapes',l:'Parcours suivi'}]},
+    {id:'commercial',l:'Devis & facturation',sous:[{id:'devis',l:'Devis'},{id:'bon',l:'Bon de commande'},{id:'facture',l:'Factures'},{id:'reglement',l:'Règlement'}]},
+    {id:'stations',l:'Ses stations',n:9,sous:[{id:'parse',l:'Par super event'},{id:'liste',l:'Liste'},{id:'kanban',l:'Kanban'}]},
+    {id:'stats',l:'Stats',sous:[{id:'chiffres',l:'Chiffres'},{id:'heure',l:'Par heure'}]},
+    {id:'lots',l:'Lots & stock',n:2,sous:[{id:'lots',l:'Lots fournis'},{id:'stock',l:'Stock'},{id:'valeur',l:'Valeur'}]},
+    {id:'gagnants',l:'Gagnants & billets',n:7,sous:[{id:'gagnants',l:'Gagnants'},{id:'billets',l:'Billets'},{id:'retraits',l:'Retraits en boutique'}]},
+    {id:'kit',l:'Kit & com',sous:[{id:'dossier',l:'Dossier partenaire'},{id:'visuels',l:'Visuels'},{id:'emails',l:'Emails types'}]},
+    {id:'qr',l:'QR & liens',sous:[{id:'qr',l:'QR'},{id:'liens',l:'Liens uniques'}]},
+   ]},
+ jo:{titre:'👤 Joueur',sous:'<span class="pill g">Joueur</span>',
+   onglets:[
+    {id:'infos',l:'Infos',sous:[{id:'general',l:'Général'},{id:'rgpd',l:'Opt-in & RGPD'}]},
+    {id:'hist',l:'Historique de jeu',sous:[{id:'parties',l:'Parties'}]},
+    {id:'lots',l:'Lots gagnés',sous:[{id:'gagnes',l:'Gagnés'},{id:'tickets',l:'Tickets'}]},
+   ]},
+};
+
+const $=i=>document.getElementById(i);
+let pile=[{d:'se',ctx:null,o:'apercu',s:'chiffres'}];
+const CTX_DEFAUT={pro:()=>PROS[0], jo:()=>JOUEURS[0], ev:()=>STATIONS[0]};
+const cur=()=>pile[pile.length-1];
+const esc=v=>String(v).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+document.querySelectorAll('.sb-i[data-d]').forEach(b=>b.onclick=()=>{
+  document.querySelectorAll('.sb-i').forEach(x=>x.classList.remove('on'));
+  b.classList.add('on');
+  const d=b.dataset.d;
+  pile=[{d,ctx:CTX_DEFAUT[d]?CTX_DEFAUT[d]():null,o:D[d].onglets[0].id,s:D[d].onglets[0].sous[0].id}];
+  rendre();
+});
+$('back').onclick=()=>{ if(pile.length>1){pile.pop();rendre();} };
+$('x').onclick=()=>{ pile=[pile[0]]; rendre(); };
+
+function ouvrirSousFiche(ev){ cur().sf=ev; cur().sfo='infos'; rendre(); }
+function fermerSousFiche(){ cur().sf=null; rendre(); }
+
+function ouvrir(d,ctx){
+  pile.push({d,ctx,o:D[d].onglets[0].id,s:D[d].onglets[0].sous[0].id});
+  rendre();
+}
+
+/* ─── tableur générique : recherche + tri par flèches ─── */
+let tri={c:null,sens:-1}, rech='';
+function tableau(cols,rows,onClic){
+  const t=rech.trim().toLowerCase();
+  let r=rows.filter(x=>!t||cols.some(c=>String(x[c.k]).toLowerCase().includes(t)));
+  if(tri.c){
+    const c=cols.find(x=>x.k===tri.c);
+    r=[...r].sort((a,b)=>{
+      const va=a[tri.c],vb=b[tri.c];
+      const n=(typeof va==='number'&&typeof vb==='number')?va-vb:String(va).localeCompare(String(vb),'fr');
+      return n*tri.sens;
+    });
+  }
+  window.__rows=r; window.__clic=onClic;
+  return `<div class="tb-bar">
+    <input id="rech" placeholder="Rechercher…" value="${esc(rech)}">
+    <span class="cnt">${r.length} ligne${r.length>1?'s':''}</span></div>
+   <div class="tbw"><table><thead><tr>${cols.map(c=>
+     `<th class="${c.n?'r ':''}${tri.c===c.k?'on':''}" data-k="${c.k}">${esc(c.l)}<span class="ar">${tri.c===c.k?(tri.sens===1?'▲':'▼'):'▼'}</span></th>`).join('')}</tr></thead>
+   <tbody>${r.map((x,i)=>`<tr data-i="${i}">${cols.map(c=>
+     `<td class="${c.n?'r':''}${c.lien?' lien':''}">${esc(x[c.k])}</td>`).join('')}</tr>`).join('')}</tbody></table></div>`;
+}
+function brancherTableau(){
+  const inp=$('rech');
+  if(inp) inp.oninput=e=>{rech=e.target.value; rendre(true); const i=$('rech'); if(i){i.focus();i.setSelectionRange(i.value.length,i.value.length);} };
+  document.querySelectorAll('th[data-k]').forEach(th=>th.onclick=()=>{
+    const k=th.dataset.k;
+    tri = tri.c===k ? {c:k,sens:tri.sens===1?-1:1} : {c:k,sens:-1};
+    rendre(true);
+  });
+  document.querySelectorAll('tbody tr[data-i]').forEach(tr=>tr.onclick=()=>{
+    if(window.__clic) window.__clic(window.__rows[+tr.dataset.i]);
+  });
+}
+
+/* ─── kanban ─── */
+function kanban(items,onClic){
+  const cols=['À venir','En cours','Terminé'];
+  window.__kb=items; window.__kbclic=onClic;
+  return `<div class="kb">${cols.map(c=>{
+    const l=items.filter(x=>x.etat===c);
+    return `<div class="kb-col"><div class="kb-t"><span>${c}</span><span>${l.length}</span></div>
+    ${l.map(x=>`<div class="kb-c" data-n="${esc(x.nom)}"><div class="n">${esc(x.nom)}</div>
+      <div class="d">${esc(x.module)} · ${x.flashs} flashs · ${x.joueurs} joueurs</div></div>`).join('')||'<div class="kb-c" style="opacity:.5;cursor:default">—</div>'}
+    </div>`}).join('')}</div>`;
+}
+function brancherKanban(){
+  document.querySelectorAll('.kb-c[data-n]').forEach(c=>c.onclick=()=>{
+    const s=window.__kb.find(x=>x.nom===c.dataset.n);
+    if(s&&window.__kbclic) window.__kbclic(s);
+  });
+}
+
+/* ─── graphique barres, série unique ─── */
+function barres(data,titre,unite){
+  const W=100,H=150,P=22,max=Math.max(...data.map(d=>d[1])),n=data.length;
+  const bw=100/n*0.62, gap=100/n*0.38;
+  const bars=data.map((d,i)=>{
+    const h=(d[1]/max)*(H-P-16), x=(i*100/n)+gap/2, y=H-P-h;
+    return `<rect class="bar" x="${x}" y="${y}" width="${bw}" height="${h}" rx="1.2"
+      data-l="${esc(d[0])}" data-v="${d[1]}" vector-effect="non-scaling-stroke"></rect>`;
+  }).join('');
+  const labs=data.map((d,i)=>`<text class="ax" x="${(i*100/n)+gap/2+bw/2}" y="${H-8}" text-anchor="middle">${esc(d[0])}</text>`).join('');
+  return `<div class="ch-t">${esc(titre)}</div><div class="ch" id="chw">
+    <svg viewBox="0 0 100 ${H}" preserveAspectRatio="none">
+      <line class="gl" x1="0" y1="${H-P}" x2="100" y2="${H-P}" vector-effect="non-scaling-stroke"/>
+      ${bars}</svg>
+    <svg viewBox="0 0 100 ${H}" style="position:absolute;inset:0;pointer-events:none">${labs}</svg>
+    <div class="tip" id="tip"></div></div>
+    <div style="font-size:11px;color:var(--muted);margin-top:6px">Maximum : <b>${max} ${esc(unite)}</b></div>`;
+}
+function brancherCh(unite){
+  const w=$('chw'); if(!w) return; const tip=$('tip');
+  w.querySelectorAll('.bar').forEach(b=>{
+    b.onmouseenter=e=>{const r=b.getBoundingClientRect(),c=w.getBoundingClientRect();
+      tip.textContent=`${b.dataset.l} — ${b.dataset.v} ${unite}`;
+      tip.style.left=(r.left-c.left+r.width/2)+'px'; tip.style.top=(r.top-c.top)+'px'; tip.classList.add('on');};
+    b.onmouseleave=()=>tip.classList.remove('on');
+  });
+}
+
+/* ─── aperçu navigable du parcours ─── */
+const ECRANS={
+ accueil:`<div class="hd"><h5>Nuits du Sud 2026</h5><p>NDS · Caisse 2</p></div>
+   <p>Réponds à 5 questions et tente de gagner un lot chez nos partenaires.</p>
+   <div class="q">🎁 20 places de concert</div><div class="q">🎁 Bons d'achat 30 €</div>
+   <div class="b">Commencer à jouer</div>`,
+ quiz:`<h5>Question 2 / 5</h5><p>En quelle année a eu lieu la première édition des Nuits du Sud ?</p>
+   <div class="q">1997</div><div class="q ok">1998 ✓</div><div class="q">2001</div><div class="q">2004</div>
+   <div class="b">Valider</div>`,
+ resultat:`<h5>4 / 5 — bravo !</h5><p>Tu entres dans le tirage au sort de fin de soirée.</p>
+   <div class="q ok">🎟️ Billet enregistré</div><div class="q">Tirage le 18/07 à 23h</div>
+   <div class="b">Voir les lots</div>`,
+ carte:`<h5>Les points de jeu</h5><p>14 stations autour du festival.</p>
+   <div class="q">📍 NDS · Caisse 2 — 80 m</div><div class="q">📍 NDS · Bar 1 — 140 m</div>
+   <div class="q">📍 Nook Café — 320 m</div><div class="b">M'y rendre</div>`,
+ se:`<div class="hd"><h5>Nuits du Sud 2026</h5><p>09 → 18 juillet · Vence</p></div>
+   <p>21 points de jeu, 42 lots à gagner chez les commerçants de Vence.</p>
+   <div class="q">🎪 14 stations du festival</div><div class="q">🏪 7 commerces partenaires</div>
+   <div class="b">Trouver un point de jeu</div>`,
+};
+let ecran='accueil';
+function apercu(liste,url){
+  return `<div class="prev">
+    <div><div class="nav">${liste.map(e=>
+      `<button class="${e[0]===ecran?'on':''}" data-e="${e[0]}">${e[1]}</button>`).join('')}</div>
+      <div class="phone"><div class="scr">${ECRANS[ecran]||ECRANS.accueil}</div></div></div>
+    <div class="pcol">
+      <div class="fr"><span>Page réelle</span><span class="mono">${esc(url)}</span></div>
+      <div class="fr"><span>Écran affiché</span><span>${esc((liste.find(e=>e[0]===ecran)||liste[0])[1])}</span></div>
+      <p style="font-size:11.5px;color:var(--muted);line-height:1.5;margin-top:12px">
+      Les écrans se parcourent ici, dans l'ordre où le joueur les voit. C'est l'aperçu
+      qui manque aujourd'hui : on ne peut vérifier un jeu qu'en le scannant sur place.</p>
+    </div></div>`;
+}
+function brancherApercu(){
+  document.querySelectorAll('.nav button[data-e]').forEach(b=>b.onclick=()=>{ecran=b.dataset.e;rendre(true);});
+}
+
+/* ─── QR réel ─── */
+function blocQr(url){
+  return `<div class="prev"><div>
+    <div class="ch-t">QR code</div><div id="qrbox"></div>
+    <div class="dl"><button>PNG 1024</button><button>SVG</button><button>Affiche A4</button></div></div>
+    <div class="pcol"><div class="fr"><span>Lien encodé</span><span class="mono">${esc(url)}</span></div>
+    <div class="fr"><span>Format</span><span>PNG · SVG · A4</span></div>
+    <p style="font-size:11.5px;color:var(--muted);line-height:1.5;margin-top:12px">
+    Le QR est calculé dans le navigateur : c'est un vrai fichier, donc téléchargeable.
+    Aujourd'hui c'est une image distante, il n'y a rien à enregistrer.</p></div></div>`;
+}
+function brancherQr(url){
+  const box=$('qrbox'); if(!box||!window.QRCode) return;
+  box.innerHTML='';
+  new QRCode(box,{text:url,width:134,height:134,colorDark:'#0F172A',colorLight:'#FFFFFF'});
+}
+
+/* ─── rendu ─── */
+function rendre(garderRech){
+  if(!garderRech && !window.__memo) { }
+  const c=cur(), d=D[c.d], ong=d.onglets.find(x=>x.id===c.o)||d.onglets[0];
+  const so=ong.sous.find(x=>x.id===c.s)||ong.sous[0];
+  c.o=ong.id; c.s=so.id;
+
+  let titre=d.titre, sous=d.sous;
+  if(c.d==='pro'&&c.ctx){
+    titre='🏢 '+c.ctx.nom;
+    const deux=c.ctx.role==='Partenaire';
+    sous=`<span class="pill g">${esc(c.ctx.role)}</span><span>${c.ctx.stations} station(s)</span><span>${c.ctx.flashs} flashs</span>`
+       + (deux?`<span class="pill" style="background:color-mix(in srgb,var(--acc) 16%,transparent);color:var(--acc)">fiche unifiée</span>`:'');
+  }
+  if(c.d==='jo'&&c.ctx){ titre='👤 '+c.ctx.nom; sous=`<span class="pill g">Joueur</span><span>${esc(c.ctx.ville)}</span><span>${c.ctx.parties} parties</span>`; }
+  if(c.d==='ev'&&c.ctx){ titre='🎬 '+c.ctx.nom; sous=`<span class="pill ev">${esc(c.ctx.type)}</span><span>${esc(c.ctx.module)}</span><span>${esc(c.ctx.pro)}</span>`; }
+  $('t').innerHTML=titre; $('s').innerHTML=sous;
+  $('back').hidden = pile.length<2;
+
+  $('n1').innerHTML=d.onglets.map(x=>
+    `<button class="${x.id===c.o?'on':''}" data-o="${x.id}">${esc(x.l)}${x.n?`<span class="n">${x.n}</span>`:''}</button>`).join('');
+  $('n1').querySelectorAll('button').forEach(b=>b.onclick=()=>{
+    c.o=b.dataset.o; c.s=D[c.d].onglets.find(x=>x.id===c.o).sous[0].id; c.sf=null; rech=''; tri={c:null,sens:-1}; rendre();
+  });
+  $('n2').style.display = c.sf ? 'none' : '';
+  $('n2').innerHTML=`<span class="n2-lbl">Sous-onglets</span>`+ong.sous.map(x=>
+    `<button class="${x.id===c.s?'on':''}" data-s="${x.id}">${esc(x.l)}</button>`).join('');
+  $('n2').querySelectorAll('button').forEach(b=>b.onclick=()=>{ c.s=b.dataset.s; c.sf=null; rech=''; tri={c:null,sens:-1}; rendre(); });
+
+  const html=contenu(c);
+  $('b').innerHTML=`<div class="chemin">${c.d==='se'?'Super event':c.d==='ev'?'Event':c.d==='pro'?'Pro':'Joueur'} › <b>${esc(ong.l)}</b> › <b>${esc(so.l)}</b></div>`+(html||vide(so.l));
+  brancherTableau(); brancherKanban(); brancherApercu();
+  document.querySelectorAll('[data-sf]').forEach(el=>el.onclick=()=>{
+    const [n,se]=el.dataset.sf.split('|');
+    const e=(window.__sf||[]).find(x=>x.nom===n&&x.se===se); if(e) ouvrirSousFiche(e);
+  });
+  document.querySelectorAll('[data-fermer]').forEach(b=>b.onclick=fermerSousFiche);
+  document.querySelectorAll('[data-sfo]').forEach(b=>b.onclick=()=>{ cur().sfo=b.dataset.sfo; rendre(); });
+  $('foot').innerHTML = `<b>Reste HORS drawer, au niveau général —</b> ces écrans ne dépendent d'aucun event, d'aucun pro :
+    prospection terrain, prospects B2B, contacts landing, retours CRM, bibliothèque des templates de jeux,
+    plaquettes commerciales, argumentaire téléphonique, packs de participation, CGV, stats toutes opérations.
+    <br><br><b>Ce qui manque à construire :</b> le drawer Super Event (il n'en a aucun aujourd'hui),
+    les sous-onglets, l'aperçu navigable du jeu, le QR téléchargeable, et le regroupement du commercial
+    dans la fiche pro (devis, bon de commande, facture et souscription sont aujourd'hui 5 entrées de menu séparées).`;
+}
+
+/* Un sous-onglet sans contenu propre doit le DIRE, jamais afficher celui d'un
+   autre : c'est exactement le bug qu'avait « Contrat & CGV », qui recopiait
+   silencieusement l'écran « Général ». */
+function vide(l){
+  return `<div style="border:1px dashed var(--line2);border-radius:10px;padding:22px;text-align:center;color:var(--muted)">
+    <div style="font-weight:800;font-size:13px;color:var(--ink)">« ${esc(l)} » n'est pas encore maquetté</div>
+    <div style="font-size:12px;margin-top:5px">Écran vide volontairement — il ne recopie pas le contenu d'un autre sous-onglet.</div></div>`;
+}
+
+function contenu(c){
+  const k=a=>`<div class="kpi">${a.map(x=>`<div><div class="v">${x[0]}</div><div class="l">${x[1]}</div></div>`).join('')}</div>`;
+  const f=a=>a.map(x=>`<div class="fr"><span>${x[0]}</span><span>${x[1]}</span></div>`).join('');
+  const colsSt=[{k:'nom',l:'Station'},{k:'type',l:'Type'},{k:'pro',l:'Pro',lien:1},
+    {k:'flashs',l:'Flashs',n:1},{k:'parties',l:'Parties',n:1},{k:'joueurs',l:'Joueurs',n:1},{k:'rejoue',l:'Rejoué',n:1},{k:'pic',l:'Pic'}];
+  const colsJo=[{k:'nom',l:'Joueur'},{k:'ville',l:'Ville'},{k:'cp',l:'CP'},
+    {k:'parties',l:'Parties',n:1},{k:'lots',l:'Lots',n:1},{k:'optin',l:'Opt-in'}];
+  const colsPro=[{k:'nom',l:'Pro / partenaire'},{k:'role',l:'Rôle'},{k:'stations',l:'Stations',n:1},
+    {k:'flashs',l:'Flashs',n:1},{k:'joueurs',l:'Joueurs',n:1},{k:'statut',l:'Statut'}];
+  const colsLot=[{k:'nom',l:'Lot'},{k:'partenaire',l:'Partenaire',lien:1},{k:'type',l:'Type'},
+    {k:'qte',l:'Quantité',n:1},{k:'restant',l:'Restant',n:1},{k:'valeur',l:'Valeur €',n:1}];
+  const versEvent=s=>ouvrir('ev',s);
+  const versPro=nom=>{const p=PROS.find(x=>x.nom===nom)||PROS[0];ouvrir('pro',p);};
+  const versJoueur=j=>ouvrir('jo',j);
+
+  if(c.d==='se'){
+    if(c.o==='apercu'){
+      if(c.s==='chiffres') return k([[21,'Stations'],[2847,'Flashs'],[986,'Parties'],[617,'Joueurs']])+
+        f([['Période','09/07 → 18/07'],['Organisateur','Ville de Vence'],['Jours avec activité','53'],['Lots distribués','118']]);
+      if(c.s==='jours'){ setTimeout(()=>brancherCh('flashs'),0);
+        return barres(JOURS,'Flashs par jour du festival','flashs'); }
+      return kanban(STATIONS,versEvent);
+    }
+    if(c.o==='stations'){
+      if(c.s==='nds') return tableau(colsSt,STATIONS.filter(s=>s.type==='Station NDS'),versEvent);
+      if(c.s==='part') return tableau(colsSt,STATIONS.filter(s=>s.type==='Partenaire'),versEvent);
+      if(c.s==='kanban') return kanban(STATIONS,versEvent);
+      return tableau(colsSt,STATIONS,versEvent);
+    }
+    if(c.o==='joueurs'){
+      if(c.s==='optin') return tableau(colsJo,JOUEURS.filter(j=>j.optin==='Oui'),versJoueur);
+      if(c.s==='fideles') return tableau(colsJo,JOUEURS.filter(j=>j.parties>=4),versJoueur);
+      return tableau(colsJo,JOUEURS,versJoueur);
+    }
+    if(c.o==='lots'){
+      if(c.s==='tirage') return f([['Tirages effectués','118'],['Lots restants','22'],['Scopé sur','Nuits du Sud 2026'],['Dernier tirage','18/07 à 23h']]);
+      if(c.s==='gagnants') return tableau(colsJo,JOUEURS.filter(j=>j.lots>0),versJoueur);
+      return tableau(colsLot,LOTS,l=>versPro(l.partenaire));
+    }
+    if(c.o==='pros'){
+      if(c.s==='pros') return tableau(colsPro,PROS.filter(p=>p.role!=='Partenaire'),p=>ouvrir('pro',p));
+      if(c.s==='commerces') return tableau(colsPro,PROS.filter(p=>p.role==='Partenaire'),p=>ouvrir('pro',p));
+      return tableau(colsPro,PROS,p=>ouvrir('pro',p));
+    }
+    if(c.o==='landing'){
+      if(c.s==='toutes') return tableau(
+        [{k:'nom',l:'Page'},{k:'fam',l:'Famille'},{k:'url',l:'URL'},{k:'apercu',l:'Aperçu'}],
+        PAGES, null)+
+        `<p style="font-size:11.5px;color:var(--muted);line-height:1.5;margin-top:10px">
+         Les <b>24</b> pages publiques du produit : 13 landings et pages commerciales,
+         7 parcours de jeu, 4 pages du super event. Une seule n'est pas prévisualisable —
+         la landing « Nuits du Sud 2026 — Partenaires », qui est un brouillon sans URL déployée.
+         Rien ne disparaît du rangement : cet inventaire reste accessible en entier.</p>`;
+      const u=c.s==='rejoindre'?'https://flowin-events.vercel.app/rejoindre/se-nds-2026'
+             :c.s==='sponsor'?'https://flowin-events.vercel.app/sponsor/se-nds-2026'
+             :'https://flowin-events.vercel.app/se/se-nds-2026';
+      setTimeout(()=>brancherQr(u),0);
+      return apercu([['se','Page du super event'],['carte','Carte des points']],u)+
+        `<div style="margin-top:18px">`+blocQr(u)+`</div>`;
+    }
+  }
+
+  if(c.d==='ev'){
+    const e=c.ctx||STATIONS[0];
+    if(c.o==='infos'){
+      if(c.s==='ratt') return f([['Pro propriétaire',`<span class="lien">${esc(e.pro)} ›</span>`],
+        ['Super event','<span class="lien">Nuits du Sud 2026 ›</span>'],['Type',esc(e.type)]]);
+      if(c.s==='visib') return f([['Stats','visible'],['Participants','visible'],['Lots','visible'],['QR','visible'],['Export','visible']]);
+      return f([['Nom',esc(e.nom)],['Module',esc(e.module)],['Dates','09/07 → 18/07'],['Lieu','Vence'],['Statut',esc(e.etat)]]);
+    }
+    if(c.o==='jeu'){
+      if(c.s==='contenu') return f([['Banques','2 sélectionnées'],['Questions disponibles','34'],['Questions par partie','5']]);
+      if(c.s==='regles') return f([['Chronomètre','30 s'],['Score minimum','0'],['Gain','Tirage au sort']]);
+      return apercu([['accueil','Accueil'],['quiz','Question'],['resultat','Résultat'],['carte','Carte']],
+        `https://flowin-events.vercel.app/parcours/${e.module}?ev=…`);
+    }
+    if(c.o==='stats'){
+      if(c.s==='heure'){ setTimeout(()=>brancherCh('flashs'),0); return barres(HEURES,'Flashs par heure','flashs'); }
+      if(c.s==='origines') return f([['Physique (QR affiche)',e.flashs],['Digital (lien partagé)',0],['Heure de pic',esc(e.pic)]]);
+      return k([[e.flashs,'Flashs'],[e.parties,'Parties'],[e.joueurs,'Joueurs'],[e.rejoue,'Ont rejoué']]);
+    }
+    if(c.o==='joueurs') return tableau(colsJo, c.s==='optin'?JOUEURS.filter(j=>j.optin==='Oui'):JOUEURS, versJoueur);
+    if(c.o==='lots'){
+      if(c.s==='gagnants') return tableau(colsJo,JOUEURS.filter(j=>j.lots>0),versJoueur);
+      return tableau(colsLot,LOTS.slice(0,3),l=>versPro(l.partenaire));
+    }
+    if(c.o==='qr'){
+      const u=`https://flowin-events.vercel.app/parcours/${e.module}?ev=ev-caisse2`;
+      if(c.s==='qr'){ setTimeout(()=>brancherQr(u),0); return blocQr(u); }
+      return apercu([['accueil','Accueil'],['quiz','Question'],['resultat','Résultat']],u);
+    }
+  }
+
+  if(c.d==='pro'){
+    const p=c.ctx||PROS[0];
+    const st=STATIONS.filter(s=>s.pro===p.nom);
+    if(c.o==='infos'){
+      if(c.s==='contact') return f([['Contact','Service événementiel'],['Email','contact@exemple.fr'],
+        ['Téléphone','04 93 00 00 00'],['Adresse','Place du Grand Jardin, 06140 Vence'],['SIRET','—']]);
+      if(c.s==='contrat') return f([
+        ['CGV acceptées','Oui — le 15/06/2026'],
+        ['Version des CGV','v2.1 (01/2026)'],
+        ['Contrat signé','Oui — BC-2026-014 du 18/06'],
+        ['Durée','Nuits du Sud 2026 · 09/07 → 18/07'],
+        ['Reconduction','Non tacite'],
+        ['Pièces jointes','Bon de commande signé · CGV v2.1']])+
+        `<p style="font-size:11.5px;color:var(--muted);line-height:1.5;margin-top:12px">
+         Les CGV sont aujourd'hui une page générale du menu, identique pour tout le monde.
+         Ici on voit <b>ce que ce pro a accepté, et quand</b> — c'est l'information qui manque
+         quand un partenaire conteste quelque chose.</p>`;
+      return f([['Nom',esc(p.nom)],['Rôle',esc(p.role)],['Stations',p.stations],
+        ['Flashs',p.flashs],['Joueurs',p.joueurs],['Statut',esc(p.statut)]]);
+    }
+    if(c.o==='stations'){
+      const mes=evDuPro(p.nom);
+      /* FICHE DANS LA FICHE : une station ouverte reste A L INTERIEUR de la fiche
+         du pro. On ne perd pas le contexte — un pro a plusieurs events, chacun
+         avec son propre jeu et sa propre comm. */
+      if(c.sf){
+        const e=c.sf;
+        const corps = c.sfo==='jeu'
+            ? f([['Module',esc(e.module)],['Banques','2 sélectionnées · 34 questions'],
+                 ['Questions par partie','5'],['Chronomètre','30 s']])+
+              `<p style="font-size:11.5px;color:var(--muted);margin-top:10px">Propre à CET event : deux stations du même pro peuvent avoir des jeux différents.</p>`
+          : c.sfo==='comm'
+            ? f([['Billets émis',e.joueurs?7:0],['Kit com','A3 · A4 · QR'],['Emails envoyés',e.joueurs?3:0],['Visuels',e.se==='Modèle (gabarit)'?'—':'4 formats']])+
+              `<p style="font-size:11.5px;color:var(--muted);margin-top:10px">La comm est portée par l'event, pas par le compte : elle change d'une opération à l'autre.</p>`
+          : c.sfo==='stats'
+            ? `<div class="kpi"><div><div class="v">${e.flashs}</div><div class="l">Flashs</div></div>
+               <div><div class="v">${e.parties}</div><div class="l">Parties</div></div>
+               <div><div class="v">${e.joueurs}</div><div class="l">Joueurs</div></div>
+               <div><div class="v">${e.etat}</div><div class="l">État</div></div></div>`
+          : c.sfo==='joueurs' ? tableau(colsJo,JOUEURS.slice(0,3),versJoueur)
+          : c.sfo==='lots'    ? tableau(colsLot,LOTS.slice(0,2),null)
+          : c.sfo==='qr'      ? f([['Lien du parcours',`<span class="mono">/parcours/${esc(e.module)}?ev=…</span>`],
+                                   ['Fiche publique',`<span class="mono">/se/…/${esc(e.nom)}</span>`],['Téléchargements','PNG · SVG · A4']])
+          : f([['Station',esc(e.nom)],['Super event',esc(e.se)],['Module',esc(e.module)],['État',esc(e.etat)]]);
+        return `<div class="n3-bar">
+            <button class="r" data-fermer="1">← Toutes ses stations</button>
+            <span class="t">🎬 ${esc(e.nom)}</span>
+            <span class="d">${esc(e.se)} · ${esc(e.module)}</span></div>
+          <div class="n3">${ONG_EV.map(o=>
+            `<button class="${o.id===c.sfo?'on':''}" data-sfo="${o.id}">${esc(o.l)}</button>`).join('')}</div>${corps}`;
+      }
+      if(c.s==='kanban') return kanban(mes.map(e=>({...e,etat:e.etat})),ouvrirSousFiche);
+      if(c.s==='liste') return tableau(
+        [{k:'nom',l:'Station'},{k:'se',l:'Super event'},{k:'module',l:'Jeu'},{k:'etat',l:'État'},
+         {k:'flashs',l:'Flashs',n:1},{k:'parties',l:'Parties',n:1},{k:'joueurs',l:'Joueurs',n:1}],
+        mes, ouvrirSousFiche);
+      const groupes=[...new Set(mes.map(e=>e.se))];
+      window.__sf=mes;
+      return groupes.map(g=>`<div class="grp">${esc(g)} · ${mes.filter(e=>e.se===g).length}</div>`+
+        mes.filter(e=>e.se===g).map(e=>`<div class="row" data-sf="${esc(e.nom)}|${esc(e.se)}">
+          <div><div class="n">${esc(e.nom)}</div><div class="d">${esc(e.module)} · ${esc(e.etat)}</div></div>
+          <div class="r">${e.flashs} flashs<br>${e.joueurs} joueurs</div></div>`).join('')).join('')+
+        `<p style="font-size:11.5px;color:var(--muted);line-height:1.5;margin-top:12px">
+         Un même commerce a un event par super event. Clique une station : sa fiche
+         s'ouvre <b>dans</b> celle du pro, avec son jeu et sa comm à elle.</p>`;
+    }
+    if(c.o==='stats'){
+      if(c.s==='heure'){ setTimeout(()=>brancherCh('flashs'),0); return barres(HEURES,'Flashs par heure','flashs'); }
+      return k([[p.flashs,'Flashs'],[st.reduce((a,b)=>a+b.parties,0),'Parties'],[p.joueurs,'Joueurs'],[p.stations,'Stations']]);
+    }
+    if(c.o==='qr'){
+      const u='https://flowin-events.vercel.app/pro';
+      if(c.s==='liens') return f([['Liens à usage unique',st.length],['Expiration','24 h']]);
+      setTimeout(()=>brancherQr(u),0); return blocQr(u);
+    }
+    if(c.o==='souscription'){
+      if(c.s==='pack') return f([['Pack souscrit','Pack Visibilité — 490 €'],['Stations incluses','2'],['Lots à fournir','10'],['Souscrit le','12/06/2026']]);
+      if(c.s==='etapes') return tableau(
+        [{k:'etape',l:'Étape'},{k:'quand',l:'Quand'},{k:'etat',l:'État'}],
+        [{etape:'1 · Persona commerce',quand:'12/06',etat:'Fait'},
+         {etape:'2 · Identité & adresse',quand:'12/06',etat:'Fait'},
+         {etape:'3 · Banque de questions',quand:'13/06',etat:'Fait'},
+         {etape:'4 · Récompense',quand:'13/06',etat:'Fait'},
+         {etape:'5 · Dates & offre',quand:'14/06',etat:'Fait'},
+         {etape:'6 · Pack de participation',quand:'14/06',etat:'Fait'},
+         {etape:'7 · Diffusion',quand:'15/06',etat:'Fait'},
+         {etape:'8 · Récapitulatif',quand:'15/06',etat:'Envoyé'}], null)+
+        `<p style="font-size:11.5px;color:var(--muted);line-height:1.5;margin-top:10px">
+         Les 8 étapes du parcours de souscription que le commerce a réellement suivi
+         sur <span class="mono">/rejoindre</span>. Aujourd'hui on ne voit que le résultat, jamais le chemin.</p>`;
+      return f([['Demande reçue le','15/06/2026'],['Canal','Parcours /rejoindre'],['Super event visé','Nuits du Sud 2026'],['Statut','Acceptée le 18/06']]);
+    }
+    if(c.o==='commercial'){
+      const colsDoc=[{k:'num',l:'N°'},{k:'objet',l:'Objet'},{k:'date',l:'Date'},{k:'montant',l:'Montant €',n:1},{k:'etat',l:'État'}];
+      if(c.s==='bon') return tableau(colsDoc,[
+        {num:'BC-2026-014',objet:'Pack Visibilité NDS 2026',date:'18/06',montant:490,etat:'Signé'}],null);
+      if(c.s==='facture') return tableau(colsDoc,[
+        {num:'FA-2026-031',objet:'Pack Visibilité NDS 2026',date:'01/07',montant:490,etat:'Payée'},
+        {num:'FA-2026-048',objet:'Lots complémentaires (10 bons)',date:'12/07',montant:180,etat:'Payée'},
+        {num:'FA-2026-057',objet:'Kit com supplémentaire A3',date:'20/07',montant:60,etat:'En attente'}],null)+
+        f([['Total facturé','730 €'],['Encaissé','670 €'],['Reste dû','60 €']]);
+      if(c.s==='reglement') return f([['Montant dû','0 €'],['Réglé le','09/07/2026'],['Moyen','Virement'],['Relances','aucune']]);
+      return tableau(colsDoc,[
+        {num:'DV-2026-022',objet:'Pack Visibilité NDS 2026',date:'15/06',montant:490,etat:'Accepté'}],null);
+    }
+    if(c.o==='lots'){
+      const mes=LOTS.filter(l=>l.partenaire===p.nom).length?LOTS.filter(l=>l.partenaire===p.nom):LOTS.slice(0,2);
+      if(c.s==='stock') return tableau(
+        [{k:'nom',l:'Lot'},{k:'qte',l:'Fourni',n:1},{k:'restant',l:'Restant',n:1},{k:'distribue',l:'Distribué',n:1}],
+        mes.map(l=>({nom:l.nom,qte:l.qte,restant:l.restant,distribue:l.qte-l.restant})), null);
+      if(c.s==='valeur') return f([['Valeur unitaire moyenne',Math.round(mes.reduce((a,b)=>a+b.valeur,0)/mes.length)+' €'],
+        ['Valeur totale fournie',mes.reduce((a,b)=>a+b.valeur*b.qte,0)+' €'],
+        ['Valeur distribuée',mes.reduce((a,b)=>a+b.valeur*(b.qte-b.restant),0)+' €']]);
+      return tableau(colsLot,mes,null);
+    }
+    if(c.o==='gagnants'){
+      if(c.s==='billets') return f([['Billets générés','7'],['Validés en caisse','6'],['En attente','1'],['Double contrôle','QR du billet + numéro saisi en caisse']]);
+      if(c.s==='retraits') return tableau(
+        [{k:'joueur',l:'Joueur'},{k:'lot',l:'Lot'},{k:'quand',l:'Retiré le'},{k:'etat',l:'État'}],
+        [{joueur:'Camille R.',lot:"Bon d'achat 30 €",quand:'21/07',etat:'Retiré'},
+         {joueur:'Inès B.',lot:"Bon d'achat 30 €",quand:'23/07',etat:'Retiré'},
+         {joueur:'Yanis M.',lot:'Panier gourmand',quand:'—',etat:'En attente'}], null);
+      return tableau(colsJo,JOUEURS.filter(j=>j.lots>0),versJoueur);
+    }
+    if(c.o==='kit'){
+      if(c.s==='visuels') return f([['Affiche A4','1 fichier'],['Visuels réseaux','4 formats'],['Spot vidéo','1'],['QR HD','600 × 600']]);
+      if(c.s==='emails') return tableau(
+        [{k:'nom',l:'Modèle'},{k:'objet',l:'Objet du mail'},{k:'envois',l:'Envoyés',n:1},{k:'maj',l:'Modifié le'}],
+        [{nom:'Annonce du jeu',objet:'Un jeu chez nous pendant les Nuits du Sud',envois:1,maj:'20/06'},
+         {nom:'Lot gagné',objet:'Vous avez gagné !',envois:7,maj:'22/06'},
+         {nom:'Liste des gagnants',objet:'Vos gagnants à accueillir en boutique',envois:2,maj:'19/07'},
+         {nom:'Relance retrait',objet:'Votre lot vous attend',envois:0,maj:'—'}], null)+
+        `<p style="font-size:11.5px;color:var(--muted);line-height:1.5;margin-top:10px">
+         Les 3 premiers modèles existent déjà et sont éditables par partenaire.
+         Le 4e n'a jamais servi : à supprimer, ou à activer.</p>`;
+      return f([['Dossier partenaire','A3 · A4 · vidéo · QR'],['Généré le','20/06/2026'],['Lien','<span class="mono">/nds/kit-digital/…</span>']]);
+    }
+  }
+
+  if(c.d==='jo'){
+    const j=c.ctx||JOUEURS[0];
+    if(c.o==='infos'){
+      if(c.s==='rgpd') return f([['Opt-in',esc(j.optin)],['Source','Landing NDS 2026'],['Consentement','09/07']]);
+      return f([['Nom',esc(j.nom)],['Ville',`${esc(j.ville)} (${esc(j.cp)})`],['Parties',j.parties],['Lots',j.lots]]);
+    }
+    if(c.o==='hist') return tableau(
+      [{k:'nom',l:'Station'},{k:'module',l:'Jeu'},{k:'parties',l:'Parties',n:1}],
+      STATIONS.slice(0,3).map(s=>({nom:s.nom,module:s.module,parties:2})), s=>{
+        const st=STATIONS.find(x=>x.nom===s.nom); if(st) versEvent(st);
+      });
+    if(c.o==='lots'){
+      if(c.s==='tickets') return f([['Billets','2'],['Validés en caisse','1']]);
+      return tableau(colsLot,LOTS.slice(0,j.lots||1),l=>versPro(l.partenaire));
+    }
+  }
+  return '';
+}
+rendre();
+</script>
