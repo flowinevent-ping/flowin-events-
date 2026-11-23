@@ -1,0 +1,778 @@
+<meta name="claude:viewport-fit-sides" content="cover">
+<title>Parcours Pro resserré</title>
+<style>
+/* Layout : barre de profils en haut, téléphone 390×844 au centre, liste
+   des écrans à gauche (repliée sous le téléphone en mobile). Jetons repris
+   de docs/DESIGN-TOKENS-flowin.md ; animation = bleu, super event = orange. */
+:root{
+  --bg:#F4F6F9; --surface:#FFFFFF; --surface-2:#EEF2F7; --fg:#1B3A5C; --fg-2:#5A6B80;
+  --trait:#DCE3EC; --champ:#CBD5E2;
+  --violet:#7A4FE0; --violet-txt:#5B34C2; --violet-clair:#EEE8FC;
+  --bleu:#3B5CC4; --bleu-clair:#E3E9F8;
+  --orange:#C2410C; --orange-2:#FF8A14; --orange-clair:#FDEBDF;
+  --ok:#0B7A4F; --ok-clair:#DDF2E8; --ko:#C62F2F;
+  --nuit:#0E1B30;
+  --r:18px; --r-s:12px; --pill:100px;
+  --ombre:0 14px 32px -22px rgba(27,58,92,.5);
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0B1526; --surface:#13233B; --surface-2:#1A2D48; --fg:#EEF2F8; --fg-2:#9FB0C8;
+  --trait:rgba(255,255,255,.10); --champ:rgba(255,255,255,.20);
+  --violet:#9C83F0; --violet-txt:#CBBDFB; --violet-clair:#2A2150;
+  --bleu:#7E97E8; --bleu-clair:#1C2C4D; --orange:#FF8A14; --orange-2:#FFB061; --orange-clair:#3A2414;
+  --ok:#3FBE8A; --ok-clair:#123527; --ko:#F0767A; --ombre:0 14px 32px -22px rgba(0,0,0,.7);
+  color-scheme:dark;}}
+:root[data-theme="dark"]{
+  --bg:#0B1526; --surface:#13233B; --surface-2:#1A2D48; --fg:#EEF2F8; --fg-2:#9FB0C8;
+  --trait:rgba(255,255,255,.10); --champ:rgba(255,255,255,.20);
+  --violet:#9C83F0; --violet-txt:#CBBDFB; --violet-clair:#2A2150;
+  --bleu:#7E97E8; --bleu-clair:#1C2C4D; --orange:#FF8A14; --orange-2:#FFB061; --orange-clair:#3A2414;
+  --ok:#3FBE8A; --ok-clair:#123527; --ko:#F0767A; --ombre:0 14px 32px -22px rgba(0,0,0,.7);
+  color-scheme:dark;}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html,body{min-height:100%}
+body{background:var(--bg);color:var(--fg);margin:0;
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));
+  padding-block:16px 32px}
+svg.i{width:20px;height:20px;flex-shrink:0;stroke:currentColor;fill:none;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
+button{font-family:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--violet);outline-offset:2px}
+
+/* ---- barre du haut ---- */
+.top{max-width:1100px;margin:0 auto 16px;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.logo{font-weight:900;font-size:20px;letter-spacing:-.02em;color:var(--fg)}
+.logo b{color:var(--bleu);font-weight:900}
+.demo{font-size:11px;font-weight:800;color:var(--orange);background:var(--orange-clair);padding:4px 9px;border-radius:var(--pill)}
+.profils{display:flex;gap:4px;background:var(--surface);border:1px solid var(--trait);border-radius:var(--pill);padding:4px;margin-left:auto}
+.profils button{border:0;background:none;padding:8px 16px;border-radius:var(--pill);font-size:13px;font-weight:800;color:var(--fg-2);cursor:pointer;min-height:36px}
+.profils button.on{background:var(--violet);color:#fff}
+.theme{border:1px solid var(--trait);background:var(--surface);border-radius:var(--pill);width:40px;height:40px;display:grid;place-items:center;cursor:pointer;color:var(--fg-2)}
+
+.wrap{max-width:1100px;margin:0 auto;display:grid;grid-template-columns:260px auto;justify-content:center;gap:28px;align-items:start}
+@media (max-width:760px){.wrap{grid-template-columns:1fr}.nav{order:2}}
+
+/* ---- liste des écrans ---- */
+.nav{background:var(--surface);border:1px solid var(--trait);border-radius:var(--r);padding:12px;min-width:0}
+.nav h3{font-size:10.5px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--fg-2);margin:10px 6px 6px}
+.nav h3:first-child{margin-top:2px}
+.nav button{display:flex;width:100%;text-align:left;border:0;background:none;padding:8px 8px;border-radius:10px;font-size:13px;font-weight:600;color:var(--fg-2);cursor:pointer;gap:8px;align-items:center}
+.nav button:hover{background:var(--surface-2)}
+.nav button.on{background:var(--violet-clair);color:var(--violet-txt);font-weight:800}
+
+/* ---- téléphone ---- */
+.phone{width:390px;max-width:100%;height:844px;max-height:calc(100vh - 110px);min-height:620px;border-radius:46px;padding:11px;background:var(--nuit);box-shadow:0 30px 70px -24px rgba(14,27,48,.6);justify-self:center}
+.ecran{position:relative;height:100%;border-radius:36px;overflow:hidden;background:var(--bg);display:flex;flex-direction:column}
+.barre{flex-shrink:0;display:flex;align-items:center;gap:6px;padding:14px 12px 8px;background:var(--surface);border-bottom:1px solid var(--trait);min-height:60px}
+.retour{width:44px;height:44px;border:0;background:none;border-radius:50%;display:grid;place-items:center;cursor:pointer;color:var(--fg)}
+.retour:disabled{opacity:0;pointer-events:none}
+.barre .t{flex:1;min-width:0;font-weight:800;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.barre .etape{font-size:11.5px;font-weight:700;color:var(--fg-2);padding-right:10px;white-space:nowrap}
+.progress{flex-shrink:0;height:3px;background:var(--trait)}
+.progress i{display:block;height:100%;background:var(--violet);transition:width .25s}
+.corps{flex:1;overflow-y:auto;padding:20px 18px 24px;-webkit-overflow-scrolling:touch}
+.pied{flex-shrink:0;padding:12px 18px 16px;background:var(--surface);border-top:1px solid var(--trait);display:flex;flex-direction:column;gap:8px}
+.tabbar{flex-shrink:0;display:grid;grid-template-columns:repeat(4,1fr);background:var(--surface);border-top:1px solid var(--trait);padding:6px 4px 10px}
+.tabbar button{border:0;background:none;display:flex;flex-direction:column;align-items:center;gap:3px;font-size:10.5px;font-weight:700;color:var(--fg-2);cursor:pointer;min-height:48px;justify-content:center}
+.tabbar button.on{color:var(--violet)}
+
+/* ---- composants ---- */
+.h1{font-size:23px;font-weight:900;line-height:1.2;margin:0 0 8px;text-wrap:balance;letter-spacing:-.01em}
+.sub{font-size:14px;line-height:1.5;color:var(--fg-2);margin:0 0 22px}
+.eyebrow{font-size:11px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:var(--violet-txt);margin-bottom:8px}
+.btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;min-height:50px;border-radius:var(--pill);border:0;font-size:15px;font-weight:800;cursor:pointer;text-decoration:none}
+.btn.p{background:var(--violet);color:#fff}
+.btn.s{background:var(--surface-2);color:var(--fg)}
+.btn.l{background:none;color:var(--fg-2);min-height:40px;font-size:13.5px}
+.btn.o{background:var(--orange);color:#fff}
+.champ{margin-bottom:16px}
+.champ label{display:block;font-size:13px;font-weight:700;margin-bottom:6px}
+.champ input,.champ select,.champ textarea{width:100%;min-height:48px;padding:12px 14px;border:1.5px solid var(--champ);border-radius:var(--r-s);background:var(--surface);color:var(--fg);font-size:15px;font-family:inherit}
+.champ textarea{min-height:84px;resize:none}
+.champ .aide{font-size:12px;color:var(--fg-2);margin-top:6px;line-height:1.4}
+.seg{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.seg button{min-height:48px;border:1.5px solid var(--champ);background:var(--surface);border-radius:var(--r-s);font-weight:700;font-size:14px;cursor:pointer}
+.seg button.on{border-color:var(--violet);background:var(--violet-clair);color:var(--violet-txt)}
+.choix{display:flex;gap:14px;align-items:center;width:100%;text-align:left;padding:16px;border:1.5px solid var(--trait);border-radius:var(--r);background:var(--surface);cursor:pointer;margin-bottom:12px}
+.choix:hover{border-color:var(--violet)}
+.choix.on{border-color:var(--violet);background:var(--violet-clair)}
+.choix .ic{width:46px;height:46px;border-radius:14px;display:grid;place-items:center;flex-shrink:0;color:#fff}
+.choix .tt{font-weight:800;font-size:15px}
+.choix .dd{font-size:12.5px;color:var(--fg-2);margin-top:3px;line-height:1.4}
+.choix .chev{margin-left:auto;color:var(--fg-2)}
+.bg-bleu{background:var(--bleu)} .bg-orange{background:linear-gradient(135deg,var(--orange-2),var(--orange))} .bg-violet{background:var(--violet)} .bg-ok{background:var(--ok)}
+.carte{background:var(--surface);border:1px solid var(--trait);border-radius:var(--r);padding:16px;margin-bottom:12px}
+.ligne{display:flex;justify-content:space-between;gap:12px;padding:11px 0;border-bottom:1px solid var(--trait);font-size:14px}
+.ligne:last-child{border-bottom:0}
+.ligne span:first-child{color:var(--fg-2)}
+.ligne span:last-child{font-weight:700;text-align:right}
+.action{display:flex;gap:12px;align-items:center;background:var(--violet);color:#fff;border-radius:var(--r);padding:16px;margin-bottom:18px;border:0;width:100%;text-align:left;cursor:pointer}
+.action .tt{font-weight:800;font-size:15px}
+.action .dd{font-size:12.5px;opacity:.85;margin-top:2px}
+.op{display:block;width:100%;text-align:left;background:var(--surface);border:1px solid var(--trait);border-left:5px solid var(--bleu);border-radius:var(--r);padding:14px;margin-bottom:12px;cursor:pointer}
+.op.se{border-left-color:var(--orange)}
+.op .tag{font-size:10.5px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--bleu)}
+.op.se .tag{color:var(--orange)}
+.op .tt{font-weight:800;font-size:16px;margin:3px 0 2px}
+.op .dd{font-size:12.5px;color:var(--fg-2)}
+.puces{display:flex;gap:6px;margin-top:12px;flex-wrap:wrap}
+.puce{display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:700;background:var(--surface-2);border-radius:var(--pill);padding:6px 10px;color:var(--fg)}
+.puce svg.i{width:15px;height:15px}
+.chiffres{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:14px}
+.chiffres div{background:var(--surface);border:1px solid var(--trait);border-radius:var(--r-s);padding:8px 4px;text-align:center}
+.chiffres b{display:block;font-size:18px;font-variant-numeric:tabular-nums}
+.chiffres span{font-size:10px;color:var(--fg-2);font-weight:700}
+.onglets{display:grid;grid-template-columns:repeat(4,1fr);gap:4px;background:var(--surface-2);border-radius:var(--pill);padding:4px;margin-bottom:16px}
+.onglets button{border:0;background:none;min-height:38px;border-radius:var(--pill);font-size:12.5px;font-weight:800;color:var(--fg-2);cursor:pointer}
+.onglets button.on{background:var(--surface);color:var(--fg);box-shadow:0 1px 4px rgba(0,0,0,.08)}
+.qr{width:190px;height:190px;margin:4px auto 16px;border-radius:16px;background:#fff;padding:14px;border:1px solid var(--trait)}
+.qr canvas{width:100%;height:100%;image-rendering:pixelated;display:block}
+.gagnant{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--trait)}
+.gagnant:last-child{border-bottom:0}
+.av{width:40px;height:40px;border-radius:50%;background:var(--surface-2);display:grid;place-items:center;font-weight:800;font-size:14px;flex-shrink:0}
+.gagnant .tt{font-weight:700;font-size:14px}
+.gagnant .dd{font-size:12px;color:var(--fg-2)}
+.gagnant button{margin-left:auto;min-height:44px;min-width:44px;border:0;background:none;color:var(--fg-2);cursor:pointer;border-radius:50%;display:grid;place-items:center}
+.badge{font-size:11px;font-weight:800;border-radius:var(--pill);padding:3px 9px}
+.badge.attente{background:var(--orange-clair);color:var(--orange)}
+.badge.ok{background:var(--ok-clair);color:var(--ok)}
+.succes{width:72px;height:72px;border-radius:50%;background:var(--ok-clair);color:var(--ok);display:grid;place-items:center;margin:10px auto 18px}
+.succes svg.i{width:36px;height:36px;stroke-width:2.4}
+.centre{text-align:center}
+.etapes{list-style:none;padding:0;margin:0 0 6px}
+.etapes li{display:flex;gap:12px;align-items:flex-start;padding:10px 0;font-size:14px;line-height:1.45}
+.etapes .n{width:26px;height:26px;border-radius:50%;background:var(--violet-clair);color:var(--violet-txt);font-weight:800;font-size:12.5px;display:grid;place-items:center;flex-shrink:0}
+.map{position:relative;height:260px;border-radius:var(--r);overflow:hidden;border:1px solid var(--trait);background:
+  linear-gradient(0deg,transparent 49%,var(--trait) 49% 51%,transparent 51%) 0 0/60px 60px,
+  linear-gradient(90deg,transparent 49%,var(--trait) 49% 51%,transparent 51%) 0 0/60px 60px,var(--surface-2);margin-bottom:12px}
+.pin{position:absolute;width:30px;height:30px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);background:var(--orange);border:3px solid #fff;box-shadow:0 4px 10px rgba(0,0,0,.25)}
+.pin.moi{background:var(--violet);width:38px;height:38px}
+.pin.drag{cursor:grab;outline:3px dashed var(--violet);outline-offset:4px}
+.liste-btn{display:flex;align-items:center;gap:12px;width:100%;text-align:left;padding:14px 4px;border:0;border-bottom:1px solid var(--trait);background:none;cursor:pointer;font-size:15px;font-weight:700;min-height:56px}
+.liste-btn .chev{margin-left:auto;color:var(--fg-2)}
+.compteur{margin-left:auto;background:var(--orange);color:#fff;font-size:12px;font-weight:800;border-radius:var(--pill);padding:3px 9px}
+.recherche{display:flex;align-items:center;gap:8px;border:1.5px solid var(--champ);border-radius:var(--pill);padding:0 14px;min-height:46px;background:var(--surface);margin-bottom:14px;color:var(--fg-2)}
+.recherche input{border:0;background:none;flex:1;font-size:14.5px;color:var(--fg);outline:none;min-width:0}
+details.acc{background:var(--surface);border:1px solid var(--trait);border-radius:var(--r);margin-bottom:10px}
+details.acc summary{list-style:none;display:flex;align-items:center;gap:10px;padding:14px;cursor:pointer;font-weight:800;font-size:14.5px;min-height:52px}
+details.acc summary::-webkit-details-marker{display:none}
+details.acc .in{padding:0 14px 8px}
+.note{font-size:12.5px;color:var(--fg-2);line-height:1.5;margin:0 0 14px}
+.jeu-hero{border-radius:var(--r);padding:22px 18px;color:#fff;background:linear-gradient(150deg,var(--bleu),var(--violet));margin-bottom:16px}
+.jeu-hero .tt{font-size:22px;font-weight:900;line-height:1.2}
+.jeu-hero .dd{font-size:13.5px;opacity:.9;margin-top:6px}
+.rep{display:block;width:100%;text-align:left;min-height:52px;padding:14px;border:1.5px solid var(--champ);border-radius:var(--r-s);background:var(--surface);font-size:15px;font-weight:700;margin-bottom:10px;cursor:pointer}
+.rep.on{border-color:var(--violet);background:var(--violet-clair)}
+.billet{border-radius:var(--r);overflow:hidden;border:1px solid var(--trait);background:var(--surface)}
+.billet .haut{background:linear-gradient(135deg,var(--orange-2),var(--orange));color:#fff;padding:18px}
+.billet .bas{padding:16px}
+
+/* ---- volet (bottom sheet) ---- */
+.voile{position:absolute;inset:0;background:rgba(10,20,40,.45);opacity:0;pointer-events:none;transition:opacity .2s;z-index:20}
+.voile.on{opacity:1;pointer-events:auto}
+.volet{position:absolute;left:0;right:0;bottom:0;background:var(--surface);border-radius:24px 24px 0 0;padding:10px 18px 20px;transform:translateY(105%);transition:transform .25s ease;z-index:21;max-height:85%;overflow-y:auto}
+.volet.on{transform:none}
+.volet .poignee{width:40px;height:5px;border-radius:5px;background:var(--trait);margin:0 auto 14px}
+.toast{position:absolute;left:18px;right:18px;bottom:96px;background:var(--fg);color:var(--bg);border-radius:var(--r-s);padding:13px 16px;font-size:13.5px;font-weight:700;display:flex;gap:10px;align-items:center;opacity:0;transform:translateY(10px);transition:.2s;pointer-events:none;z-index:30}
+.toast.on{opacity:1;transform:none}
+
+/* ---- rapport d'audit ---- */
+.vues{display:flex;gap:4px;background:var(--surface);border:1px solid var(--trait);border-radius:var(--pill);padding:4px}
+.vues button{border:0;background:none;padding:8px 14px;border-radius:var(--pill);font-size:13px;font-weight:800;color:var(--fg-2);cursor:pointer;min-height:36px}
+.vues button.on{background:var(--fg);color:var(--bg)}
+.rapport{max-width:900px;margin:0 auto;font-size:15px;line-height:1.6}
+.rapport h2{font-size:22px;font-weight:900;margin:36px 0 12px;letter-spacing:-.01em}
+.rapport h2:first-child{margin-top:4px}
+.rapport h3{font-size:15.5px;font-weight:800;margin:20px 0 8px}
+.rapport p{margin:0 0 12px;color:var(--fg)}
+.rapport .verdict{background:var(--surface);border:1px solid var(--trait);border-left:5px solid var(--ko);border-radius:var(--r);padding:18px 20px;font-size:16px;font-weight:600}
+.rapport .tbl{overflow-x:auto;background:var(--surface);border:1px solid var(--trait);border-radius:var(--r)}
+.rapport table{width:100%;border-collapse:collapse;font-size:13.5px}
+.rapport th{text-align:left;font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--fg-2);padding:10px 14px;border-bottom:1px solid var(--trait);background:var(--surface-2)}
+.rapport td{padding:10px 14px;border-bottom:1px solid var(--trait);vertical-align:top}
+.rapport tr:last-child td{border-bottom:0}
+.rapport td:first-child{font-weight:800;white-space:nowrap}
+.rapport .ok{color:var(--ok)} .rapport .ko{color:var(--ko)}
+.rapport ul,.rapport ol{margin:0 0 12px;padding-left:22px}
+.rapport li{margin-bottom:6px}
+.rapport .note-chip{display:inline-block;min-width:44px;text-align:center;font-weight:900;border-radius:var(--pill);padding:2px 10px;font-variant-numeric:tabular-nums}
+.rapport .n-bas{background:color-mix(in srgb,var(--ko) 14%,transparent);color:var(--ko)}
+.rapport .n-moy{background:var(--orange-clair);color:var(--orange)}
+.rapport .n-haut{background:var(--ok-clair);color:var(--ok)}
+.rapport .prio{font-size:11px;font-weight:900;border-radius:6px;padding:2px 7px;margin-right:6px}
+.rapport .p0{background:var(--ko);color:#fff} .rapport .p1{background:var(--orange);color:#fff} .rapport .p2{background:var(--surface-2);color:var(--fg)}
+.rapport code{font-size:12.5px;background:var(--surface-2);padding:1px 6px;border-radius:6px}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-back" viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></symbol>
+  <symbol id="i-chev" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></symbol>
+  <symbol id="i-home" viewBox="0 0 24 24"><path d="M3 10.5L12 3l9 7.5V21H3z"/><path d="M9 21v-6h6v6"/></symbol>
+  <symbol id="i-grid" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></symbol>
+  <symbol id="i-trophy" viewBox="0 0 24 24"><path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 01-10 0z"/><path d="M17 5h3v2a3 3 0 01-3 3M7 5H4v2a3 3 0 003 3"/></symbol>
+  <symbol id="i-user" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0116 0"/></symbol>
+  <symbol id="i-qr" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><path d="M14 14h3v3h-3zM20 14v.01M14 20h.01M17 17h4v4h-4"/></symbol>
+  <symbol id="i-gift" viewBox="0 0 24 24"><rect x="3" y="8" width="18" height="13" rx="2"/><path d="M12 8v13M3 12h18M12 8S10 3 7.5 4.5 9 8 12 8zM12 8s2-5 4.5-3.5S15 8 12 8z"/></symbol>
+  <symbol id="i-map" viewBox="0 0 24 24"><path d="M12 21s-7-6.2-7-11.5a7 7 0 0114 0C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></symbol>
+  <symbol id="i-send" viewBox="0 0 24 24"><path d="M21 3L10 14M21 3l-7 18-4-7-7-4z"/></symbol>
+  <symbol id="i-print" viewBox="0 0 24 24"><path d="M6 9V3h12v6M6 18H4v-7h16v7h-2"/><rect x="6" y="14" width="12" height="7"/></symbol>
+  <symbol id="i-link" viewBox="0 0 24 24"><path d="M10 14a5 5 0 007 0l3-3a5 5 0 00-7-7l-1 1M14 10a5 5 0 00-7 0l-3 3a5 5 0 007 7l1-1"/></symbol>
+  <symbol id="i-chat" viewBox="0 0 24 24"><path d="M21 12a8 8 0 01-11.6 7.1L4 20.5l1.4-5.1A8 8 0 1121 12z"/></symbol>
+  <symbol id="i-cal" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></symbol>
+  <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+  <symbol id="i-flag" viewBox="0 0 24 24"><path d="M5 21V4h11l-1.5 4L16 12H5"/></symbol>
+  <symbol id="i-bell" viewBox="0 0 24 24"><path d="M6 16V11a6 6 0 0112 0v5l2 2H4zM10 21h4"/></symbol>
+  <symbol id="i-store" viewBox="0 0 24 24"><path d="M4 9l1.5-5h13L20 9M4 9h16v12H4zM9 21v-6h6v6"/></symbol>
+  <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></symbol>
+  <symbol id="i-chart" viewBox="0 0 24 24"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></symbol>
+  <symbol id="i-play" viewBox="0 0 24 24"><path d="M7 4l13 8-13 8z"/></symbol>
+  <symbol id="i-dice" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="4"/><circle cx="8.5" cy="8.5" r="1.2"/><circle cx="15.5" cy="15.5" r="1.2"/><circle cx="15.5" cy="8.5" r="1.2"/><circle cx="8.5" cy="15.5" r="1.2"/></symbol>
+  <symbol id="i-wheel" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 3v18M3 12h18M5.6 5.6l12.8 12.8M18.4 5.6L5.6 18.4"/></symbol>
+  <symbol id="i-vote" viewBox="0 0 24 24"><path d="M4 21h16M6 17V9M12 17V5M18 17v-5"/></symbol>
+  <symbol id="i-ticket" viewBox="0 0 24 24"><path d="M3 8a2 2 0 002-2h14a2 2 0 002 2v2a2 2 0 000 4v2a2 2 0 01-2 2H5a2 2 0 01-2-2v-2a2 2 0 000-4z"/><path d="M14 6v12"/></symbol>
+  <symbol id="i-inbox" viewBox="0 0 24 24"><path d="M3 13l3-8h12l3 8v6H3zM3 13h5l1 3h6l1-3h5"/></symbol>
+  <symbol id="i-mail" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></symbol>
+  <symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M5 5l1.5 1.5M17.5 17.5L19 19M5 19l1.5-1.5M17.5 6.5L19 5"/></symbol>
+  <symbol id="i-dots" viewBox="0 0 24 24"><circle cx="5" cy="12" r="1.3"/><circle cx="12" cy="12" r="1.3"/><circle cx="19" cy="12" r="1.3"/></symbol>
+</svg>
+
+<div class="top">
+  <div class="logo">Flow<b>in</b></div>
+  <span class="demo">Démo · données fictives</span>
+  <div class="vues" id="vues"><button data-vue="maquette" class="on">Maquette</button><button data-vue="rapport">Rapport d’audit</button></div>
+  <div class="profils" id="profils">
+    <button data-profil="pro" class="on">Pro</button>
+    <button data-profil="admin">Admin</button>
+    <button data-profil="joueur">Joueur</button>
+  </div>
+  <button class="theme" id="theme" title="Clair / sombre" aria-label="Changer de thème"><svg class="i"><use href="#i-sun"/></svg></button>
+</div>
+
+
+<main class="rapport" id="rapport" hidden>
+  <h2>Verdict</h2>
+  <p class="verdict">L’app ressemble à un outil complet, mais les chaînes de bout en bout ne tiennent pas : l’information s’arrête en route, la facturation n’est pas conforme, et quatre failles de sécurité permettent de modifier des données sans compte. La refonte des écrans (maquette) n’a de sens qu’après la sécurité et la remise en état des chaînes.</p>
+
+  <h2>Notes par domaine</h2>
+  <div class="tbl"><table>
+    <tr><th>Domaine</th><th>Note /10</th><th>En une phrase</th></tr>
+    <tr><td>Inscription pro</td><td><span class="note-chip n-haut">7</span></td><td>Claire, un sujet par écran ; le pro paie avant de voir son jeu.</td></tr>
+    <tr><td>Tableau de bord pro</td><td><span class="note-chip n-moy">6</span></td><td>Menu court ; le QR code est introuvable, l’accès est revérifié à chaque onglet.</td></tr>
+    <tr><td>Rejoindre un festival</td><td><span class="note-chip n-bas">4</span></td><td>Écran final de 3 900 px ; pas de paiement à la fin ; personne n’est prévenu.</td></tr>
+    <tr><td>Créer une animation</td><td><span class="note-chip n-moy">5</span></td><td>Jusqu’à 32 champs sur un écran ; fin contradictoire « en attente » / « en ligne ».</td></tr>
+    <tr><td>Lots et gagnants</td><td><span class="note-chip n-bas">4</span></td><td>Chiffres pro faux ×3 à ×4 ; retrait sans PIN ; le joueur ne voit pas ses résultats.</td></tr>
+    <tr><td>QR code</td><td><span class="note-chip n-bas">3</span></td><td>Caché dans un 3ᵉ onglet ; <code>/q/&lt;code&gt;</code> cassé en prod.</td></tr>
+    <tr><td>Carte</td><td><span class="note-chip n-bas">4</span></td><td>Pas de carte de la ville ; stations sans GPS absentes ; carte admin à 80 px sur mobile.</td></tr>
+    <tr><td>Admin</td><td><span class="note-chip n-bas">3</span></td><td>Tiroirs invisibles sur mobile ; « Créer un pro » inutilisable ; pros créés sans accès.</td></tr>
+    <tr><td>Bons, devis, factures</td><td><span class="note-chip n-bas">2</span></td><td>Numérotation non conforme, factures modifiables par tous, pas d’avoir, pas de devis.</td></tr>
+    <tr><td>Circulation des données</td><td><span class="note-chip n-bas">3</span></td><td>Même information à 2 à 5 endroits sans synchro ; nombreux orphelins.</td></tr>
+    <tr><td>Emails et communication</td><td><span class="note-chip n-bas">4</span></td><td>Envoi depuis l’adresse de test Resend ; 4 fonctions d’envoi absentes ; 3 emails, 3 prix.</td></tr>
+    <tr><td>Explications</td><td><span class="note-chip n-moy">5</span></td><td>Pas de règlement du jeu ; « et après ? » manquant ; textes « [à compléter] » visibles.</td></tr>
+    <tr><td>Cohérence graphique</td><td><span class="note-chip n-moy">5.5</span></td><td>Super event rouge au lieu d’orange ; animation violette au lieu de bleue ; 9 styles de bouton.</td></tr>
+    <tr><td>Fluidité</td><td><span class="note-chip n-bas">4</span></td><td>Pages qui sautent ; Échap et Retour ne ferment rien.</td></tr>
+    <tr><td>Marketing et adhésion</td><td><span class="note-chip n-moy">5</span></td><td>Bouton principal de la landing en 404 ; pas de prix public ; valeur après paiement.</td></tr>
+    <tr><td>Sécurité</td><td><span class="note-chip n-bas">1</span></td><td>Écriture libre sur <code>pros</code>, <code>factures</code>, <code>bons_commande</code> ; validation sans compte ; email relais.</td></tr>
+  </table></div>
+
+  <h2>Ce qui marche, ce qui ne marche pas</h2>
+  <div class="tbl"><table>
+    <tr><th>Chaîne</th><th>Marche</th><th>Ne marche pas</th></tr>
+    <tr><td>Inscription → base</td><td class="ok">Fiche créée dans <code>pros</code>, liée au compte</td><td class="ko">17 pros sur 18 sans compte de connexion ; Flowin jamais prévenu ; inscription codée deux fois</td></tr>
+    <tr><td>Tableau de bord → festival</td><td class="ok">Demande visible dans l’admin ; plusieurs festivals possibles en base (9 pros)</td><td class="ko">Pas de paiement à la fin ; pas de liste « Mes festivals » ; demandes en double possibles ; aucune notification</td></tr>
+    <tr><td>Offre</td><td class="ok">Cases « physique » / « digital » enregistrées</td><td class="ko">Aucune offre segmentée, sans effet sur le prix ; 3 sources de prix</td></tr>
+    <tr><td>Animation autonome → ville</td><td class="ok">Animation enregistrée</td><td class="ko">Carte de la ville inexistante ; 16 animations sur 19 sans GPS</td></tr>
+    <tr><td>Pont station → festival</td><td>—</td><td class="ko">L’approbation recrée une station en doublon ; ni raccourci ni tarif</td></tr>
+    <tr><td>Bon → paiement → facture</td><td class="ok">Chaîne « animation magasin » conforme (jamais utilisée)</td><td class="ko">Chaîne réelle : n° saisi dans le navigateur, trous 0003/0004/0006, dates inversées, facture avant paiement, modifiable, pas d’avoir</td></tr>
+    <tr><td>Lots → gagnant → retrait</td><td class="ok">Tirages cohérents en base</td><td class="ko">153 tirages annulés comptés comme remis ; PIN non vérifié en base</td></tr>
+    <tr><td>QR</td><td>—</td><td class="ko">Migration non appliquée : tous les codes répondent « n’existe pas »</td></tr>
+    <tr><td>Emails</td><td class="ok">Signature centralisée</td><td class="ko">Adresse d’expédition de test ; rappels plaquette perdus ; rien au rattachement</td></tr>
+  </table></div>
+
+  <h2>Éléments manquants</h2>
+  <h3>Parcours et offre</h3>
+  <ul>
+    <li>Paiement à la fin du parcours « rejoindre un festival » (bon de commande signé, puis paiement)</li>
+    <li>Offre segmentée en base : Digital, et Digital + supports imprimés, avec catalogue des supports</li>
+    <li>Liste « Mes festivals » avec le statut de chaque demande, et blocage des doublons</li>
+    <li>Pont « Rattacher ce jeu à un festival » qui réutilise la station existante, avec un tarif dédié</li>
+    <li>Carte des partenaires de la ville, avec marqueur distinct pour les animations autonomes</li>
+    <li>Géocodage obligatoire à l’inscription (aujourd’hui 16 animations sans GPS)</li>
+    <li>Compte de connexion et invitation pour tout pro créé par l’admin</li>
+    <li>Démo sans compte, prix publics sur la landing, page <code>/contact</code></li>
+  </ul>
+  <h3>Facturation</h3>
+  <ul>
+    <li>Devis (n’existe pas)</li>
+    <li>Numérotation attribuée par la base, en série continue (FL), sans trou ni doublon</li>
+    <li>Facture émise après paiement, immuable ; avoir pour toute correction</li>
+    <li>Mentions : date de prestation, TVA du client, forme juridique et capital, pénalités alignées sur les CGV</li>
+    <li>Suivi du paiement et de l’envoi, facture téléchargeable dans l’espace pro</li>
+    <li>Une source unique de prix</li>
+  </ul>
+  <h3>Données et notifications</h3>
+  <ul>
+    <li>Une source unique par objet (<code>events.super_event_id</code>, table <code>lots</code>, <code>tirages.statut</code>, <code>bons_commande</code> pour le paiement)</li>
+    <li>11 fonctions SQL et 5 tables appelées par le code mais absentes de la base</li>
+    <li>4 fonctions d’envoi d’email non déployées ; expéditeur sur un domaine vérifié</li>
+    <li>Emails : inscription, demande de rattachement (Flowin et pro), validation, refus</li>
+    <li>Règlement du jeu côté joueur ; date de consentement RGPD sur les 480 opt-in</li>
+  </ul>
+
+  <h2>Ce qui a été fait</h2>
+  <ul>
+    <li>Audit complet en 16 rapports : profils SA, pro, joueur, souscription, transversal ; ergonomie, fluidité, cohérence, technique, marketing ; cohérence graphique, communication, explications ; parcours et offre, facturation, circulation des données.</li>
+    <li>Rapports archivés dans <code>docs/audit-2026-11-07/</code>, données personnelles masquées.</li>
+    <li>Maquette cliquable de bout en bout (onglet Maquette) : Pro, Admin, Joueur, avec offre, bon de commande, paiement, mes festivals, pont, carte de la ville, factures et avoir.</li>
+    <li>Migrations « bon et facture par jeton » et « CRM participants » appliquées le 19/09.</li>
+  </ul>
+
+  <h2>Ce qui reste à faire, dans l’ordre</h2>
+  <ol>
+    <li><span class="prio p0">P0</span><b>Sécurité.</b> Fermer l’écriture publique sur <code>pros</code>, <code>factures</code>, <code>bons_commande</code>, <code>demandes</code> ; contrôle admin sur l’approbation ; PIN vérifié en base ; email gagnant protégé ; contrôle d’accès <code>?pro=</code> ; retirer <code>prospection.html</code> du public. Nettoyer les données de test <code>qa</code> et le super event modèle.</li>
+    <li><span class="prio p0">P0</span><b>Facturation conforme.</b> Registre des trous et de l’inversion avec l’expert-comptable, nouvelle série FL numérotée par la base, facture immuable après paiement, avoirs, mentions complètes.</li>
+    <li><span class="prio p0">P0</span><b>Ce qui est cassé.</b> Tiroirs admin sur mobile, champ « Créer un pro », carte admin mobile, Échap et Retour, lien <code>/contact</code>, chiffres comptant les tirages annulés.</li>
+    <li><span class="prio p1">P1</span><b>Chaînes.</b> Appliquer les migrations manquantes (QR permanents, résultats de tirage), déployer les fonctions d’email, comptes des pros, une source unique de prix et par objet.</li>
+    <li><span class="prio p1">P1</span><b>Parcours.</b> Rejoindre un festival en 5 écrans avec offre et paiement, mes festivals, pont station, carte de la ville, QR et affiche en fin de création.</li>
+    <li><span class="prio p2">P2</span><b>Finition.</b> Système graphique unique (orange super event, bleu animation, un bouton primaire), pictogrammes à la place des emojis, glossaire, règlement du jeu, textes d’explication.</li>
+  </ol>
+
+  <h2>Suggestions</h2>
+  <ul>
+    <li>Mettre le super event en tête de l’argumentaire : aucun concurrent repéré (Adictiz, Obypay, Jotform, QR Code Tiger) ne propose un même jeu dans tous les commerces d’un territoire.</li>
+    <li>Laisser le pro publier une première animation en brouillon avant de payer : il voit la valeur avant l’engagement.</li>
+    <li>Le pont station → festival comme offre de montée en gamme : tarif réduit, aucun support à réimprimer.</li>
+    <li>Ajouter un contrôle automatique anti-emoji et anti-« [à compléter] » avant chaque mise en ligne.</li>
+    <li>Chaque correction livrée par petit paquet : une PR, construction verte, scénarios rejoués avant et après.</li>
+  </ul>
+
+  <h2>Décisions attendues</h2>
+  <ol>
+    <li>Feu vert pour l’étape 1 (sécurité et nettoyage), écritures en base de prod.</li>
+    <li>Prix de chaque offre : Digital, Digital + supports imprimés, tarif du pont station → festival.</li>
+    <li>Adresse email qui reçoit les notifications Flowin (le domaine <code>flowin.events</code> n’existe pas) et coordonnées officielles uniques.</li>
+    <li>Moyen de paiement à la fin du parcours : prélèvement SEPA, virement, ou les deux.</li>
+  </ol>
+</main>
+
+<div class="wrap" id="maquette">
+  <nav class="nav" id="nav" aria-label="Aller directement à un écran"></nav>
+  <div class="phone">
+    <div class="ecran" id="ecran">
+      <div class="barre">
+        <button class="retour" id="retour" aria-label="Retour"><svg class="i"><use href="#i-back"/></svg></button>
+        <div class="t" id="titre"></div>
+        <div class="etape" id="etape"></div>
+      </div>
+      <div class="progress" id="progressWrap"><i id="progress"></i></div>
+      <div class="corps" id="corps"></div>
+      <div class="pied" id="pied"></div>
+      <div class="tabbar" id="tabbar"></div>
+      <div class="voile" id="voile"></div>
+      <div class="volet" id="volet" role="dialog" aria-modal="true"></div>
+      <div class="toast" id="toast"><svg class="i"><use href="#i-check"/></svg><span></span></div>
+    </div>
+  </div>
+</div>
+
+<script>
+(() => {
+  const ic = (n) => `<svg class="i"><use href="#i-${n}"/></svg>`;
+  const btn = (txt, go, cls = 'p', icon = '') => `<button class="btn ${cls}" data-go="${go}">${icon ? ic(icon) : ''}${txt}</button>`;
+  const champ = (l, ph, aide = '', type = 'text') => `<div class="champ"><label>${l}</label><input type="${type}" placeholder="${ph}">${aide ? `<div class="aide">${aide}</div>` : ''}</div>`;
+
+  /* ---------------- PRO ---------------- */
+  const PRO_TABS = [['p-home','home','Accueil'],['p-ops','grid','Animations'],['p-gagnants','trophy','Gagnants'],['p-profil','user','Profil']];
+  const S = {};
+
+  S['p-bienvenue'] = { g:'Adhésion', t:'Flowin', body:() => `
+    <div class="eyebrow">Ma première fois</div>
+    <h1 class="h1">Faites venir du monde avec un jeu</h1>
+    <p class="sub">Vos clients jouent sur leur téléphone, gagnent vos lots en boutique, et vous gardez leur contact.</p>
+    <ol class="etapes">
+      <li><span class="n">1</span><span>Vous créez votre compte</span></li>
+      <li><span class="n">2</span><span>Vous choisissez : votre propre jeu, ou rejoindre un festival</span></li>
+      <li><span class="n">3</span><span>Vous imprimez votre QR code, c’est en ligne</span></li>
+    </ol>`, pied:() => btn('Créer mon compte','p-vous') + `<button class="btn l" data-toast="Démo : écran de connexion">J’ai déjà un compte</button>` };
+
+  S['p-vous'] = { g:'Adhésion', t:'Vous', step:[1,3], body:() => `
+    <h1 class="h1">Faisons connaissance</h1>
+    ${champ('Prénom et nom','Prénom Nom')}${champ('Email','vous@exemple.fr','','email')}${champ('Téléphone','06 …','','tel')}`,
+    pied:() => btn('Continuer','p-etab') };
+
+  S['p-etab'] = { g:'Adhésion', t:'Votre établissement', step:[2,3], body:() => `
+    <h1 class="h1">Votre établissement</h1>
+    <p class="sub">Tapez son nom ou son SIRET, on remplit le reste depuis l’annuaire officiel.</p>
+    <div class="recherche">${ic('search')}<input placeholder="Nom ou SIRET"></div>
+    <div class="choix on"><div class="ic bg-bleu">${ic('store')}</div><div><div class="tt">Boutique Exemple</div><div class="dd">Commerce de détail · 06140 Vence</div></div><div class="chev">${ic('check')}</div></div>`,
+    pied:() => btn('Continuer','p-mdp') };
+
+  S['p-mdp'] = { g:'Adhésion', t:'Votre accès', step:[3,3], body:() => `
+    <h1 class="h1">Choisissez un mot de passe</h1>
+    ${champ('Mot de passe','8 caractères minimum','','password')}`,
+    pied:() => btn('Créer mon compte','p-choix') };
+
+  S['p-choix'] = { g:'Adhésion', t:'Votre premier jeu', body:() => `
+    <h1 class="h1">Que voulez-vous faire ?</h1>
+    <p class="sub">Vous pourrez faire l’autre plus tard.</p>
+    <button class="choix" data-go="p-rj-se"><div class="ic bg-orange">${ic('map')}</div><div><div class="tt">Rejoindre un festival</div><div class="dd">Votre boutique devient une étape du jeu, sur la carte de l’événement</div></div><div class="chev">${ic('chev')}</div></button>
+    <button class="choix" data-go="p-an-jeu"><div class="ic bg-bleu">${ic('play')}</div><div><div class="tt">Créer mon propre jeu</div><div class="dd">Un jeu pour votre boutique seule, à vos dates</div></div><div class="chev">${ic('chev')}</div></button>` };
+
+  /* Rejoindre : 3 étapes + envoi + attente */
+  S['p-rj-se'] = { g:'Rejoindre un festival', t:'Le festival', step:[1,5], body:() => `
+    <div class="eyebrow" style="color:var(--orange)">Super event</div>
+    <h1 class="h1">Festival Exemple 2027</h1>
+    <p class="sub">Vence · 9 au 18 juillet 2027. Le jeu est le même pour toutes les boutiques : un quiz préparé par l’organisateur.</p>
+    <div class="carte"><div class="ligne"><span>Boutiques déjà inscrites</span><span>14</span></div><div class="ligne"><span>Votre jeu</span><span>Quiz du festival</span></div><div class="ligne"><span>Votre rôle</span><span>Offrir un lot</span></div></div>`,
+    pied:() => btn('Je participe','p-rj-lots','o') + `<button class="btn l" data-toast="Démo : liste des autres festivals">Voir un autre festival</button>` };
+
+  S['p-rj-lots'] = { g:'Rejoindre un festival', t:'Votre lot', step:[2,5], body:() => `
+    <h1 class="h1">Qu’offrez-vous aux gagnants ?</h1>
+    <p class="sub">Les gagnants sont tirés au sort par le festival, puis viennent le chercher chez vous.</p>
+    ${champ('Votre lot','Ex. un dessert offert')}
+    ${champ('Combien ?','10','Vous pourrez en ajouter à tout moment.','number')}`,
+    pied:() => btn('Continuer','p-rj-offre','o') };
+
+  S['p-rj-offre'] = { g:'Rejoindre un festival', t:'Votre offre', step:[3,5], body:() => `
+    <h1 class="h1">Votre visibilité</h1>
+    <p class="sub">Les deux offres comprennent le jeu, votre lot sur la carte et vos statistiques.</p>
+    <button class="choix on" data-pick><div class="ic bg-violet">${ic('chat')}</div><div><div class="tt">Digital</div><div class="dd">QR à imprimer vous-même, partage réseaux et WhatsApp</div><div class="dd" style="font-weight:800;color:var(--fg);margin-top:6px">[prix à fixer] € HT</div></div></button>
+    <button class="choix" data-pick><div class="ic bg-orange">${ic('print')}</div><div><div class="tt">Digital + supports imprimés</div><div class="dd">Affiche, chevalet de caisse et tickets livrés en boutique</div><div class="dd" style="font-weight:800;color:var(--fg);margin-top:6px">[prix à fixer] € HT</div></div></button>`,
+    pied:() => btn('Continuer','p-rj-recap','o') };
+
+  S['p-rj-recap'] = { g:'Rejoindre un festival', t:'Bon de commande', step:[4,5], body:() => `
+    <h1 class="h1">Votre bon de commande</h1>
+    <div class="carte"><div class="ligne"><span>Festival</span><span>Festival Exemple 2027</span></div><div class="ligne"><span>Offre</span><span>Digital</span></div><div class="ligne"><span>Votre lot</span><span>Dessert offert × 10</span></div><div class="ligne"><span>Total</span><span>[prix à fixer] € HT</span></div></div>
+    <label style="display:flex;gap:10px;font-size:13.5px;line-height:1.4;margin-bottom:16px"><input type="checkbox" style="width:22px;height:22px;flex-shrink:0">J’accepte les conditions générales de vente</label>
+    <div class="champ"><label>Un mot pour l’organisateur (facultatif)</label><textarea placeholder="Ex. nous sommes ouverts tous les soirs du festival"></textarea></div>`,
+    pied:() => btn('Signer le bon de commande','p-rj-paiement','o') };
+
+  S['p-rj-paiement'] = { g:'Rejoindre un festival', t:'Paiement', step:[5,5], body:() => `
+    <h1 class="h1">Paiement</h1>
+    <p class="sub">Bon de commande signé. Votre facture est émise dès réception du paiement.</p>
+    <button class="choix on" data-pick><div class="ic bg-violet">${ic('ticket')}</div><div><div class="tt">Prélèvement SEPA</div><div class="dd">Vous signez le mandat en ligne</div></div></button>
+    <button class="choix" data-pick><div class="ic bg-bleu">${ic('send')}</div><div><div class="tt">Virement</div><div class="dd">Coordonnées bancaires sur votre bon de commande</div></div></button>`,
+    pied:() => btn('Payer et envoyer ma demande','p-rj-envoye','o','send') };
+
+  S['p-rj-envoye'] = { g:'Rejoindre un festival', t:'Demande envoyée', noBack:true, body:() => `
+    <div class="succes">${ic('check')}</div>
+    <h1 class="h1 centre">Demande envoyée</h1>
+    <p class="sub centre">L’organisateur la valide, en général sous 48 h.</p>
+    <ol class="etapes">
+      <li><span class="n">1</span><span>Vous recevez un email dès la validation</span></li>
+      <li><span class="n">2</span><span>Votre boutique apparaît sur la carte du festival</span></li>
+      <li><span class="n">3</span><span>Votre QR code est prêt à imprimer</span></li>
+      <li><span class="n">4</span><span>Votre facture est dans Profil, rubrique Bons et factures</span></li>
+    </ol>`, pied:() => btn('Voir mes festivals','p-supers') + `<button class="btn l" data-go="p-home">Aller à mon espace</button>` };
+
+  /* Créer une animation : 4 étapes + succès QR */
+  const jeux = [['quiz','dice','Quiz','3 questions sur votre métier, déjà rédigées'],['roue','wheel','Roue','On tourne, on gagne ou pas'],['vote','vote','Vote','Vos clients votent pour leur préféré']];
+  S['p-an-jeu'] = { g:'Créer mon jeu', t:'Le jeu', step:[1,4], body:() => `
+    <h1 class="h1">Quel jeu ?</h1>
+    <p class="sub">Les questions sont prêtes. Vous pourrez les modifier après.</p>
+    ${jeux.map((j,i)=>`<button class="choix${i===0?' on':''}" data-pick><div class="ic bg-bleu">${ic(j[1])}</div><div><div class="tt">${j[2]}</div><div class="dd">${j[3]}</div></div></button>`).join('')}`,
+    pied:() => btn('Continuer','p-an-dates') };
+
+  S['p-an-dates'] = { g:'Créer mon jeu', t:'Les dates', step:[2,4], body:() => `
+    <h1 class="h1">Quand ?</h1>
+    <div class="seg" style="margin-bottom:16px"><button class="on" data-pick>1 mois</button><button data-pick>Je choisis</button></div>
+    ${champ('Début','','', 'date')}`,
+    pied:() => btn('Continuer','p-an-lots') };
+
+  S['p-an-lots'] = { g:'Créer mon jeu', t:'Le lot', step:[3,4], body:() => `
+    <h1 class="h1">Qu’offrez-vous ?</h1>
+    ${champ('Votre lot','Ex. un café offert')}
+    ${champ('Combien ?','20','','number')}
+    <div class="champ"><label>Qui gagne ?</label><div class="seg"><button class="on" data-pick>Tout de suite</button><button data-pick>Tirage au sort</button></div><div class="aide">« Tout de suite » : le joueur voit qu’il a gagné à la fin du jeu.</div></div>`,
+    pied:() => btn('Continuer','p-an-recap') };
+
+  S['p-an-recap'] = { g:'Créer mon jeu', t:'Vérifier', step:[4,4], body:() => `
+    <h1 class="h1">Prêt à publier</h1>
+    <div class="carte"><div class="ligne"><span>Jeu</span><span>Quiz</span></div><div class="ligne"><span>Dates</span><span>1 mois</span></div><div class="ligne"><span>Lot</span><span>Café offert × 20</span></div><div class="ligne"><span>Gagnants</span><span>Tout de suite</span></div></div>
+    <p class="note">Logo, horaires et couleurs se règlent après, depuis votre animation.</p>`,
+    pied:() => btn('Publier mon jeu','p-qr') };
+
+  S['p-qr'] = { g:'Créer mon jeu', t:'C’est en ligne', noBack:true, body:() => `
+    <h1 class="h1 centre">Votre jeu est en ligne</h1>
+    <p class="sub centre">Affichez ce QR code en caisse ou en vitrine.</p>
+    <div class="qr"><canvas data-qr></canvas></div>`,
+    pied:() => btn('Imprimer l’affiche','__toast:Démo : affiche A4 avec votre QR','p','print') + `<div class="seg"><button class="btn s" data-toast="Lien copié">${ic('link')}Copier le lien</button><button class="btn s" data-toast="Démo : WhatsApp s’ouvre avec le message prêt">${ic('chat')}WhatsApp</button></div>` + `<button class="btn l" data-go="p-home">Aller à mon espace</button>` };
+
+  /* Espace pro */
+  S['p-home'] = { g:'Mon espace', t:'Accueil', tab:'p-home', noBack:true, body:() => `
+    <h1 class="h1">Bonjour</h1>
+    <button class="action" data-go="p-gagnants">${ic('gift')}<div><div class="tt">3 lots à remettre</div><div class="dd">Des gagnants doivent passer en boutique</div></div></button>
+    <div class="eyebrow">Mes animations</div>
+    <button class="op se" data-go="p-op-se"><div class="tag">Festival</div><div class="tt">Festival Exemple 2027</div><div class="dd">En ligne · 214 joueurs</div>
+      <div class="puces"><span class="puce">${ic('qr')}Mon QR</span><span class="puce">${ic('gift')}Lots 7/10</span><span class="puce">${ic('map')}Carte</span></div></button>
+    <button class="liste-btn" data-go="p-supers" style="border:0;padding:6px 4px 14px;min-height:44px;font-size:14px">${ic('map')}Mes festivals : 1 demande en attente<span class="chev">${ic('chev')}</span></button>
+    <button class="op" data-go="p-op"><div class="tag">Mon jeu</div><div class="tt">Quiz de la boutique</div><div class="dd">En ligne · 86 joueurs</div>
+      <div class="puces"><span class="puce">${ic('qr')}Mon QR</span><span class="puce">${ic('gift')}Lots 12/20</span></div></button>`,
+    pied:() => btn('Nouvelle animation','p-choix','s','plus') };
+
+  S['p-ops'] = { ...S['p-home'], t:'Animations', tab:'p-ops', body:() => `
+    <h1 class="h1">Mes animations</h1>
+    <button class="op se" data-go="p-op-se"><div class="tag">Festival</div><div class="tt">Festival Exemple 2027</div><div class="dd">9 au 18 juillet · en ligne</div></button>
+    <button class="op" data-go="p-op"><div class="tag">Mon jeu</div><div class="tt">Quiz de la boutique</div><div class="dd">Jusqu’au 7 décembre · en ligne</div></button>` };
+
+  const fiche = (se) => {
+    const o = (window.__onglet && window.__onglet[se ? 'se' : 'an']) || 'qr';
+    const cont = {
+      qr: `<div class="qr"><canvas data-qr></canvas></div>${btn('Imprimer l’affiche','__toast:Démo : affiche A4','p','print')}<div style="height:8px"></div><div class="seg"><button class="btn s" data-toast="Lien copié">${ic('link')}Copier</button><button class="btn s" data-toast="Démo : WhatsApp prêt">${ic('chat')}WhatsApp</button></div>`,
+      lots: `<div class="carte"><div class="ligne"><span>${se?'Dessert offert':'Café offert'}</span><span>${se?'7 / 10':'12 / 20'} restants</span></div></div>${btn('Ajouter des lots','__toast:Stock mis à jour : +5','s','plus')}`,
+      gagnants: `<div class="carte">${['Léa M.','Hugo T.','Inès B.'].map((n,i)=>`<div class="gagnant"><div class="av">${n[0]}</div><div><div class="tt">${n}</div><div class="dd">${se?'Dessert offert':'Café offert'}</div></div><span class="badge ${i<2?'attente':'ok'}" style="margin-left:auto">${i<2?'À remettre':'Remis'}</span></div>`).join('')}</div>${btn('Voir tous les gagnants','p-gagnants','s')}`,
+      stats: `<div class="carte"><div class="ligne"><span>Joueurs</span><span>${se?'214':'86'}</span></div><div class="ligne"><span>Contacts gardés</span><span>${se?'121':'49'}</span></div><div class="ligne"><span>Lots remis</span><span>${se?'3':'8'}</span></div></div>${se?btn('Voir ma place sur la carte','p-carte','s','map'):btn('Voir la carte de ma ville','p-ville','s','map')}`
+    }[o];
+    return `<div class="eyebrow" style="color:var(--${se?'orange':'bleu'})">${se?'Festival':'Mon jeu'}</div>
+      <h1 class="h1">${se?'Festival Exemple 2027':'Quiz de la boutique'}</h1>
+      ${se?'':`<button class="choix" data-go="p-pont" style="padding:12px"><div class="ic bg-orange" style="width:38px;height:38px">${ic('map')}</div><div><div class="tt" style="font-size:14px">Rattacher ce jeu à un festival</div><div class="dd">Votre jeu devient une étape du festival, tarif réduit</div></div><div class="chev">${ic('chev')}</div></button>`}
+      <div class="onglets" data-onglets="${se?'se':'an'}">${[['qr','QR code'],['lots','Lots'],['gagnants','Gagnants'],['stats','Chiffres']].map(([k,l])=>`<button data-onglet="${k}" class="${k===o?'on':''}">${l}</button>`).join('')}</div>${cont}`;
+  };
+  S['p-op'] = { g:'Mon espace', t:'Mon jeu', tab:'p-ops', body:() => fiche(false) };
+  S['p-op-se'] = { g:'Mon espace', t:'Festival', tab:'p-ops', body:() => fiche(true) };
+
+  S['p-gagnants'] = { g:'Mon espace', t:'Gagnants', tab:'p-gagnants', noBack:true, body:() => `
+    <h1 class="h1">Gagnants</h1>
+    <div class="seg" style="margin-bottom:14px"><button class="on" data-pick>À remettre (3)</button><button data-pick>Remis (11)</button></div>
+    <div class="carte">${[['Léa M.','Dessert offert · Festival'],['Hugo T.','Dessert offert · Festival'],['Nora K.','Café offert · Mon jeu']].map(([n,d])=>`<div class="gagnant"><div class="av">${n[0]}</div><div><div class="tt">${n}</div><div class="dd">${d}</div></div><button data-volet="gagnant" aria-label="Actions">${ic('dots')}</button></div>`).join('')}</div>`,
+    pied:() => `<button class="btn s" data-volet="relance">${ic('bell')}Rappeler les 3 gagnants</button>` };
+
+  S['p-carte'] = { g:'Mon espace', t:'Ma place sur la carte', body:() => `
+    <h1 class="h1">Festival Exemple 2027</h1>
+    <div class="map" id="map"><span class="pin" style="left:22%;top:30%"></span><span class="pin" style="left:62%;top:22%"></span><span class="pin" style="left:40%;top:62%"></span><span class="pin moi" id="moi" style="left:70%;top:58%"></span></div>
+    <p class="note" id="mapnote">Le point violet, c’est vous. 14 boutiques participent.</p>`,
+    pied:() => `<button class="btn s" id="corriger">${ic('map')}Corriger ma position</button>` };
+
+  S['p-pont'] = { g:'Mon espace', t:'Rattacher à un festival', tab:'p-ops', body:() => `
+    <div class="eyebrow" style="color:var(--orange)">Votre jeu existe déjà</div>
+    <h1 class="h1">Quel festival ?</h1>
+    <p class="sub">Votre jeu, votre QR et vos lots restent les mêmes : rien à réimprimer.</p>
+    <button class="choix on" data-pick><div class="ic bg-orange">${ic('map')}</div><div><div class="tt">Festival Exemple 2027</div><div class="dd">Vence · 9 au 18 juillet · 14 boutiques</div></div></button>
+    <div class="carte"><div class="ligne"><span>Tarif station existante</span><span>[prix à fixer] € HT</span></div></div>`,
+    pied:() => btn('Continuer','p-rj-recap','o') };
+
+  S['p-supers'] = { g:'Mon espace', t:'Mes festivals', tab:'p-ops', body:() => `
+    <h1 class="h1">Mes festivals</h1>
+    <button class="op se" data-go="p-op-se"><div class="tag">Festival</div><div class="tt">Festival Exemple 2027</div><div class="dd">Vence · 9 au 18 juillet</div><div class="puces"><span class="badge ok">Vous participez</span></div></button>
+    <div class="op se" style="cursor:default"><div class="tag">Festival</div><div class="tt">Marché de Noël Exemple</div><div class="dd">Saint-Paul · décembre</div><div class="puces"><span class="badge attente">Demande envoyée · validation sous 48 h</span></div></div>
+    <div class="op se" style="cursor:default"><div class="tag">Festival</div><div class="tt">Fête de la musique Exemple</div><div class="dd">Vence · 21 juin</div><div class="puces"><span class="badge attente">Paiement à faire</span><button class="btn s" style="min-height:36px;width:auto;padding:0 14px;font-size:13px" data-go="p-rj-paiement">Payer</button></div></div>`,
+    pied:() => btn('Rejoindre un autre festival','p-rj-se','s','plus') };
+
+  S['p-ville'] = { g:'Mon espace', t:'Carte de ma ville', tab:'p-ops', body:() => `
+    <h1 class="h1">Vence</h1>
+    <div class="map"><span class="pin" style="left:20%;top:28%;background:var(--bleu)"></span><span class="pin" style="left:58%;top:20%"></span><span class="pin" style="left:36%;top:64%"></span><span class="pin" style="left:76%;top:46%;background:var(--bleu)"></span><span class="pin moi" style="left:50%;top:44%;background:var(--bleu)"></span></div>
+    <div class="carte"><div class="ligne"><span><span class="pin" style="position:static;display:inline-block;width:14px;height:14px;border-width:2px;background:var(--bleu);vertical-align:-2px;margin-right:8px"></span>Jeu en boutique</span><span>3</span></div><div class="ligne"><span><span class="pin" style="position:static;display:inline-block;width:14px;height:14px;border-width:2px;vertical-align:-2px;margin-right:8px"></span>Étape d’un festival</span><span>14</span></div></div>
+    <p class="note">Les joueurs de la ville voient votre boutique, même hors festival.</p>` };
+
+  S['p-docs'] = { g:'Mon espace', t:'Bons et factures', tab:'p-profil', body:() => `
+    <h1 class="h1">Bons et factures</h1>
+    <div class="carte">
+      <div class="gagnant"><div class="av">${ic('ticket')}</div><div><div class="tt">Facture FL-2027-0001</div><div class="dd">Festival Exemple 2027 · payée le 02/06</div></div><button aria-label="Télécharger" data-toast="Démo : PDF de la facture">${ic('print')}</button></div>
+      <div class="gagnant"><div class="av">${ic('ticket')}</div><div><div class="tt">Bon de commande BC-2027-0001</div><div class="dd">Signé le 28/05</div></div><button aria-label="Télécharger" data-toast="Démo : PDF du bon">${ic('print')}</button></div>
+      <div class="gagnant"><div class="av">${ic('ticket')}</div><div><div class="tt">Bon de commande BC-2027-0002</div><div class="dd">Fête de la musique Exemple · paiement à faire</div></div><button aria-label="Payer" data-go="p-rj-paiement">${ic('chev')}</button></div>
+    </div>
+    <p class="note">Une facture émise ne se modifie pas. Une correction donne lieu à un avoir.</p>` };
+
+  S['p-profil'] = { g:'Mon espace', t:'Profil', tab:'p-profil', noBack:true, body:() => `
+    <h1 class="h1">Profil</h1>
+    <button class="liste-btn" data-go="p-supers">${ic('map')}Mes festivals<span class="chev">${ic('chev')}</span></button>
+    <button class="liste-btn" data-go="p-docs">${ic('ticket')}Bons et factures<span class="chev">${ic('chev')}</span></button>
+    ${[['store','Mon établissement'],['user','Mon accès'],['chat','Contacter Flowin']].map(([i,l])=>`<button class="liste-btn" data-toast="Démo : ${l}">${ic(i)}${l}<span class="chev">${ic('chev')}</span></button>`).join('')}` };
+
+  /* ---------------- ADMIN ---------------- */
+  S['a-home'] = { g:'Admin', t:'Admin Flowin', noBack:true, tab:'a-home', body:() => `
+    <h1 class="h1">À traiter</h1>
+    <button class="liste-btn" data-go="a-demandes">${ic('inbox')}Demandes de festival<span class="compteur">2</span></button>
+    <button class="liste-btn" data-go="a-gagnants">${ic('gift')}Lots non remis<span class="compteur">14</span></button>
+    <button class="liste-btn" data-go="a-factures">${ic('ticket')}Factures à émettre<span class="compteur">1</span></button>
+    <button class="liste-btn" data-toast="Démo : pros sans accès">${ic('user')}Pros sans accès<span class="compteur">3</span></button>
+    <div class="eyebrow" style="margin-top:24px">Créer</div>
+    <button class="choix" data-go="a-pro-1"><div class="ic bg-bleu">${ic('store')}</div><div><div class="tt">Un pro</div><div class="dd">Il reçoit un email pour choisir son mot de passe</div></div></button>
+    <button class="choix" data-go="a-se-1"><div class="ic bg-orange">${ic('map')}</div><div><div class="tt">Un festival</div><div class="dd">Plusieurs boutiques, un seul jeu, une carte</div></div></button>` };
+
+  S['a-demandes'] = { g:'Admin', t:'Demandes', tab:'a-home', body:() => `
+    <h1 class="h1">Demandes de festival</h1>
+    ${[['Boutique Exemple','Dessert offert × 10'],['Librairie Exemple','Livre offert × 5']].map(([n,d])=>`<button class="op se" data-go="a-demande"><div class="tag">Festival Exemple 2027</div><div class="tt">${n}</div><div class="dd">${d} · il y a 2 h</div></button>`).join('')}` };
+
+  S['a-demande'] = { g:'Admin', t:'Demande', tab:'a-home', body:() => `
+    <div class="eyebrow" style="color:var(--orange)">Festival Exemple 2027</div>
+    <h1 class="h1">Boutique Exemple</h1>
+    <div class="carte"><div class="ligne"><span>Lot</span><span>Dessert offert × 10</span></div><div class="ligne"><span>Adresse</span><span>06140 Vence</span></div><div class="ligne"><span>Position carte</span><span>Trouvée</span></div></div>
+    <div class="carte"><div class="note" style="margin:0">« Nous sommes ouverts tous les soirs du festival. »</div></div>`,
+    pied:() => btn('Accepter','a-accepte','p','check') + `<button class="btn l" data-volet="refus">Refuser</button>` };
+
+  S['a-accepte'] = { g:'Admin', t:'Accepté', tab:'a-home', noBack:true, body:() => `
+    <div class="succes">${ic('check')}</div>
+    <h1 class="h1 centre">Boutique Exemple participe</h1>
+    <ol class="etapes"><li><span class="n">1</span><span>Elle est sur la carte du festival</span></li><li><span class="n">2</span><span>Son QR code est créé</span></li><li><span class="n">3</span><span>Un email l’a prévenue</span></li></ol>`,
+    pied:() => btn('Demande suivante','a-demandes') };
+
+  S['a-pro-1'] = { g:'Admin · créer un pro', t:'Nouveau pro', step:[1,2], tab:'a-home', body:() => `
+    <h1 class="h1">Quel établissement ?</h1>
+    <div class="recherche">${ic('search')}<input placeholder="Nom ou SIRET"></div>
+    <div class="choix on"><div class="ic bg-bleu">${ic('store')}</div><div><div class="tt">Boutique Exemple</div><div class="dd">06140 Vence</div></div><div class="chev">${ic('check')}</div></div>`,
+    pied:() => btn('Continuer','a-pro-2') };
+  S['a-pro-2'] = { g:'Admin · créer un pro', t:'Nouveau pro', step:[2,2], tab:'a-home', body:() => `
+    <h1 class="h1">Qui contacter ?</h1>
+    ${champ('Prénom et nom','Prénom Nom')}${champ('Email','contact@exemple.fr','Il reçoit un lien pour choisir son mot de passe.','email')}`,
+    pied:() => btn('Créer et envoyer l’invitation','a-pro-ok','p','send') };
+  S['a-pro-ok'] = { g:'Admin · créer un pro', t:'Pro créé', tab:'a-home', noBack:true, body:() => `
+    <div class="succes">${ic('check')}</div><h1 class="h1 centre">Invitation envoyée</h1><p class="sub centre">Boutique Exemple pourra se connecter dès qu’elle aura choisi son mot de passe.</p>`,
+    pied:() => btn('Retour','a-home','s') };
+
+  S['a-se-1'] = { g:'Admin · créer un festival', t:'Nouveau festival', step:[1,4], tab:'a-home', body:() => `
+    <h1 class="h1">Le festival</h1>${champ('Nom','Festival Exemple 2027')}<div class="seg">${champ('Du','','','date')}${champ('Au','','','date')}</div>`, pied:() => btn('Continuer','a-se-2','o') };
+  S['a-se-2'] = { g:'Admin · créer un festival', t:'Nouveau festival', step:[2,4], tab:'a-home', body:() => `
+    <h1 class="h1">Où ?</h1><div class="recherche">${ic('search')}<input placeholder="Ville"></div><div class="map"><span class="pin" style="left:46%;top:40%"></span></div>`, pied:() => btn('Continuer','a-se-3','o') };
+  S['a-se-3'] = { g:'Admin · créer un festival', t:'Nouveau festival', step:[3,4], tab:'a-home', body:() => `
+    <h1 class="h1">Quel jeu pour toutes les boutiques ?</h1>${jeux.map((j,i)=>`<button class="choix${i===0?' on':''}" data-pick><div class="ic bg-orange">${ic(j[1])}</div><div><div class="tt">${j[2]}</div><div class="dd">${j[3]}</div></div></button>`).join('')}<p class="note">Gagnants tirés au sort à la fin du festival.</p>`, pied:() => btn('Continuer','a-se-4','o') };
+  S['a-se-4'] = { g:'Admin · créer un festival', t:'Nouveau festival', step:[4,4], tab:'a-home', body:() => `
+    <h1 class="h1">Prêt</h1><div class="carte"><div class="ligne"><span>Nom</span><span>Festival Exemple 2027</span></div><div class="ligne"><span>Lieu</span><span>Vence</span></div><div class="ligne"><span>Jeu</span><span>Quiz</span></div></div>`, pied:() => btn('Publier le festival','a-se-ok','o') };
+  S['a-se-ok'] = { g:'Admin · créer un festival', t:'Festival publié', tab:'a-home', noBack:true, body:() => `
+    <div class="succes">${ic('check')}</div><h1 class="h1 centre">Ouvert aux boutiques</h1><p class="sub centre">Envoyez ce lien ou ce QR aux commerçants : ils s’inscrivent en 3 écrans.</p><div class="qr"><canvas data-qr></canvas></div>`,
+    pied:() => `<div class="seg"><button class="btn s" data-toast="Lien copié">${ic('link')}Copier</button><button class="btn s" data-toast="Démo : WhatsApp prêt">${ic('chat')}WhatsApp</button></div>` + `<button class="btn l" data-go="a-home">Retour</button>` };
+
+  S['a-factures'] = { g:'Admin', t:'Factures', tab:'a-home', body:() => `
+    <h1 class="h1">Factures</h1>
+    <p class="note">Numérotées automatiquement, dans l’ordre, sans trou. Une facture émise ne se modifie pas.</p>
+    <div class="carte">${[['FL-2027-0004','Boutique Exemple','À émettre après paiement','attente'],['FL-2027-0003','Librairie Exemple','Payée','ok'],['FL-2027-0002','Café Exemple','Payée','ok'],['FL-2027-0001','Boutique Exemple','Payée','ok']].map(([n,c,s,k])=>`<div class="gagnant"><div class="av">${ic('ticket')}</div><div><div class="tt">${n}</div><div class="dd">${c}</div></div><span class="badge ${k}" style="margin-left:auto">${s}</span></div>`).join('')}</div>`,
+    pied:() => `<button class="btn s" data-volet="avoir">Émettre un avoir</button>` };
+
+  S['a-gagnants'] = { g:'Admin', t:'Lots et gagnants', tab:'a-home', body:() => `
+    <h1 class="h1">Lots non remis</h1>
+    <div class="recherche">${ic('search')}<input placeholder="Boutique ou gagnant"></div>
+    ${[['Boutique Exemple',5],['Librairie Exemple',4],['Café Exemple',5]].map(([n,k])=>`<details class="acc"><summary>${ic('store')}${n}<span class="compteur">${k}</span></summary><div class="in">${['Léa M.','Hugo T.'].map(g=>`<div class="gagnant"><div class="av">${g[0]}</div><div><div class="tt">${g}</div><div class="dd">Gagné le 12/07</div></div><span class="badge attente" style="margin-left:auto">À remettre</span></div>`).join('')}</div></details>`).join('')}`,
+    pied:() => `<button class="btn s" data-volet="relance">${ic('bell')}Rappeler les 14 gagnants</button>` };
+
+  /* ---------------- JOUEUR ---------------- */
+  S['j-accueil'] = { g:'Joueur', t:'Boutique Exemple', noBack:true, body:() => `
+    <div class="jeu-hero"><div class="tt">Joue et gagne un café</div><div class="dd">3 questions, 1 minute. Gratuit.</div></div>
+    <div class="carte"><div class="ligne"><span>À gagner</span><span>Café offert</span></div><div class="ligne"><span>Où</span><span>Boutique Exemple</span></div></div>`,
+    pied:() => btn('Jouer','j-q') + `<button class="btn l" data-toast="Démo : règlement du jeu">Règlement du jeu</button>` };
+  S['j-q'] = { g:'Joueur', t:'Question 1 / 3', step:[1,3], body:() => `
+    <h1 class="h1">Quel pain demande le plus de temps de levée ?</h1>
+    ${['La baguette','Le pain au levain','La brioche'].map((r)=>`<button class="rep" data-rep>${r}</button>`).join('')}`,
+    pied:() => btn('Valider','j-inscr') };
+  S['j-inscr'] = { g:'Joueur', t:'Ton résultat', body:() => `
+    <h1 class="h1">Bravo, 3 sur 3</h1><p class="sub">Dis-nous où t’envoyer ton billet.</p>
+    ${champ('Prénom','Prénom')}${champ('Email','toi@exemple.fr','','email')}
+    <div class="champ"><label>Tu es</label><div class="seg"><button data-pick>Homme</button><button data-pick>Femme</button></div></div>
+    ${champ('Code postal','06140')}
+    <label style="display:flex;gap:10px;font-size:13px;line-height:1.4;color:var(--fg-2);margin-bottom:8px"><input type="checkbox" style="width:20px;height:20px">J’accepte de recevoir les bons plans de la boutique</label>`,
+    pied:() => btn('Voir mon lot','j-gagne') };
+  S['j-gagne'] = { g:'Joueur', t:'Gagné', noBack:true, body:() => `
+    <div class="succes">${ic('gift')}</div><h1 class="h1 centre">Tu as gagné un café</h1><p class="sub centre">Montre ton billet en caisse. Il est aussi dans ta boîte mail.</p>`,
+    pied:() => btn('Voir mon billet','j-billet') };
+  S['j-billet'] = { g:'Joueur', t:'Mon billet', body:() => `
+    <div class="billet"><div class="haut"><div style="font-size:12px;font-weight:800;opacity:.9">BILLET GAGNANT</div><div style="font-size:21px;font-weight:900;margin-top:4px">Café offert</div><div style="font-size:13px;opacity:.9">Boutique Exemple · 06140 Vence</div></div>
+    <div class="bas"><div class="qr" style="width:160px;height:160px"><canvas data-qr></canvas></div><div class="ligne"><span>Valable jusqu’au</span><span>31/12/2027</span></div><div class="ligne"><span>Conditions</span><span>1 par personne</span></div></div></div>
+    <p class="note" style="margin-top:12px">Le commerçant scanne ce QR pour te remettre ton lot.</p>` };
+
+  /* ---------------- groupes de navigation ---------------- */
+  const PROFILS = {
+    pro: { start:'p-bienvenue', tabs:PRO_TABS, groupes:[
+      ['Adhésion',['p-bienvenue','p-vous','p-etab','p-mdp','p-choix']],
+      ['Rejoindre un festival',['p-rj-se','p-rj-lots','p-rj-offre','p-rj-recap','p-rj-paiement','p-rj-envoye']],
+      ['Créer mon jeu',['p-an-jeu','p-an-dates','p-an-lots','p-an-recap','p-qr']],
+      ['Mon espace',['p-home','p-op','p-op-se','p-gagnants','p-carte','p-ville','p-profil']],
+      ['Festivals et facturation',['p-supers','p-pont','p-docs']]]},
+    admin: { start:'a-home', tabs:[['a-home','home','À traiter'],['a-gagnants','gift','Lots'],['a-demandes','inbox','Demandes'],['a-se-1','map','Festivals']], groupes:[
+      ['À traiter',['a-home','a-demandes','a-demande','a-accepte','a-gagnants']],
+      ['Facturation',['a-factures']],
+      ['Créer un pro',['a-pro-1','a-pro-2','a-pro-ok']],
+      ['Créer un festival',['a-se-1','a-se-2','a-se-3','a-se-4','a-se-ok']]]},
+    joueur: { start:'j-accueil', tabs:null, groupes:[['Jouer',['j-accueil','j-q','j-inscr','j-gagne','j-billet']]]}
+  };
+  const NOMS = {'p-bienvenue':'Accueil','p-vous':'Vous','p-etab':'Établissement','p-mdp':'Mot de passe','p-choix':'Que voulez-vous faire ?','p-rj-se':'Le festival','p-rj-lots':'Votre lot','p-rj-offre':'Votre offre','p-rj-recap':'Bon de commande','p-rj-paiement':'Paiement','p-pont':'Rattacher mon jeu','p-supers':'Mes festivals','p-ville':'Carte de ma ville','p-docs':'Bons et factures','a-factures':'Factures','p-rj-envoye':'Demande envoyée','p-an-jeu':'Le jeu','p-an-dates':'Les dates','p-an-lots':'Le lot','p-an-recap':'Vérifier','p-qr':'QR code et affiche','p-home':'Accueil','p-op':'Fiche de mon jeu','p-op-se':'Fiche festival','p-gagnants':'Gagnants','p-carte':'Carte','p-profil':'Profil','a-home':'À traiter','a-demandes':'Demandes','a-demande':'Une demande','a-accepte':'Acceptée','a-gagnants':'Lots non remis','a-pro-1':'Établissement','a-pro-2':'Contact','a-pro-ok':'Invitation envoyée','a-se-1':'Nom et dates','a-se-2':'Lieu','a-se-3':'Jeu','a-se-4':'Vérifier','a-se-ok':'Lien et QR','j-accueil':'Accueil du jeu','j-q':'Question','j-inscr':'Inscription','j-gagne':'Gagné','j-billet':'Billet'};
+
+  /* ---------------- moteur ---------------- */
+  const st = { profil:'pro', ecran:'p-bienvenue', pile:[] };
+  const $ = (id) => document.getElementById(id);
+  window.__onglet = {};
+
+  function qr(canvas){
+    const n = 25, c = canvas, x = c.getContext('2d'); c.width = c.height = n;
+    let s = 7; const r = () => (s = (s * 9301 + 49297) % 233280) / 233280;
+    const fg = '#0E1B30'; x.fillStyle = '#fff'; x.fillRect(0,0,n,n); x.fillStyle = fg;
+    for (let i=0;i<n;i++) for (let j=0;j<n;j++) if (r() > .52) x.fillRect(i,j,1,1);
+    [[0,0],[n-7,0],[0,n-7]].forEach(([a,b]) => { x.fillStyle='#fff'; x.fillRect(a,b,7,7); x.fillStyle=fg; x.fillRect(a,b,7,7); x.fillStyle='#fff'; x.fillRect(a+1,b+1,5,5); x.fillStyle=fg; x.fillRect(a+2,b+2,3,3); });
+  }
+
+  function render(){
+    const e = S[st.ecran];
+    $('titre').textContent = e.t;
+    $('etape').textContent = e.step ? `${e.step[0]} / ${e.step[1]}` : '';
+    $('progressWrap').hidden = !e.step;
+    if (e.step) $('progress').style.width = (e.step[0] / e.step[1] * 100) + '%';
+    $('retour').disabled = e.noBack || st.pile.length === 0;
+    $('corps').innerHTML = e.body(); $('corps').scrollTop = 0;
+    const p = e.pied ? e.pied() : ''; $('pied').innerHTML = p; $('pied').hidden = !p;
+    const tabs = PROFILS[st.profil].tabs;
+    const showTabs = tabs && e.tab;
+    $('tabbar').hidden = !showTabs;
+    if (showTabs) $('tabbar').innerHTML = tabs.map(([id,i,l]) => `<button data-tab="${id}" class="${e.tab===id?'on':''}">${ic(i)}${l}</button>`).join('');
+    document.querySelectorAll('[data-qr]').forEach(qr);
+    renderNav(); fermerVolet();
+    try { location.hash = st.ecran; } catch(_){}
+  }
+
+  function renderNav(){
+    $('nav').innerHTML = PROFILS[st.profil].groupes.map(([g, ids]) =>
+      `<h3>${g}</h3>` + ids.map(id => `<button data-saut="${id}" class="${id===st.ecran?'on':''}">${NOMS[id]}</button>`).join('')).join('');
+    document.querySelectorAll('#profils button').forEach(b => b.classList.toggle('on', b.dataset.profil === st.profil));
+  }
+
+  function aller(id, empiler = true){ if (!S[id]) return; if (empiler && id !== st.ecran) st.pile.push(st.ecran); st.ecran = id; render(); }
+  function toast(t){ const el = $('toast'); el.querySelector('span').textContent = t; el.classList.add('on'); clearTimeout(toast._t); toast._t = setTimeout(() => el.classList.remove('on'), 2000); }
+
+  const VOLETS = {
+    relance: () => `<div class="poignee"></div><h2 class="h1" style="font-size:19px">Rappeler les gagnants</h2><p class="sub">Un email leur rappelle de venir chercher leur lot, avec leur billet.</p>${btn('Envoyer le rappel','__toast:Rappel envoyé','p','send')}<button class="btn l" data-fermer>Annuler</button>`,
+    gagnant: () => `<div class="poignee"></div><h2 class="h1" style="font-size:19px">Léa M.</h2><p class="sub">Dessert offert · gagné le 12/07</p>${btn('Valider la remise','__toast:Lot remis','p','check')}<div style="height:8px"></div><button class="btn s" data-toast="Rappel envoyé à Léa M.">${ic('bell')}Lui rappeler</button><button class="btn l" data-fermer>Fermer</button>`,
+    avoir: () => `<div class="poignee"></div><h2 class="h1" style="font-size:19px">Émettre un avoir</h2><div class="champ"><label>Facture concernée</label><select><option>FL-2027-0003 · Librairie Exemple</option></select></div><div class="champ"><label>Motif</label><textarea placeholder="Ex. erreur de quantité"></textarea></div>${btn('Émettre l’avoir AV-2027-0001','__toast:Avoir émis et envoyé','p')}<button class="btn l" data-fermer>Annuler</button>`,
+    refus: () => `<div class="poignee"></div><h2 class="h1" style="font-size:19px">Refuser la demande</h2><div class="champ"><label>Motif (envoyé au pro)</label><textarea placeholder="Ex. festival complet"></textarea></div>${btn('Refuser','__toast:Demande refusée, le pro est prévenu','s')}<button class="btn l" data-fermer>Annuler</button>`
+  };
+  function ouvrirVolet(k){ $('volet').innerHTML = VOLETS[k](); $('voile').classList.add('on'); $('volet').classList.add('on'); $('volet').querySelector('button')?.focus(); }
+  function fermerVolet(){ $('voile').classList.remove('on'); $('volet').classList.remove('on'); }
+
+  document.addEventListener('click', (ev) => {
+    const t = ev.target.closest('button,[data-go],[data-saut]'); if (!t) return;
+    const d = t.dataset;
+    if (d.go){ if (d.go.startsWith('__toast:')) { fermerVolet(); toast(d.go.slice(8)); } else aller(d.go); return; }
+    if (d.saut){ aller(d.saut); if (innerWidth < 760) document.querySelector('.phone').scrollIntoView({behavior:'smooth', block:'start'}); return; }
+    if (d.tab){ st.pile = []; aller(d.tab, false); return; }
+    if (d.profil){ st.profil = d.profil; st.pile = []; aller(PROFILS[d.profil].start, false); return; }
+    if (d.toast){ toast(d.toast); return; }
+    if (d.volet){ ouvrirVolet(d.volet); return; }
+    if ('fermer' in d){ fermerVolet(); return; }
+    if (d.onglet){ const k = t.parentElement.dataset.onglets; window.__onglet[k] = d.onglet; const sc = $('corps').scrollTop; render(); $('corps').scrollTop = sc; return; }
+    if ('pick' in d || 'rep' in d){ [...t.parentElement.children].forEach(c => c.classList && c.classList.remove('on')); t.classList.add('on'); return; }
+    if (t.id === 'retour'){ if (st.pile.length) { st.ecran = st.pile.pop(); render(); } return; }
+    if (t.id === 'corriger'){ const moi = $('moi'); const on = !moi.classList.contains('drag');
+      moi.classList.toggle('drag', on);
+      $('mapnote').textContent = on ? 'Glissez le point violet à la bonne place.' : 'Le point violet, c’est vous. 14 boutiques participent.';
+      $('pied').innerHTML = on ? `<div class="seg"><button class="btn s" id="corriger">Annuler</button><button class="btn p" data-go="__toast:Position enregistrée">Enregistrer</button></div>` : `<button class="btn s" id="corriger">${ic('map')}Corriger ma position</button>`;
+      return; }
+    if (d.vue){ document.querySelectorAll('#vues button').forEach(b => b.classList.toggle('on', b === t)); $('rapport').hidden = d.vue !== 'rapport'; $('maquette').hidden = d.vue === 'rapport'; $('profils').hidden = d.vue === 'rapport'; return; }
+    if (t.id === 'theme'){ const r = document.documentElement; const dark = r.dataset.theme ? r.dataset.theme === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches; r.dataset.theme = dark ? 'light' : 'dark'; try { localStorage.setItem('fl-maq-theme', r.dataset.theme); } catch(_){} }
+  });
+  $('voile').addEventListener('click', fermerVolet);
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape') fermerVolet(); });
+
+  /* glisser du point « moi » uniquement en mode correction */
+  document.addEventListener('pointerdown', (e) => {
+    const moi = e.target.closest('#moi.drag'); if (!moi) return;
+    const map = $('map'); moi.setPointerCapture(e.pointerId);
+    const mv = (ev) => { const r = map.getBoundingClientRect(); moi.style.left = Math.max(0, Math.min(92, (ev.clientX - r.left) / r.width * 100 - 4)) + '%'; moi.style.top = Math.max(0, Math.min(85, (ev.clientY - r.top) / r.height * 100 - 6)) + '%'; };
+    const up = () => { moi.removeEventListener('pointermove', mv); moi.removeEventListener('pointerup', up); };
+    moi.addEventListener('pointermove', mv); moi.addEventListener('pointerup', up);
+  });
+
+  try { const th = localStorage.getItem('fl-maq-theme'); if (th) document.documentElement.dataset.theme = th; } catch(_){}
+  const h = location.hash.slice(1);
+  if (S[h]) { st.ecran = h; st.profil = h[0] === 'a' ? 'admin' : h[0] === 'j' ? 'joueur' : 'pro'; }
+  render();
+})();
+</script>
