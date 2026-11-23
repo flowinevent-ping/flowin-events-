@@ -1,4 +1,4 @@
-# État des parcours (dernière mise à jour : 21/11/2026)
+# État des parcours (dernière mise à jour : 23/11/2026)
 
 Statuts : VÉRIFIÉ PROD (preuve mesurée sur flowin-events.vercel.app) / NON VÉRIFIÉ / BLOQUÉ. Une ligne par parcours, on écrase l'ancien verdict (historique : JOURNAL.md et git).
 Source principale : `docs/E2E-verification-2026-11-20.md` (E2E). Comptes de test : voir `agents/recette-tests/MEMOIRE.md`.
@@ -35,6 +35,7 @@ Source principale : `docs/E2E-verification-2026-11-20.md` (E2E). Comptes de test
 | Nettoyage des données TEST en base | BLOQUÉ : confirmation DELETE sans réponse (2 fois) | 20/11 | `sql/2026-11-20-e2e-nettoyage-TEST-2.sql` à exécuter par Romain | Romain a exécuté |
 | Équipe critique : 4 agents, mémoires, carnet `AMELIORATIONS.md` | PREMIER PASSAGE FAIT (16 propositions, aucune validée) | 21/11 | `docs/claude/AMELIORATIONS.md` ; mesures SELECT et web du 21/11 | décision de Romain sur le carnet ; passage mensuel 01/12 |
 | Reprise et continuité : plan écrit, tags de version | PLAN ÉCRIT, RIEN RESTAURÉ : tags créés en local, push refusé (403) ; sauvegardes / PITR NON vérifiés (à lire par Romain) ; fonctions déployées listées, non comparées au dépôt | 21/11 | `docs/claude/PLAN-DE-REPRISE.md` ; `list_migrations`, `list_branches` (vide), `list_edge_functions` | Romain pousse les tags et lit Database > Backups ; test de restauration sur copie |
+| Fidélité aux maquettes : contrat `CONTRAT-MAQUETTE.md` et 20 demandes 19-23/11 | PREMIER PASSAGE FAIT : 131 lignes (78 OK (code), 35 MANQUE, 11 VOULU, 7 NON VÉRIFIÉ) ; production NON prouvable depuis le cloud (403 Vercel) | 23/11 | `docs/claude/CONTRAT-MAQUETTE.md`, AMEL-GAR-01 à 04 | accès production par une machine non bloquée ; comptes de test Super Admin, pro, appareil réel |
 
 ## Réserves ouvertes (E2E 20/11)
 - Textes joueur gain immédiat et e-mail Super Event en dur NDS : voir lignes ci-dessus.

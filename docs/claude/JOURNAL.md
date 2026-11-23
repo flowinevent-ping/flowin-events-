@@ -70,3 +70,4 @@ Ce journal n'est pas une preuve de production : l'état vérifié est dans `ETAT
 - 21/11 | Règle d'accès et de sécurité inscrite dans la feuille de route du Super Admin (lib/roadmap.ts) et REGLES.md | ce commit
 - 23/11 | Romain recadre les priorités (fonctionnement de bout en bout, ergonomie, CRM, banques) ; nettoyage des tests non prioritaire ; stock baisse au retrait | ce commit
 - 23/11 | Agent gardien-fidelite, dossier docs/maquette/, brief agent avec économie de jetons (branche claude/gardien-fidelite, PR sans fusion) | PR
+- 23/11 | Gardien de fidélité : CONTRAT-MAQUETTE.md (131 lignes : 78 OK (code), 35 MANQUE, 11 VOULU, 7 NON VÉRIFIÉ), 20 demandes 19-23/11 comptées ; production 403 depuis le cloud, preuves dans le code | PR claude/gardien-fidelite
