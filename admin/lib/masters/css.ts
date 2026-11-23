@@ -2,7 +2,7 @@
    CSS des ecrans telephone, couleurs remplacees par les jetons du theme. */
 export const MASTER_CSS = `/* Variables courtes des maquettes, branchees sur le fichier de theme unique
    public/flowin-theme.css (jetons --fl-*). L'accent commun = --fl-accent. */
-.fm{--ink:var(--fl-ink);--ink2:var(--fl-ink-2);--muted:var(--fl-muted);--line:var(--fl-line);--field:var(--fl-field);--cta:#3B5CC4;
+.fm{--fl-accent:#3B5CC4;--fl-accent-soft:#EAF0FF;--fl-accent-ink:#FFFFFF;--ink:var(--fl-ink);--ink2:var(--fl-ink-2);--muted:var(--fl-muted);--line:var(--fl-line);--field:var(--fl-field);--cta:#3B5CC4;
 --white:#FFFFFF;--off:var(--fl-paper);--mint:var(--fl-mint);--sky:var(--fl-sky);--peach:var(--fl-mint);
 --coral:#F26B4F;--violet:var(--fl-solo);--gold:#F5A100;--teal:var(--fl-spin);--blue:var(--fl-vote);--sy:var(--fl-super-jaune);--sr:var(--fl-super-rouge);--sb:var(--fl-super-bleu);--logo-in:var(--fl-blue);
 --ok:var(--fl-ok);--ko:var(--fl-ko);--page:var(--fl-paper);
@@ -94,9 +94,9 @@ color:var(--ink);font-family:var(--fl-font);-webkit-font-smoothing:antialiased}
 .glyph b{font-size:20px;font-weight:800;letter-spacing:-.04em;display:block;line-height:1;color:inherit}
 .glyph small{font-size:9.5px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;margin-top:3px;color:inherit}
 .g-produit{background:#E6F7F4;color:#00796B}
-.g-remise{background:#F1ECFA;color:var(--fl-solo)}
+.g-remise{background:#EAF0FF;color:#2746A6}
 .g-bon{background:#fff;border-color:#F59E0B;color:#8a5e12}
-.g-service{background:#F1ECFA;color:var(--fl-solo)}
+.g-service{background:#FDF1E3;color:#9A3412}
 .g-ticket{background:#fff;border-color:var(--c);color:var(--c-ink)}
 .g-tour{background:#E6F7F4;color:#00796B}
 .tag{display:inline-flex;align-items:center;gap:5px;font-size:11.5px;font-weight:800;padding:3px 9px;border-radius:99px;margin-top:6px;white-space:nowrap;border:1.5px solid transparent}
@@ -142,7 +142,7 @@ color:var(--ink);font-family:var(--fl-font);-webkit-font-smoothing:antialiased}
 
 /* quiz */
 .qtop{display:flex;align-items:center;gap:14px;padding:4px 20px 0;flex:none}
-.qtop .mid{flex:1}
+.qtop .mid{flex:1;min-width:0}
 .qtop .mid small{display:block;font-size:12.5px;font-weight:800;letter-spacing:.06em;color:var(--muted);margin-bottom:8px}
 .prog{display:flex;gap:6px}
 .prog i{flex:1;height:6px;border-radius:3px;background:#E7ECF3}
@@ -206,7 +206,7 @@ color:var(--ink);font-family:var(--fl-font);-webkit-font-smoothing:antialiased}
 .ages{display:grid;grid-template-columns:repeat(4,1fr);gap:7px}
 .ages .chip{padding:0 6px;justify-content:center;font-size:13.5px;min-height:44px}
 .ages .chip:first-child{grid-column:span 2}
-.insc.v1 .iv2,.insc.v2 .iv1{display:none}.insc.v2 .fld{margin-top:6px}.insc.v2 .fld .lab{margin-bottom:5px}.insc.v2 .body{padding-top:2px!important}.insc.v2 .chips,.insc.v2 .ages{gap:6px}.insc.v2 .consent{padding:8px 10px;margin-top:6px;gap:10px}.insc.v2 .consent p{font-size:13px;line-height:1.3}.insc .foot .lnk{margin-top:2px}.insc .etapes{display:none}.insc.v2 .consent em{display:inline-block;margin-top:2px;font-size:10px}.insc.v2 .consent .box{flex:none}.insc.v2 .mention{margin-top:8px;font-size:12px}.insc.v2 .foot{padding-top:8px;padding-bottom:16px}
+.insc [hidden]{display:none!important}.insc .reco{margin:-4px 0 6px;font-size:13.5px;font-weight:800;color:var(--fl-ok,#15803D)}.insc.connu.v2 .recap{margin-top:8px}.insc.v1 .iv2,.insc.v2 .iv1{display:none}.insc.v2 .fld{margin-top:6px}.insc.v2 .fld .lab{margin-bottom:5px}.insc.v2 .body{padding-top:2px!important}.insc.v2 .chips,.insc.v2 .ages{gap:6px}.insc.v2 .consent{padding:8px 10px;margin-top:6px;gap:10px}.insc.v2 .consent p{font-size:13px;line-height:1.3}.insc .foot .lnk{margin-top:2px}.insc .etapes{display:none}.insc.v2 .consent em{display:inline-block;margin-top:2px;font-size:10px}.insc.v2 .consent .box{flex:none}.insc.v2 .mention{margin-top:8px;font-size:12px}.insc.v2 .foot{padding-top:8px;padding-bottom:16px}
 .consent{display:flex;gap:13px;align-items:flex-start;padding:14px;border:1.5px solid var(--field);border-radius:18px;cursor:pointer;margin-top:12px;background:#fff}
 .consent .box{width:26px;height:26px;border-radius:8px;border:2px solid #8797AB;flex:none;display:grid;place-items:center;color:#fff;margin-top:1px}
 .consent .box svg{opacity:0}
@@ -240,8 +240,8 @@ color:var(--ink);font-family:var(--fl-font);-webkit-font-smoothing:antialiased}
 /* ticket */
 .tk{display:flex;margin-top:20px;animation:stamp .7s .15s cubic-bezier(.2,.9,.3,1.3) both}
 .tk .main{flex:1;background:#fff;border:2px solid var(--c);border-right:0;border-radius:22px 0 0 22px;padding:16px 18px;position:relative;overflow:hidden;color:var(--ink)}
-.tk .main small{display:block;font-size:11px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--c-ink)}
-.tk .main b{display:block;font-size:38px;font-weight:800;letter-spacing:-.04em;line-height:1;margin-top:10px}
+.tk .main small{display:block;font-size:12px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--c-ink)}
+.tk .main{container-type:inline-size}.tk .main b{display:block;font-size:clamp(20px,6.6vw,30px);font-size:min(30px,max(13px,calc(100cqw / (var(--n,12) * .66))));font-weight:800;letter-spacing:-.03em;line-height:1.1;margin-top:10px;white-space:nowrap;overflow:hidden;text-overflow:clip}
 .tk .main span{display:block;font-size:14px;font-weight:700;color:var(--ink2);margin-top:9px}
 .tk .stub{width:82px;background:var(--c);color:var(--c-on);border-radius:0 22px 22px 0;position:relative;display:flex;align-items:center;justify-content:center}
 .tk .stub:before{content:'';position:absolute;left:-1px;top:12px;bottom:12px;border-left:3px dotted #fff}
@@ -591,5 +591,5 @@ color:var(--ink);font-family:var(--fl-font);-webkit-font-smoothing:antialiased}
 .amorce-tk small{display:block;font-size:10px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;color:var(--c-ink)}
 .amorce-tk i{display:block;height:8px;margin:6px 10px 0;background:repeating-linear-gradient(90deg,var(--ink) 0 2px,transparent 2px 5px)}
 @keyframes amorce{from{transform:translateY(-14px)}to{transform:translateY(0)}}
-@media (prefers-reduced-motion:reduce){.amorce-tk{animation:none}}
+@media (prefers-reduced-motion:reduce){.amorce-tk{animation:none}.confetti{display:none}.tk{animation:none}}
 `

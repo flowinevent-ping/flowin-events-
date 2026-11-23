@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { envoyerLienConnexion } from '@/lib/connexionJoueur'
 
-const HERO = '#E8336B'
+const HERO = '#3B5CC4'
 
 export default function ConnexionEmail({ compact = false }: { compact?: boolean }) {
   const [email, setEmail] = useState('')
@@ -29,10 +29,10 @@ export default function ConnexionEmail({ compact = false }: { compact?: boolean 
         value={email} onChange={e => setEmail(e.target.value)}
         style={{ padding: '12px 14px', borderRadius: 12, border: '1.5px solid #dfe2e8', fontSize: 16, background: '#fff', color: '#141a26' }} />
       <button type="submit" disabled={etat === 'envoi'}
-        style={{ padding: '12px 18px', borderRadius: 100, border: 0, background: HERO, color: '#fff', fontWeight: 800, fontSize: 15, opacity: etat === 'envoi' ? .6 : 1 }}>
+        style={{ minHeight: 48, padding: '12px 18px', borderRadius: 100, border: 0, background: HERO, color: '#fff', fontWeight: 800, fontSize: 15, opacity: etat === 'envoi' ? .6 : 1 }}>
         {etat === 'envoi' ? 'Envoi…' : 'Me connecter'}
       </button>
-      {err && <div role="alert" style={{ fontSize: 12.5, color: '#b3261e', lineHeight: 1.4 }}>{err}</div>}
+      {err && <div role="alert" style={{ fontSize: 13, color: '#b3261e', lineHeight: 1.4 }}>{err}</div>}
     </form>
   )
 }

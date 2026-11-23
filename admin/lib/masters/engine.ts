@@ -53,6 +53,10 @@ export interface EtatPartie {
   erreur: string
   /** Volet affiché du formulaire de coordonnées (1 ou 2), audit 17/11. */
   inscVolet?: number
+  /** Joueur reconnu (profil complet sur ce téléphone, ou retrouvé par e-mail) : volet 1 replié, les 3 cases restent. */
+  connu?: boolean
+  /** Prénom du joueur retrouvé par e-mail (message « Content de te revoir »). */
+  reco?: string
   envoi: boolean
 }
 
@@ -149,7 +153,7 @@ function courte(t: string): string { return /^\d{1,2} \S+ \d{4}$/.test(t) ? t.re
 function lotRow(v: VueMaster, l: LotAffiche): string {
   return '<div class="lot">' + glyph(l) + '<div class="tx"><b>' + txt(l.nom) + '</b><small>' + txt(l.cond) + '</small>' + modeTag(v, l.mode) + '</div></div>'
 }
-const LCOL = ['#3B5CC4', '#00B4A0', '#E85D04', '#7C5CC4', '#0B9E6E', '#F59E0B', '#1B3A5C', '#2C49A6', '#13A89E', '#C24A03']
+const LCOL = ['#3B5CC4', '#00B4A0', '#E85D04', '#C2410C', '#0B9E6E', '#F59E0B', '#1B3A5C', '#2C49A6', '#13A89E', '#C24A03']
 /** Logo d'illustration generique (maquette) : utilise quand un partenaire n'a pas de logo. */
 function plogo(i: number, w: number, h: number): string {
   const c = LCOL[i % LCOL.length], c2 = LCOL[(i + 3) % LCOL.length], vv = i % 8
@@ -211,7 +215,7 @@ function etapes(i: number): string {
 }
 function confetti(n: number, seed?: number, base?: number): string {
   base = base || 0
-  const R = rnd(seed || 7), cols = ['#3B5CC4', '#00B4A0', '#0B9E6E', '#F59E0B', '#7C5CC4', '#6A93FF']
+  const R = rnd(seed || 7), cols = ['#3B5CC4', '#00B4A0', '#0B9E6E', '#F59E0B', '#C2410C', '#6A93FF']
   let h = '<div class="confetti" aria-hidden="true">'
   for (let i = 0; i < n; i++) { const w = 6 + R() * 8, ht = R() > .5 ? w : w * 1.6, c = cols[Math.floor(R() * cols.length)]; h += '<i style="left:' + n1(R() * 390) + 'px;width:' + n1(w) + 'px;height:' + n1(ht) + 'px;background:' + c + ';border-radius:' + (R() > .5 ? '50%' : '3px') + ';--dx:' + n1((R() - .5) * 120) + 'px;--r:' + Math.floor(R() * 720 - 360) + 'deg;--t:' + n1(1.8 + R() * 1.6) + 's;--d:' + n1(base + R() * .6) + 's"></i>' }
   return h + '</div>'
@@ -347,17 +351,24 @@ S['c-inscription'] = { tall: true, r: function (v, r) {
      mêmes consentements ; tout reste dans la page (lireForm lit les deux volets). Une erreur sur
      prénom / nom / email / téléphone rouvre le volet 1, sinon le volet 2. */
   const vol1Ok = !!(p.prenom && p.nom && (p.email || '').indexOf('@') > 0 && (p.tel || '').replace(/\s/g, '').length >= 8)
-  const vol = r.erreur ? (vol1Ok ? 2 : 1) : (r.inscVolet || 1)
-  return '<div class="scr bg-w insc v' + vol + '">' + barre() + hdr(v, { back: 's-accueil', title: 'Dernière étape', small: 'Tes coordonnées' }) + etapes(2) +
+  /* Reconnaissance (lot ergonomie 2) : joueur connu = coordonnées déjà là, on n'affiche que ce qui reste
+     à décider (les 3 cases, texte inchangé). Le volet 1 reste atteignable par « Modifier mes coordonnées ». */
+  const connu = !!r.connu && vol1Ok
+  const vol = r.erreur ? (vol1Ok ? 2 : 1) : (connu ? (r.inscVolet || 2) : (r.inscVolet || 1))
+  const ageConnu = !!p.age
+  const masqueSrc = connu || !!r.reco
+  const blocAge = '<div class="fld"' + (connu && ageConnu ? ' hidden' : '') + '><div class="lab">Tranche d\'âge</div><div class="ages">' + ages.map(function (a) { return '<button class="chip' + (p.age === a ? ' on' : '') + '" data-one="age" data-val="' + esc(a) + '">' + a + '</button>' }).join('') + '</div></div>'
+  const blocSrc = '<div class="fld"' + (masqueSrc ? ' hidden' : '') + '><div class="lab">Comment nous as-tu connus ?</div><div class="chips">' + src.map(function (s) { return '<button class="chip' + (p.src === s ? ' on' : '') + '" data-one="src" data-val="' + esc(s) + '">' + s + '</button>' }).join('') + '</div></div>'
+  const recoLigne = r.reco ? '<p class="reco" data-reco role="status">Content de te revoir, ' + esc(r.reco) + '.</p>' : ''
+  const accueilConnu = connu ? '<h2 class="h2" style="font-size:23px">Content de te revoir, ' + esc(p.prenom || '') + '</h2><p class="mention" style="text-align:left;margin:2px 0 10px">' + esc((p.prenom || '') + ' ' + (p.nom || '')) + ' · ' + esc(p.email || '') + '</p><div class="card recap">' + glyph(rec.gl) + '<div><b>' + txt(rec.t) + '</b><small>' + txt(rec.s) + '</small></div></div>' : ''
+  return '<div class="scr bg-w insc' + (connu ? ' connu' : '') + ' v' + vol + '">' + barre() + hdr(v, { back: 's-accueil', title: 'Dernière étape', small: 'Tes coordonnées' }) + etapes(2) +
     '<div class="body" style="padding-top:8px"><div class="iv1"><h2 class="h2" style="font-size:26px">Où t\'envoyer<br>ton gain ?</h2>' +
     '<div class="card recap">' + glyph(rec.gl) + '<div><b>' + txt(rec.t) + '</b><small>' + txt(rec.s) + '</small></div></div>' +
+    '<div class="fld"><label for="f3">Email</label><input id="f3" class="inp" type="email" autocomplete="email" value="' + esc(p.email || '') + '"></div>' + recoLigne +
     '<div class="two"><div class="fld"><label for="f1">Prénom</label><input id="f1" class="inp" autocomplete="given-name" value="' + esc(p.prenom || '') + '"></div><div class="fld"><label for="f2">Nom</label><input id="f2" class="inp" autocomplete="family-name" value="' + esc(p.nom || '') + '"></div></div>' +
-    '<div class="fld"><label for="f3">Email</label><input id="f3" class="inp" type="email" autocomplete="email" value="' + esc(p.email || '') + '"></div>' +
     '<div class="two"><div class="fld"><label for="f4">Téléphone</label><input id="f4" class="inp" type="tel" autocomplete="tel" value="' + esc(p.tel || '') + '"></div><div class="fld"><label for="f6">Code postal</label><input id="f6" class="inp" inputmode="numeric" autocomplete="postal-code" value="' + esc(p.cp || '') + '"></div></div>' +
     '<div class="fld"><div class="lab">Sexe <span class="opt-l">facultatif</span></div><div class="seg" role="radiogroup" aria-label="Sexe"><button data-seg data-genre="Homme"' + (p.genre === 'Homme' ? ' class="on"' : '') + '>Homme</button><button data-seg data-genre="Femme"' + (p.genre === 'Femme' ? ' class="on"' : '') + '>Femme</button></div></div>' +
-    '</div><div class="iv2">' +
-    '<div class="fld"><div class="lab">Tranche d\'âge</div><div class="ages">' + ages.map(function (a) { return '<button class="chip' + (p.age === a ? ' on' : '') + '" data-one="age" data-val="' + esc(a) + '">' + a + '</button>' }).join('') + '</div></div>' +
-    '<div class="fld"><div class="lab">Comment nous as-tu connus ?</div><div class="chips">' + src.map(function (s) { return '<button class="chip' + (p.src === s ? ' on' : '') + '" data-one="src" data-val="' + esc(s) + '">' + s + '</button>' }).join('') + '</div></div>' +
+    '</div><div class="iv2">' + accueilConnu + blocAge + blocSrc +
     consentements(v, r) + '</div>' +
     (r.erreur ? '<p class="fm-err" role="alert">' + esc(r.erreur) + '</p>' : '') + '</div>' +
     foot('<div class="iv1">' + btn('Continuer', '@insc-2') + '<p class="mention">Étape 1 sur 2 · encore quelques choix rapides.</p></div>' +
@@ -396,9 +407,9 @@ S['c-ticket'] = { tall: true, r: function (v, r) {
       autresCommerces(v) + '<button class="lnk" data-go="c-profil">Voir mon profil</button>' +
       dock({ cta: btn('Parrainer mes amis', 'c-parrainage'), nav: '' }) + '</div>'
   }
-  return '<div class="scr bg-o">' + barre() + hdr(v, { title: n ? 'Ticket validé' : 'Participation validée', small: v.key === 'vote' ? 'Loterie' : 'Tirage au sort', back: 's-accueil' }) +
+  return '<div class="scr bg-o">' + (n ? confetti(38, 17) : '') + barre() + hdr(v, { title: n ? 'Ticket validé' : 'Participation validée', small: v.key === 'vote' ? 'Loterie' : 'Tirage au sort', back: 's-accueil' }) +
     '<div class="body" style="padding-top:2px"><h2 class="h2 a-rise" style="font-size:33px">' + (n ? 'Tu es<br>dans le tirage&nbsp;!' : 'Merci<br>d\'avoir joué&nbsp;!') + '</h2>' +
-    (n ? '<div class="tk"><div class="main"><small>Ticket · ' + esc(v.who.nom) + '</small><b class="num">' + esc(code) + '</b><span>Tirage au sort le ' + txt(v.tirage) + '</span></div><div class="stub"><b>N° ' + esc(numCourt(code)) + '</b></div></div>' : '') +
+    (n ? '<div class="tk"><div class="main"><small>Ticket · ' + esc(v.who.nom) + '</small><b class="num" style="--n:' + Math.max(8, String(code).length) + '">' + esc(code) + '</b><span>Tirage au sort le ' + txt(v.tirage) + '</span></div><div class="stub"><b>N° ' + esc(numCourt(code)) + '</b></div></div>' : '') +
     '<div class="card stack a-rise" style="--d:.5s"><span class="cnt">' + n + '</span><p>' + (n > 1 ? 'tickets pour ce tirage. ' : 'ticket pour ce tirage. ') + (n ? 'On te prévient par email si tu gagnes.' : 'Fais un sans-faute demain pour gagner ton ticket.') + '</p></div>' +
     '<div class="card infobox a-rise" style="--d:.6s"><div class="inforow">' + icon('users', 21) + '<span>' + esc(v.parrain) + '</span></div><div class="inforow">' + icon('clock', 21) + 'Reviens demain : une partie par jour et par commerce</div></div></div>' +
     autresCommerces(v) + '<button class="lnk" data-go="c-profil">Voir mes tickets dans mon profil</button>' +

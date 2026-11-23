@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react'
 import { lierSessionAuJoueur } from '@/lib/connexionJoueur'
 import ConnexionEmail from '@/components/joueur/ConnexionEmail'
 
-const HERO = '#E8336B'
+const HERO = '#3B5CC4'
 
 export default function ConnexionJoueur() {
   const [etat, setEtat] = useState<'attente' | 'aucun' | 'sans_session' | 'erreur'>('attente')

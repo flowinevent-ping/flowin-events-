@@ -29,6 +29,7 @@ type Rubrique = 'lots' | 'bientot' | 'proche' | 'notifs' | 'compte'
 type Pos = { lat: number; lng: number }
 
 const HERO = '#2746A6'
+const BLEU = '#3B5CC4'
 const PROCHE_M = 2000
 
 const RUBRIQUES: { k: Rubrique; ico: string; txt: string }[] = [
@@ -146,6 +147,8 @@ export default function MonComptePage() {
   const bientot = tousLots.filter(l => !l.donne && l.etat === 'a_utiliser' && palierRappel(joursRestants(l.valableJusquAu)))
     .sort((a, b) => (joursRestants(a.valableJusquAu) ?? 999) - (joursRestants(b.valableJusquAu) ?? 999))
   const nonVues = notifs.filter(n => !n.vu_le)
+  const resultatsTirage = notifs.filter(n => n.palier === 'resultat')
+  const ticketsParOperation = Array.from(new Set(tickets.map(t => t.super_event_id || '').filter(Boolean)))
 
   /* Compteurs et badges : uniquement des données réelles. */
   const nbGagnes = tousLots.filter(l => !l.recu).length
@@ -199,7 +202,7 @@ export default function MonComptePage() {
   const wrap: React.CSSProperties = { position: 'fixed', left: 0, right: 0, bottom: 0, top: 'var(--moi-haut, 0px)', display: 'flex', flexDirection: 'column', boxSizing: 'border-box', background: '#f1ede6', fontFamily: 'system-ui, sans-serif', color: '#141a26', overflow: 'hidden' }
 
   if (loading) {
-    return <div style={{ ...wrap, alignItems: 'center', justifyContent: 'center' }}><div style={{ color: '#9aa0ad' }}>Chargement…</div></div>
+    return <div style={{ ...wrap, alignItems: 'center', justifyContent: 'center' }}><div style={{ color: '#5a6071' }}>Chargement…</div></div>
   }
 
   if (!joueur) {
@@ -248,13 +251,13 @@ export default function MonComptePage() {
             ].map(c => (
               <div key={c.i} style={{ flex: 1, background: 'rgba(255,255,255,.16)', borderRadius: 12, padding: '7px 6px', textAlign: 'center' }}>
                 <div style={{ fontSize: 19, fontWeight: 800 }}><Ico k={c.i} size={12} style={{ marginRight: 4, verticalAlign: -1 }} />{c.n}</div>
-                <div style={{ fontSize: 10.5, opacity: 0.85 }}>{c.t}</div>
+                <div style={{ fontSize: 12, opacity: 0.95 }}>{c.t}</div>
               </div>
             ))}
           </div>
           <div data-badges style={{ display: 'flex', gap: 6, marginTop: 10, overflowX: 'auto', scrollbarWidth: 'none' }}>
             {badges.map(b => (
-              <span key={b.k} data-badge={b.k} data-obtenu={b.ok ? '1' : '0'} style={{ flexShrink: 0, display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 11, fontWeight: 800, padding: '4px 9px', borderRadius: 100, background: b.ok ? '#FBBF24' : 'rgba(255,255,255,.12)', color: b.ok ? '#3b2a00' : 'rgba(255,255,255,.55)' }}>
+              <span key={b.k} data-badge={b.k} data-obtenu={b.ok ? '1' : '0'} style={{ flexShrink: 0, display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 12, fontWeight: 800, padding: '5px 10px', borderRadius: 100, background: b.ok ? '#FBBF24' : 'rgba(255,255,255,.12)', color: b.ok ? '#3b2a00' : 'rgba(255,255,255,.88)' }}>
                 <Ico k={b.ico} size={11} />{b.txt}
               </span>
             ))}
@@ -273,6 +276,30 @@ export default function MonComptePage() {
       <div data-rubrique={rub} style={{ flex: 1, minHeight: 0, overflowY: 'auto', padding: '14px 18px 10px' }}>
         <div style={{ maxWidth: 540, margin: '0 auto' }}>
           {rub === 'lots' && (<>
+            {/* Mes tickets : en tête du profil (promesse n°1 du jeu), plus cachée dans « Compte » */}
+            <div data-mes-tickets style={{ ...carte, display: 'flex', alignItems: 'center', gap: 12, marginBottom: 12, border: `1.5px solid ${BLEU}` }}>
+              <div style={{ flexShrink: 0, width: 52, height: 52, borderRadius: 14, background: BLEU, color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Ico k="ticket" size={26} /></div>
+              <div style={{ minWidth: 0, flex: 1 }}>
+                <div style={{ fontSize: 17, fontWeight: 800, lineHeight: 1.2 }}>Mes tickets : {tickets.length}</div>
+                <div style={{ fontSize: 13, color: '#5a6071', marginTop: 1 }}>
+                  {tickets.length ? 'pour les tirages au sort' : 'Joue dans un commerce pour en gagner.'}
+                </div>
+                {ticketsParOperation.length > 0 && (
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginTop: 6 }}>
+                    {ticketsParOperation.map(se => (
+                      <a key={se} href={`/se/${se}`} style={{ display: 'inline-flex', alignItems: 'center', minHeight: 32, fontSize: 12, fontWeight: 800, color: '#9A3412', background: '#FFF1E8', borderRadius: 100, padding: '0 11px', textDecoration: 'none' }}>
+                        {seNames[se] || 'Opération'} · {tickets.filter(t => t.super_event_id === se).length}
+                      </a>
+                    ))}
+                  </div>
+                )}
+              </div>
+              {resultatsTirage.length > 0 && (
+                <button data-resultats onClick={() => ouvrir('notifs')} style={{ flexShrink: 0, minHeight: 44, padding: '0 14px', borderRadius: 12, border: 'none', background: BLEU, color: '#fff', fontWeight: 800, fontSize: 13, cursor: 'pointer', fontFamily: 'inherit' }}>
+                  Résultats
+                </button>
+              )}
+            </div>
             {titre('Mes lots', actifs.length ? 'Touche le QR pour le montrer en caisse.' : undefined)}
             <MesLots lots={tousLots} joueurId={joueur.id} onChange={joueur.id === 'demo' ? undefined : () => { chargerMesLots(joueur.id).then(setLots).catch(() => { /* */ }) }} vide="Pas encore de lot. Joue dans un commerce près de chez toi !" />
           </>)}
@@ -303,7 +330,7 @@ export default function MonComptePage() {
               ))}
               {!proches.length && <div style={{ ...carte, textAlign: 'center', color: '#5a6071', fontSize: 14 }}>Aucun jeu en cours pour l’instant.</div>}
             </div>
-            <a href="/carte-commerces" style={{ display: 'block', textAlign: 'center', marginTop: 12, fontSize: 13.5, fontWeight: 800, color: HERO, textDecoration: 'none' }}>Voir la carte ({commerces.length})</a>
+            <a href="/carte-commerces" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: 44, marginTop: 8, fontSize: 14, fontWeight: 800, color: HERO, textDecoration: 'none' }}>Voir la carte ({commerces.length})</a>
           </>)}
 
           {rub === 'notifs' && (<>
@@ -317,7 +344,7 @@ export default function MonComptePage() {
                     <span style={{ display: 'block', fontSize: 12, fontWeight: 800, color: HERO }}>{n.commerce || '[commerce à compléter]'}</span>
                     <span style={{ display: 'block', fontSize: 14, fontWeight: 800 }}>{libelleNotif(n)}</span>
                     {n.message && <span style={{ display: 'block', fontSize: 13, color: '#5a6071', marginTop: 2 }}>{n.message}</span>}
-                    {n.lien && <a href={n.lien} style={{ display: 'inline-block', marginTop: 6, fontSize: 13, fontWeight: 800, color: HERO, textDecoration: 'none' }}>Voir l’animation</a>}
+                    {n.lien && <a href={n.lien} style={{ display: 'inline-flex', alignItems: 'center', minHeight: 44, marginTop: 2, fontSize: 13, fontWeight: 800, color: HERO, textDecoration: 'none' }}>Voir l’animation</a>}
                   </span>
                 </div>
                 ) :
@@ -360,32 +387,13 @@ export default function MonComptePage() {
                     <span style={{ flex: 1 }}>{c.pro_id ? c.nom : 'Flowin Event : offres, bons deals, prochains events'}</span>
                   </label>
                 ))}
-                <div style={{ fontSize: 11.5, color: '#9aa0ad', marginTop: 4 }}>Tes données ne sont jamais vendues, échangées ni commercialisées.</div>
+                <div style={{ fontSize: 12, color: '#5a6071', marginTop: 4 }}>Tes données ne sont jamais vendues, échangées ni commercialisées.</div>
               </div>
             )}
             <div style={{ ...carte, marginBottom: 10, fontSize: 13, color: '#5a6071', lineHeight: 1.5 }}>
               <div style={{ fontSize: 13.5, fontWeight: 800, color: '#141a26', marginBottom: 6 }}>Utiliser un autre compte</div>
               <ConnexionEmail compact />
             </div>
-            {tickets.length > 0 && (
-              <div style={{ ...carte, fontSize: 13, color: '#5a6071' }}>
-                <Ico k="ticket" size={13} style={{ marginRight: 5, verticalAlign: -2 }} />
-                {tickets.length} ticket{tickets.length > 1 ? 's' : ''} de tirage
-                {/* Contrôle audit 17/11 : détail par opération et par commerce rétabli (présent avant l'audit). */}
-                {Array.from(new Set(tickets.map(t => t.super_event_id || '').filter(Boolean))).map(se => {
-                  const parCom: Record<string, number> = {}
-                  tickets.filter(t => t.super_event_id === se).forEach(t => { const k = t.event_id || ''; if (k) parCom[k] = (parCom[k] || 0) + 1 })
-                  return (
-                    <a key={se} href={`/se/${se}`} style={{ display: 'block', marginTop: 8, color: 'inherit', textDecoration: 'none' }}>
-                      <b style={{ color: HERO }}>{seNames[se] || 'Opération'}</b> · {tickets.filter(t => t.super_event_id === se).length}
-                      <span style={{ display: 'flex', flexWrap: 'wrap', gap: 5, marginTop: 4 }}>
-                        {Object.keys(parCom).map(eid => <span key={eid} style={{ fontSize: 11.5, background: '#f3f4f6', padding: '2px 8px', borderRadius: 100 }}>{evNames[eid] || eid} · {parCom[eid]}</span>)}
-                      </span>
-                    </a>
-                  )
-                })}
-              </div>
-            )}
           </>)}
         </div>
       </div>
@@ -397,10 +405,10 @@ export default function MonComptePage() {
             const a = rub === r.k
             const pastille = r.k === 'notifs' ? nonVues.length : r.k === 'bientot' ? bientot.length : r.k === 'lots' ? actifs.length : 0
             return (
-              <button key={r.k} data-onglet={r.k} onClick={() => ouvrir(r.k)} style={{ flex: 1, position: 'relative', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3, padding: '9px 2px 8px', border: 'none', background: 'none', cursor: 'pointer', color: a ? HERO : '#7a8091', fontWeight: 800, fontSize: 11 }}>
+              <button key={r.k} data-onglet={r.k} onClick={() => ouvrir(r.k)} style={{ flex: 1, position: 'relative', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3, padding: '9px 2px 8px', border: 'none', background: 'none', cursor: 'pointer', color: a ? HERO : '#5a6071', fontWeight: 800, fontSize: 12 }}>
                 <Ico k={r.ico} size={20} />
                 {r.txt}
-                {pastille > 0 && <span style={{ position: 'absolute', top: 4, left: '56%', minWidth: 16, height: 16, borderRadius: 8, background: r.k === 'lots' ? '#0B6E50' : '#DC2626', color: '#fff', fontSize: 10, lineHeight: '16px', textAlign: 'center', padding: '0 4px', boxSizing: 'border-box' }}>{pastille}</span>}
+                {pastille > 0 && <span style={{ position: 'absolute', top: 4, left: '56%', minWidth: 18, height: 18, borderRadius: 9, background: r.k === 'lots' ? '#0B6E50' : '#B91C1C', color: '#fff', fontSize: 12, lineHeight: '18px', textAlign: 'center', padding: '0 4px', boxSizing: 'border-box' }}>{pastille}</span>}
                 {a && <span style={{ position: 'absolute', top: 0, left: '30%', right: '30%', height: 3, borderRadius: 3, background: HERO }} />}
               </button>
             )

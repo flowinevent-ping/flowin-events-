@@ -29,18 +29,20 @@ interface Props {
 }
 
 const HERO = '#3B5CC4'
+const ENTETE_SE = 'linear-gradient(135deg,#C2410C 0%,#E05A0E 55%,#FF8A14 100%)'
 
 type ModUI = { label: string; grad: string; accent: string; soft: string }
 const MODULE_UI: Record<string, ModUI> = {
   spin: { label: 'Roue de la chance', grad: 'linear-gradient(135deg,#F59E0B,#EA580C)', accent: '#C2410C', soft: '#FDF1E3' },
   quiz: { label: 'Quiz', grad: 'linear-gradient(135deg,#3B5CC4,#2DA8FF)', accent: '#2746A6', soft: '#EAF0FF' },
   quizsolo: { label: 'Quiz solo', grad: 'linear-gradient(135deg,#0EA5A4,#0891B2)', accent: '#0E7490', soft: '#E5F7F7' },
-  quizmaster: { label: 'Quiz Master', grad: 'linear-gradient(135deg,#4F46E5,#3B5CC4)', accent: '#4338CA', soft: '#ECEBFE' },
+  quizmaster: { label: 'Quiz Master', grad: 'linear-gradient(135deg,#2746A6,#3B5CC4)', accent: '#2746A6', soft: '#EAF0FF' },
+  nds2026: { label: 'Jeu des Nuits du Sud', grad: 'linear-gradient(135deg,#F59E0B,#EA580C)', accent: '#C2410C', soft: '#FDF1E3' },
   tombola: { label: 'Tombola', grad: 'linear-gradient(135deg,#E11D48,#9F1239)', accent: '#BE123C', soft: '#FCE7EC' },
   vote: { label: 'Vote', grad: 'linear-gradient(135deg,#0EA5A4,#3B5CC4)', accent: '#0E7490', soft: '#E5F7F7' },
 }
 function modUI(m?: string | null): ModUI {
-  return (m && MODULE_UI[m]) || { label: m || 'Jeu', grad: `linear-gradient(135deg,${HERO},#2DA8FF)`, accent: '#2746A6', soft: '#EAF0FF' }
+  return (m && MODULE_UI[m]) || { label: 'Jeu', grad: `linear-gradient(135deg,${HERO},#2DA8FF)`, accent: '#2746A6', soft: '#EAF0FF' }
 }
 
 const PODIUM = [
@@ -84,6 +86,7 @@ export default function SuperEventClient({ se, lots, lotsPhases = [], lieux, spo
   const [ticketCount, setTicketCount] = useState(0)
   const [gains, setGains] = useState<GainRow[]>([])
   const [userPos, setUserPos] = useState<{ lat: number; lng: number } | null>(null)
+  const [tous, setTous] = useState(false)
 
   useEffect(() => {
     if (typeof navigator === 'undefined' || !navigator.geolocation) return
@@ -151,6 +154,21 @@ export default function SuperEventClient({ se, lots, lotsPhases = [], lieux, spo
   const mapLieux = lieux.map((l) => ({ ...l, couleur: ACCENT_SUPER, joue: identified ? played.has(l.id) : l.joue }))
   const playedCount = lieux.filter((l) => played.has(l.id)).length
   const fu = selected ? modUI(selected.module) : null
+  /* Stations triées du plus proche au plus loin (si la position est connue), sinon l'ordre de la base. */
+  const distDe = (l: Lieu): number | null => (userPos && typeof l.lat === 'number' && typeof l.lng === 'number') ? distMeters(userPos.lat, userPos.lng, l.lat, l.lng) : null
+  const lieuxTries = userPos
+    ? [...lieux].sort((a, b) => (distDe(a) ?? 1e12) - (distDe(b) ?? 1e12))
+    : lieux
+  const groupes: { label: string; items: Lieu[] }[] = []
+  lieux.forEach((l) => {
+    const lb = modUI(l.module).label
+    let g = groupes.find((x) => x.label === lb)
+    if (!g) { g = { label: lb, items: [] }; groupes.push(g) }
+    g.items.push(l)
+  })
+  const lotTete = lotsSorted[0]
+  const lotTeteTxt = lotTete ? (lotTete.libelle || (lotTete.valeur ? `${lotTete.valeur} €` : '')) : ''
+  const pctJoue = lieux.length ? Math.round((playedCount / lieux.length) * 100) : 0
   const dist = (selected && userPos && typeof selected.lat === 'number' && typeof selected.lng === 'number')
     ? fmtDist(distMeters(userPos.lat, userPos.lng, selected.lat, selected.lng))
     : null
@@ -163,30 +181,52 @@ export default function SuperEventClient({ se, lots, lotsPhases = [], lieux, spo
         @keyframes feRise{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
         @keyframes fePulse{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.6);opacity:.3}}
         @keyframes feGlow{0%,100%{box-shadow:0 4px 14px var(--g)}50%{box-shadow:0 4px 26px var(--g)}}
+        @keyframes feReveal{0%{transform:scale(.5) rotate(-6deg);opacity:0}60%{transform:scale(1.06) rotate(1.5deg);opacity:1}100%{transform:scale(1) rotate(0)}}
+        @keyframes feEclat{0%{left:-60%}55%,100%{left:130%}}
+        @keyframes feHalo{0%,100%{transform:scale(.8);opacity:.45}50%{transform:scale(1.15);opacity:.9}}
+        @keyframes feSlide{from{transform:translateY(-10px);opacity:0}to{transform:none;opacity:1}}
+        @keyframes feRemplit{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+        @keyframes feRespire{0%,100%{transform:scale(1)}50%{transform:scale(1.025)}}
         .fe-card{animation:feRise .34s ease both}
+        .se-plaque{position:relative;overflow:hidden;background:#fff;border-radius:16px;padding:7px 14px;margin:0 auto;width:min(62%,240px);box-shadow:0 0 0 3px rgba(255,255,255,.35),0 10px 22px -10px rgba(120,30,0,.7);animation:feReveal .8s cubic-bezier(.2,.9,.3,1.2) both}
+        .se-plaque img{display:block;width:100%;height:auto}
+        .se-plaque:after{content:'';position:absolute;top:-30%;bottom:-30%;width:38%;left:-60%;background:linear-gradient(100deg,transparent,rgba(255,210,63,.85),transparent);transform:skewX(-18deg);animation:feEclat 2.6s 1s ease-in-out 2}
+        .se-halo{position:absolute;inset:-60%;background:radial-gradient(closest-side,rgba(255,210,63,.42),transparent 70%);animation:feHalo 3.4s ease-in-out infinite;pointer-events:none}
+        .se-glisse{animation:feSlide .55s .5s ease-out both}
+        .se-barre{height:10px;border-radius:9px;background:#F8D3BC;overflow:hidden}
+        .se-barre i{display:block;height:100%;border-radius:9px;background:linear-gradient(90deg,#C2410C,#FF8A14);transform-origin:left;animation:feRemplit 1s .4s cubic-bezier(.3,.7,.2,1) both}
+        .se-cta{animation:feRespire 2.4s 2s ease-in-out infinite}
+        .se-car{display:flex;gap:10px;overflow-x:auto;scroll-snap-type:x mandatory;scroll-padding:0 20px;margin:0 -20px;padding:2px 20px 8px;scrollbar-width:none}
+        .se-car::-webkit-scrollbar{display:none}
+        .se-car>*{scroll-snap-align:start}
+        @media (prefers-reduced-motion:reduce){
+          .se-plaque,.se-plaque:after,.se-halo,.se-glisse,.se-barre i,.se-cta,.fe-card{animation:none!important}
+          .se-plaque:after{display:none}
+        }
       ` }} />
 
       <div style={{ position: 'absolute', inset: 0, zIndex: 0 }}>
         <SuperEventMap lieux={mapLieux} mode={identified ? 'jeu' : 'vitrine'} height="100%" showPosition={true} onSelect={selectById} />
       </div>
 
-      {/* Bannière de quête */}
-      <div style={{ position: 'absolute', top: 0, left: 0, right: 0, zIndex: 1000, padding: '14px 14px', pointerEvents: 'none' }}>
-        <div style={{ display: 'inline-flex', alignItems: 'center', gap: 12, background: 'linear-gradient(135deg,#2746A6,#3B7DE0)', color: '#fff', boxShadow: '0 6px 22px rgba(39,70,166,.42)', borderRadius: 18, padding: '12px 16px', maxWidth: '94%', pointerEvents: 'auto' }}>
-          <span style={{ position: 'relative', width: 11, height: 11, flexShrink: 0 }}>
-            <span style={{ position: 'absolute', inset: 0, borderRadius: '50%', background: '#4ADE80' }} />
-            <span style={{ position: 'absolute', inset: 0, borderRadius: '50%', background: '#4ADE80', animation: 'fePulse 1.8s ease-in-out infinite' }} />
-          </span>
-          <div style={{ minWidth: 0 }}>
-            <div style={{ fontSize: 17, fontWeight: 800, lineHeight: 1.15, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{se.nom}</div>
-            <div style={{ fontSize: 13, opacity: 0.88, marginTop: 1 }}>Des lots t&apos;attendent juste à côté <Ico k="gift" size={13} style={{ marginRight: 5, verticalAlign: -2 }} /></div>
+      {/* En-tête Super Event : orange (charte), logo sur plaque avec éclat, nom humain, compteur */}
+      <div data-se-entete style={{ position: 'absolute', top: demo ? 26 : 0, left: 0, right: 0, zIndex: 1000, pointerEvents: 'none' }}>
+        <div style={{ position: 'relative', overflow: 'hidden', pointerEvents: 'auto', background: ENTETE_SE, color: '#fff', borderRadius: '0 0 26px 26px', padding: '14px 16px 14px', boxShadow: '0 14px 28px -16px rgba(120,30,0,.6)' }}>
+          <div className="se-halo" aria-hidden="true" />
+          <div style={{ position: 'relative' }}>
+            <div className="se-plaque"><img src="/flowin-super-event-logo.svg" alt="Super event" width={240} height={51} /></div>
+            <div className="se-glisse" style={{ marginTop: 11, display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', gap: 10 }}>
+              <div style={{ minWidth: 0 }}>
+                <span style={{ display: 'inline-block', background: '#fff', color: ORANGE_SE, fontWeight: 900, fontSize: 12, letterSpacing: '.1em', textTransform: 'uppercase', padding: '3px 10px', borderRadius: 99 }}>Super event</span>
+                <div style={{ fontSize: 22, fontWeight: 900, lineHeight: 1.1, marginTop: 6, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{se.nom}</div>
+                {periode(se.date_d, se.date_f) && <div style={{ fontSize: 14, fontWeight: 700, marginTop: 2 }}>{periode(se.date_d, se.date_f)}</div>}
+              </div>
+              <div style={{ flexShrink: 0, background: '#fff', color: ORANGE_SE, borderRadius: 16, padding: '6px 14px', textAlign: 'center', boxShadow: '0 8px 16px -8px rgba(0,0,0,.4)' }}>
+                <div style={{ fontSize: 28, fontWeight: 900, lineHeight: 1 }}>{identified ? ticketCount : lieux.length}</div>
+                <div style={{ fontSize: 12, fontWeight: 800, color: '#5a6071' }}>{identified ? `ticket${ticketCount > 1 ? 's' : ''}` : 'commerces'}</div>
+              </div>
+            </div>
           </div>
-          {identified && (
-            <span style={{ flexShrink: 0, background: 'rgba(255,255,255,.18)', borderRadius: 12, padding: '7px 11px', textAlign: 'center', lineHeight: 1.05 }}>
-              <span style={{ display: 'block', fontSize: 17, fontWeight: 800 }}><Ico k="ticket" size={13} style={{ marginRight: 5, verticalAlign: -2 }} />{ticketCount}</span>
-              <span style={{ display: 'block', fontSize: 10, opacity: 0.85 }}>ticket{ticketCount > 1 ? 's' : ''}</span>
-            </span>
-          )}
         </div>
       </div>
 
@@ -195,17 +235,44 @@ export default function SuperEventClient({ se, lots, lotsPhases = [], lieux, spo
 
         <button
           onClick={() => setOpen((o) => !o)}
-          style={{ width: '100%', border: 'none', background: 'transparent', cursor: 'pointer', padding: '13px 20px 14px', display: 'block', textAlign: 'left' }}
+          style={{ width: '100%', border: 'none', background: 'transparent', cursor: 'pointer', padding: '13px 20px 10px', display: 'block', textAlign: 'left', minHeight: 44 }}
           aria-expanded={open}
         >
-          <div style={{ width: 48, height: 6, background: '#dcdfe6', borderRadius: 3, margin: '0 auto 13px' }} />
+          <div style={{ width: 48, height: 6, background: '#dcdfe6', borderRadius: 3, margin: '0 auto 12px' }} />
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
             <span style={{ fontSize: 18, fontWeight: 800 }}>
-              <Ico k="game" size={13} style={{ marginRight: 5, verticalAlign: -2 }} />{lieux.length} commerces{identified ? ` · ${playedCount} joué${playedCount > 1 ? 's' : ''}` : ' jouent le jeu'}
+              {lieux.length} commerces{identified ? ` · ${playedCount} joué${playedCount > 1 ? 's' : ''}` : ' jouent le jeu'}
             </span>
-            <span style={{ fontSize: 20, color: '#9aa0ad' }}>{open ? '▾' : '▴'}</span>
+            <span aria-hidden="true" style={{ fontSize: 20, color: '#5a6071' }}>{open ? '▾' : '▴'}</span>
           </div>
+          {!open && <div style={{ fontSize: 14, color: '#5a6071', marginTop: 2 }}>1 ticket par commerce et par jour. Un seul grand tirage.</div>}
         </button>
+
+        {!open && (
+          <div style={{ padding: '0 20px 20px' }}>
+            {lotTeteTxt && (
+              <div data-lot-tete style={{ display: 'flex', alignItems: 'center', gap: 10, background: '#FFF1E8', border: '1px solid #F8D3BC', borderRadius: 14, padding: '9px 12px', marginBottom: 10 }}>
+                <span style={{ flexShrink: 0, display: 'inline-flex', color: ORANGE_SE }}><Ico k="gift" size={22} /></span>
+                <div style={{ minWidth: 0, fontSize: 14, fontWeight: 800, color: '#7C2D12', lineHeight: 1.25 }}>
+                  Grand tirage : {lotTeteTxt}
+                  {lotsSorted.length > 1 && <span style={{ fontWeight: 700, color: '#5a6071' }}> et {lotsSorted.length - 1} autre{lotsSorted.length > 2 ? 's' : ''} lot{lotsSorted.length > 2 ? 's' : ''}</span>}
+                </div>
+              </div>
+            )}
+            {identified && lieux.length > 0 && (
+              <div data-progression style={{ marginBottom: 12 }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13, fontWeight: 800, color: '#141a26', marginBottom: 5 }}>
+                  <span>{playedCount} sur {lieux.length} commerces</span>
+                  <span style={{ color: ORANGE_SE }}>{ticketCount} ticket{ticketCount > 1 ? 's' : ''}</span>
+                </div>
+                <div className="se-barre"><i style={{ width: `${Math.max(pctJoue, 3)}%` }} /></div>
+              </div>
+            )}
+            <button data-cta-jouer className="se-cta" onClick={() => setOpen(true)} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, width: '100%', minHeight: 52, border: 0, borderRadius: 99, fontWeight: 900, fontSize: 16, color: '#fff', cursor: 'pointer', background: 'linear-gradient(135deg,#C2410C,#E05A0E)', boxShadow: '0 12px 22px -12px rgba(194,65,12,.85)' }}>
+              <Ico k="pin" size={20} />Jouer près de moi
+            </button>
+          </div>
+        )}
 
         {open && (
           <div style={{ padding: '4px 20px 28px' }}>
@@ -218,13 +285,13 @@ export default function SuperEventClient({ se, lots, lotsPhases = [], lieux, spo
             )}
 
             {focus && (
-              <div className="fe-card" style={{ background: 'linear-gradient(135deg,#0F9E73,#0B6E50)', color: '#fff', borderRadius: 18, padding: '17px 18px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, marginBottom: 18, boxShadow: '0 6px 20px rgba(15,158,115,.38)' }}>
+              <div className="fe-card" style={{ background: ENTETE_SE, color: '#fff', borderRadius: 18, padding: '17px 18px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, marginBottom: 18, boxShadow: '0 6px 20px rgba(194,65,12,.38)' }}>
                 <div>
-                  <div style={{ fontSize: 13, opacity: 0.85 }}>Te voilà chez</div>
+                  <div style={{ fontSize: 13, opacity: 0.95 }}>Te voilà chez</div>
                   <div style={{ fontSize: 21, fontWeight: 800 }}>{focus.nom}</div>
                 </div>
-                <a href={focus.module ? `/parcours/${focus.module}?ev=${focus.id}` : '#'} style={{ background: '#fff', color: '#0B6E50', fontWeight: 800, fontSize: 16, padding: '13px 22px', borderRadius: 14, textDecoration: 'none', whiteSpace: 'nowrap' }}>
-                  On joue ▸
+                <a href={focus.module ? `/parcours/${focus.module}?ev=${focus.id}` : '#'} style={{ background: '#fff', color: ORANGE_SE, fontWeight: 800, fontSize: 16, padding: '13px 22px', borderRadius: 14, textDecoration: 'none', whiteSpace: 'nowrap', minHeight: 44, display: 'inline-flex', alignItems: 'center' }}>
+                  On joue
                 </a>
               </div>
             )}
@@ -232,7 +299,7 @@ export default function SuperEventClient({ se, lots, lotsPhases = [], lieux, spo
             {/* Carnet de gains */}
             {identified && gains.length > 0 && (
               <div style={{ marginBottom: 20 }}>
-                <div style={{ fontSize: 13, fontWeight: 800, letterSpacing: '.04em', color: '#9aa0ad', textTransform: 'uppercase', marginBottom: 11 }}><Ico k="gift" size={13} style={{ marginRight: 5, verticalAlign: -2 }} />Tes gains</div>
+                <div style={{ fontSize: 13, fontWeight: 800, letterSpacing: '.04em', color: '#5a6071', textTransform: 'uppercase', marginBottom: 11 }}><Ico k="gift" size={13} style={{ marginRight: 5, verticalAlign: -2 }} />Tes gains</div>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 9 }}>
                   {gains.map((g) => (
                     <div key={g.id} className="fe-card" style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '13px 15px', borderRadius: 16, background: g.utilise ? '#F3F4F6' : 'linear-gradient(135deg,#EAFBF3,#D6F5E6)', border: `1px solid ${g.utilise ? '#e5e7eb' : '#bfedd6'}` }}>
@@ -241,7 +308,7 @@ export default function SuperEventClient({ se, lots, lotsPhases = [], lieux, spo
                         <div style={{ fontSize: 15, fontWeight: 800, color: g.utilise ? '#6b7280' : '#0B6E50', textDecoration: g.utilise ? 'line-through' : 'none' }}>{g.libelle || 'Lot'}</div>
                         {g.code && <div style={{ fontSize: 12, color: '#6b7385', fontFamily: 'monospace', marginTop: 2 }}>Code : {g.code}</div>}
                       </div>
-                      <span style={{ flexShrink: 0, fontSize: 11, fontWeight: 800, padding: '4px 9px', borderRadius: 100, background: g.utilise ? '#e5e7eb' : '#0B6E50', color: g.utilise ? '#6b7280' : '#fff' }}>
+                      <span style={{ flexShrink: 0, fontSize: 12, fontWeight: 800, padding: '4px 9px', borderRadius: 100, background: g.utilise ? '#e5e7eb' : '#0B6E50', color: g.utilise ? '#6b7280' : '#fff' }}>
                         {g.utilise ? 'Utilisé' : 'À récupérer'}
                       </span>
                     </div>
@@ -255,7 +322,7 @@ export default function SuperEventClient({ se, lots, lotsPhases = [], lieux, spo
                 <div style={{ display: 'flex', gap: 6, background: '#FFF4EC', borderRadius: 14, padding: 4 }}>
                   {(['avant', 'pendant'] as Phase[]).map(ph => (
                     <button key={ph} data-phase={ph} onClick={() => setPhaseVue(ph)}
-                      style={{ flex: 1, border: 'none', borderRadius: 11, padding: '9px 6px', cursor: 'pointer', fontWeight: 800, fontSize: 12.5,
+                      style={{ flex: 1, border: 'none', borderRadius: 11, padding: '9px 6px', minHeight: 44, cursor: 'pointer', fontWeight: 800, fontSize: 13,
                         background: phaseAff === ph ? ORANGE_SE : 'transparent', color: phaseAff === ph ? '#fff' : ORANGE_SE }}>
                       {ph === 'avant' ? 'Avant' : 'Pendant'}{ph === enCours ? ' · en cours' : ''}
                     </button>
@@ -264,13 +331,13 @@ export default function SuperEventClient({ se, lots, lotsPhases = [], lieux, spo
                 <div style={{ fontSize: 12, color: '#6b7280', textAlign: 'center', marginTop: 7 }}>
                   {LIBELLE_PHASE[phaseAff]}{periodePhase(phases, phaseAff) ? ` · ${periodePhase(phases, phaseAff)}` : ''} · tirage au sort{demo && !phases.actif ? ' · DÉMO' : ''}
                 </div>
-                {lotsSorted.length === 0 && <div style={{ fontSize: 12.5, color: '#9aa0ad', textAlign: 'center', marginTop: 8 }}>Lots de cette phase [à compléter]</div>}
+                {lotsSorted.length === 0 && <div style={{ fontSize: 12.5, color: '#5a6071', textAlign: 'center', marginTop: 8 }}>Lots de cette phase [à compléter]</div>}
               </div>
             )}
             {/* Podium des lots */}
             {lotsSorted.length > 0 && (
               <div style={{ marginBottom: 22 }}>
-                <div style={{ fontSize: 13, fontWeight: 800, letterSpacing: '.06em', color: '#9aa0ad', textTransform: 'uppercase', marginBottom: 12, textAlign: 'center' }}><Ico k="star" size={13} style={{ marginRight: 5, verticalAlign: -2 }} />Les lots à rafler</div>
+                <div style={{ fontSize: 13, fontWeight: 800, letterSpacing: '.06em', color: '#5a6071', textTransform: 'uppercase', marginBottom: 12, textAlign: 'center' }}><Ico k="star" size={13} style={{ marginRight: 5, verticalAlign: -2 }} />Les lots à rafler</div>
                 <div style={{ display: 'flex', gap: 11, alignItems: 'flex-end' }}>
                   {lotsSorted.slice(0, 3).map((l, i) => {
                     const p = PODIUM[i] || PODIUM[2]
@@ -283,7 +350,7 @@ export default function SuperEventClient({ se, lots, lotsPhases = [], lieux, spo
                       >
                         <div style={{ fontSize: tall ? 30 : 24, lineHeight: 1, fontWeight: 900 }}>{p.medal}</div>
                         <div style={{ fontSize: tall ? 27 : 22, fontWeight: 800, marginTop: 6 }}>{l.valeur ? `${l.valeur} €` : ''}</div>
-                        {l.libelle && <div style={{ fontSize: 11.5, opacity: 0.85, marginTop: 2 }}>{l.libelle}</div>}
+                        {l.libelle && <div style={{ fontSize: 12, opacity: 0.9, marginTop: 2 }}>{l.libelle}</div>}
                       </div>
                     )
                   })}
@@ -294,7 +361,7 @@ export default function SuperEventClient({ se, lots, lotsPhases = [], lieux, spo
             {(se.social?.insta || se.social?.fb) && (
               <div style={{ background: '#fff', border: '1px solid #e6e9f2', borderRadius: 16, padding: '15px 16px', marginBottom: 18, textAlign: 'center' }}>
                 <div style={{ fontSize: 13, fontWeight: 800, color: '#2c3a63', marginBottom: 6 }}><Ico k="ticket" size={13} style={{ marginRight: 5, verticalAlign: -2 }} />Résultats du grand tirage</div>
-                <div style={{ fontSize: 12.5, color: '#6b7280', marginBottom: 12, lineHeight: 1.45 }}>Les gagnants sont annoncés sur les réseaux des Nuits du Sud. Suis-les pour ne rien manquer.</div>
+                <div style={{ fontSize: 13, color: '#5a6071', marginBottom: 12, lineHeight: 1.45 }}>Les gagnants sont annoncés sur les réseaux des Nuits du Sud. Suis-les pour ne rien manquer.</div>
                 <div style={{ display: 'flex', gap: 10, justifyContent: 'center' }}>
                   {se.social?.insta && <a href={se.social.insta} target="_blank" rel="noopener" style={{ flex: 1, maxWidth: 160, padding: '11px', borderRadius: 12, background: '#3B5CC4', color: '#fff', textDecoration: 'none', fontWeight: 700, fontSize: 13 }}>Instagram</a>}
                   {se.social?.fb && <a href={se.social.fb} target="_blank" rel="noopener" style={{ flex: 1, maxWidth: 160, padding: '11px', borderRadius: 12, background: '#3b5998', color: '#fff', textDecoration: 'none', fontWeight: 700, fontSize: 13 }}>Facebook</a>}
@@ -302,52 +369,67 @@ export default function SuperEventClient({ se, lots, lotsPhases = [], lieux, spo
               </div>
             )}
 
-            {!focus && (
-              <div style={{ display: 'flex', gap: 12, background: '#EFF3FE', borderRadius: 16, padding: '14px 15px', marginBottom: 18, alignItems: 'center' }}>
-                <span style={{ fontSize: 28, flexShrink: 0 }}><Ico k="sparkle" size={28} /></span>
-                <div style={{ fontSize: 13.5, lineHeight: 1.5, color: '#2c3a63' }}>
-                  Le principe est simple : tu pousses la porte, tu joues, tu gagnes. Et à chaque fois, <strong>+1 ticket/jour</strong> pour le grand tirage <Ico k="ticket" size={13} style={{ marginRight: 5, verticalAlign: -2 }} />
-                </div>
-              </div>
-            )}
-
-            {/* Cartes commerce */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 11 }}>
-              {lieux.map((l, idx) => {
-                const u = modUI(l.module)
-                const isPlayed = identified && played.has(l.id)
-                const hint = l.gain_immediat ? `${l.gain_immediat}` : 'Un ticket à gagner'
-                return (
-                  <div
-                    key={l.id}
-                    role="button"
-                    tabIndex={0}
-                    onClick={() => setSelected(l)}
-                    className="fe-card"
-                    style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '14px 15px', borderRadius: 18, background: '#fff', border: `1px solid ${isPlayed ? '#bfedd6' : '#eef0f3'}`, boxShadow: '0 2px 8px rgba(20,26,38,.06)', cursor: 'pointer', animationDelay: `${Math.min(idx * 35, 280)}ms` }}
-                  >
-                    <span style={{ position: 'relative', width: 52, height: 52, borderRadius: 15, background: u.grad, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 27, flexShrink: 0, boxShadow: '0 3px 10px rgba(20,26,38,.14)' }}>
-                      <IcoModule module={l.module ?? 'quiz'} size={26} />
-                      {isPlayed && <span style={{ position: 'absolute', top: -5, right: -5, width: 22, height: 22, borderRadius: '50%', background: '#16A34A', color: '#fff', fontSize: 13, fontWeight: 800, display: 'flex', alignItems: 'center', justifyContent: 'center', border: '2px solid #fff' }}>✓</span>}
-                    </span>
-                    <div style={{ flex: 1, minWidth: 0 }}>
-                      <div style={{ fontSize: 16.5, fontWeight: 800, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{l.nom}</div>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 7, marginTop: 4, flexWrap: 'wrap' }}>
-                        {isPlayed
-                          ? <span style={{ fontSize: 11.5, fontWeight: 800, color: '#15803D', background: '#DCFCE7', padding: '3px 9px', borderRadius: 100 }}>✓ Joué</span>
-                          : <span style={{ fontSize: 11.5, fontWeight: 800, color: u.accent, background: u.soft, padding: '3px 9px', borderRadius: 100 }}>{u.label}</span>}
-                        <span style={{ fontSize: 12.5, color: '#7a8190', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{hint}</span>
+            {/* Commerces : carrousel des plus proches, liste groupée par jeu sur demande */}
+            <div data-stations style={{ marginBottom: 6 }}>
+              <div style={{ fontSize: 13, fontWeight: 800, letterSpacing: '.04em', color: '#5a6071', textTransform: 'uppercase', marginBottom: 9 }}><Ico k="shop" size={13} style={{ marginRight: 5, verticalAlign: -2 }} />{userPos ? 'Les plus proches' : 'Commerces à découvrir'}</div>
+              <div className="se-car" data-carrousel>
+                {lieuxTries.slice(0, 6).map((l, idx) => {
+                  const u = modUI(l.module)
+                  const isPlayed = identified && played.has(l.id)
+                  const d = distDe(l)
+                  const hint = l.gain_immediat ? `${l.gain_immediat}` : 'Un ticket à gagner'
+                  return (
+                    <div
+                      key={l.id}
+                      role="button"
+                      tabIndex={0}
+                      data-station
+                      onClick={() => setSelected(l)}
+                      onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setSelected(l) } }}
+                      className="fe-card"
+                      style={{ flex: '0 0 74%', maxWidth: 300, display: 'flex', alignItems: 'center', gap: 12, padding: '12px 13px', borderRadius: 18, background: '#fff', border: `1px solid ${isPlayed ? '#bfedd6' : '#eef0f3'}`, boxShadow: '0 2px 8px rgba(20,26,38,.06)', cursor: 'pointer', animationDelay: `${Math.min(idx * 50, 250)}ms`, minHeight: 76 }}
+                    >
+                      <span style={{ position: 'relative', width: 48, height: 48, borderRadius: 14, background: u.grad, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, boxShadow: '0 3px 10px rgba(20,26,38,.14)' }}>
+                        <IcoModule module={l.module ?? 'quiz'} size={24} />
+                        {isPlayed && <span style={{ position: 'absolute', top: -5, right: -5, width: 22, height: 22, borderRadius: '50%', background: '#15803D', color: '#fff', fontSize: 13, fontWeight: 800, display: 'flex', alignItems: 'center', justifyContent: 'center', border: '2px solid #fff' }}>✓</span>}
+                      </span>
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <div style={{ fontSize: 16, fontWeight: 800, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{l.nom}</div>
+                        <div style={{ fontSize: 13, color: '#5a6071', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', marginTop: 2 }}>{isPlayed ? 'Déjà joué' : (d !== null ? `${fmtDist(d)} · ` : '') + hint}</div>
                       </div>
                     </div>
-                    <span style={{ fontSize: 26, color: '#c4c8d0', flexShrink: 0 }}>›</span>
-                  </div>
-                )
-              })}
+                  )
+                })}
+              </div>
+              {lieux.length > 6 && (
+                <button data-voir-tous aria-expanded={tous} onClick={() => setTous((t) => !t)} style={{ display: 'block', width: '100%', minHeight: 44, border: '1.5px solid #F8D3BC', borderRadius: 14, background: '#FFF1E8', color: '#9A3412', fontWeight: 800, fontSize: 14.5, cursor: 'pointer', marginTop: 4 }}>
+                  {tous ? 'Masquer la liste' : `Voir les ${lieux.length} commerces`}
+                </button>
+              )}
+              {(tous || lieux.length <= 6) && lieux.length > 0 && (
+                <div data-liste-groupee style={{ marginTop: 12 }}>
+                  {groupes.map((g) => (
+                    <div key={g.label} style={{ marginBottom: 12 }}>
+                      <div style={{ fontSize: 13, fontWeight: 800, color: '#5a6071', marginBottom: 6 }}>{g.label} · {g.items.length}</div>
+                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(150px,1fr))', gap: 6 }}>
+                        {g.items.map((l) => {
+                          const jo = identified && played.has(l.id)
+                          return (
+                            <button key={l.id} onClick={() => setSelected(l)} style={{ minHeight: 44, textAlign: 'left', border: `1px solid ${jo ? '#bfedd6' : '#e6e9f2'}`, background: jo ? '#EAFBF3' : '#fff', borderRadius: 12, padding: '0 12px', fontSize: 13.5, fontWeight: 700, color: '#141a26', cursor: 'pointer', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                              {jo ? '✓ ' : ''}{l.nom}
+                            </button>
+                          )
+                        })}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
 
             {autres.length > 0 && (
               <div style={{ marginTop: 22 }}>
-                <div style={{ fontSize: 13, fontWeight: 800, letterSpacing: '.04em', color: '#9aa0ad', textTransform: 'uppercase', marginBottom: 11 }}><Ico k="globe" size={13} style={{ marginRight: 5, verticalAlign: -2 }} />Autres opérations en cours</div>
+                <div style={{ fontSize: 13, fontWeight: 800, letterSpacing: '.04em', color: '#5a6071', textTransform: 'uppercase', marginBottom: 11 }}><Ico k="globe" size={13} style={{ marginRight: 5, verticalAlign: -2 }} />Autres opérations en cours</div>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
                   {autres.map((a) => (
                     <a
@@ -356,14 +438,14 @@ export default function SuperEventClient({ se, lots, lotsPhases = [], lieux, spo
                       className="fe-card"
                       style={{ display: 'flex', alignItems: 'center', gap: 13, padding: '14px 15px', borderRadius: 18, background: 'linear-gradient(135deg,#F4F6FB,#EAF0FF)', border: '1px solid #e2e8f6', textDecoration: 'none', color: 'inherit' }}
                     >
-                      <span style={{ width: 48, height: 48, borderRadius: 14, background: 'linear-gradient(135deg,#2746A6,#3B7DE0)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 23, flexShrink: 0 }}><Ico k="pin" size={23} /></span>
+                      <span style={{ width: 48, height: 48, borderRadius: 14, background: ENTETE_SE, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 23, flexShrink: 0 }}><Ico k="pin" size={23} /></span>
                       <div style={{ flex: 1, minWidth: 0 }}>
                         <div style={{ fontSize: 15.5, fontWeight: 800, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{a.nom}</div>
                         <div style={{ fontSize: 12.5, color: '#6b7385', marginTop: 2 }}>
                           {a.nb} commerce{a.nb > 1 ? 's' : ''}{periode(a.date_d, a.date_f) ? ` · ${periode(a.date_d, a.date_f)}` : ''}
                         </div>
                       </div>
-                      <span style={{ fontSize: 22, color: '#9fb0d8', flexShrink: 0 }}>›</span>
+                      <span style={{ fontSize: 22, color: '#5a6071', flexShrink: 0 }}>›</span>
                     </a>
                   ))}
                 </div>
@@ -372,7 +454,7 @@ export default function SuperEventClient({ se, lots, lotsPhases = [], lieux, spo
 
             {sponsors.length > 0 && (
               <div style={{ marginTop: 20 }}>
-                <div style={{ fontSize: 12, color: '#9aa0ad', marginBottom: 9 }}>Avec le soutien de</div>
+                <div style={{ fontSize: 12, color: '#5a6071', marginBottom: 9 }}>Avec le soutien de</div>
                 <div style={{ display: 'flex', gap: 9, flexWrap: 'wrap' }}>
                   {sponsors.map((s) => (
                     <span key={s.id} style={{ display: 'flex', alignItems: 'center', gap: 6, border: '1px solid #e3e5ea', padding: '6px 12px', borderRadius: 12, fontSize: 13, fontWeight: 500 }}>
@@ -403,7 +485,7 @@ export default function SuperEventClient({ se, lots, lotsPhases = [], lieux, spo
               )}
               <div style={{ position: 'relative', padding: '20px 22px 22px', minHeight: selected.photo_url ? 188 : undefined, display: 'flex', flexDirection: 'column', justifyContent: 'flex-end' }}>
                 <div style={{ position: 'absolute', top: 16, left: '50%', transform: 'translateX(-50%)', width: 48, height: 6, background: 'rgba(255,255,255,.7)', borderRadius: 3 }} />
-                <button onClick={() => setSelected(null)} style={{ position: 'absolute', top: 14, right: 16, width: 36, height: 36, borderRadius: '50%', border: 'none', background: 'rgba(0,0,0,.35)', color: '#fff', fontSize: 18, cursor: 'pointer', backdropFilter: 'blur(4px)' }} aria-label="Fermer">✕</button>
+                <button onClick={() => setSelected(null)} style={{ position: 'absolute', top: 14, right: 16, width: 44, height: 44, borderRadius: '50%', border: 'none', background: 'rgba(0,0,0,.35)', color: '#fff', fontSize: 18, cursor: 'pointer', backdropFilter: 'blur(4px)' }} aria-label="Fermer">✕</button>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8 }}>
                   <span style={{ width: 44, height: 44, borderRadius: 13, background: selected.photo_url ? 'rgba(255,255,255,.18)' : 'rgba(255,255,255,.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 24, flexShrink: 0, backdropFilter: 'blur(4px)' }}><IcoModule module={selected?.module ?? 'quiz'} size={24} /></span>
                   <div style={{ display: 'flex', gap: 7, flexWrap: 'wrap' }}>
@@ -422,7 +504,7 @@ export default function SuperEventClient({ se, lots, lotsPhases = [], lieux, spo
             <div style={{ padding: '18px 22px 26px' }}>
 
               {/* Gains */}
-              <div style={{ fontSize: 12, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '.05em', color: '#9aa0ad', marginBottom: 11 }}>Ici, tu repars avec</div>
+              <div style={{ fontSize: 12, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '.05em', color: '#5a6071', marginBottom: 11 }}>Ici, tu repars avec</div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
                 {selected.gain_immediat && (
                   <div className="fe-card" style={{ display: 'flex', alignItems: 'center', gap: 13, background: '#E9F7F0', color: '#0B6E50', borderRadius: 16, padding: '15px 16px' }}>

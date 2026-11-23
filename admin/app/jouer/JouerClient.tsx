@@ -22,7 +22,7 @@ import { rendreEcran, etatInitial, rotationPourCase, regleBarre, regleParte, reg
 import { chargerMesTickets, nonVus, versVue, marquerVus, TICKETS_EXEMPLE, type ResultatRow } from '@/lib/masters/tickets'
 import type { VueMaster } from '@/lib/masters/resolve'
 import { estDemo } from '@/lib/demo'
-import { writeJoueur, getJoueurLocal, animationDejaJouee, dejaJoueAujourdhuiCeQr } from '@/lib/parcours'
+import { writeJoueur, getJoueurLocal, lookupJoueurByEmail, animationDejaJouee, dejaJoueAujourdhuiCeQr } from '@/lib/parcours'
 
 /* Version du texte de consentement des masters (audit 17/11 : ajout des choix « rester en
    contact avec Flowin Event » et « rester en contact avec ce commerce »). */
@@ -90,7 +90,11 @@ export default function JouerClient(p: Props) {
     let carteRoot: Root | null = null
     let maPosition: { lat: number; lng: number } | null = null
     const local = getJoueurLocal()
-    if (local) r.profil = { prenom: local.prenom, nom: local.nom, email: local.email, tel: local.tel, cp: local.cp, age: local.age }
+    if (local) {
+      r.profil = { prenom: local.prenom, nom: local.nom, email: local.email, tel: local.tel, cp: local.cp, age: local.age, genre: local.genre }
+      /* Joueur reconnu sur ce téléphone (id gardé en local) : le formulaire de coordonnées se replie ; les 3 cases restent. */
+      r.connu = !!(local.id && local.prenom && local.nom && (local.tel || '').replace(/\s/g, '').length >= 8)
+    }
 
     function nettoyer() { minuteurs.current.forEach(id => { clearInterval(id); clearTimeout(id) }); minuteurs.current = [] }
     function plus_tard(fn: () => void, ms: number) { minuteurs.current.push(window.setTimeout(fn, ms)) }
@@ -524,6 +528,31 @@ export default function JouerClient(p: Props) {
       const t = e.target as HTMLElement
       if ((e.key === ' ' || e.key === 'Enter') && t.hasAttribute && t.hasAttribute('data-tog')) { e.preventDefault(); t.click() }
     }
+    /* Autre appareil : l'e-mail est demandé en premier ; une fois saisi, on retrouve le compte (RPC joueur_reconnaitre,
+       repli lecture directe si la RPC est absente). Lecture seule, aucun consentement n'est sauté. */
+    let dernierEmail = ''
+    function sortieChamp(e: FocusEvent) {
+      const t = e.target as HTMLInputElement | null
+      if (!t || t.id !== 'f3' || r.connu || p.demo || p.apercu || !p.evId) return
+      const em = (t.value || '').trim().toLowerCase()
+      if (em.indexOf('@') < 1 || em.lastIndexOf('.') < em.indexOf('@') || em === dernierEmail) return
+      dernierEmail = em
+      lookupJoueurByEmail(em, p.evId).then(j => {
+        if (!j || courant.current !== 'c-inscription') return
+        const f = lireForm()
+        const m = { prenom: f.prenom || j.prenom || '', nom: f.nom || j.nom || '', email: f.email, tel: f.tel || j.tel || '', cp: f.cp || j.cp || '', age: f.age || j.age || '', genre: f.genre || j.genre || '', src: f.src }
+        r.profil = m
+        r.reco = j.prenom || 'toi'
+        r.connu = !!(m.prenom && m.nom && m.tel.replace(/\s/g, '').length >= 8)
+        if (r.connu) { r.inscVolet = 2; montrer('c-inscription', true); return }
+        /* Compte retrouvé mais coordonnées partielles : on complète les champs vides sans refaire l'écran (le focus reste). */
+        const mettre = (id: string, val: string) => { const el = host!.querySelector('#' + id) as HTMLInputElement | null; if (el && !el.value && val) el.value = val }
+        mettre('f1', m.prenom); mettre('f2', m.nom); mettre('f4', m.tel); mettre('f6', m.cp)
+        const champ = host!.querySelector('#f3') as HTMLElement | null, fld = champ && champ.parentElement
+        if (fld && !host!.querySelector('[data-reco]')) fld.insertAdjacentHTML('afterend', '<p class="reco" data-reco role="status">Content de te revoir, ' + String(r.reco).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' } as Record<string, string>)[c]) + '.</p>')
+      }).catch(() => { /* hors ligne ou RPC refusee : formulaire normal */ })
+    }
+    host.addEventListener('focusout', sortieChamp)
     host.addEventListener('click', clic)
     host.addEventListener('keydown', touche)
 
@@ -583,7 +612,7 @@ export default function JouerClient(p: Props) {
     const premier = debut
     const tReplace = window.setTimeout(() => { if (!enCadre) { try { history.replaceState({ ...(history.state || {}), fm: premier, n: 0 }, '', location.pathname + location.search + '#' + premier) } catch { /* ignore */ } } }, 0)
 
-    return () => { if (arretInstall) arretInstall(); clearTimeout(tReplace); nettoyer(); host.removeEventListener('click', clic); host.removeEventListener('keydown', touche); window.removeEventListener('message', message); window.removeEventListener('popstate', surPopstate) }
+    return () => { if (arretInstall) arretInstall(); clearTimeout(tReplace); nettoyer(); host.removeEventListener('click', clic); host.removeEventListener('focusout', sortieChamp); host.removeEventListener('keydown', touche); window.removeEventListener('message', message); window.removeEventListener('popstate', surPopstate) }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [p.evId, p.vue.id, p.debut, p.demo])
 
