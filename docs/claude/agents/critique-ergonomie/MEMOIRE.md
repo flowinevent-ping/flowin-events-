@@ -22,3 +22,11 @@
 ## Journal des passages
 - 21/11/2026 : premier passage (4 propositions, voir AMELIORATIONS.md : AMEL-ERG-01 à 04).
 - 23/11 : mesure par événement quiz vers résultats -23 % à -47 % sur 6 événements NDS (NDS seulement) ; `visites` vient de NDS2026Client et parcours-tracking, pas du moteur masters ; métiers de banques existants : restaurateur, pizzeria, boulanger, boucher, libraire ; AMEL-ERG-05 à 09 proposées.
+- 23/11 (soir, demande de Romain : « clac, clac, boum, boum ») : `docs/claude/VISION-ERGONOMIE.md` = budgets de gestes par parcours (mesurés Playwright 390 px `?demo=1`, build local, 0 écriture), règle d'acceptation, définition du « fun » ; maquette `docs/maquette/super-event-wow.html` ; AMEL-VIS-01 à 08 proposées. Ne pas re-proposer.
+
+## Mesures de référence 23/11 (gestes = touchers + champs)
+- Inscription pro : 3 écrans d'accueil + 7 étapes, 10 touchers, ~11 champs. Configurateur : Roue 7 écrans, 7 touchers ; Quiz 9 écrans, 10 touchers ; écran final 13 mots, sans QR.
+- Import fichier : 5 gestes ; l'écran « Colonnes » est imposé même si tout est deviné. Rejoindre un Super Event : hauteurs 3,1 / 1,9 / 2,6 / 3,7 écrans, 5 touchers. Bon de commande autonome : 9 écrans, 8 touchers, 15 champs.
+- Joueur (démo `/jouer?m=`) : quiz solo 9 écrans, 13 touchers ; roue 6 écrans, ≈ 9 touchers ; accueil ≈ 190 mots.
+- NDS 2026 (SELECT, 9-18 juillet, 18 stations `ev-nds-*`) : visiteurs distincts par station min 1, Q1 3,5, médiane 22, Q3 67, max 221. Hors NDS : pas assez de données (9 animations en ligne sur 68 événements).
+- Outils : le script de marche des masters doit cliquer `[data-go]` / `.btn` / `.opt` ; les textes contiennent des espaces insécables (regex avec `.`), pas de `getByText` fiable.

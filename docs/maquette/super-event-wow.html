@@ -1,0 +1,271 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Maquette : Super Event en version wow</title>
+<style>
+/* Maquette statique, CSS seul, aucune donnée réelle. Jetons : docs/DESIGN-TOKENS-flowin.md, charte lib/charte.ts.
+   Orange #C2410C = Super Event ; bleu #3B5CC4 = animation et actions ; pas de violet, pas d'emoji. */
+:root{--o:#C2410C;--o2:#FF8A14;--od:#9A3412;--ol:#FFF1E8;--ink:#1B3A5C;--bleu:#3B5CC4;--papier:#F4F6F9;--muted:#5a6b80;--trait:#DCE3EC;--ok:#0B7A4F}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#E9EDF3;color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;-webkit-font-smoothing:antialiased}
+.page{max-width:1280px;margin:0 auto;padding:20px 16px 40px}
+.page>h1{font-size:20px;font-weight:900}
+.page>p{font-size:13.5px;color:var(--muted);margin:4px 0 18px;max-width:760px;line-height:1.45}
+.row{display:flex;flex-wrap:wrap;gap:28px;justify-content:center}
+.col{width:390px;max-width:100%}
+.cap{font-size:12.5px;color:var(--muted);line-height:1.45;margin-bottom:8px}
+.cap b{color:var(--ink);font-size:14px;display:block}
+.cap code{font-size:11.5px;background:#fff;border:1px solid var(--trait);border-radius:6px;padding:1px 5px;white-space:nowrap}
+.tel{position:relative;width:390px;max-width:100%;height:780px;background:var(--papier);border-radius:28px;overflow:hidden;box-shadow:0 24px 50px -28px rgba(27,58,92,.55);border:1px solid var(--trait)}
+.tag-ex{position:absolute;z-index:40;right:10px;bottom:8px;font-size:10.5px;font-weight:800;color:var(--muted);background:rgba(255,255,255,.9);border:1px dashed var(--trait);border-radius:99px;padding:2px 8px}
+
+/* ---------- logo Super Event (SVG existant en data URI) ---------- */
+.logo{display:block;background:url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjIuNCAtNzguOCA0MzcuNCA5Mi42IiByb2xlPSJpbWciIGFyaWEtbGFiZWw9IlN1cGVyIGV2ZW50Ij48dGl0bGU+U3VwZXIgZXZlbnQ8L3RpdGxlPjxkZWZzPjxwYXRoIGlkPSJmbC1zZS1zIiBkPSJNMjMuMSAwLjJRMTkuMSAwLjIgMTUuMSAtMS45NVExMS4xIC00LjEgNy40IC04LjhMMTQuOCAtMjMuM1ExNS45IC0yMS40IDE4LjA1IC0xOS43UTIwLjIgLTE4IDIyLjYgLTE3UTI1IC0xNiAyNi43IC0xNlEyOS4zIC0xNiAzMS42NSAtMTcuNlEzNCAtMTkuMiAzNCAtMjEuOVEzNCAtMjUuNCAzMC44IC0yOC4zUTI3LjYgLTMxLjIgMjMuNiAtMzRRMTkuNyAtMzYuOCAxNi40NSAtNDAuMzVRMTMuMiAtNDMuOSAxMy4yIC00OC41UTEzLjIgLTUzLjcgMTYuMiAtNTguMTVRMTkuMiAtNjIuNiAyNCAtNjUuOTVRMjguOCAtNjkuMyAzNC4yNSAtNzEuMTVRMzkuNyAtNzMgNDQuNiAtNzNRNDguMSAtNzMgNTEuMSAtNzEuODVRNTQuMSAtNzAuNyA1NS45IC02OC4xUTU3LjcgLTY1LjUgNTcuNyAtNjEuMVE1Ny43IC02MC40IDU3LjY1IC01OS43UTU3LjYgLTU5IDU3LjUgLTU4LjNRNTcuNCAtNTcuNiA1Ny4yNSAtNTYuODVRNTcuMSAtNTYuMSA1NyAtNTUuM0w0Mi41IC01MS4xUTQyLjcgLTUxLjkgNDIuODUgLTUyLjdRNDMgLTUzLjUgNDMgLTU0LjNRNDMgLTU3LjMgNDEuOTUgLTU4LjY1UTQwLjkgLTYwIDM5LjIgLTYwUTM4LjMgLTYwIDM2LjYgLTU5LjA1UTM0LjkgLTU4LjEgMzMuNTUgLTU2LjQ1UTMyLjIgLTU0LjggMzIuMiAtNTIuOFEzMi4yIC00OS41IDM0Ljk1IC00Ny4zNVEzNy43IC00NS4yIDQxLjMgLTQzUTQzIC00MiA0NS4xIC0zOS44NVE0Ny4yIC0zNy43IDQ4Ljc1IC0zNC4wNVE1MC4zIC0zMC40IDUwLjMgLTI0LjdRNTAuMyAtMTcuMyA0Ni42NSAtMTEuN1E0MyAtNi4xIDM2LjggLTIuOTVRMzAuNiAwLjIgMjMuMSAwLjJaTTcwLjUgMS44UTY3LjUgMS44IDY0LjQgMC41UTYxLjMgLTAuOCA1OS4yIC0zLjVRNTcuMSAtNi4yIDU3LjEgLTEwLjRWLTExLjJRNTcuMSAtMTEuNyA1Ny4yIC0xMlE1Ny41IC0xNC42IDU4LjA1IC0xOC44UTU4LjYgLTIzIDU5LjQgLTI3Ljk1UTYwLjIgLTMyLjkgNjEuMDUgLTM3LjhRNjEuOSAtNDIuNyA2Mi42IC00Ni43UTY0LjEgLTU0LjcgNjUgLTU5LjZRNjUuOSAtNjQuNSA2Ni40NSAtNjcuMTVRNjcgLTY5LjggNjcuMyAtNzEuMUw4My44IC03Mi43UTgyLjUgLTY2LjYgODEuMzUgLTYxLjE1UTgwLjIgLTU1LjcgNzkuMiAtNTAuOEw3NC42IC0yOC43UTc0IC0yNi4yIDczLjcgLTI0LjVRNzMuMyAtMjIuOSA3Mi44NSAtMjAuNDVRNzIuNCAtMTggNzIuNCAtMTZRNzIuNCAtMTQuNCA3My4yIC0xMy4zNVE3NCAtMTIuMyA3NS4yIC0xMi4zUTc2LjkgLTEyLjMgNzggLTEzLjZRNzkuMSAtMTQuOSA3OS44IC0xNi44UTgwLjUgLTE4LjcgODAuOSAtMjAuNjVRODEuMyAtMjIuNiA4MS42IC0yMy44UTgyLjYgLTI4LjQgODMuNDUgLTMyLjc1UTg0LjMgLTM3LjEgODUuMjUgLTQyUTg2LjIgLTQ2LjkgODcuNCAtNTMuM1E4OC4yIC01Ny43IDg5LjA1IC02Mi4yNVE4OS45IC02Ni44IDkwLjcgLTcxLjVMMTA1LjkgLTcyLjVMMTAyLjQgLTUzLjJRMTAxLjcgLTQ5LjUgMTAwLjg1IC00NC45UTEwMCAtNDAuMyA5OSAtMzUuNlE5OCAtMzAuOSA5Ny4xNSAtMjYuN1E5Ni4zIC0yMi41IDk1LjYgLTE5LjVROTMuNiAtMTEuMyA4OS40IC02LjY1UTg1LjIgLTIgODAuMTUgLTAuMVE3NS4xIDEuOCA3MC41IDEuOFpNMTAwLjYgMC4xUTEwMy42IC0xMy40IDEwNi4zIC0yNi4zUTEwNy40IC0zMS41IDEwOC41NSAtMzcuNDVRMTA5LjcgLTQzLjQgMTEwLjkgLTQ5LjVRMTEyLjEgLTU1LjYgMTEzLjEgLTYxLjA1UTExNC4xIC02Ni41IDExNC43IC03MC42UTExOC43IC03MS44IDEyMy4zNSAtNzIuOFExMjggLTczLjggMTMxLjcgLTczLjhRMTM3LjcgLTczLjggMTQxLjIgLTcxLjI1UTE0NC43IC02OC43IDE0Ni4yIC02NC40UTE0Ny43IC02MC4xIDE0Ny43IC01NVExNDcuNyAtNDkuNCAxNDUuNjUgLTQ0LjI1UTE0My42IC0zOS4xIDE0MC4xNSAtMzVRMTM2LjcgLTMwLjkgMTMyLjI1IC0yOC41UTEyNy44IC0yNi4xIDEyMyAtMjYuMUgxMjEuOVExMjEuMSAtMjIuNyAxMjAuNCAtMTguN1ExMTkuNyAtMTQuNyAxMTkuMiAtMTEuM1ExMTguOCAtOS4zIDExOC41IC03LjNRMTE4LjIgLTUuMyAxMTcuOSAtMy4zWk0xMjMuOSAtMzYuNlExMjYuMiAtMzcuMiAxMjguNSAtMzkuNjVRMTMwLjggLTQyLjEgMTMyLjMgLTQ1LjlRMTMzLjggLTQ5LjcgMTMzLjggLTU0LjJRMTMzLjggLTU3LjkgMTMyLjE1IC01OS44UTEzMC41IC02MS43IDEyOC41IC02MS43UTEyNy40IC01NS4xIDEyNi4zIC00OS4yUTEyNS4yIC00My4zIDEyMy45IC0zNi42Wk0xNDQuNiAwLjEgMTU3LjcgLTcxIDE4OS4zIC03My43UTE4OC42IC03MS41IDE4OC4xIC02OS4yUTE4Ny42IC02Ny4zIDE4Ny4xNSAtNjUuMjVRMTg2LjcgLTYzLjIgMTg2LjQgLTYxLjZRMTg1LjEgLTYxLjUgMTgyLjcgLTYxLjQ1UTE4MC4zIC02MS40IDE3Ny44IC02MS4zNVExNzUuMyAtNjEuMyAxNzMuNSAtNjEuM1ExNzEuNyAtNjEuMyAxNzEuNiAtNjEuM0wxNjguMSAtNDMuNEwxNzMuOSAtNDMuN1ExNzUgLTQzLjggMTc2LjE1IC00My44UTE3Ny4zIC00My44IDE3OC40IC00My44UTE3OS41IC00My44IDE4MC40IC00My44UTE4MS4zIC00My44IDE4MS44IC00My45UTE4MS42IC00Mi41IDE4MS40NSAtNDEuMTVRMTgxLjMgLTM5LjggMTgxLjEgLTM4LjRMMTgwLjIgLTMyLjlRMTc5LjcgLTMyLjggMTc4LjkgLTMyLjhRMTc4LjEgLTMyLjggMTc3IC0zMi44UTE3NS45IC0zMi43IDE3NC43IC0zMi43UTE3My41IC0zMi43IDE3Mi40IC0zMi42UTE3MS4xIC0zMi41IDE2OS43IC0zMi41UTE2OC4zIC0zMi41IDE2Ni43IC0zMi40TDE2My4zIC0xNEwxNzcuOSAtMTYuM0wxNzYuOSAtNC45Wk0xODMuMyAwLjEgMTg4LjUgLTI1LjlRMTg5LjcgLTMzLjEgMTkxLjEgLTQwLjdRMTkyLjUgLTQ4LjMgMTkzLjc1IC01NS43UTE5NSAtNjMuMSAxOTUuNyAtNjkuNlEyMDEuNCAtNzEuNCAyMDggLTcyLjI1UTIxNC42IC03My4xIDIyMS4xIC03My4xUTIyOC43IC03My4xIDIzMS40NSAtNjkuOFEyMzQuMiAtNjYuNSAyMzQuMiAtNjAuOVEyMzQuMiAtNTUuOCAyMzEuOCAtNTAuNjVRMjI5LjQgLTQ1LjUgMjI1LjU1IC00MS4zNVEyMjEuNyAtMzcuMiAyMTcuMSAtMzQuOFEyMTguOSAtMzAuOCAyMjAuOTUgLTI2LjA1UTIyMyAtMjEuMyAyMjQuOCAtMTdRMjI1LjggLTE0LjUgMjI2Ljg1IC0xMlEyMjcuOSAtOS41IDIyOC45IC03TDIxMy40IC0xLjZRMjEyLjQgLTUuMSAyMTEuNSAtOC4zUTIxMC42IC0xMS41IDIwOS44IC0xNC42UTIwOC44IC0xOC4zIDIwNy45IC0yMS43NVEyMDcgLTI1LjIgMjA2LjM1IC0yNy45UTIwNS43IC0zMC42IDIwNS42IC0zMS43TDIwNC4zIC0zMS4zUTIwMy43IC0yOC4xIDIwMi44NSAtMjMuNVEyMDIgLTE4LjkgMjAxLjMgLTE0LjZMMTk5LjUgLTQuMVpNMjA2LjggLTQzLjNRMjA4LjYgLTQzLjUgMjExLjI1IC00NC44NVEyMTMuOSAtNDYuMiAyMTYuNTUgLTQ4LjJRMjE5LjIgLTUwLjIgMjIxIC01Mi4zUTIyMi44IC01NC40IDIyMi44IC01NlEyMjIuOCAtNTggMjIwLjQ1IC01OC42NVEyMTguMSAtNTkuMyAyMTQuMyAtNTkuM0gyMTIuMVEyMTEuNSAtNTkuMiAyMTEgLTU5LjJRMjEwLjUgLTU5LjIgMjEwIC01OS4yWiIvPjxwYXRoIGlkPSJmbC1zZS1lIiBkPSJNMjU2Ljk2IDAuMDggMjY3LjcgLTU4LjIyIDI5My42MSAtNjAuNDNRMjkzLjA0IC01OC42MyAyOTIuNjMgLTU2Ljc0UTI5Mi4yMiAtNTUuMTkgMjkxLjg1IC01My41MVEyOTEuNDggLTUxLjgyIDI5MS4yMyAtNTAuNTFRMjkwLjE3IC01MC40MyAyODguMiAtNTAuMzlRMjg2LjIzIC01MC4zNSAyODQuMTggLTUwLjMxUTI4Mi4xMyAtNTAuMjcgMjgwLjY1IC01MC4yN1EyNzkuMTggLTUwLjI3IDI3OS4xIC01MC4yN0wyNzYuMjMgLTM1LjU5TDI4MC45OCAtMzUuODNRMjgxLjg4IC0zNS45MiAyODIuODMgLTM1LjkyUTI4My43NyAtMzUuOTIgMjg0LjY3IC0zNS45MlEyODUuNTcgLTM1LjkyIDI4Ni4zMSAtMzUuOTJRMjg3LjA1IC0zNS45MiAyODcuNDYgLTM2UTI4Ny4zIC0zNC44NSAyODcuMTcgLTMzLjc0UTI4Ny4wNSAtMzIuNjQgMjg2Ljg5IC0zMS40OUwyODYuMTUgLTI2Ljk4UTI4NS43NCAtMjYuOSAyODUuMDggLTI2LjlRMjg0LjQzIC0yNi45IDI4My41MiAtMjYuOVEyODIuNjIgLTI2LjgxIDI4MS42NCAtMjYuODFRMjgwLjY1IC0yNi44MSAyNzkuNzUgLTI2LjczUTI3OC42OSAtMjYuNjUgMjc3LjU0IC0yNi42NVEyNzYuMzkgLTI2LjY1IDI3NS4wOCAtMjYuNTdMMjcyLjI5IC0xMS40OEwyODQuMjYgLTEzLjM3TDI4My40NCAtNC4wMlpNMjkzLjIgMC43NFEyOTMuNzcgLTUgMjk0LjI3IC0xMC42NlEyOTQuNzYgLTE2LjMyIDI5NS4xNyAtMjEuODFRMjk2LjA3IC0zMS44MiAyOTYuNiAtNDEuNDlRMjk3LjE0IC01MS4xNyAyOTcuMyAtNTkuNjFRMzAzLjcgLTU5LjYxIDMwNi44OSAtNTkuOVEzMTAuMDkgLTYwLjE5IDMxMC4wOSAtNjAuMTlRMzA5LjY4IC01NS40MyAzMDkuMjcgLTUxLjU0UTMwOC44NiAtNDcuNjQgMzA4LjUzIC00NC42MUwzMDcuNTUgLTM0LjY5UTMwNy4xNCAtMzAuMTggMzA2Ljg1IC0yNy4wNlEzMDYuNTcgLTIzLjk0IDMwNi4zMiAtMjEuMzJRMzA2LjA3IC0xOC43IDMwNS42NiAtMTUuNThIMzA3LjE0TDMxNi4zMiAtNTkuMkwzMjAuODMgLTU5LjQ1UTMyMS45IC01OS41MyAzMjIuOTcgLTU5LjU3UTMyNC4wMyAtNTkuNjEgMzI1LjE4IC01OS43UTMyNi4zMyAtNTkuNzggMzI3LjM1IC01OS44NlEzMjguMzggLTU5Ljk0IDMyOS4yOCAtNjAuMDJRMzI3LjcyIC01NS4xOSAzMjYuMTIgLTQ5LjJRMzI0LjUyIC00My4yMSAzMjIuOTMgLTM2LjgyUTMyMS4zMyAtMzAuNDIgMzE5LjY5IC0yNC4xOVEzMTguMzcgLTE4Ljk0IDMxNy4wNiAtMTMuNDlRMzE1Ljc1IC04LjA0IDMxNC40NCAtMi40NlpNMzI0LjIgMC4wOCAzMzQuOTQgLTU4LjIyIDM2MC44NSAtNjAuNDNRMzYwLjI4IC01OC42MyAzNTkuODcgLTU2Ljc0UTM1OS40NiAtNTUuMTkgMzU5LjA5IC01My41MVEzNTguNzIgLTUxLjgyIDM1OC40NyAtNTAuNTFRMzU3LjQxIC01MC40MyAzNTUuNDQgLTUwLjM5UTM1My40NyAtNTAuMzUgMzUxLjQyIC01MC4zMVEzNDkuMzcgLTUwLjI3IDM0Ny44OSAtNTAuMjdRMzQ2LjQyIC01MC4yNyAzNDYuMzQgLTUwLjI3TDM0My40NyAtMzUuNTlMMzQ4LjIyIC0zNS44M1EzNDkuMTIgLTM1LjkyIDM1MC4wNyAtMzUuOTJRMzUxLjAxIC0zNS45MiAzNTEuOTEgLTM1LjkyUTM1Mi44MSAtMzUuOTIgMzUzLjU1IC0zNS45MlEzNTQuMjkgLTM1LjkyIDM1NC43IC0zNlEzNTQuNTQgLTM0Ljg1IDM1NC40MSAtMzMuNzRRMzU0LjI5IC0zMi42NCAzNTQuMTMgLTMxLjQ5TDM1My4zOSAtMjYuOThRMzUyLjk4IC0yNi45IDM1Mi4zMiAtMjYuOVEzNTEuNjcgLTI2LjkgMzUwLjc2IC0yNi45UTM0OS44NiAtMjYuODEgMzQ4Ljg4IC0yNi44MVEzNDcuODkgLTI2LjgxIDM0Ni45OSAtMjYuNzNRMzQ1LjkzIC0yNi42NSAzNDQuNzggLTI2LjY1UTM0My42MyAtMjYuNjUgMzQyLjMyIC0yNi41N0wzMzkuNTMgLTExLjQ4TDM1MS41IC0xMy4zN0wzNTAuNjggLTQuMDJaTTM1Ni4wOSAwLjQxUTM1Ny4yNCAtNS40MSAzNTguMzUgLTExLjAzUTM1OS40NiAtMTYuNjUgMzYwLjUyIC0yMi4xNFEzNjEuNjcgLTI4LjU0IDM2Mi44NiAtMzUuMVEzNjQuMDUgLTQxLjY2IDM2NS4wNyAtNDcuODlRMzY2LjEgLTU0LjEyIDM2Ni42NyAtNTkuNDVRMzY3Ljk4IC01OS41MyAzNjkuMjEgLTU5LjYxUTM3MC40NCAtNTkuNyAzNzEuNTkgLTU5Ljc4UTM3Mi42NiAtNTkuODYgMzczLjc2IC01OS45NFEzNzQuODcgLTYwLjAyIDM3NS45NCAtNjAuMTFMMzc5Ljg3IC02MC4zNVEzODAuNDUgLTU3LjI0IDM4MC45IC01NC4yUTM4MS4zNSAtNTEuMTcgMzgxLjc2IC00OC4zUTM4Mi4wOSAtNDYuMzMgMzgyLjU0IC00My43MVEzODIuOTkgLTQxLjA4IDM4My40NCAtMzguMzRRMzgzLjg5IC0zNS41OSAzODQuMzQgLTMzLjIxUTM4NC43OSAtMzAuODMgMzg1LjEyIC0yOS4zNlEzODUuOTQgLTMzLjcgMzg2LjQ4IC0zNi41M1EzODcuMDEgLTM5LjM2IDM4Ny41NCAtNDIuMDNRMzg4LjA3IC00NC42OSAzODguODEgLTQ4LjNMMzkxLjM1IC02MC4yN0w0MDEuMzYgLTYxLjVRMzk5Ljk2IC01NS4zNSAzOTguNzMgLTQ5LjUzUTM5Ny41IC00My43MSAzOTYuNDQgLTM4LjIxUTM5NC4zOSAtMjguMjkgMzkyLjgzIC0xOS42NFEzOTEuMjcgLTEwLjk5IDM5MC40NSAtNC41MUwzNzcuMDkgLTEuMzlMMzc1Ljg2IC0xNC4wMlEzNzUuNjkgLTE1LjkxIDM3NS4zNiAtMTguNTdRMzc1LjA0IC0yMS4yNCAzNzQuNzEgLTI0LjA3UTM3NC4zOCAtMjYuOSAzNzQuMDUgLTI5LjIzUTM3My43MiAtMzEuNTcgMzczLjU2IC0zMi43MlEzNzIuNzQgLTI3Ljg4IDM3MiAtMjMuMzNRMzcxLjI2IC0xOC43OCAzNzAuMzYgLTE0LjUxUTM2OS43OSAtMTEuNjQgMzY5LjI1IC04LjU3UTM2OC43MiAtNS40OSAzNjguMDcgLTIuMzhaTTQwNC4yMyAwLjA4UTQwNS4xMyAtNC40MyA0MDYuMDcgLTguOVE0MDcuMDIgLTEzLjM3IDQwNy44NCAtMTcuNzFRNDEwLjk1IC0zMy4yOSA0MTIuOTIgLTQ3LjU2UTQxMi4wMiAtNDcuNzIgNDExLjAzIC00Ny43N1E0MTAuMDUgLTQ3LjgxIDQwOS4xNSAtNDcuNzJRNDA3LjE4IC00Ny41NiA0MDUuMjkgLTQ4LjIyUTQwNS4zOCAtNDguODcgNDA1LjM4IC00OS42NVE0MDUuMzggLTUwLjQzIDQwNS4zOCAtNTEuMjVRNDA1LjM4IC01Mi4xNSA0MDUuMzggLTUzLjAxUTQwNS4zOCAtNTMuODcgNDA1LjQ2IC01NC42OVE0MDUuNTQgLTU1LjYgNDA1LjU0IC01Ni42MlE0MDUuNTQgLTU3LjY1IDQwNS42MiAtNTguNzFRNDA3Ljc1IC01OC41NSA0MDkuODkgLTU4LjQ3UTQxMi4wMiAtNTguMzggNDE0LjE1IC01OC4zOFE0MjAuMjIgLTU4LjM4IDQyNS43NSAtNTguNzlRNDMxLjI5IC01OS4yIDQzNS45NiAtNTkuNzhMNDM1LjA2IC01NS4zNUw0MzQuMzIgLTUxLjVRNDMzLjkxIC00OS4zNiA0MzMuNTggLTQ4LjEzUTQzMi42OCAtNDcuODkgNDMxLjc4IC00Ny43MlE0MzAuODggLTQ3LjU2IDQyOS45OCAtNDcuNDhRNDI5LjA3IC00Ny40IDQyOC4xMyAtNDcuMjNRNDI3LjE5IC00Ny4wNyA0MjYuMjkgLTQ2LjlRNDI1LjA2IC00MC44NCA0MjQuMjggLTM2LjQxUTQyMy41IC0zMS45OCA0MjIuODggLTI3LjkyUTQyMi4yNyAtMjMuODYgNDIxLjQ1IC0xOS4wMlE0MjAuMDUgLTEwLjc0IDQxOC45OSAtMi4yMVoiLz48L2RlZnM+PHVzZSBocmVmPSIjZmwtc2UtcyIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoNyA3KSIgZmlsbD0iI0UyMjMxQSIgc3Ryb2tlPSIjRTIyMzFBIiBzdHJva2Utd2lkdGg9IjYiIHN0cm9rZS1saW5lam9pbj0icm91bmQiLz48dXNlIGhyZWY9IiNmbC1zZS1zIiB0cmFuc2Zvcm09InRyYW5zbGF0ZSgzLjUgMy41KSIgZmlsbD0iI0UyMjMxQSIgc3Ryb2tlPSIjRTIyMzFBIiBzdHJva2Utd2lkdGg9IjYiIHN0cm9rZS1saW5lam9pbj0icm91bmQiLz48dXNlIGhyZWY9IiNmbC1zZS1zIiBmaWxsPSJub25lIiBzdHJva2U9IiMxQjNBNUMiIHN0cm9rZS13aWR0aD0iNiIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIvPjx1c2UgaHJlZj0iI2ZsLXNlLXMiIGZpbGw9IiNGRkQyM0YiLz48dXNlIGhyZWY9IiNmbC1zZS1lIiB0cmFuc2Zvcm09InJvdGF0ZSgtNCAzNDMuNDcgLTI4Ljc4KSIgZmlsbD0iIzFCM0E1QyIvPjwvc3ZnPgo=) center/contain no-repeat;aspect-ratio:437.4/92.6}
+.plaque{position:relative;background:#fff;border-radius:20px;padding:14px 18px;box-shadow:0 0 0 4px rgba(255,255,255,.35),0 14px 30px -12px rgba(120,30,0,.7);overflow:hidden;animation:reveal .9s cubic-bezier(.2,1.5,.4,1) both}
+.plaque::after{content:"";position:absolute;top:-30%;bottom:-30%;width:38%;left:-60%;background:linear-gradient(100deg,transparent,rgba(255,210,63,.85),transparent);transform:skewX(-18deg);animation:eclat 2.6s 1.1s ease-in-out infinite}
+@keyframes reveal{0%{transform:scale(.4) rotate(-8deg);opacity:0}60%{transform:scale(1.08) rotate(2deg);opacity:1}100%{transform:scale(1) rotate(0)}}
+@keyframes eclat{0%{left:-60%}55%,100%{left:130%}}
+
+/* ---------- bandeau orange ---------- */
+.bande{position:relative;background:linear-gradient(135deg,var(--o) 0%,#E05A0E 55%,var(--o2) 100%);color:#fff;overflow:hidden}
+.bande::before{content:"";position:absolute;inset:-40%;background:radial-gradient(closest-side,rgba(255,210,63,.45),transparent 70%);animation:halo 3.4s ease-in-out infinite}
+@keyframes halo{0%,100%{transform:scale(.8);opacity:.5}50%{transform:scale(1.15);opacity:1}}
+.bande>*{position:relative}
+.rub{display:inline-block;background:#fff;color:var(--o);font-weight:900;font-size:11px;letter-spacing:.12em;text-transform:uppercase;padding:3px 10px;border-radius:99px;animation:glissade .6s .5s both}
+@keyframes glissade{from{transform:translateY(-12px);opacity:0}to{transform:none;opacity:1}}
+
+/* ---------- compteur qui monte (CSS seul) ---------- */
+@property --n{syntax:'<integer>';initial-value:0;inherits:false}
+.cnt{counter-reset:n var(--n);animation:monte 1.7s .9s cubic-bezier(.2,.8,.3,1) forwards}
+.cnt::after{content:counter(n)}
+@keyframes monte{to{--n:var(--v)}}
+
+/* ---------- carte stylisée + épingles qui sautent ---------- */
+.carte{position:absolute;inset:0;background:#F3EFE8}
+.carte svg{position:absolute;inset:0;width:100%;height:100%}
+.pin{position:absolute;width:22px;height:22px;margin:-22px 0 0 -11px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);background:var(--o);box-shadow:0 4px 8px rgba(0,0,0,.25);animation:saute .55s cubic-bezier(.2,1.7,.4,1) both;animation-delay:calc(1.0s + var(--i)*.085s)}
+.pin::after{content:"";position:absolute;inset:6px;border-radius:50%;background:#fff}
+.pin.moi{background:var(--bleu);width:30px;height:30px;margin:-30px 0 0 -15px;animation-duration:.8s}
+.pin.moi::after{inset:9px}
+.pin.gris{background:#E7B49A;box-shadow:none}
+@keyframes saute{0%{transform:translateY(-70px) rotate(-45deg) scale(.3);opacity:0}70%{transform:translateY(4px) rotate(-45deg) scale(1.1);opacity:1}100%{transform:rotate(-45deg)}}
+.onde{position:absolute;width:44px;height:44px;margin:-22px 0 0 -22px;border-radius:50%;border:2px solid var(--o);opacity:0;animation:onde 2.2s calc(1.6s + var(--i)*.2s) ease-out infinite}
+@keyframes onde{0%{transform:scale(.3);opacity:.7}100%{transform:scale(2.2);opacity:0}}
+
+/* ---------- écran 1 : page publique ---------- */
+.s1 .haut{position:absolute;left:0;right:0;top:0;z-index:5;padding:18px 18px 22px;border-radius:0 0 28px 28px;box-shadow:0 14px 28px -16px rgba(120,30,0,.6)}
+.s1 .plaque{margin:0 auto;width:78%}
+.s1 .nom{margin-top:12px;display:flex;align-items:flex-end;justify-content:space-between;gap:10px;animation:glissade .6s .7s both}
+.s1 .nom b{display:block;font-size:22px;line-height:1.1;font-weight:900}
+.s1 .nom small{font-size:13px;font-weight:700;opacity:.92}
+.s1 .compte{background:#fff;color:var(--o);border-radius:16px;padding:6px 12px;text-align:center;box-shadow:0 8px 16px -8px rgba(0,0,0,.4)}
+.s1 .compte .cnt{font-size:28px;font-weight:900;line-height:1}
+.s1 .compte small{display:block;font-size:11px;font-weight:800;color:var(--muted)}
+.s1 .feuille{position:absolute;left:0;right:0;bottom:0;z-index:6;background:#fff;border-radius:26px 26px 0 0;padding:10px 20px 22px;box-shadow:0 -12px 30px -18px rgba(27,58,92,.5);animation:monteFeuille .7s 1.6s cubic-bezier(.2,1.2,.4,1) both}
+@keyframes monteFeuille{from{transform:translateY(80px);opacity:0}to{transform:none;opacity:1}}
+.poignee{width:44px;height:5px;border-radius:9px;background:var(--trait);margin:0 auto 10px}
+.feuille h2{font-size:18px;font-weight:900}
+.feuille p{font-size:13px;color:var(--muted);margin:2px 0 12px}
+.btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;min-height:52px;border:0;border-radius:99px;font:inherit;font-weight:900;font-size:16px;color:#fff;background:linear-gradient(135deg,var(--o),var(--o2));box-shadow:0 12px 22px -12px rgba(194,65,12,.85);animation:respire 2.4s 2.4s ease-in-out infinite}
+@keyframes respire{0%,100%{transform:scale(1)}50%{transform:scale(1.025)}}
+.btn svg{width:20px;height:20px}
+
+/* ---------- écran 2 : rejoindre ---------- */
+.s2 .bandeau{padding:14px 18px 16px}
+.s2 .ligne{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.s2 .petit{width:150px;padding:6px 10px;border-radius:12px;animation:reveal .8s both}
+.s2 .etapes{display:flex;gap:6px;margin-top:12px}
+.s2 .etapes i{flex:1;height:6px;border-radius:9px;background:rgba(255,255,255,.35);overflow:hidden;position:relative}
+.s2 .etapes i:first-child::after{content:"";position:absolute;inset:0;background:#fff;transform-origin:left;animation:remplit 1s .5s both}
+@keyframes remplit{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+.s2 h2{font-size:22px;font-weight:900;padding:14px 18px 0}
+.s2 .mini{position:relative;height:210px;margin:10px 18px 0;border-radius:20px;overflow:hidden;border:1px solid var(--trait)}
+.s2 .mini .etiq{position:absolute;z-index:3;left:50%;top:68%;transform:translateX(-50%);background:var(--bleu);color:#fff;font-size:12px;font-weight:800;padding:3px 10px;border-radius:99px;white-space:nowrap;animation:glissade .5s 2s both}
+.s2 .choix{display:flex;align-items:center;gap:12px;margin:12px 18px 0;padding:12px 14px;background:#fff;border:2px solid var(--o);border-radius:18px;box-shadow:0 10px 22px -16px rgba(194,65,12,.8)}
+.s2 .choix .coche{flex:none;width:28px;height:28px;border-radius:50%;background:var(--o);display:grid;place-items:center;animation:pop .5s .9s cubic-bezier(.2,1.8,.4,1) both}
+.s2 .choix .coche svg{width:16px;height:16px;stroke:#fff}
+@keyframes pop{from{transform:scale(0)}to{transform:scale(1)}}
+.s2 .choix b{display:block;font-size:15.5px}
+.s2 .choix small{font-size:12.5px;color:var(--muted)}
+.s2 .prevision{margin:12px 18px 0;padding:12px 14px;border-radius:18px;background:var(--ol);border:1px solid #F8D3BC;animation:glissade .6s 1.4s both}
+.s2 .prevision small{display:block;font-size:11.5px;font-weight:800;color:var(--od);text-transform:uppercase;letter-spacing:.06em}
+.s2 .prevision .gros{font-size:30px;font-weight:900;color:var(--o);line-height:1.15}
+.s2 .prevision .gros span{font-size:14px;color:var(--ink);font-weight:800}
+.s2 .prevision .barre{position:relative;height:8px;border-radius:9px;background:#F8D3BC;margin:8px 0 4px}
+.s2 .prevision .barre i{position:absolute;top:0;bottom:0;left:2%;right:70%;border-radius:9px;background:linear-gradient(90deg,var(--o),var(--o2));transform-origin:left;animation:remplit 1.2s 1.8s both}
+.s2 .prevision p{font-size:12px;color:var(--muted)}
+.s2 .pied{position:absolute;left:18px;right:18px;bottom:18px}
+.s2 .pied .suite{display:flex;justify-content:center;gap:6px;margin-bottom:10px}
+.s2 .pied .suite i{width:8px;height:8px;border-radius:9px;background:var(--trait)}
+.s2 .pied .suite i:first-child{width:22px;background:var(--o)}
+
+/* ---------- écran 3 : tableau de bord organisateur ---------- */
+.s3 .tete{padding:16px 18px 18px;border-radius:0 0 28px 28px;box-shadow:0 14px 28px -16px rgba(120,30,0,.6)}
+.s3 .l1{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.s3 .l1 .plaque{width:168px;padding:7px 10px;border-radius:14px}
+.s3 .direct{display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.6);border-radius:99px;padding:4px 10px;font-size:12px;font-weight:900}
+.s3 .direct i{width:9px;height:9px;border-radius:50%;background:#fff;animation:pouls 1.4s infinite}
+@keyframes pouls{0%{box-shadow:0 0 0 0 rgba(255,255,255,.9)}100%{box-shadow:0 0 0 10px rgba(255,255,255,0)}}
+.s3 h2{font-size:21px;font-weight:900;margin-top:12px;animation:glissade .6s .6s both}
+.s3 .sous{font-size:13px;font-weight:700;opacity:.92}
+.s3 .tuiles{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:14px 18px 0}
+.s3 .tuile{background:#fff;border:1px solid var(--trait);border-radius:16px;padding:10px 8px;text-align:center;animation:glissade .5s both;animation-delay:calc(.9s + var(--k)*.15s);box-shadow:0 10px 20px -16px rgba(27,58,92,.6)}
+.s3 .tuile .cnt{display:block;font-size:26px;font-weight:900;color:var(--o);line-height:1.1}
+.s3 .tuile small{font-size:11.5px;font-weight:800;color:var(--muted)}
+.s3 .bloc{margin:12px 18px 0;background:#fff;border:1px solid var(--trait);border-radius:20px;padding:14px;display:flex;gap:14px;align-items:center}
+.s3 .anneau{flex:none;width:96px;height:96px;position:relative}
+.s3 .anneau svg{width:96px;height:96px;transform:rotate(-90deg)}
+.s3 .anneau circle{fill:none;stroke-width:11;stroke-linecap:round}
+.s3 .anneau .fond{stroke:#F8D3BC}
+.s3 .anneau .val{stroke:var(--o);stroke-dasharray:264;stroke-dashoffset:264;animation:anneau 1.6s 1.2s cubic-bezier(.2,.8,.3,1) forwards}
+@keyframes anneau{to{stroke-dashoffset:71}}
+.s3 .anneau b{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:21px;font-weight:900}
+.s3 .bloc h3{font-size:15.5px;font-weight:900}
+.s3 .bloc p{font-size:12.5px;color:var(--muted);margin-top:2px}
+.s3 .eq{display:flex;align-items:flex-end;gap:5px;height:84px;margin:12px 18px 0;padding:0 2px;border-bottom:1px solid var(--trait)}
+.s3 .eq i{flex:1;border-radius:5px 5px 0 0;background:linear-gradient(180deg,var(--o2),var(--o));height:calc(var(--h)*1%);transform-origin:bottom;animation:grandit .7s both cubic-bezier(.2,1.3,.4,1);animation-delay:calc(1.4s + var(--k)*.06s)}
+@keyframes grandit{from{transform:scaleY(0)}to{transform:scaleY(1)}}
+.s3 .eqt{display:flex;justify-content:space-between;margin:4px 20px 0;font-size:11px;color:var(--muted);font-weight:700}
+.s3 .nouveau{display:flex;align-items:center;gap:12px;margin:16px 18px 0;padding:11px 14px;background:var(--ol);border:1px solid #F8D3BC;border-radius:18px;animation:glissade .6s 3s both}
+.s3 .nouveau .coche{flex:none;width:30px;height:30px;border-radius:50%;background:var(--o);display:grid;place-items:center;animation:pop .5s 3.2s cubic-bezier(.2,1.8,.4,1) both}
+.s3 .nouveau .coche svg{width:16px;height:16px;stroke:#fff}
+.s3 .nouveau b{display:block;font-size:14px}
+.s3 .nouveau small{font-size:12px;color:var(--muted)}
+.s3 .pied{position:absolute;left:18px;right:18px;bottom:18px}
+
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-delay:0s!important;animation-iteration-count:1!important}.cnt{--n:var(--v)}}
+</style>
+</head>
+<body>
+<div class="page">
+  <h1>Super Event : proposition « wow » (maquette statique, 390 px)</h1>
+  <p>Trois écrans : la page publique avec la carte en vedette, l'écran « Rejoindre » du pro avec la prévision de passages, l'en-tête du tableau de bord organisateur. Tout est en CSS : logo qui apparaît avec un éclat, épingles qui sautent, compteurs qui montent, anneau qui se remplit. Les chiffres marqués « exemple » sont fictifs ; la fourchette de l'écran 2 vient de la base (voir légende).</p>
+  <div class="row">
+
+    <!-- ===== Écran 1 : page publique ===== -->
+    <div class="col">
+      <div class="cap"><b>1. Page publique du Super Event</b>
+        Aujourd'hui : carte plein écran, bandeau bleu sans logo. Proposé : le logo Super Event en plaque avec éclat, le nom, un compteur de commerces, la carte avec épingles qui sautent.<br>
+        À modifier : <code>admin/app/se/[se]/SuperEventClient.tsx</code>, <code>admin/components/carte/CarteCommerces.tsx</code>, <code>admin/lib/charte.ts</code> (orange).</div>
+      <div class="tel s1" id="ecran1">
+        <div class="carte" aria-hidden="true">
+          <svg viewBox="0 0 390 780" preserveAspectRatio="none">
+            <rect width="390" height="780" fill="#F3EFE8"/>
+            <path d="M0 520 C80 470 120 560 210 500 S330 420 390 450 L390 780 L0 780Z" fill="#DDE8D2"/>
+            <path d="M-10 330 C90 300 150 360 250 330 S350 290 400 300" stroke="#F5D2AE" stroke-width="16" fill="none"/>
+            <path d="M-10 330 C90 300 150 360 250 330 S350 290 400 300" stroke="#fff" stroke-width="10" fill="none"/>
+            <path d="M120 200 C130 300 100 420 150 560 S170 700 160 790" stroke="#fff" stroke-width="9" fill="none"/>
+            <path d="M260 220 C250 320 300 430 270 560" stroke="#fff" stroke-width="8" fill="none"/>
+            <path d="M0 640 C100 610 220 650 400 600" stroke="#fff" stroke-width="7" fill="none"/>
+            <g fill="#E6DFD3"><rect x="150" y="360" width="30" height="22" rx="4"/><rect x="200" y="380" width="26" height="30" rx="4"/><rect x="60" y="400" width="34" height="24" rx="4"/><rect x="290" y="360" width="28" height="26" rx="4"/><rect x="95" y="260" width="30" height="22" rx="4"/></g>
+          </svg>
+          <span class="onde" style="left:210px;top:420px;--i:0"></span>
+          <span class="onde" style="left:290px;top:470px;--i:2"></span>
+          <span class="pin" style="left:210px;top:420px;--i:0"></span>
+          <span class="pin" style="left:290px;top:470px;--i:1"></span>
+          <span class="pin" style="left:150px;top:380px;--i:2"></span>
+          <span class="pin" style="left:240px;top:350px;--i:3"></span>
+          <span class="pin" style="left:80px;top:440px;--i:4"></span>
+          <span class="pin" style="left:330px;top:390px;--i:5"></span>
+          <span class="pin" style="left:180px;top:480px;--i:6"></span>
+          <span class="pin" style="left:120px;top:330px;--i:7"></span>
+          <span class="pin" style="left:260px;top:530px;--i:8"></span>
+          <span class="pin" style="left:50px;top:520px;--i:9"></span>
+          <span class="pin" style="left:320px;top:310px;--i:10"></span>
+          <span class="pin" style="left:200px;top:290px;--i:11"></span>
+        </div>
+        <div class="haut bande">
+          <div class="plaque"><div class="logo" role="img" aria-label="Super event"></div></div>
+          <div class="nom">
+            <div><span class="rub">Super Event</span><b style="margin-top:6px">Nuits du Sud 2026</b><small>9 – 18 juillet · Vence</small></div>
+            <div class="compte"><span class="cnt" style="--v:22"></span><small>commerces</small></div>
+          </div>
+        </div>
+        <div class="feuille">
+          <div class="poignee"></div>
+          <h2>22 commerces jouent le jeu</h2>
+          <p>Un ticket par station. Un seul grand tirage.</p>
+          <button class="btn" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg>Jouer près de moi</button>
+        </div>
+        <span class="tag-ex">maquette</span>
+      </div>
+    </div>
+
+    <!-- ===== Écran 2 : rejoindre (pro) ===== -->
+    <div class="col">
+      <div class="cap"><b>2. Le pro rejoint en 1 geste</b>
+        Aujourd'hui : 4 écrans de 1,9 à 3,7 hauteurs, 7 champs, 4 tarifs. Proposé : un écran, la carte avec sa station qui tombe, la prévision, un bouton.<br>
+        À modifier : <code>admin/components/creation/ParcoursCreation.tsx</code> (branche rejoindre), <code>admin/app/rejoindre/[se]/RejoindreClient.tsx</code>, <code>admin/components/pro/StationsCarteGPS.tsx</code>.</div>
+      <div class="tel s2" id="ecran2">
+        <div class="bandeau bande">
+          <div class="ligne"><span class="rub">Rejoindre</span><div class="plaque petit"><div class="logo" role="img" aria-label="Super event"></div></div></div>
+          <div class="etapes"><i></i><i></i><i></i></div>
+        </div>
+        <h2>Votre station sur la carte</h2>
+        <div class="mini">
+          <div class="carte" aria-hidden="true">
+            <svg viewBox="0 0 354 210" preserveAspectRatio="none"><rect width="354" height="210" fill="#F3EFE8"/><path d="M0 150 C60 120 120 170 200 140 S300 110 354 130 L354 210 L0 210Z" fill="#DDE8D2"/><path d="M-10 90 C80 70 160 110 250 85 S330 70 360 78" stroke="#F5D2AE" stroke-width="14" fill="none"/><path d="M-10 90 C80 70 160 110 250 85 S330 70 360 78" stroke="#fff" stroke-width="8" fill="none"/><path d="M110 0 C120 80 90 150 130 215" stroke="#fff" stroke-width="7" fill="none"/></svg>
+            <span class="pin gris" style="left:60px;top:70px;--i:0"></span>
+            <span class="pin gris" style="left:290px;top:60px;--i:1"></span>
+            <span class="pin gris" style="left:240px;top:150px;--i:2"></span>
+            <span class="pin gris" style="left:90px;top:160px;--i:3"></span>
+            <span class="onde" style="left:177px;top:128px;--i:6;border-color:var(--bleu)"></span>
+            <span class="pin moi" style="left:177px;top:128px;--i:7"></span>
+          </div>
+          <span class="etiq">Votre station</span>
+        </div>
+        <div class="choix">
+          <span class="coche"><svg viewBox="0 0 24 24" fill="none" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span>
+          <div><b>Nuits du Sud 2026</b><small>9 – 18 juillet · jeu choisi par l'organisateur</small></div>
+        </div>
+        <div class="prevision">
+          <small>Passages attendus</small>
+          <div class="gros">4 à 67 <span>visiteurs sur 10 jours</span></div>
+          <div class="barre"><i></i></div>
+          <p>Estimation d'après NDS 2026 : la moitié des 18 stations.</p>
+        </div>
+        <div class="pied">
+          <div class="suite"><i></i><i></i><i></i></div>
+          <button class="btn" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>Je rejoins</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== Écran 3 : tableau de bord organisateur ===== -->
+    <div class="col">
+      <div class="cap"><b>3. Tableau de bord de l'organisateur</b>
+        Aujourd'hui : « Mes super events », titre plat, aucun chiffre en tête. Proposé : en-tête orange avec logo, état en direct, trois compteurs, anneau, barres.<br>
+        À modifier : <code>admin/app/pro/super/[event]/page.tsx</code>, <code>admin/components/pro/RapportPro.tsx</code> (tuiles, égaliseur existants), <code>admin/components/dashboard/Camembert.tsx</code> (anneau).</div>
+      <div class="tel s3" id="ecran3">
+        <div class="tete bande">
+          <div class="l1"><div class="plaque"><div class="logo" role="img" aria-label="Super event"></div></div><span class="direct"><i></i>En direct</span></div>
+          <h2>Nuits du Sud 2026</h2>
+          <div class="sous">9 – 18 juillet · Vence</div>
+        </div>
+        <div class="tuiles">
+          <div class="tuile" style="--k:0"><span class="cnt" style="--v:22"></span><small>stations</small></div>
+          <div class="tuile" style="--k:1"><span class="cnt" style="--v:1240"></span><small>passages (exemple)</small></div>
+          <div class="tuile" style="--k:2"><span class="cnt" style="--v:610"></span><small>joueurs (exemple)</small></div>
+        </div>
+        <div class="bloc">
+          <div class="anneau">
+            <svg viewBox="0 0 100 100"><circle class="fond" cx="50" cy="50" r="42"/><circle class="val" cx="50" cy="50" r="42"/></svg>
+            <b><span class="cnt" style="--v:73"></span>%</b>
+          </div>
+          <div><h3>Stations actives aujourd'hui</h3><p>16 sur 22 (exemple). Relancez les 6 autres en un geste.</p></div>
+        </div>
+        <div class="eq" aria-label="Passages par jour (exemple)">
+          <i style="--h:30;--k:0"></i><i style="--h:44;--k:1"></i><i style="--h:38;--k:2"></i><i style="--h:60;--k:3"></i><i style="--h:52;--k:4"></i><i style="--h:78;--k:5"></i><i style="--h:70;--k:6"></i><i style="--h:100;--k:7"></i><i style="--h:88;--k:8"></i><i style="--h:64;--k:9"></i>
+        </div>
+        <div class="eqt"><span>9 juil.</span><span>passages par jour (exemple)</span><span>18 juil.</span></div>
+        <div class="nouveau"><span class="coche"><svg viewBox="0 0 24 24" fill="none" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span><div><b>Une station vient de rejoindre</b><small>[nom du commerce] · il y a 2 min (exemple)</small></div></div>
+        <div class="pied"><button class="btn" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 10.6l6.8-4M8.6 13.4l6.8 4"/></svg>Inviter des commerces</button></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+</body>
+</html>
