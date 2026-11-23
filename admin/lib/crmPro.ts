@@ -3,7 +3,7 @@
  * une ligne par joueur, toutes operations confondues (events, super events),
  * avec origines, operations jouees, parties, gains et lots.
  */
-import { supabase } from './supabase'
+import { supabase, sessionSAFraiche } from './supabase'
 import { libelleSource } from './nds'
 
 export interface OperationContact { cle: string; nom: string; parties: number; derniere: string | null }
@@ -21,26 +21,48 @@ export interface ContactPro {
 
 /** Message en francais pour une erreur de lecture du CRM (jamais le texte technique de la base). */
 export function messageErreurCrm(brut: string): string {
-  if (/permission denied|42501|row-level security/i.test(brut)) return 'Vos contacts ne sont pas accessibles avec ce compte pour le moment. Reconnectez-vous ou contactez Flowin.'
+  if (/permission denied|42501|row-level security|acces refuse/i.test(brut)) return 'Vos contacts ne sont pas accessibles avec ce compte pour le moment. Reconnectez-vous ou contactez Flowin.'
   if (/fetch|network|timeout|failed to fetch/i.test(brut)) return 'Connexion impossible : vérifiez votre réseau puis rechargez la page.'
   return 'Vos contacts n’ont pas pu être chargés. Rechargez la page ; si le problème continue, contactez Flowin.'
 }
 
+/** Affiche quand aucune session n'est ouverte : jamais un tableau vide qui laisserait croire a « aucun contact ». */
+export const MESSAGE_CONNEXION_CRM = 'Connectez-vous pour voir vos contacts.'
+
+export interface ResultatCrm {
+  contacts: ContactPro[]
+  erreur: string | null
+  /** Vrai quand aucune session n'est ouverte (la base refuse l'anonyme depuis le 23/11/2026). */
+  sansSession?: boolean
+}
+
+/** Une session est-elle ouverte ? SA : session admin (/dashboard) ; pro : session supabase-js du navigateur. */
+async function sessionCrmOuverte(sa: boolean): Promise<boolean> {
+  if (typeof window === 'undefined') return false
+  try {
+    if (sa) return !!(await sessionSAFraiche())
+    const { data } = await supabase.auth.getSession()
+    return !!data.session?.access_token
+  } catch { return false }
+}
+
 /**
- * `sa: true` (dashboard Super Admin) : coordonnees completes. Espace pro : consentants seulement.
+ * CRM du pro, lu AVEC LA SESSION DU NAVIGATEUR (securite 23/11/2026, sql/2026-11-23-crm-pro-securise.sql).
+ * crm_pro n'est plus executable par la cle publique : la base exige le pro proprietaire ou le super admin, et
+ * masque cote serveur e-mail, telephone et nom des joueurs sans consentement. Donc :
+ *  - a appeler depuis un composant client (le rendu serveur n'a pas de session) ;
+ *  - `sa: true` (dashboard Super Admin) : session SA, coordonnees completes ;
+ *  - sans session : { sansSession: true }, aucun appel reseau ;
+ *  - le masque navigateur (limiterAuConsentement) est conserve : sans effet une fois la base a jour,
+ *    il protege pendant la transition. crm_pro_consentants (sql/05) n'est plus appelee.
  * Renvoie aussi l'erreur (en francais) : « liste vide » et « lecture impossible » ne doivent jamais se confondre.
  */
-export async function fetchCrmProDetail(proId: string, opts?: { sa?: boolean }): Promise<{ contacts: ContactPro[]; erreur: string | null }> {
+export async function fetchCrmProDetail(proId: string, opts?: { sa?: boolean }): Promise<ResultatCrm> {
   if (!proId) return { contacts: [], erreur: null }
-  /* Espace pro : fonction qui ne renvoie les coordonnees que des joueurs consentants
-     (sql/05-confidentialite-contacts.sql, phase 1). Tant qu'elle n'est pas appliquee, repli
-     sur crm_pro + masque cote application (limiterAuConsentement ci-dessous). Le SA garde
-     la fonction complete. */
-  let rep = await supabase.rpc(opts?.sa ? 'crm_pro' : 'crm_pro_consentants', { p_pro: proId })
-  if (rep.error && !opts?.sa) rep = await supabase.rpc('crm_pro', { p_pro: proId })
-  const { data, error } = rep
+  if (!(await sessionCrmOuverte(!!opts?.sa))) return { contacts: [], erreur: null, sansSession: true }
+  const { data, error } = await supabase.rpc('crm_pro', { p_pro: proId })
   if (error) { console.error('[fetchCrmPro]', error.message); return { contacts: [], erreur: messageErreurCrm(error.message) } }
-  const contacts = ((data ?? []) as ContactPro[]).map(c => (opts?.sa ? c : limiterAuConsentement(c))).map(c => ({
+  const contacts = ((Array.isArray(data) ? data : []) as ContactPro[]).map(c => (opts?.sa ? c : limiterAuConsentement(c))).map(c => ({
     ...c,
     origines: c.origines ?? [], operations: c.operations ?? [], lots: c.lots ?? [],
     nb_parties: Number(c.nb_parties ?? 0), nb_tickets: Number(c.nb_tickets ?? 0), nb_gains: Number(c.nb_gains ?? 0),

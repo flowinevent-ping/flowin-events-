@@ -75,7 +75,9 @@
 drop policy if exists joueurs_super_admin_lecture on public.joueurs;
 create policy joueurs_super_admin_lecture on public.joueurs for select to authenticated using (public.est_super_admin());
 
--- 1c. CRM du pro : memes colonnes que crm_pro, mais email / telephone / nom / prenom
+-- 1c. [REMPLACE le 23/11/2026 : NE PAS APPLIQUER. crm_pro elle-meme controle l'appelant et masque cote serveur
+--     (sql/2026-11-23-crm-pro-securise.sql) ; le code n'appelle plus crm_pro_consentants. Gardee pour memoire.]
+--     CRM du pro : memes colonnes que crm_pro, mais email / telephone / nom / prenom
 --     ne sortent QUE pour les joueurs qui ont consenti. Les autres restent comptes
 --     (age, genre, code postal, parties, gains) sans coordonnees.
 create or replace function public.crm_pro_consentants(p_pro text)

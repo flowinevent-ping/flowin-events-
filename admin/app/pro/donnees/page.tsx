@@ -1,11 +1,10 @@
 import Link from 'next/link'
 import { fetchOperationsPro, libelleDates } from '@/lib/operations'
-import { fetchCrmProDetail } from '@/lib/crmPro'
 import { rangerParPeriode, groupesChoix } from '@/lib/rangementOperations'
 import ProShell from '@/components/pro/ProShell'
 import GagnantsClient from '@/components/pro/GagnantsClient'
 import ChoixOperation from '@/components/pro/ChoixOperation'
-import CrmPro from '@/components/pro/CrmPro'
+import CrmProCharge from '@/components/pro/CrmProCharge'
 import AnnoncePro from '@/components/pro/AnnoncePro'
 import GrilleOperations, { Vignette } from '@/components/pro/GrilleOperations'
 import { OngletOperationsPro } from '@/components/operations/BlocsOperations'
@@ -32,7 +31,7 @@ export default async function Page({ searchParams }: { searchParams: { pro?: str
   const proId = searchParams.pro ?? ''
   const brut = searchParams.onglet ?? ''
   const onglet: Onglet = ONGLETS.find(o => o.id === brut)?.id ?? ALIAS[brut] ?? 'crm'
-  const [ops, crm] = await Promise.all([fetchOperationsPro(proId), onglet === 'crm' ? fetchCrmProDetail(proId) : Promise.resolve({ contacts: [], erreur: null })])
+  const ops = await fetchOperationsPro(proId)
   const cle = ops.operations.some(o => o.cle === searchParams.op) ? (searchParams.op as string) : ''
   const choix = groupesChoix(ops.operations, o => libelleDates(o.dateD, o.dateF))
   const lien = (o: Onglet, op?: string) => {
@@ -72,8 +71,8 @@ export default async function Page({ searchParams }: { searchParams: { pro?: str
           liens={ops.operations.filter(o => o.type === 'event' && o.stations[0]).map(o => ({ nom: o.nom || 'Mon animation', url: `/parcours/${o.stations[0].module || 'nds2026'}?ev=${encodeURIComponent(o.stations[0].id)}` }))} />
       )}
       {onglet === 'crm' && (
-        <CrmPro
-          proId={proId} proNom={ops.proNom ?? ''} contacts={crm.contacts} erreur={crm.erreur}
+        <CrmProCharge
+          proId={proId} proNom={ops.proNom ?? ''}
           operations={choix.flatMap(g => g.ops)} operationInitiale={cle || null}
         />
       )}

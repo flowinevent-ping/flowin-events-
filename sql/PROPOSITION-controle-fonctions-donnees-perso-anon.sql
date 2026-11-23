@@ -1,0 +1,51 @@
+-- =============================================================================
+-- PROPOSITION (NON APPLIQUÉE) : contrôle quotidien « fonction qui renvoie des données personnelles, exécutable par anon »
+-- 23/11/2026. À relire par Romain / l'agent securite-donnees avant d'ajouter au bloc SECURITE de
+-- public.controle_qualite_lancer() (sql/2026-11-21-controles-qualite.sql). Ne rien appliquer sans accord.
+--
+-- Pourquoi : crm_pro et crm_participants renvoyaient prénom, nom,
+-- e-mail, téléphone à n'importe quel visiteur muni de la clé publique. Les contrôles existants regardent les
+-- TABLES (anon_lecture_tables_sensibles), pas les FONCTIONS SECURITY DEFINER.
+--
+-- Principe : lister les fonctions de public exécutables par anon dont la liste de colonnes de sortie contient
+-- email, tel, telephone, nom, prenom, joueur_email ou joueur_tel, moins une liste blanche argumentée.
+-- Rouge si au moins une hors liste blanche ; la ligne cite les noms (jamais de valeurs).
+--
+-- Au 23/11/2026 (avant application de sql/2026-11-23-crm-pro-securise.sql), la requête ci-dessous renvoie 14 lignes :
+--   à fermer (crm_pro, crm_participants : sql/2026-11-23-crm-pro-securise.sql) ;
+--   à traiter : flowin_export_users / flowin_export_partenaires / flowin_export_pros / nds_export_crm /
+--               nds_export_joueurs_uniques (protégées seulement par un jeton écrit en dur dans le corps de la
+--               fonction ET dans docs/backup/backup-crm-nds-google-sheet.gs : jeton à changer, accès à repenser) ;
+--   probablement voulues (à confirmer) : moi_profil(uuid), mes_consentements(uuid) (l'id joueur sert de jeton),
+--               carte_commerces_publique[_v2]() (nom du commerce, pas une personne), search_ecoles (écoles),
+--               flowin_classes_prof (autre produit).
+--
+-- Requête de lecture (sans risque, exécutable à la main) :
+--   select p.oid::regprocedure::text as fonction, left(pg_get_function_result(p.oid), 120) as sortie
+--     from pg_proc p
+--    where p.pronamespace = 'public'::regnamespace
+--      and has_function_privilege('anon', p.oid, 'execute')
+--      and pg_get_function_result(p.oid) ~* '(\memail\M|\mtel\M|\mnom\M|\mprenom\M|joueur_email|joueur_tel|telephone)'
+--    order by 1;
+--
+-- Extrait à insérer dans controle_qualite_lancer() (même style que truncate_accorde) :
+--
+--   begin  -- fonctions renvoyant des données personnelles, exécutables par anon
+--     select count(*), string_agg(f.sig, ', ' order by f.sig) into n, s
+--       from (select p.oid::regprocedure::text as sig, p.proname
+--               from pg_proc p
+--              where p.pronamespace = 'public'::regnamespace
+--                and has_function_privilege('anon', p.oid, 'execute')
+--                and pg_get_function_result(p.oid) ~* '(\memail\M|\mtel\M|\mprenom\M|joueur_email|joueur_tel|telephone)') f
+--      where f.proname <> all (v_liste_blanche_fonctions);   -- tableau à déclarer en tête, avec la raison de chaque entrée
+--     perform public._cq_ligne(t,'SECURITE','fonction_donnees_perso_anon','Fonction à données personnelles exécutable par anon',
+--       case when n = 0 then 'vert' else 'rouge' end, 'bloquant',
+--       case when n = 0 then 'aucune fonction hors liste blanche' else n||' fonction(s) : '||left(s, 600) end,
+--       'Agent securite-donnees : garde est_super_admin() / pro propriétaire, revoke anon');
+--   exception when others then
+--     perform public._cq_ligne(t,'SECURITE','fonction_donnees_perso_anon','Fonction à données personnelles exécutable par anon','orange','info','contrôle en erreur : '||sqlerrm,'Agent securite-donnees : examiner');
+--   end;
+--
+-- Variable à ajouter dans le bloc declare : v_liste_blanche_fonctions text[] := array['moi_profil','mes_consentements'];
+-- (le nom `nom` seul est volontairement hors du motif : trop de faux positifs sur les noms de commerces.)
+-- Après ajout : select public.schema_reference_rafraichir();  puis lire select public.controle_qualite_dernier();

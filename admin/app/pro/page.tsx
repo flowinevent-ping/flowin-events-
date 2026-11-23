@@ -10,8 +10,7 @@ import CompteurMensuel from '@/components/pro/CompteurMensuel'
 import { CHARTE_PRO as C } from '@/lib/charte'
 import { CARD, MUTED, H1, SUB, BTN, BTN2 } from '@/lib/proui'
 import { lireDroitsPro, peutOuvrirNouvelle } from '@/lib/droitsPro'
-import { fetchCrmProDetail } from '@/lib/crmPro'
-import RapportPro from '@/components/pro/RapportPro'
+import { RapportProAvecContacts } from '@/components/pro/CrmProCharge'
 import { BASE_CANONIQUE } from '@/lib/qrPermalien'
 
 export const metadata: Metadata = { title: 'Mes animations — Flowin Pro' }
@@ -37,13 +36,9 @@ export default async function ProAccueilPage({ searchParams }: Props) {
     const { data: ev } = await supabase.from('events').select('pro_id').eq('id', evId).single()
     proId = ev?.pro_id ?? ''
   }
-  const [ops, crm] = await Promise.all([fetchOperationsPro(proId), fetchCrmProDetail(proId)])
+  const ops = await fetchOperationsPro(proId)
   /* Résumé global (spec du 10/11 soir) : toutes les stations du pro, agrégats seulement. */
   const idsGlobal = ops.operations.flatMap(o => o.stations.map(s => s.id))
-  const contacts = {
-    autorises: crm.contacts.filter(c => c.optin === true).length,
-    importes: crm.contacts.filter(c => (c.origines ?? []).some(o => o === 'import' || o === 'parrainage')).length,
-  }
   const anim = ops.operations.find(o => o.type === 'event' && o.status === 'live') ?? ops.operations.find(o => o.type === 'event')
   const st0 = anim?.stations[0]
   const lienJeu = st0 ? `${BASE_CANONIQUE}/parcours/${st0.module || 'nds2026'}?ev=${encodeURIComponent(st0.id)}` : null
@@ -89,7 +84,7 @@ export default async function ProAccueilPage({ searchParams }: Props) {
       <CompteurMensuel proId={proId} />
       {idsGlobal.length > 0 && (
         <div data-resume-pro style={{ ...CARD, marginBottom: 14 }}>
-          <RapportPro eventIds={idsGlobal} contacts={contacts} lien={lienJeu} nom="Résumé de vos animations" />
+          <RapportProAvecContacts proId={proId} eventIds={idsGlobal} lien={lienJeu} nom="Résumé de vos animations" />
         </div>
       )}
       {/* 10/11 (controle) : action principale en premier, actions secondaires sur une ligne qui défile,

@@ -13,8 +13,7 @@ import { useEffect, useState } from 'react'
 import { fetchOperationsPro, libelleDates, libelleModule, type OperationsPro } from '@/lib/operations'
 import { ONGLETS_OP, LIBELLE_PERIODE, periodeOperation, type OngletOp } from '@/lib/ongletsOperation'
 import { ContenuLots, BoutonGererLots, ContenuComm, ContenuContrat, ContenuTracking } from '@/components/operations/BlocsOperations'
-import CrmPro from '@/components/pro/CrmPro'
-import type { ContactPro } from '@/lib/crmPro'
+import CrmProCharge from '@/components/pro/CrmProCharge'
 import { BlocGagnants } from '@/components/pro/GagnantsClient'
 import ParcoursMobil from '@/components/pro/ParcoursMobil'
 import { CHARTE_PRO as C } from '@/lib/charte'
@@ -24,7 +23,7 @@ import { COULEURS_ETAPES } from '@/components/parcours/BandeauEtapes'
 /** Sur un super event, l'onglet des contacts s'appelle « Participants » (ses droits sont rappeles dans l'onglet). */
 function libelleOnglet(id: string, label: string, type: string): string { return id === 'crm' && type === 'super' ? 'Participants' : label }
 
-export default function FicheOperationPro({ initial, cle, onglet: ongletInitial, contacts, erreurContacts }: { initial: OperationsPro; cle: string; onglet: OngletOp; contacts: ContactPro[]; erreurContacts?: string | null }) {
+export default function FicheOperationPro({ initial, cle, onglet: ongletInitial }: { initial: OperationsPro; cle: string; onglet: OngletOp }) {
   const [data, setData] = useState(initial)
   const [onglet, setOnglet] = useState<OngletOp>(ongletInitial)
   const recharger = () => { fetchOperationsPro(initial.proId).then(setData) }
@@ -136,7 +135,7 @@ export default function FicheOperationPro({ initial, cle, onglet: ongletInitial,
         {/* Audit promesse L3 (19/11/2026) : les réponses du quiz bonus, à un clic du rapport. */}
         {onglet === 'trafic' && op.type !== 'super' && st && <a data-lien-bonus href={`/pro/super/${encodeURIComponent(st.id)}${q}`} style={{ ...BTN2, display: 'inline-block', textDecoration: 'none', marginBottom: 12 }}>Réponses du quiz bonus</a>}
         {onglet === 'trafic' && <ContenuTracking op={op} proId={data.proId} onStation={id => { window.location.href = `/pro/super/${encodeURIComponent(id)}${q}` }} masquerGlobal />}
-        {onglet === 'crm' && <CrmPro proId={data.proId} proNom={data.proNom ?? ''} contacts={contacts} erreur={erreurContacts} operations={[]} operationFixe={op.cle} />}
+        {onglet === 'crm' && <CrmProCharge proId={data.proId} proNom={data.proNom ?? ''} operations={[]} operationFixe={op.cle} />}
         {onglet === 'bons' && <ContenuContrat op={op} mode="pro" partenaireId={pt?.id ?? null} onChange={recharger} />}
       </div>
     </div>
