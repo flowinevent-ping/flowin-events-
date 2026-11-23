@@ -69,3 +69,4 @@ Ce journal n'est pas une preuve de production : l'état vérifié est dans `ETAT
 - 21/11 | Sécurité `pros` : partie A en prod (4 RPC), code `bd844bdc` déployé (21 pages démo : 200, 0 non-GET, 0 erreur JS) ; partie B (drop de `pros_anon_select`) en attente de confirmation de Romain (timeout) | `sql/2026-11-21-pros-lecture-publique.sql`, `docs/SECURITE-pros-2026-11-21.md`
 - 21/11 | Règle d'accès et de sécurité inscrite dans la feuille de route du Super Admin (lib/roadmap.ts) et REGLES.md | ce commit
 - 23/11 | Romain recadre les priorités (fonctionnement de bout en bout, ergonomie, CRM, banques) ; nettoyage des tests non prioritaire ; stock baisse au retrait | ce commit
+- 23/11 | Fuite crm_pro / crm_participants fermée (migration + code a9db7a3f) ; audits import fichier client et ergonomie ; premier passage du gardien (PR #97) ; mémoire mise à jour | ce commit

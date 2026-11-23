@@ -21,3 +21,4 @@
 
 ## Journal des passages
 - 21/11/2026 : premier passage (4 propositions, voir AMELIORATIONS.md : AMEL-ERG-01 à 04).
+- 23/11 : mesure par événement quiz vers résultats -23 % à -47 % sur 6 événements NDS (NDS seulement) ; `visites` vient de NDS2026Client et parcours-tracking, pas du moteur masters ; métiers de banques existants : restaurateur, pizzeria, boulanger, boucher, libraire ; AMEL-ERG-05 à 09 proposées.

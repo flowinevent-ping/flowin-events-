@@ -30,3 +30,4 @@ La facturation légale et Jeffrey CRM relèvent de l'agent `facturation-crm` (m�
 - Déployer / vérifier `b810cd56` ; contrôler le cron du 21/11 ; neutraliser le texte NDS des e-mails Super Event ; lot organisateur validable seulement par le SA.
 - Envoi en masse (annonces) : domaine et service d'envoi à décider (étude L14 : Resend Pro 20 $/mois + domaine vérifié recommandé le 17/11, puis Gmail le 19/11).
 - Réglages Supabase Auth (URL, modèles, SMTP) et séparation avec Flowin Révision : par Romain.
+- 23/11 : Import fichier client = EXISTE MAIS INCOMPLET (0 import réel, pas d'attestation, pas d'adresse) ; campagnes à un fichier importé = hors règles, option A (invitation envoyée par le pro, lien ou QR suivi) en attente de Romain et d'un juriste ; crm_pro fermé à anon (23/11).
