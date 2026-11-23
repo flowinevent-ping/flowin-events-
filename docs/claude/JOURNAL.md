@@ -71,3 +71,4 @@ Ce journal n'est pas une preuve de production : l'état vérifié est dans `ETAT
 - 23/11 | Romain recadre les priorités (fonctionnement de bout en bout, ergonomie, CRM, banques) ; nettoyage des tests non prioritaire ; stock baisse au retrait | ce commit
 - 23/11 | Fuite crm_pro / crm_participants fermée (migration + code a9db7a3f) ; audits import fichier client et ergonomie ; premier passage du gardien (PR #97) ; mémoire mise à jour | ce commit
 - 23/11 | CRM pro : cellules vides et infos décalées corrigées (Contact non partagé, cartes mobiles alignées, session SA expirée dite clairement) ; vérifié Playwright 390 et 1440 px en démo, 0 requête non-GET ; prod et téléphone réel NON vérifiés | ce commit
+- 23/11 | Vision « clac clac boum boum » : budgets de clics par parcours (VISION-ERGONOMIE.md), maquette Super Event wow, AMEL-VIS-01 à 08 ; CRM pro corrigé (cases vides, lignes décalées, session expirée) | ce commit
