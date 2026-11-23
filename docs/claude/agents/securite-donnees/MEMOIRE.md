@@ -19,7 +19,7 @@
 ## Risques ouverts (non traités, assumés)
 - INSERT anonymes voulus (flux joueur) : `joueurs`, `participations`, `se_gains`/`se_tickets`/`se_reponses` via RPC, `visites`, `partenaire_clics`, `sondage_brigade`, `crm_retours`, `leads_landing` : un tricheur peut spammer ; « sur place » (géolocalisation) non vérifiable côté serveur.
 - L'id joueur sert de jeton dans le téléphone : connaître un e-mail donne l'id, donc les RPC « moi » (tickets, gains, lots). Durcir demande une preuve par lien e-mail.
-- Pages `/pro/*` rendues côté serveur protégées par le seul `?pro=` ; `crm_pro` / `fetchCrmPro` à revoir.
+- Pages `/pro/*` rendues côté serveur protégées par le seul `?pro=` (le CRM, lui, est fermé depuis le 23/11 : voir plus bas).
 - Connexion joueur par lien e-mail crée des comptes Auth : « authenticated » n'est pas de confiance.
 - Fonctions Edge en `verify_jwt` false (`rappel-tickets`, `notify-commande-animation`, `notify-souscription`...) : chacune doit se protéger elle-même ; `send-resultat-tirage` neutralisée, non déployée.
 - Version déployée des fonctions vs dépôt : à comparer (précédent : `send-ticket-gagnant` ancienne version en prod).
@@ -52,4 +52,11 @@
 - Ouvert : `flowin_export_pros(p_token)` exécutable par anon, jeton en dur dans la fonction et dans `docs/backup/backup-crm-nds-google-sheet.gs` (ne pas le recopier) ; TRUNCATE sur `emails_compteur_jour`.
 
 ## Ouvert
-- Cron du 21/11 09:07 UTC : `succeeded` dans `cron.job_run_details` (statut HTTP réel non relu) ; corriger les rouges du contrôle quotidien (voir ci-dessus) ; état prod des SQL non consignés ; décision sur le plan Supabase ; durcir l'identité joueur ; revoir `crm_pro`.
+- Cron du 21/11 09:07 UTC : `succeeded` dans `cron.job_run_details` (statut HTTP réel non relu) ; corriger les rouges du contrôle quotidien (voir ci-dessus) ; état prod des SQL non consignés ; décision sur le plan Supabase ; durcir l'identité joueur ; jeton en dur des fonctions `flowin_export_*` / `nds_export_*` (voir CRM pro).
+
+## CRM pro `crm_pro` fermé (23/11/2026)
+- Trou : `crm_pro(p_pro)` et `crm_participants(p_se)` SECURITY DEFINER exécutables par anon sans contrôle (prénom, nom, e-mail, tél de tous les joueurs). `crm_pro_consentants` (sql/05) n'a jamais été appliquée.
+- Corrigé : code `a9db7a3f` (CRM lu dans le navigateur avec la session : `CrmProCharge`, `FicheContactPro`, `RapportProAvecContacts` ; sans session « Connectez-vous pour voir vos contacts ») puis migration `crm_pro_securise_2026_11_23` appliquée (`sql/2026-11-23-crm-pro-securise.sql`) : corps dans `_crm_pro_interne` / `_crm_participants_interne` (non exposées), `crm_pro` = SA ou pro propriétaire (`pros.auth_id = auth.uid()`) sinon 42501, masquage serveur (e-mail, tél, nom initial sans consentement), `crm_participants` SA seul. Preuve : appel REST anonyme = 401 « permission denied », contrôle quotidien sans nouveau rouge, `schema_derive` vert après `schema_reference_rafraichir()`.
+- Doc : `docs/SECURITE-crm-pro-2026-11-23.md`. Proposition de contrôle des fonctions à données perso exécutables par anon : `sql/PROPOSITION-controle-fonctions-donnees-perso-anon.sql` (non appliquée).
+- Ouvert : `flowin_export_users/partenaires/pros`, `nds_export_crm`, `nds_export_joueurs_uniques` anon + jeton en dur (jeton à considérer exposé, à changer : décision de Romain) ; `moi_profil`, `mes_consentements` (id joueur = jeton).
+- Pièges : un composant serveur n'a pas de session (lire avec le navigateur) ; en `?demo=1` une RPC refusée renvoie un objet `{ok:true,demo:true}` (tester `Array.isArray`) ; ProShell attend la fiche du pro (utiliser un vrai pro `pro-test-boulangerie-e2e` pour les tests Playwright) ; `next start` d'une ancienne build occupe le port (tuer `next-server`) ; depuis cet environnement le site Vercel répond 403 (pare-feu) : preuve de déploiement = statut GitHub « Vercel : Deployment has completed » du commit.
