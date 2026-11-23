@@ -1,6 +1,7 @@
 import { supabase } from '@/lib/supabase'
 import { fetchLotsSuperEvent, fetchLotsSuperEventPhases } from '@/lib/superEventLots'
 import SuperEventClient from '../SuperEventClient'
+import { chargerLogosStations } from '@/lib/seReperes'
 
 export const revalidate = 60
 
@@ -26,6 +27,7 @@ export default async function Page({ params }: Props) {
   ])
 
   if (!seRes.data) return NOTFOUND
+  const logos = await chargerLogosStations(seId)
 
   const autresRes = await supabase
     .from('super_events')
@@ -49,6 +51,7 @@ export default async function Page({ params }: Props) {
       lots={lotsRes}
       lotsPhases={lotsPhasesRes}
       lieux={lieuxRes.data ?? []}
+      logos={logos}
       sponsors={sponsorsRes.data ?? []}
       autres={autres}
       focus={focusRes.data ?? null}

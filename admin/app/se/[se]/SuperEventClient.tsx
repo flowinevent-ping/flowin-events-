@@ -1,12 +1,13 @@
 'use client'
 import { chargerTicketsGainsJoueur } from '@/lib/moiTicketsGains'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { supabase } from '@/lib/supabase'
 import SuperEventMap, { Lieu } from '../_components/SuperEventMap'
 import { Ico, IcoModule } from '@/lib/proicons'
 import { ACCENT_SUPER } from '@/lib/charte'
 import { estDemo } from '@/lib/demo'
 import type { LotPhase } from '@/lib/superEventLots'
+import { initiale, separerReperes } from '@/lib/seReperes'
 import { lirePhases, phaseCourante, periodePhase, LIBELLE_PHASE, ORANGE_SE, type Phase } from '@/lib/superEventPhases'
 
 type SE = { id: string; nom: string; description?: string | null; date_d?: string | null; date_f?: string | null; social?: { insta?: string; fb?: string; site?: string } | null; cfg_jeu?: unknown }
@@ -26,9 +27,12 @@ interface Props {
   sponsors: Sponsor[]
   autres?: Autre[]
   focus?: FocusEvent | null
+  /** Logos des commerces { event_id: image_url } (partenaires.image_url via partenaires.event_id). */
+  logos?: Record<string, string>
 }
 
 const HERO = '#3B5CC4'
+const ctaStyle: React.CSSProperties = { display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '10px 14px 0', minHeight: 52, borderRadius: 26, background: 'linear-gradient(135deg,#B5471E,#D2631F)', color: '#fff', font: '700 17px system-ui', textDecoration: 'none', boxShadow: '0 6px 14px rgba(181,71,30,.35)', width: 'calc(100% - 28px)', boxSizing: 'border-box' }
 const ENTETE_SE = 'linear-gradient(135deg,#C2410C 0%,#E05A0E 55%,#FF8A14 100%)'
 
 type ModUI = { label: string; grad: string; accent: string; soft: string }
@@ -78,15 +82,16 @@ function fmtDist(m: number): string {
   return m < 1000 ? `à ${Math.round(m / 10) * 10} m` : `à ${(m / 1000).toFixed(1).replace('.', ',')} km`
 }
 
-export default function SuperEventClient({ se, lots, lotsPhases = [], lieux, sponsors, autres = [], focus }: Props) {
-  const [open, setOpen] = useState<boolean>(!!focus)
+export default function SuperEventClient({ se, lots, lotsPhases = [], lieux, sponsors, autres = [], focus, logos = {} }: Props) {
+  const [open, setOpen] = useState<boolean>(false)
+  const [fiche, setFiche] = useState(false)
+  const carRef = useRef<HTMLDivElement>(null)
   const [selected, setSelected] = useState<Lieu | null>(null)
   const [joueur, setJoueur] = useState<Joueur | null>(null)
   const [played, setPlayed] = useState<Set<string>>(new Set())
   const [ticketCount, setTicketCount] = useState(0)
   const [gains, setGains] = useState<GainRow[]>([])
   const [userPos, setUserPos] = useState<{ lat: number; lng: number } | null>(null)
-  const [tous, setTous] = useState(false)
 
   useEffect(() => {
     if (typeof navigator === 'undefined' || !navigator.geolocation) return
@@ -143,16 +148,28 @@ export default function SuperEventClient({ se, lots, lotsPhases = [], lieux, spo
     })()
   }, [se.id, idsKey])
 
+  function choisir(l: Lieu) {
+    setSelected(l)
+    setOpen(false)
+    setFiche(false)
+  }
   function selectById(id: string) {
     const l = lieux.find((x) => x.id === id)
-    if (l) setSelected(l)
+    if (l) choisir(l)
   }
+  /* Arrivée par le QR d'un commerce : il est déjà choisi (la carte s'y recentre). */
+  useEffect(() => {
+    if (focus && !selected) { const l = lieux.find((x) => x.id === focus.id); if (l) setSelected(l) }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [focus?.id, idsKey])
 
   const identified = !!joueur
   /* Pastilles a la couleur de categorie super event (orange), plus le violet
      #7C2D92 herite des donnees. */
-  const mapLieux = lieux.map((l) => ({ ...l, couleur: ACCENT_SUPER, joue: identified ? played.has(l.id) : l.joue }))
+  const mapLieux = lieux.map((l) => ({ ...l, couleur: ACCENT_SUPER, joue: identified ? played.has(l.id) : l.joue, logo: logos[l.id] || null }))
   const playedCount = lieux.filter((l) => played.has(l.id)).length
+  /* Après chargement du jeu, le carrousel repart du début (les plus proches). */
+  useEffect(() => { if (carRef.current) carRef.current.scrollTo({ left: 0 }) }, [playedCount])
   const fu = selected ? modUI(selected.module) : null
   /* Stations triées du plus proche au plus loin (si la position est connue), sinon l'ordre de la base. */
   const distDe = (l: Lieu): number | null => (userPos && typeof l.lat === 'number' && typeof l.lng === 'number') ? distMeters(userPos.lat, userPos.lng, l.lat, l.lng) : null
@@ -169,6 +186,18 @@ export default function SuperEventClient({ se, lots, lotsPhases = [], lieux, spo
   const lotTete = lotsSorted[0]
   const lotTeteTxt = lotTete ? (lotTete.libelle || (lotTete.valeur ? `${lotTete.valeur} €` : '')) : ''
   const pctJoue = lieux.length ? Math.round((playedCount / lieux.length) * 100) : 0
+  /* Carrousel : les points du festival sans logo sont regroupés sur la carte, pas dans le carrousel.
+     Plus proches devant ; en jeu, les commerces joués passent en fin de carrousel. */
+  const sep = separerReperes(mapLieux)
+  const grpIds = new Set(sep.groupes.flat().map((x) => x.id))
+  const base = lieuxTries.filter((l) => !grpIds.has(l.id))
+  const caro = identified ? [...base.filter((l) => !played.has(l.id)), ...base.filter((l) => played.has(l.id))] : base
+  const nbCommerces = caro.length
+  const prochain = caro.find((l) => !(identified && played.has(l.id))) ?? caro[0]
+  const joues = caro.filter((l) => identified && played.has(l.id)).length
+  const hautEntete = demo ? 26 : 0
+  const urlJouer = (l: Lieu) => `/parcours/${l.module || 'nds2026'}?ev=${l.id}${demo ? '&demo=1' : ''}`
+  const urlAccueil = `/se/${se.id}${demo ? '?demo=1' : ''}`
   const dist = (selected && userPos && typeof selected.lat === 'number' && typeof selected.lng === 'number')
     ? fmtDist(distMeters(userPos.lat, userPos.lng, selected.lat, selected.lng))
     : null
@@ -206,52 +235,97 @@ export default function SuperEventClient({ se, lots, lotsPhases = [], lieux, spo
       ` }} />
 
       <div style={{ position: 'absolute', inset: 0, zIndex: 0 }}>
-        <SuperEventMap lieux={mapLieux} mode={identified ? 'jeu' : 'vitrine'} height="100%" showPosition={true} onSelect={selectById} />
+        <SuperEventMap lieux={mapLieux} mode={identified ? 'jeu' : 'vitrine'} height="100%" showPosition={true} onSelect={selectById} reperes selId={selected?.id ?? null} decalageBas={selected ? 340 : 260} geoHaut={hautEntete + 100} />
       </div>
 
-      {/* En-tête Super Event : orange (charte), logo sur plaque avec éclat, nom humain, compteur */}
-      <div data-se-entete style={{ position: 'absolute', top: demo ? 26 : 0, left: 0, right: 0, zIndex: 1000, pointerEvents: 'none' }}>
-        <div style={{ position: 'relative', overflow: 'hidden', pointerEvents: 'auto', background: ENTETE_SE, color: '#fff', borderRadius: '0 0 26px 26px', padding: '14px 16px 14px', boxShadow: '0 14px 28px -16px rgba(120,30,0,.6)' }}>
-          <div className="se-halo" aria-hidden="true" />
-          <div style={{ position: 'relative' }}>
-            <div className="se-plaque"><img src="/flowin-super-event-logo.svg" alt="Super event" width={240} height={51} /></div>
-            <div className="se-glisse" style={{ marginTop: 11, display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', gap: 10 }}>
-              <div style={{ minWidth: 0 }}>
-                <span style={{ display: 'inline-block', background: '#fff', color: ORANGE_SE, fontWeight: 900, fontSize: 12, letterSpacing: '.1em', textTransform: 'uppercase', padding: '3px 10px', borderRadius: 99 }}>Super event</span>
-                <div style={{ fontSize: 22, fontWeight: 900, lineHeight: 1.1, marginTop: 6, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{se.nom}</div>
-                {periode(se.date_d, se.date_f) && <div style={{ fontSize: 14, fontWeight: 700, marginTop: 2 }}>{periode(se.date_d, se.date_f)}</div>}
-              </div>
-              <div style={{ flexShrink: 0, background: '#fff', color: ORANGE_SE, borderRadius: 16, padding: '6px 14px', textAlign: 'center', boxShadow: '0 8px 16px -8px rgba(0,0,0,.4)' }}>
-                <div style={{ fontSize: 28, fontWeight: 900, lineHeight: 1 }}>{identified ? ticketCount : lieux.length}</div>
-                <div style={{ fontSize: 12, fontWeight: 800, color: '#5a6071' }}>{identified ? `ticket${ticketCount > 1 ? 's' : ''}` : 'commerces'}</div>
-              </div>
-            </div>
-          </div>
+      {/* Bandeau Super Event 88 px (maquette lot 4 v2) : dégradé orange, cartouche logo, compteur ; un appui = accueil du Super Event */}
+      <a data-se-entete href={urlAccueil} aria-label="Accueil du Super Event"
+        onClick={(e) => { if (typeof window !== 'undefined' && window.location.pathname === `/se/${se.id}`) { e.preventDefault(); setSelected(null); setOpen(false); setFiche(false) } }}
+        style={{ position: 'absolute', top: hautEntete, left: 0, right: 0, height: 88, zIndex: 1000, display: 'flex', alignItems: 'center', gap: 10, padding: '0 14px', background: ENTETE_SE, color: '#fff', borderRadius: '0 0 22px 22px', boxShadow: '0 3px 10px rgba(0,0,0,.3)', textDecoration: 'none', boxSizing: 'border-box' }}>
+        <span style={{ flexShrink: 0, height: 44, background: '#fff', borderRadius: 12, padding: '4px 10px', display: 'flex', alignItems: 'center', border: '3px solid #E9B993', boxSizing: 'border-box' }}>
+          <img src="/flowin-super-event-logo.svg" alt="Super event" height={30} style={{ height: 30, width: 'auto', display: 'block' }} />
+        </span>
+        <span style={{ minWidth: 0, flex: 1, fontWeight: 800, fontSize: 16, lineHeight: 1.15 }}>
+          <span style={{ display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{se.nom}</span>
+          {periode(se.date_d, se.date_f) && <span style={{ display: 'block', fontWeight: 600, fontSize: 12, opacity: .95, marginTop: 2 }}>{periode(se.date_d, se.date_f)}</span>}
+        </span>
+        <span style={{ flexShrink: 0, background: '#fff', color: ORANGE_SE, borderRadius: 14, padding: '6px 10px', textAlign: 'center', minWidth: 44 }}>
+          <span data-nb-commerces style={{ display: 'block', fontSize: 20, fontWeight: 900, lineHeight: 1 }}>{nbCommerces}</span>
+          <span style={{ display: 'block', fontSize: 11, fontWeight: 800, color: '#5a6071' }}>commerces</span>
+        </span>
+      </a>
+
+      {/* En jeu : pastille de progression discrète en haut de la carte */}
+      {identified && nbCommerces > 0 && (
+        <div data-progression-pastille style={{ position: 'absolute', top: hautEntete + 100, left: 12, zIndex: 900, background: '#fff', borderRadius: 14, boxShadow: '0 2px 10px rgba(0,0,0,.25)', padding: '6px 12px 6px 8px', display: 'flex', alignItems: 'center', gap: 9, maxWidth: 'calc(100% - 150px)' }}>
+          <span style={{ width: 38, height: 38, borderRadius: '50%', background: `conic-gradient(#15803D 0 ${Math.round((joues / nbCommerces) * 100)}%,#E5E7EB 0)`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+            <b style={{ width: 30, height: 30, borderRadius: '50%', background: '#fff', fontSize: 11, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{joues}/{nbCommerces}</b>
+          </span>
+          <span style={{ fontSize: 12, color: '#374151', lineHeight: 1.25 }}><b style={{ display: 'block', fontSize: 13, color: '#111' }}>{joues} joué{joues > 1 ? 's' : ''}</b>{ticketCount} ticket{ticketCount > 1 ? 's' : ''}</span>
         </div>
-      </div>
+      )}
 
-      {/* Onglet bottom-sheet */}
-      <div style={{ position: 'absolute', left: 0, right: 0, bottom: 0, zIndex: 1000, background: '#fff', borderTopLeftRadius: 26, borderTopRightRadius: 26, boxShadow: '0 -4px 24px rgba(0,0,0,.18)', maxHeight: open ? '70dvh' : undefined, overflowY: open ? 'auto' : 'visible' }}>
-
-        <button
-          onClick={() => setOpen((o) => !o)}
-          style={{ width: '100%', border: 'none', background: 'transparent', cursor: 'pointer', padding: '13px 20px 10px', display: 'block', textAlign: 'left', minHeight: 44 }}
-          aria-expanded={open}
-        >
-          <div style={{ width: 48, height: 6, background: '#dcdfe6', borderRadius: 3, margin: '0 auto 12px' }} />
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-            <span style={{ fontSize: 18, fontWeight: 800 }}>
-              {lieux.length} commerces{identified ? ` · ${playedCount} joué${playedCount > 1 ? 's' : ''}` : ' jouent le jeu'}
-            </span>
-            <span aria-hidden="true" style={{ fontSize: 20, color: '#5a6071' }}>{open ? '▾' : '▴'}</span>
-          </div>
-          {!open && <div style={{ fontSize: 14, color: '#5a6071', marginTop: 2 }}>1 ticket par commerce et par jour. Un seul grand tirage.</div>}
+      {/* Feuille du bas : poignée, carrousel de logos balayable, fiche courte et bouton pastille */}
+      <div data-feuille style={{ position: 'absolute', left: 0, right: 0, bottom: 0, zIndex: 1000, background: '#fff', borderTopLeftRadius: 26, borderTopRightRadius: 26, boxShadow: '0 -4px 18px rgba(0,0,0,.25)', maxHeight: open ? '82dvh' : undefined, overflowY: open ? 'auto' : 'visible', paddingBottom: 16 }}>
+        <button onClick={() => setOpen((o) => !o)} aria-expanded={open} aria-label={open ? 'Réduire' : 'Voir plus'}
+          style={{ display: 'block', width: '100%', minHeight: 44, border: 'none', background: 'transparent', cursor: 'pointer', padding: '10px 0 0' }}>
+          <span style={{ display: 'block', width: 44, height: 5, background: '#D1D5DB', borderRadius: 3, margin: '0 auto' }} />
         </button>
+        <div style={{ padding: '0 14px 8px', display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: 8 }}>
+          <span style={{ font: '700 15px system-ui', color: '#B5471E' }}>{identified ? 'Prochains commerces' : 'Les commerces qui jouent'}</span>
+          <span style={{ fontSize: 12, fontWeight: 600, color: '#6b7280' }}>{identified ? 'vert = joué' : `${nbCommerces} · glissez →`}</span>
+        </div>
+        <div ref={carRef} data-carrousel className="se-car" style={{ margin: 0, padding: '2px 14px 6px', gap: 10 }}>
+          {caro.map((l) => {
+            const jo = identified && played.has(l.id)
+            const on = selected?.id === l.id
+            const d = distDe(l)
+            const lg = logos[l.id]
+            return (
+              <button key={l.id} data-station data-logo={lg ? '1' : '0'} aria-pressed={on} onClick={() => choisir(l)}
+                style={{ flex: '0 0 76px', width: 76, minWidth: 0, border: 0, background: 'transparent', padding: 0, cursor: 'pointer', textAlign: 'center', font: 'inherit' }}>
+                <span style={{ position: 'relative', width: 74, height: 74, borderRadius: 16, background: lg ? '#fff' : '#FED7AA', border: `2px solid ${on ? '#1D4ED8' : jo ? '#15803D' : '#E5E7EB'}`, boxShadow: on ? '0 0 0 3px rgba(29,78,216,.2)' : 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', boxSizing: 'border-box', margin: '0 auto' }}>
+                  {lg ? <img src={lg} alt="" style={{ width: '80%', height: '80%', objectFit: 'contain' }} /> : <span style={{ font: '800 24px system-ui', color: '#9A3412' }}>{initiale(l.nom)}</span>}
+                  {jo && <span style={{ position: 'absolute', right: -5, top: -5, width: 20, height: 20, borderRadius: '50%', background: '#15803D', color: '#fff', font: '700 12px/20px system-ui', textAlign: 'center' }}>{'✓'}</span>}
+                </span>
+                <span style={{ display: 'block', maxWidth: 76, fontSize: 11, color: '#374151', marginTop: 3, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{l.nom}</span>
+                <span style={{ display: 'block', fontSize: 10, color: jo ? '#15803D' : '#6b7280', fontWeight: jo ? 700 : 400 }}>{jo ? 'joué' : d !== null ? (d < 1000 ? `${Math.round(d / 10) * 10} m` : `${(d / 1000).toFixed(1).replace('.', ',')} km`) : ' '}</span>
+              </button>
+            )
+          })}
+        </div>
+
+        {selected && (
+          <div data-fiche-courte style={{ margin: '6px 14px 0', border: '1px solid #E5E7EB', borderRadius: 14, padding: 10, display: 'flex', gap: 10, alignItems: 'center' }}>
+            <span style={{ width: 56, height: 56, flexShrink: 0, border: '1px solid #eee', borderRadius: 12, display: 'flex', alignItems: 'center', justifyContent: 'center', background: logos[selected.id] ? '#fff' : '#FED7AA' }}>
+              {logos[selected.id] ? <img src={logos[selected.id]} alt="" style={{ width: '80%', height: '80%', objectFit: 'contain' }} /> : <span style={{ font: '800 22px system-ui', color: '#9A3412' }}>{initiale(selected.nom)}</span>}
+            </span>
+            <div style={{ minWidth: 0, flex: 1 }}>
+              <b style={{ fontSize: 15, display: 'block', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{selected.nom}</b>
+              <div style={{ fontSize: 12, color: '#4B5563', marginTop: 2 }}>{dist ? `${dist.replace(/^à /, '')} · ` : ''}{identified && played.has(selected.id) ? 'déjà joué' : selected.gain_immediat ? `Lot immédiat : ${selected.gain_immediat}` : 'Un ticket du Grand tirage'}</div>
+            </div>
+            <button data-infos onClick={() => setFiche(true)} style={{ flexShrink: 0, minWidth: 44, minHeight: 44, border: '1.5px solid #F8D3BC', borderRadius: 12, background: '#FFF1E8', color: '#9A3412', fontWeight: 800, fontSize: 13, cursor: 'pointer', padding: '0 10px' }}>Infos</button>
+          </div>
+        )}
+
+        {selected ? (
+          <a data-cta-jouer href={urlJouer(selected)} style={ctaStyle}>Jouer ici</a>
+        ) : (
+          <button data-cta-jouer onClick={() => { if (prochain) choisir(prochain) }} style={{ ...ctaStyle, border: 0, cursor: 'pointer' }}>
+            {identified && prochain ? `Aller à ${prochain.nom}` : 'Jouer au plus proche'}
+          </button>
+        )}
 
         {!open && (
-          <div style={{ padding: '0 20px 20px' }}>
+          <button onClick={() => setOpen(true)} style={{ display: 'block', width: '100%', minHeight: 44, marginTop: 4, border: 0, background: 'transparent', color: '#5a6071', fontWeight: 700, fontSize: 13, cursor: 'pointer' }}>
+            Lots, gains et tous les commerces
+          </button>
+        )}
+
+        {open && (
+          <div style={{ padding: '4px 20px 12px' }}>
             {lotTeteTxt && (
-              <div data-lot-tete style={{ display: 'flex', alignItems: 'center', gap: 10, background: '#FFF1E8', border: '1px solid #F8D3BC', borderRadius: 14, padding: '9px 12px', marginBottom: 10 }}>
+              <div data-lot-tete style={{ display: 'flex', alignItems: 'center', gap: 10, background: '#FFF1E8', border: '1px solid #F8D3BC', borderRadius: 14, padding: '9px 12px', marginBottom: 12 }}>
                 <span style={{ flexShrink: 0, display: 'inline-flex', color: ORANGE_SE }}><Ico k="gift" size={22} /></span>
                 <div style={{ minWidth: 0, fontSize: 14, fontWeight: 800, color: '#7C2D12', lineHeight: 1.25 }}>
                   Grand tirage : {lotTeteTxt}
@@ -259,6 +333,7 @@ export default function SuperEventClient({ se, lots, lotsPhases = [], lieux, spo
                 </div>
               </div>
             )}
+            <div style={{ fontSize: 13, color: '#5a6071', marginBottom: 12 }}>1 ticket par commerce et par jour. Un seul grand tirage.</div>
             {identified && lieux.length > 0 && (
               <div data-progression style={{ marginBottom: 12 }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13, fontWeight: 800, color: '#141a26', marginBottom: 5 }}>
@@ -268,31 +343,11 @@ export default function SuperEventClient({ se, lots, lotsPhases = [], lieux, spo
                 <div className="se-barre"><i style={{ width: `${Math.max(pctJoue, 3)}%` }} /></div>
               </div>
             )}
-            <button data-cta-jouer className="se-cta" onClick={() => setOpen(true)} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, width: '100%', minHeight: 52, border: 0, borderRadius: 99, fontWeight: 900, fontSize: 16, color: '#fff', cursor: 'pointer', background: 'linear-gradient(135deg,#C2410C,#E05A0E)', boxShadow: '0 12px 22px -12px rgba(194,65,12,.85)' }}>
-              <Ico k="pin" size={20} />Jouer près de moi
-            </button>
-          </div>
-        )}
-
-        {open && (
-          <div style={{ padding: '4px 20px 28px' }}>
 
             {identified && (
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
                 <div style={{ fontSize: 15, fontWeight: 700 }}>{joueur?.prenom ? `Salut ${joueur.prenom}` : 'Salut'}</div>
                 <a href="/moi" style={{ fontSize: 13, fontWeight: 800, color: '#2746A6', background: '#EFF3FE', padding: '7px 13px', borderRadius: 100, textDecoration: 'none' }}><Ico k="user" size={13} style={{ marginRight: 5, verticalAlign: -2 }} />Mon compte</a>
-              </div>
-            )}
-
-            {focus && (
-              <div className="fe-card" style={{ background: ENTETE_SE, color: '#fff', borderRadius: 18, padding: '17px 18px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, marginBottom: 18, boxShadow: '0 6px 20px rgba(194,65,12,.38)' }}>
-                <div>
-                  <div style={{ fontSize: 13, opacity: 0.95 }}>Te voilà chez</div>
-                  <div style={{ fontSize: 21, fontWeight: 800 }}>{focus.nom}</div>
-                </div>
-                <a href={focus.module ? `/parcours/${focus.module}?ev=${focus.id}` : '#'} style={{ background: '#fff', color: ORANGE_SE, fontWeight: 800, fontSize: 16, padding: '13px 22px', borderRadius: 14, textDecoration: 'none', whiteSpace: 'nowrap', minHeight: 44, display: 'inline-flex', alignItems: 'center' }}>
-                  On joue
-                </a>
               </div>
             )}
 
@@ -369,45 +424,11 @@ export default function SuperEventClient({ se, lots, lotsPhases = [], lieux, spo
               </div>
             )}
 
-            {/* Commerces : carrousel des plus proches, liste groupée par jeu sur demande */}
-            <div data-stations style={{ marginBottom: 6 }}>
-              <div style={{ fontSize: 13, fontWeight: 800, letterSpacing: '.04em', color: '#5a6071', textTransform: 'uppercase', marginBottom: 9 }}><Ico k="shop" size={13} style={{ marginRight: 5, verticalAlign: -2 }} />{userPos ? 'Les plus proches' : 'Commerces à découvrir'}</div>
-              <div className="se-car" data-carrousel>
-                {lieuxTries.slice(0, 6).map((l, idx) => {
-                  const u = modUI(l.module)
-                  const isPlayed = identified && played.has(l.id)
-                  const d = distDe(l)
-                  const hint = l.gain_immediat ? `${l.gain_immediat}` : 'Un ticket à gagner'
-                  return (
-                    <div
-                      key={l.id}
-                      role="button"
-                      tabIndex={0}
-                      data-station
-                      onClick={() => setSelected(l)}
-                      onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setSelected(l) } }}
-                      className="fe-card"
-                      style={{ flex: '0 0 74%', maxWidth: 300, display: 'flex', alignItems: 'center', gap: 12, padding: '12px 13px', borderRadius: 18, background: '#fff', border: `1px solid ${isPlayed ? '#bfedd6' : '#eef0f3'}`, boxShadow: '0 2px 8px rgba(20,26,38,.06)', cursor: 'pointer', animationDelay: `${Math.min(idx * 50, 250)}ms`, minHeight: 76 }}
-                    >
-                      <span style={{ position: 'relative', width: 48, height: 48, borderRadius: 14, background: u.grad, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, boxShadow: '0 3px 10px rgba(20,26,38,.14)' }}>
-                        <IcoModule module={l.module ?? 'quiz'} size={24} />
-                        {isPlayed && <span style={{ position: 'absolute', top: -5, right: -5, width: 22, height: 22, borderRadius: '50%', background: '#15803D', color: '#fff', fontSize: 13, fontWeight: 800, display: 'flex', alignItems: 'center', justifyContent: 'center', border: '2px solid #fff' }}>✓</span>}
-                      </span>
-                      <div style={{ flex: 1, minWidth: 0 }}>
-                        <div style={{ fontSize: 16, fontWeight: 800, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{l.nom}</div>
-                        <div style={{ fontSize: 13, color: '#5a6071', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', marginTop: 2 }}>{isPlayed ? 'Déjà joué' : (d !== null ? `${fmtDist(d)} · ` : '') + hint}</div>
-                      </div>
-                    </div>
-                  )
-                })}
-              </div>
-              {lieux.length > 6 && (
-                <button data-voir-tous aria-expanded={tous} onClick={() => setTous((t) => !t)} style={{ display: 'block', width: '100%', minHeight: 44, border: '1.5px solid #F8D3BC', borderRadius: 14, background: '#FFF1E8', color: '#9A3412', fontWeight: 800, fontSize: 14.5, cursor: 'pointer', marginTop: 4 }}>
-                  {tous ? 'Masquer la liste' : `Voir les ${lieux.length} commerces`}
-                </button>
-              )}
-              {(tous || lieux.length <= 6) && lieux.length > 0 && (
-                <div data-liste-groupee style={{ marginTop: 12 }}>
+            {/* Tous les commerces, groupés par jeu */}
+            {lieux.length > 0 && (
+              <div data-stations style={{ marginBottom: 6 }}>
+                <div style={{ fontSize: 13, fontWeight: 800, letterSpacing: '.04em', color: '#5a6071', textTransform: 'uppercase', marginBottom: 9 }}><Ico k="shop" size={13} style={{ marginRight: 5, verticalAlign: -2 }} />Tous les commerces</div>
+                <div data-liste-groupee>
                   {groupes.map((g) => (
                     <div key={g.label} style={{ marginBottom: 12 }}>
                       <div style={{ fontSize: 13, fontWeight: 800, color: '#5a6071', marginBottom: 6 }}>{g.label} · {g.items.length}</div>
@@ -415,7 +436,7 @@ export default function SuperEventClient({ se, lots, lotsPhases = [], lieux, spo
                         {g.items.map((l) => {
                           const jo = identified && played.has(l.id)
                           return (
-                            <button key={l.id} onClick={() => setSelected(l)} style={{ minHeight: 44, textAlign: 'left', border: `1px solid ${jo ? '#bfedd6' : '#e6e9f2'}`, background: jo ? '#EAFBF3' : '#fff', borderRadius: 12, padding: '0 12px', fontSize: 13.5, fontWeight: 700, color: '#141a26', cursor: 'pointer', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                            <button key={l.id} onClick={() => choisir(l)} style={{ minHeight: 44, textAlign: 'left', border: `1px solid ${jo ? '#bfedd6' : '#e6e9f2'}`, background: jo ? '#EAFBF3' : '#fff', borderRadius: 12, padding: '0 12px', fontSize: 13.5, fontWeight: 700, color: '#141a26', cursor: 'pointer', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                               {jo ? '✓ ' : ''}{l.nom}
                             </button>
                           )
@@ -424,8 +445,8 @@ export default function SuperEventClient({ se, lots, lotsPhases = [], lieux, spo
                     </div>
                   ))}
                 </div>
-              )}
-            </div>
+              </div>
+            )}
 
             {autres.length > 0 && (
               <div style={{ marginTop: 22 }}>
@@ -470,9 +491,9 @@ export default function SuperEventClient({ se, lots, lotsPhases = [], lieux, spo
       </div>
 
       {/* ===== FICHE COMMERCE ===== */}
-      {selected && fu && (
+      {fiche && selected && fu && (
         <>
-          <div onClick={() => setSelected(null)} style={{ position: 'absolute', inset: 0, zIndex: 1500, background: 'rgba(15,20,35,.5)', animation: 'feFade .2s ease' }} />
+          <div onClick={() => setFiche(false)} style={{ position: 'absolute', inset: 0, zIndex: 1500, background: 'rgba(15,20,35,.5)', animation: 'feFade .2s ease' }} />
           <div style={{ position: 'absolute', left: 0, right: 0, bottom: 0, zIndex: 1600, background: '#fff', borderTopLeftRadius: 26, borderTopRightRadius: 26, boxShadow: '0 -6px 30px rgba(0,0,0,.25)', maxHeight: '86dvh', overflowY: 'auto', animation: 'feSheetUp .3s cubic-bezier(.4,0,.2,1)' }}>
 
             {/* Hero : photo si dispo, sinon dégradé du jeu */}
@@ -485,7 +506,7 @@ export default function SuperEventClient({ se, lots, lotsPhases = [], lieux, spo
               )}
               <div style={{ position: 'relative', padding: '20px 22px 22px', minHeight: selected.photo_url ? 188 : undefined, display: 'flex', flexDirection: 'column', justifyContent: 'flex-end' }}>
                 <div style={{ position: 'absolute', top: 16, left: '50%', transform: 'translateX(-50%)', width: 48, height: 6, background: 'rgba(255,255,255,.7)', borderRadius: 3 }} />
-                <button onClick={() => setSelected(null)} style={{ position: 'absolute', top: 14, right: 16, width: 44, height: 44, borderRadius: '50%', border: 'none', background: 'rgba(0,0,0,.35)', color: '#fff', fontSize: 18, cursor: 'pointer', backdropFilter: 'blur(4px)' }} aria-label="Fermer">✕</button>
+                <button onClick={() => setFiche(false)} style={{ position: 'absolute', top: 14, right: 16, width: 44, height: 44, borderRadius: '50%', border: 'none', background: 'rgba(0,0,0,.35)', color: '#fff', fontSize: 18, cursor: 'pointer', backdropFilter: 'blur(4px)' }} aria-label="Fermer">✕</button>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8 }}>
                   <span style={{ width: 44, height: 44, borderRadius: 13, background: selected.photo_url ? 'rgba(255,255,255,.18)' : 'rgba(255,255,255,.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 24, flexShrink: 0, backdropFilter: 'blur(4px)' }}><IcoModule module={selected?.module ?? 'quiz'} size={24} /></span>
                   <div style={{ display: 'flex', gap: 7, flexWrap: 'wrap' }}>
