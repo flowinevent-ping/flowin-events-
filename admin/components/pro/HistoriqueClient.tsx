@@ -73,7 +73,7 @@ export default function HistoriqueClient({ initial, cle: cleInitiale }: { initia
         <div style={{ ...CARD, textAlign: 'center', padding: 26 }}>
           <div style={{ fontSize: 16, fontWeight: 800 }}>Aucune animation pour le moment</div>
           <div style={{ fontSize: 13.5, ...MUTED, margin: '6px 0 14px' }}>{peutCreer ? 'Créez votre animation ou rejoignez un super event.' : 'Pour créer une animation, contactez Flowin.'}</div>
-          {peutCreer && <Link href={`/pro/nouvelle${q}`} style={{ display: 'inline-block', background: C.degrade, color: '#fff', borderRadius: 999, padding: '12px 26px', fontWeight: 800, fontSize: 14, textDecoration: 'none' }}>Commencer</Link>}
+          {peutCreer && <Link href={`/pro/nouvelle${q}`} style={{ display: 'inline-flex', alignItems: 'center', minHeight: 44, background: C.degrade, color: '#fff', borderRadius: 999, padding: '12px 26px', fontWeight: 800, fontSize: 14, textDecoration: 'none' }}>Commencer</Link>}
         </div>
       )}
 

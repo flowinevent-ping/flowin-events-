@@ -19,7 +19,7 @@ function Copier({ k, v, copie }: { k: string; v: string; copie: string }) {
     <button type="button" data-copier={k}
       onClick={() => { navigator.clipboard?.writeText(copie).then(() => { setOk(true); setTimeout(() => setOk(false), 1600) }, () => {}) }}
       style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10, width: '100%', background: '#fff', border: `1.5px solid ${C.bordure}`, borderRadius: 12, padding: '9px 12px', cursor: 'pointer', fontFamily: 'inherit', color: C.texte, textAlign: 'left' }}>
-      <span style={{ minWidth: 0 }}><span style={{ display: 'block', fontSize: 11, fontWeight: 800, ...MUTED }}>{k}</span>
+      <span style={{ minWidth: 0 }}><span style={{ display: 'block', fontSize: 12, fontWeight: 800, ...MUTED }}>{k}</span>
         <b style={{ fontSize: 14, fontFamily: 'ui-monospace,Menlo,monospace', overflowWrap: 'anywhere' }}>{v}</b></span>
       <span style={{ fontSize: 12.5, fontWeight: 800, color: ok ? '#15803D' : C.violet, whiteSpace: 'nowrap' }}>{ok ? 'Copié' : 'Copier'}</span>
     </button>

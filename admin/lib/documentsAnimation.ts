@@ -207,7 +207,7 @@ export function garantieActive(): boolean {
 export function rappelGarantie(r: Commande): string {
   if (!garantieActive() || r.offre !== "annuelle" || r.garantie || r.type_commande === "renouvellement") return "";
   const lien = "https://flowin-events.vercel.app/bon-commande-animation.html?garantie=demarche&commande=" + encodeURIComponent(String(r.id));
-  return `<div style="border:2px solid #7A4FE0;border-radius:12px;padding:12px 14px;margin-top:14px;font-size:14px"><b>Satisfait ou remboursé</b> : la garantie des premiers adhérents (formule annuelle) n'est pas encore activée sur votre commande. Remplissez et certifiez votre fiche découverte en deux minutes :<br><a href="${lien}" style="display:inline-block;margin-top:10px;background:#7A4FE0;color:#fff;text-decoration:none;font-weight:800;padding:10px 18px;border-radius:100px">Je veux bénéficier du satisfait ou remboursé</a></div>`;
+  return `<div style="border:2px solid #3B5CC4;border-radius:12px;padding:12px 14px;margin-top:14px;font-size:14px"><b>Satisfait ou remboursé</b> : la garantie des premiers adhérents (formule annuelle) n'est pas encore activée sur votre commande. Remplissez et certifiez votre fiche découverte en deux minutes :<br><a href="${lien}" style="display:inline-block;margin-top:10px;background:#3B5CC4;color:#fff;text-decoration:none;font-weight:800;padding:10px 18px;border-radius:100px">Je veux bénéficier du satisfait ou remboursé</a></div>`;
 }
 
 /** Avant paiement : accusé de réception + bon de commande + coordonnées de virement. PAS de facture. */

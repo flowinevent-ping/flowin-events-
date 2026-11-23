@@ -161,7 +161,7 @@ export default function ImportFichierClient({ proId }: { proId: string }) {
   const pastille = (n: number, l: string, couleur: string = C.texte) => (
     <div style={{ background: C.subtil, border: `1px solid ${C.bordure}`, borderRadius: 14, padding: '10px 8px', textAlign: 'center' }}>
       <div style={{ fontSize: 22, fontWeight: 900, color: couleur }}>{n}</div>
-      <div style={{ fontSize: 11.5, ...MUTED, fontWeight: 700 }}>{l}</div>
+      <div style={{ fontSize: 12, ...MUTED, fontWeight: 700 }}>{l}</div>
     </div>
   )
 
@@ -171,7 +171,7 @@ export default function ImportFichierClient({ proId }: { proId: string }) {
         {ETAPES.map((e, i) => (
           <div key={e} style={{ flex: 1 }}>
             <div style={{ height: 4, borderRadius: 4, background: i <= etape ? C.bleu : C.bordure }} />
-            <div style={{ fontSize: 11, fontWeight: 800, marginTop: 4, color: i === etape ? C.bleu : C.attenue }}>{i + 1}. {e}</div>
+            <div style={{ fontSize: 12, fontWeight: 800, marginTop: 4, color: i === etape ? C.bleu : C.attenue }}>{i + 1}. {e}</div>
           </div>
         ))}
       </div>

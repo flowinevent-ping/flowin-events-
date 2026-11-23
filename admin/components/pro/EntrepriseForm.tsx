@@ -127,7 +127,7 @@ export default function EntrepriseForm({ initial, avecFicheEntreprise = false }:
                 value={f.image_url ?? ''} onChange={e => { setF(x => ({ ...x, image_url: e.target.value })); setEtat('') }} />
             </div>
             {uploadErreur && <div style={{ fontSize: 12, color: '#B45309', marginTop: 6, fontWeight: 700 }}>{uploadErreur}</div>}
-            <div style={{ fontSize: 11.5, color: '#5a6b80', marginTop: 6 }}>PNG, JPG, WebP ou SVG — 5 Mo max. Affiché sur vos jeux, la carte et les billets.</div>
+            <div style={{ fontSize: 12, color: '#5a6b80', marginTop: 6 }}>PNG, JPG, WebP ou SVG — 5 Mo max. Affiché sur vos jeux, la carte et les billets.</div>
           </div>
         </div>
       )}

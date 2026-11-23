@@ -250,7 +250,7 @@ function FicheCommerce({ c, d, mode, actif, onClick }: { c: CommerceCarte; d: nu
       </div>
 
       {c.lot && (
-        <div style={{ display: 'flex', gap: 6, alignItems: 'center', fontSize: 12.5, fontWeight: 800, color: '#7A4FE0', background: '#7A4FE014', borderRadius: 8, padding: '5px 8px', overflow: 'hidden' }}>
+        <div style={{ display: 'flex', gap: 6, alignItems: 'center', fontSize: 12.5, fontWeight: 800, color: '#3B5CC4', background: '#3B5CC414', borderRadius: 8, padding: '5px 8px', overflow: 'hidden' }}>
           <Cadeau /><span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>Lot du moment : {c.lot}</span>
         </div>
       )}

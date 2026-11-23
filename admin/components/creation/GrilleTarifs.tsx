@@ -20,7 +20,7 @@ export default function GrilleTarifs({ valeur, onChange, accent = '#C2410C', pac
           const on = valeur === p.cle
           return (
             <label key={p.cle} data-pack={p.cle} style={{ position: 'relative', display: 'block', cursor: 'pointer', background: on ? `${accent}10` : '#fff', border: `2px solid ${on ? accent : C.bordureChamp}`, borderRadius: 16, padding: '14px 14px 12px', boxSizing: 'border-box' }}>
-              {p.badge && <span style={{ position: 'absolute', top: -10, right: 12, background: accent, color: '#fff', fontSize: 10.5, fontWeight: 800, letterSpacing: '.04em', borderRadius: 99, padding: '3px 9px' }}>{p.badge}</span>}
+              {p.badge && <span style={{ position: 'absolute', top: -10, right: 12, background: accent, color: '#fff', fontSize: 12, fontWeight: 800, letterSpacing: '.04em', borderRadius: 99, padding: '3px 9px' }}>{p.badge}</span>}
               <span style={{ display: 'flex', alignItems: 'flex-start', gap: 10 }}>
                 <input type="checkbox" checked={on} onChange={() => onChange(on ? null : p.cle)} aria-label={`Pack ${p.nom}, ${prixAffiche(p)}`} style={{ marginTop: 3, width: 18, height: 18, accentColor: accent, flexShrink: 0 }} />
                 <span style={{ flex: 1, minWidth: 0 }}>

@@ -60,7 +60,7 @@ export function BadgeTypeQr({ type }: { type: TypeQr }) {
   return (
     <span style={{
       fontSize: 10, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '.04em', padding: '2px 7px', borderRadius: 99,
-      background: d ? 'rgba(224,33,138,.1)' : 'rgba(22,163,74,.1)', color: d ? '#BE185D' : '#15803D', whiteSpace: 'nowrap',
+      background: d ? 'rgba(224,33,138,.1)' : 'rgba(21,128,61,.1)', color: d ? '#BE185D' : '#15803D', whiteSpace: 'nowrap',
     }}>{d ? 'Digital' : 'Physique'}</span>
   )
 }

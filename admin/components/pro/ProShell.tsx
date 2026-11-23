@@ -174,12 +174,12 @@ export default function ProShell({ proName, proId, active, children }: { proName
         {/* Logo texte de la landing : « Flow » encre + « in » bleu. */}
         <span style={{ display: 'flex', alignItems: 'baseline', gap: 7 }}>
           <span className="fl-logo">Flow<em>in</em> Event</span>
-          <span style={{ fontSize: 10.5, fontWeight: 800, letterSpacing: '.12em', color: C.violet }}>PRO</span>
+          <span style={{ fontSize: 12, fontWeight: 800, letterSpacing: '.12em', color: C.violet }}>PRO</span>
         </span>
         <button className="pro-drawer-close" onClick={() => setOpen(false)} aria-label="Fermer le menu" style={{ display: 'none', background: 'none', border: 'none', color: C.attenue, fontSize: 24, cursor: 'pointer', lineHeight: 1, minWidth: 44, minHeight: 44, marginRight: -10 }}>×</button>
       </div>
       <div style={{ background: C.fond, border: `1px solid ${C.bordure}`, borderRadius: 14, padding: '11px 13px', marginBottom: 20 }}>
-        <div style={{ fontSize: 10, fontWeight: 800, letterSpacing: '.12em', textTransform: 'uppercase', color: C.attenue }}>Établissement</div>
+        <div style={{ fontSize: 12, fontWeight: 800, letterSpacing: '.1em', textTransform: 'uppercase', color: C.attenue }}>Établissement</div>
         <div style={{ fontSize: 14, fontWeight: 800, color: C.texte, lineHeight: 1.25, marginTop: 2 }}>{proName || 'Mon établissement'}</div>
       </div>
       {navVisible.map(n => {
@@ -190,7 +190,7 @@ export default function ProShell({ proName, proId, active, children }: { proName
               <span style={{ width: 34, height: 34, borderRadius: 11, background: on ? C.violet : C.fond, color: on ? '#fff' : C.accent, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}><Icon k={n.icon} /></span>
               <span style={{ flex: 1, minWidth: 0 }}>
                 <span style={{ display: 'block', fontSize: 14, fontWeight: 800 }}>{n.label}</span>
-                <span style={{ display: 'block', fontSize: 11, fontWeight: 600, color: C.attenue }}>{n.sous}</span>
+                <span style={{ display: 'block', fontSize: 12, fontWeight: 600, color: C.attenue }}>{n.sous}</span>
               </span>
             </div>
           </Link>
@@ -206,7 +206,7 @@ export default function ProShell({ proName, proId, active, children }: { proName
         return (
           <Link key={n.key} href={`${n.route}${q}`} data-nav={n.key} style={{ textDecoration: 'none', flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3, padding: '9px 4px 8px', minHeight: 56, boxSizing: 'border-box', color: on ? C.violetFonce : C.attenue }}>
             <span style={{ color: on ? C.violet : C.attenue }}><Icon k={n.icon} /></span>
-            <span style={{ fontSize: 11.5, fontWeight: 800, lineHeight: 1.1, textAlign: 'center' }}>{LIBELLE_COURT[n.key] ?? n.label}</span>
+            <span style={{ fontSize: 12.5, fontWeight: 800, lineHeight: 1.1, textAlign: 'center' }}>{LIBELLE_COURT[n.key] ?? n.label}</span>
           </Link>
         )
       })}

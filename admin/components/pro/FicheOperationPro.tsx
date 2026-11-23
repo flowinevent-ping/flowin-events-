@@ -62,7 +62,7 @@ export default function FicheOperationPro({ initial, cle, onglet: ongletInitial 
   const chiffre = (v: number | string, l: string) => (
     <div style={{ background: 'rgba(255,255,255,.14)', borderRadius: 12, padding: '7px 12px' }}>
       <div style={{ fontSize: 19, fontWeight: 800, lineHeight: 1.1 }}>{v}</div>
-      <div style={{ fontSize: 11, fontWeight: 700, opacity: 0.85 }}>{l}</div>
+      <div style={{ fontSize: 12, fontWeight: 700, opacity: 0.85 }}>{l}</div>
     </div>
   )
 
@@ -75,10 +75,10 @@ export default function FicheOperationPro({ initial, cle, onglet: ongletInitial 
         <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 4, background: C.filet }} />
         <div style={{ padding: '15px 20px 14px' }}>
           <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
-            <span style={{ fontSize: 11, fontWeight: 800, letterSpacing: '.1em', textTransform: 'uppercase', background: 'rgba(255,255,255,.16)', borderRadius: 50, padding: '4px 10px' }}>
+            <span style={{ fontSize: 12, fontWeight: 800, letterSpacing: '.1em', textTransform: 'uppercase', background: 'rgba(255,255,255,.16)', borderRadius: 50, padding: '4px 10px' }}>
               {op.type === 'super' ? 'Super event' : 'Animation'}
             </span>
-            <span style={{ fontSize: 11, fontWeight: 800, letterSpacing: '.1em', textTransform: 'uppercase', background: periode === 'en_cours' ? C.fuchsia : 'rgba(255,255,255,.16)', borderRadius: 50, padding: '4px 10px' }}>
+            <span style={{ fontSize: 12, fontWeight: 800, letterSpacing: '.1em', textTransform: 'uppercase', background: periode === 'en_cours' ? C.fuchsia : 'rgba(255,255,255,.16)', borderRadius: 50, padding: '4px 10px' }}>
               {LIBELLE_PERIODE[periode]}
             </span>
           </div>
@@ -122,8 +122,8 @@ export default function FicheOperationPro({ initial, cle, onglet: ongletInitial 
                 {op.type === 'super' ? 'Le jeu du super event, identique sur chaque station. Choisissez la vue « mon animation » ou « super event ».' : 'Le jeu de votre animation, tel que vos clients le voient.'}
               </div>
               {op.type === 'super'
-                ? <a href={`/pro/super${q}&se=${encodeURIComponent(op.id)}`} style={{ ...BTN2, display: 'inline-block', textDecoration: 'none' }}>Carte et bilan du super event</a>
-                : <a href={`/pro/super/${encodeURIComponent(st.id)}${q}`} style={{ ...BTN2, display: 'inline-block', textDecoration: 'none' }}>Activité détaillée</a>}
+                ? <a href={`/pro/super${q}&se=${encodeURIComponent(op.id)}`} style={{ ...BTN2, textDecoration: 'none' }}>Carte et bilan du super event</a>
+                : <a href={`/pro/super/${encodeURIComponent(st.id)}${q}`} style={{ ...BTN2, textDecoration: 'none' }}>Activité détaillée</a>}
             </div>
             {/* Parcours mobil d origine : parcours event + parcours super event, choix de la station. */}
             <ParcoursMobil events={op.stations.map(s => ({ id: s.id, module: s.module, nom: s.nom, super_event_id: s.super_event_id }))} showTitle={false} />
@@ -133,7 +133,7 @@ export default function FicheOperationPro({ initial, cle, onglet: ongletInitial 
         {onglet === 'diffusion' && <ContenuComm op={op} partenaireId={pt?.id ?? null} partenaireSe={pt?.super_event_id ?? null} mode="pro" />}
         {onglet === 'gagnants' && <BlocGagnants op={op} data={data} onChange={recharger} />}
         {/* Audit promesse L3 (19/11/2026) : les réponses du quiz bonus, à un clic du rapport. */}
-        {onglet === 'trafic' && op.type !== 'super' && st && <a data-lien-bonus href={`/pro/super/${encodeURIComponent(st.id)}${q}`} style={{ ...BTN2, display: 'inline-block', textDecoration: 'none', marginBottom: 12 }}>Réponses du quiz bonus</a>}
+        {onglet === 'trafic' && op.type !== 'super' && st && <a data-lien-bonus href={`/pro/super/${encodeURIComponent(st.id)}${q}`} style={{ ...BTN2, textDecoration: 'none', marginBottom: 12 }}>Réponses du quiz bonus</a>}
         {onglet === 'trafic' && <ContenuTracking op={op} proId={data.proId} onStation={id => { window.location.href = `/pro/super/${encodeURIComponent(id)}${q}` }} masquerGlobal />}
         {onglet === 'crm' && <CrmProCharge proId={data.proId} proNom={data.proNom ?? ''} operations={[]} operationFixe={op.cle} />}
         {onglet === 'bons' && <ContenuContrat op={op} mode="pro" partenaireId={pt?.id ?? null} onChange={recharger} />}

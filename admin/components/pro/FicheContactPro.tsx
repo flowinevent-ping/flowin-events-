@@ -61,7 +61,7 @@ export default function FicheContactPro({ proId, proNom, joueurId, partenaireId,
         {lienRetour}
         <div style={CARD} data-crm-connexion>
           <div style={{ fontSize: 14, marginBottom: 10 }}>{MESSAGE_CONNEXION_CRM}</div>
-          <Link href="/pro/connexion" style={{ fontWeight: 800, fontSize: 14 }}>Me connecter</Link>
+          <Link href="/pro/connexion" style={{ display: 'inline-flex', alignItems: 'center', minHeight: 44, fontWeight: 800, fontSize: 14 }}>Me connecter</Link>
         </div>
       </>
     )
@@ -97,7 +97,7 @@ export default function FicheContactPro({ proId, proNom, joueurId, partenaireId,
     </div>
   )
   const bouton: React.CSSProperties = { border: `1.5px solid ${C.bordureChamp}`, borderRadius: 50, padding: '7px 14px', fontWeight: 800, fontSize: 12.5, color: C.accent, textDecoration: 'none', background: '#fff' }
-  const titre = (t: string) => <div style={{ fontSize: 11, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '.06em', color: C.attenue, marginBottom: 6 }}>{t}</div>
+  const titre = (t: string) => <div style={{ fontSize: 12, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '.06em', color: C.attenue, marginBottom: 6 }}>{t}</div>
 
   return (
     <>
@@ -150,9 +150,9 @@ export default function FicheContactPro({ proId, proNom, joueurId, partenaireId,
             <div key={t.id} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '7px 0', borderBottom: `1px solid ${C.bordure}` }}>
               <div style={{ flex: 1 }}>
                 <div style={{ fontWeight: 700, fontSize: 13 }}>{t.lot_nom ?? 'Lot'}</div>
-                <div style={{ fontSize: 11, ...MUTED }}>{t.created_at ? new Date(t.created_at).toLocaleDateString('fr-FR') : '—'}</div>
+                <div style={{ fontSize: 12, ...MUTED }}>{t.created_at ? new Date(t.created_at).toLocaleDateString('fr-FR') : '—'}</div>
               </div>
-              <span style={{ fontSize: 10.5, fontWeight: 800, borderRadius: 99, padding: '3px 9px',
+              <span style={{ fontSize: 12, fontWeight: 800, borderRadius: 99, padding: '3px 9px',
                 background: remis ? 'rgba(21,128,61,.1)' : 'rgba(180,83,9,.1)', color: remis ? '#15803D' : '#B45309' }}>
                 {remis ? 'Remis' : 'À remettre'}
               </span>

@@ -26,7 +26,7 @@ import type { Facture } from '@/lib/documentsAnimation'
 import { GARANTIE_ACTIVE } from '@/lib/flowinConfig'
 const TEINTE: Record<StatutAffiche, { fond: string; texte: string }> = {
   attente: { fond: '#FFF4E0', texte: '#9A5B00' },
-  paye: { fond: '#E6F7F4', texte: C.ok },
+  paye: { fond: '#DCFCE7', texte: C.ok },
   documents: { fond: '#EAEFFB', texte: C.bleu },
   a_reprendre: { fond: '#FDECEC', texte: C.ko },
   annulee: { fond: '#EEF1F5', texte: C.attenue },
@@ -83,7 +83,7 @@ export default function HistoriqueCommandes({ proId }: { proId: string }) {
       <div style={CARD}>
         <div style={{ fontSize: 16, fontWeight: 900 }}>Connectez-vous pour voir vos commandes</div>
         <div style={{ fontSize: 13.5, ...MUTED, margin: '6px 0 14px' }}>Vos commandes et vos factures sont réservées à votre compte pro.</div>
-        <Link href="/pro/connexion" style={{ ...BTN, display: 'inline-block', textDecoration: 'none' }}>Se connecter</Link>
+        <Link href="/pro/connexion" style={{ ...BTN, textDecoration: 'none' }}>Se connecter</Link>
       </div>
     )
   }
@@ -102,7 +102,7 @@ export default function HistoriqueCommandes({ proId }: { proId: string }) {
       <div style={{ ...CARD, textAlign: 'center', padding: 28 }}>
         <div style={{ fontSize: 17, fontWeight: 900 }}>Aucune commande pour le moment</div>
         <div style={{ fontSize: 13.5, ...MUTED, margin: '6px 0 16px' }}>Choisissez votre offre et validez votre bon de commande.</div>
-        <LienBonCommande proId={proId} style={{ ...BTN, display: 'inline-block', textDecoration: 'none' }}>Valider mon bon de commande</LienBonCommande>
+        <LienBonCommande proId={proId} style={{ ...BTN, textDecoration: 'none' }}>Valider mon bon de commande</LienBonCommande>
       </div>
     )
   }
@@ -132,8 +132,8 @@ export default function HistoriqueCommandes({ proId }: { proId: string }) {
                 </div>
                 <div style={{ fontSize: 13, fontWeight: 700, color: C.encre2 }}>{resumeOffre(c)}</div>
                 <div style={{ textAlign: 'right' }}>
-                  <div style={{ fontSize: 15, fontWeight: 900 }}>{eur(c.montant_ttc)} <span style={{ fontSize: 11, ...MUTED, fontWeight: 700 }}>TTC</span></div>
-                  <div style={{ fontSize: 11.5, ...MUTED }}>{eur(c.montant_ht)} HT</div>
+                  <div style={{ fontSize: 15, fontWeight: 900 }}>{eur(c.montant_ttc)} <span style={{ fontSize: 12, ...MUTED, fontWeight: 700 }}>TTC</span></div>
+                  <div style={{ fontSize: 12, ...MUTED }}>{eur(c.montant_ht)} HT</div>
                 </div>
                 <Pastille s={s} />
               </button>
@@ -145,7 +145,7 @@ export default function HistoriqueCommandes({ proId }: { proId: string }) {
                       <div style={ETIQ}>Détail de la commande</div>
                       {lignesCommande(c).map((l, i) => (
                         <div key={i} style={{ display: 'flex', gap: 10, justifyContent: 'space-between', padding: '8px 0', borderBottom: `1px solid ${C.bordure}`, fontSize: 13 }}>
-                          <div><b>{l.lib}</b>{l.q > 1 ? <span style={MUTED}> × {l.q}</span> : null}<div style={{ fontSize: 11.5, ...MUTED }}>{l.det}</div></div>
+                          <div><b>{l.lib}</b>{l.q > 1 ? <span style={MUTED}> × {l.q}</span> : null}<div style={{ fontSize: 12, ...MUTED }}>{l.det}</div></div>
                           <b style={{ whiteSpace: 'nowrap' }}>{eur(l.ht)}</b>
                         </div>
                       ))}
@@ -213,5 +213,5 @@ export default function HistoriqueCommandes({ proId }: { proId: string }) {
   )
 }
 
-const ETIQ: React.CSSProperties = { fontSize: 11, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '.1em', color: C.attenue, marginBottom: 6 }
+const ETIQ: React.CSSProperties = { fontSize: 12, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '.1em', color: C.attenue, marginBottom: 6 }
 const LIGNE: React.CSSProperties = { display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 10, padding: '8px 0', borderBottom: `1px solid ${C.bordure}`, fontSize: 13 }

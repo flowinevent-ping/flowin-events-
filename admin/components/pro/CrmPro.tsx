@@ -37,14 +37,14 @@ const bouton: React.CSSProperties = {
   padding: '7px 13px', fontWeight: 800, fontSize: 12.5, cursor: 'pointer', fontFamily: 'inherit', whiteSpace: 'nowrap', textDecoration: 'none',
 }
 const boutonPlein: React.CSSProperties = { ...bouton, border: 'none', background: C.degrade, color: '#fff' }
-const th: React.CSSProperties = { textAlign: 'left', fontSize: 10, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '.07em', color: C.attenue, padding: '8px 10px', borderBottom: `1px solid ${C.bordure}`, background: C.subtil, whiteSpace: 'nowrap' }
+const th: React.CSSProperties = { textAlign: 'left', fontSize: 12, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '.07em', color: C.attenue, padding: '8px 10px', borderBottom: `1px solid ${C.bordure}`, background: C.subtil, whiteSpace: 'nowrap' }
 const td: React.CSSProperties = { padding: '8px 10px', borderBottom: `1px solid ${C.bordure}`, fontSize: 12.5, verticalAlign: 'top' }
 
 function Tuile({ v, l }: { v: React.ReactNode; l: string }) {
   return (
     <div style={{ flex: '1 1 120px', background: '#fff', border: `1px solid ${C.bordure}`, borderRadius: 14, padding: '10px 14px' }}>
       <div style={{ fontSize: 22, fontWeight: 800, color: C.accent, lineHeight: 1.1 }}>{v}</div>
-      <div style={{ fontSize: 11.5, fontWeight: 700, color: C.attenue }}>{l}</div>
+      <div style={{ fontSize: 12, fontWeight: 700, color: C.attenue }}>{l}</div>
     </div>
   )
 }
@@ -262,26 +262,26 @@ export default function CrmPro({ proId, proNom, contacts, erreur, operations, op
                       <td style={td}>
                         <div>
                           <div style={{ fontWeight: 800 }}>{nomContact(c)}</div>
-                          {c.offert_par && <div data-offert-par style={{ fontSize: 11.5, fontWeight: 800, color: '#C2410C' }}>Offert par {c.offert_par}</div>}
-                          <div style={{ fontSize: 11.5, color: C.attenue }}>{[c.code_postal, c.ville].filter(Boolean).join(' ') || 'Adresse non renseignée'}</div>
+                          {c.offert_par && <div data-offert-par style={{ fontSize: 12, fontWeight: 800, color: '#C2410C' }}>Offert par {c.offert_par}</div>}
+                          <div style={{ fontSize: 12, color: C.attenue }}>{[c.code_postal, c.ville].filter(Boolean).join(' ') || 'Adresse non renseignée'}</div>
                         </div>
                       </td>
                       <td style={td}>
                         {c.email || c.tel ? (
                           <div>
                             {c.email && <div>{c.email}</div>}
-                            {c.tel && <div style={{ fontSize: 11.5, color: C.attenue }}>{c.tel}</div>}
+                            {c.tel && <div style={{ fontSize: 12, color: C.attenue }}>{c.tel}</div>}
                           </div>
                         ) : (
                           <div data-non-partage style={{ fontSize: 12, color: C.attenue, fontStyle: 'italic' }}>{c.optin === true ? 'Aucune coordonnée' : TEXTE_NON_PARTAGE}</div>
                         )}
                       </td>
-                      <td style={{ ...td, fontSize: 11.5 }}>{c.origines.length ? c.origines.map(libelleOrigine).join(', ') : '—'}</td>
-                      <td style={{ ...td, fontSize: 11.5 }}>{c.operations.map(o => o.nom).join(', ') || '—'}</td>
+                      <td style={{ ...td, fontSize: 12 }}>{c.origines.length ? c.origines.map(libelleOrigine).join(', ') : '—'}</td>
+                      <td style={{ ...td, fontSize: 12 }}>{c.operations.map(o => o.nom).join(', ') || '—'}</td>
                       <td style={{ ...td, fontWeight: 800 }}>{c.nb_parties}</td>
                       <td style={td}>
                         {c.nb_gains > 0
-                          ? <span title={c.lots.join(', ')} style={{ fontSize: 11, fontWeight: 800, color: '#15803D', background: 'rgba(21,128,61,.09)', borderRadius: 99, padding: '3px 8px' }}>{c.nb_gains} lot{c.nb_gains > 1 ? 's' : ''}</span>
+                          ? <span title={c.lots.join(', ')} style={{ fontSize: 12, fontWeight: 800, color: '#15803D', background: 'rgba(21,128,61,.09)', borderRadius: 99, padding: '3px 8px' }}>{c.nb_gains} lot{c.nb_gains > 1 ? 's' : ''}</span>
                           : <span style={{ color: C.attenue }}>—</span>}
                       </td>
                       <td style={{ ...td, whiteSpace: 'nowrap' }}>{dateFr(c.derniere)}</td>
@@ -349,7 +349,7 @@ function TableRepartition({ titre, lignes, onLigne }: { titre: string; lignes: {
   return (
     <div style={{ background: '#fff', border: `1px solid ${C.bordure}`, borderRadius: 14, overflowX: 'auto' }}>
       {onLigne && lignes.length > 0 && (
-        <div style={{ padding: '9px 14px', fontSize: 11.5, color: C.attenue, borderBottom: `1px solid ${C.bordure}` }}>Clique une ligne pour voir ses contacts.</div>
+        <div style={{ padding: '9px 14px', fontSize: 12, color: C.attenue, borderBottom: `1px solid ${C.bordure}` }}>Clique une ligne pour voir ses contacts.</div>
       )}
       {lignes.length === 0 ? <div style={{ padding: 16, fontSize: 13, color: C.attenue }}>Aucune donnée.</div> : (
         <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: 560 }}>

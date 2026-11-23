@@ -24,7 +24,7 @@ export function useGlisser(avancer: (sens: 1 | -1) => void) {
   }
 }
 
-export function NavCarrousel({ n, i, setI, dernier, suivantBloque, onAvant, onTenter }: {
+export function NavCarrousel({ n, i, setI, dernier, suivantBloque, onAvant, onTenter, sansPoints }: {
   n: number
   i: number
   setI: (k: number) => void
@@ -36,6 +36,8 @@ export function NavCarrousel({ n, i, setI, dernier, suivantBloque, onAvant, onTe
   onAvant?: () => void
   /** Appelé quand le pro tente d'avancer alors que c'est bloqué. */
   onTenter?: () => void
+  /** Masque les points : le parcours montre sa propre progression stable (Configurateur, 23/11/2026). */
+  sansPoints?: boolean
 }) {
   const cur = Math.min(Math.max(i, 0), n - 1)
   const aller = (k: number) => {
@@ -46,7 +48,7 @@ export function NavCarrousel({ n, i, setI, dernier, suivantBloque, onAvant, onTe
   }
   return (
     <div data-nav-carrousel>
-      <div style={{ display: 'flex', justifyContent: 'center', gap: 0, margin: '2px 0 0' }}>
+      {!sansPoints && <div style={{ display: 'flex', justifyContent: 'center', gap: 0, margin: '2px 0 0' }}>
         {/* Zone de toucher 44 px de haut (audit 17/11) ; le point visible garde sa taille. */}
         {Array.from({ length: n }, (_, k) => (
           <button key={k} type="button" aria-label={`Écran ${k + 1} sur ${n}`} aria-current={k === cur}
@@ -55,8 +57,8 @@ export function NavCarrousel({ n, i, setI, dernier, suivantBloque, onAvant, onTe
             <span style={{ display: 'block', width: k === cur ? 22 : 9, height: 9, borderRadius: 9, background: k === cur ? C.violet : C.bordureChamp, transition: 'width .2s' }} />
           </button>
         ))}
-      </div>
-      <div style={{ display: 'flex', justifyContent: 'space-between', gap: 10 }}>
+      </div>}
+      <div style={{ display: 'flex', justifyContent: 'space-between', gap: 10, marginTop: sansPoints ? 14 : 0 }}>
         <button type="button" style={{ ...BTN2, visibility: cur > 0 || onAvant ? 'visible' : 'hidden' }} onClick={() => aller(cur - 1)}>← Précédent</button>
         {cur < n - 1
           ? <button type="button" data-suivant style={{ ...BTN, opacity: suivantBloque ? 0.5 : 1 }} onClick={() => aller(cur + 1)}>Suivant →</button>

@@ -92,7 +92,7 @@ export default function ParcoursMobil({ events = [], showTitle = true }: { event
     return (
       <button onClick={() => { setTab(t); setEcran(t === 'super' ? 'sj-accueil' : 's-accueil') }} style={{ flex: 1, textAlign: 'left', padding: '13px 16px', borderRadius: 16, cursor: 'pointer', fontFamily: 'inherit', border: tab === t ? `2px solid ${c}` : `1.5px solid ${C.bordure}`, background: tab === t ? (t === 'super' ? '#FFF8EA' : C.violetClair) : '#fff' }}>
         <div style={{ fontWeight: 800, fontSize: 14, color: tab === t ? c : C.texte }}>{label}</div>
-        <div style={{ fontSize: 11.5, color: C.attenue, marginTop: 2 }}>{sous}</div>
+        <div style={{ fontSize: 12, color: C.attenue, marginTop: 2 }}>{sous}</div>
       </button>
     )
   }
@@ -113,7 +113,7 @@ export default function ParcoursMobil({ events = [], showTitle = true }: { event
         <div style={{ flex: '0 1 360px', minWidth: 260, maxWidth: 400, order: 1 }}>
           {events.length > 0 && (
             <div style={{ marginBottom: 16 }}>
-              <div style={{ fontSize: 11, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '.08em', color: C.attenue, marginBottom: 8 }}>Animation à prévisualiser</div>
+              <div style={{ fontSize: 12, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '.08em', color: C.attenue, marginBottom: 8 }}>Animation à prévisualiser</div>
               <select
                 value={ev?.id ?? ''}
                 onChange={e => { setEvId(e.target.value); setEcran(tab === 'super' ? 'sj-accueil' : 's-accueil') }}
@@ -132,7 +132,7 @@ export default function ParcoursMobil({ events = [], showTitle = true }: { event
 
           {tab === 'event' && master && (
             <div style={{ marginBottom: 14 }}>
-              <div style={{ fontSize: 11, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '.08em', color: C.attenue, marginBottom: 8 }}>Écran</div>
+              <div style={{ fontSize: 12, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '.08em', color: C.attenue, marginBottom: 8 }}>Écran</div>
               <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
                 {ECRANS_APERCU.map(x => {
                   const id = x.id === '@jeu' && ev ? x.jeu(ev.module) : x.id

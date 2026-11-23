@@ -59,7 +59,7 @@ export function Vide({ children }: { children: React.ReactNode }) {
 
 function Pastille({ ton, children }: { ton: 'ok' | 'warn' | 'neutre' | 'acc'; children: React.ReactNode }) {
   const c = {
-    ok: ['rgba(34,197,94,.12)', '#15803D'],
+    ok: ['rgba(21,128,61,.12)', '#15803D'],
     warn: ['rgba(245,158,11,.13)', '#B45309'],
     neutre: [SUBT, MUT],
     acc: ['rgba(59,92,196,.11)', 'var(--sa-accent, #3B5CC4)'],

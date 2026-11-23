@@ -17,10 +17,17 @@ export const CHARTE = {
   subtil: '#F8FAFC',
   sidebar: '#1E293B',
   sidebar2: '#172033',
-  accent: '#7A4FE0',
-  accentClair: '#9B7BEA',
-  accentFonce: '#6A3FD0',
+  /* 23/11/2026 (lot ergonomie 1) : plus de violet dans l'application ; accent = bleu Flowin. */
+  accent: '#3B5CC4',
+  accentClair: '#6F8BDD',
+  accentFonce: '#2B47A8',
 } as const
+
+/** UN SEUL vert de succes pour tout l'espace pro (lot ergonomie 1, 23/11/2026, AMEL-DES-10).
+ *  Remplace #00897A (ancien C.ok) et #0B7A4F ; #15803D etait deja le vert de 90 % des ecrans
+ *  (contraste 5,0:1 sur blanc, AA ; le teal #00897A n'atteignait que 4,0:1). Fond doux : VERT_OK_FOND. */
+export const VERT_OK = '#15803D'
+export const VERT_OK_FOND = '#DCFCE7'
 
 export const POLICE_ADMIN = '-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Arial,sans-serif'
 
@@ -34,8 +41,7 @@ export const VARIABLES_CSS = `--sa-bg:${CHARTE.fond};--sa-card:${CHARTE.carte};-
  * encre #1B3A5C, bleu #3B5CC4, papier #F4F6F9, texte secondaire #5a6b80, police
  * systeme graisse 800-900, logo « Flow » + « in » bleu.
  *
- * DIFFERENCE VOULUE avec la landing : l'accent commun (boutons, selection) est
- * le VIOLET #7A4FE0 et non le teal (decision Romain : « bleu + vert = pharmacie »).
+ * Accent commun (boutons, selection) : BLEU #3B5CC4 (le violet a ete retire le 09/11 puis du code le 23/11).
  * Le fuchsia #E0368C n'est qu'une touche ponctuelle (pastille « en cours »),
  * jamais en grand aplat, jamais associe a un fond noir. Plus de fond sombre :
  * la barre laterale de l'espace pro est claire.
@@ -43,7 +49,7 @@ export const VARIABLES_CSS = `--sa-bg:${CHARTE.fond};--sa-card:${CHARTE.carte};-
  * Les noms de cles historiques (magenta, sidebar…) sont conserves pour ne pas
  * casser les ecrans qui les lisent ; leurs VALEURS suivent la nouvelle charte.
  * ALIGNEE sur les maquettes d'app validees (maquettes-jeux/index.html, 31/10) : memes
- * jetons --ink, --ink2, --muted, --line (#DCE3EC), --field (#C9D4E3), --cta (#7A4FE0),
+ * jetons --ink, --ink2, --muted, --line (#DCE3EC), --field (#C9D4E3), --cta (#3B5CC4),
  * --ok, --ko, logo graisse 800 / -.045em, dock bas blanc a filet 1,5 px.
  * Les memes valeurs sont exposees en variables CSS (--fl-*) par VARIABLES_PRO_CSS,
  * injectees par ProShell et par le parcours « Ma premiere fois ».
@@ -57,7 +63,7 @@ export const CHARTE_PRO = {
   texte: '#1B3A5C',
   attenue: '#5a6b80',
   encre2: '#3a4d63',
-  ok: '#00897A',
+  ok: '#15803D', /* = VERT_OK : un seul vert de succes */
   ko: '#C62F2F',
   subtil: '#F8FAFC',
   sidebar: '#FFFFFF',

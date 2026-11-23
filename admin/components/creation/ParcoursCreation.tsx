@@ -147,12 +147,12 @@ export const PC_CSS = `.nop-carte{position:relative;overflow:hidden;display:flex
   .nop-carte:hover .nop-fleche{transform:translateX(3px)}
   .nop-carte.nop-actif{border-color:var(--acc);background:var(--acc-tint)}
   .pc-steps{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
-  .pc-step{padding:8px 14px;border-radius:99px;font-size:12.5px;font-weight:800;color:${C.attenue};background:#fff;border:1.5px solid ${C.bordure};display:inline-flex;align-items:center;gap:6px;font-family:inherit;white-space:nowrap}
-  .pc-step .n{width:18px;height:18px;border-radius:50%;background:${C.bordure};color:#fff;font-size:10px;display:inline-flex;align-items:center;justify-content:center}
+  .pc-step{padding:8px 14px;min-height:44px;border-radius:99px;font-size:12.5px;font-weight:800;color:${C.attenue};background:#fff;border:1.5px solid ${C.bordure};display:inline-flex;align-items:center;gap:6px;font-family:inherit;white-space:nowrap}
+  .pc-step .n{width:20px;height:20px;border-radius:50%;background:${C.bordure};color:#fff;font-size:12px;display:inline-flex;align-items:center;justify-content:center}
   .pc-step.active{background:${C.accent};border-color:${C.accent};color:#fff}
   .pc-step.active .n{background:rgba(255,255,255,.3)}
-  .pc-step.done{color:#16a34a;cursor:pointer}
-  .pc-step.done .n{background:#16a34a}
+  .pc-step.done{color:#15803D;cursor:pointer}
+  .pc-step.done .n{background:#15803D}
   .pc-grille{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:26px;align-items:start}
   @media (max-width:1020px){.pc-grille{grid-template-columns:minmax(0,1fr)}}
   .pc-qr{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
@@ -164,9 +164,9 @@ export const PC_CSS = `.nop-carte{position:relative;overflow:hidden;display:flex
   .pc-aide{display:flex;align-items:center;gap:14px;background:#fff;border:1.5px solid ${C.bordure};border-radius:16px;padding:16px 18px;margin-top:22px;flex-wrap:wrap}
   .pc-aide .ico{width:42px;height:42px;border-radius:12px;background:rgba(14,165,233,.1);color:#0EA5E9;display:flex;align-items:center;justify-content:center;flex-shrink:0}
   .pc-aide .btns{margin-left:auto;display:flex;gap:8px;flex-wrap:wrap}
-  .pc-aide .ab{padding:10px 16px;border-radius:50px;font-size:12.5px;font-weight:800;text-decoration:none;font-family:inherit;border:none;cursor:pointer}
-  .pc-aide .ab.appel{background:#dcfce7;color:#166534}
-  .pc-aide .ab.msg{background:rgba(122,79,224,.1);color:${C.accent}}
+  .pc-aide .ab{padding:10px 16px;min-height:44px;display:inline-flex;align-items:center;justify-content:center;border-radius:50px;font-size:13px;font-weight:800;text-decoration:none;font-family:inherit;border:none;cursor:pointer}
+  .pc-aide .ab.appel{background:#dcfce7;color:#15803D}
+  .pc-aide .ab.msg{background:#3B5CC4;color:#fff}
   .pc-ligne-pro{display:flex;align-items:center;gap:12px;width:100%;text-align:left;background:#fff;border:1.5px solid ${C.bordure};border-radius:14px;padding:11px 14px;margin-bottom:8px;cursor:pointer;font-family:inherit;color:${C.texte}}
   .pc-ligne-pro.sel{border-color:${ACCENT_SUPER};background:${ACCENT_SUPER}10}`
 
@@ -767,7 +767,7 @@ export default function ParcoursCreation({ mode = 'pro', pro, banques, supers, p
               L’équipe Flowin vous recontacte pour monter « {dNom.trim()} » avec vous. Une fois le super event créé, vous le rejoignez depuis cet écran.
             </div>
             <div style={{ display: 'flex', gap: 10, justifyContent: 'center', flexWrap: 'wrap', marginTop: 18 }}>
-              <a style={{ ...BTN2, display: 'inline-block', textDecoration: 'none' }} href={`/pro${q}`}>Mes opérations</a>
+              <a style={{ ...BTN2, textDecoration: 'none' }} href={`/pro${q}`}>Mes opérations</a>
             </div>
           </div>
           <BlocAide />
@@ -858,14 +858,14 @@ export default function ParcoursCreation({ mode = 'pro', pro, banques, supers, p
             )}
             {carFait && montreFait('bon') && (
               <div data-virement data-attente-paiement style={{ border: `1.5px solid ${C.accent}`, borderRadius: 14, padding: '14px 16px', marginBottom: 8, background: '#fff', fontSize: 14, lineHeight: 1.55 }}>
-                <span style={{ display: 'inline-block', fontSize: 11.5, fontWeight: 800, letterSpacing: '.04em', textTransform: 'uppercase', background: '#FEF3C7', color: '#92400E', borderRadius: 999, padding: '3px 10px', marginBottom: 8 }}>En attente de paiement</span>
+                <span style={{ display: 'inline-block', fontSize: 12, fontWeight: 800, letterSpacing: '.04em', textTransform: 'uppercase', background: '#FEF3C7', color: '#92400E', borderRadius: 999, padding: '3px 10px', marginBottom: 8 }}>En attente de paiement</span>
                 <b style={{ display: 'block', fontSize: 17 }}>Dernière étape : votre bon de commande</b>
                 <div style={{ margin: '8px 0 2px' }}><b>{offreFait.nom}</b> · {offreFait.prix}</div>
                 {optQuizFlowin && <div>{OPTION_QUIZ_FLOWIN.nom} · {prixOptionQuiz(offreAnim)}</div>}
                 {optCustom && <div>{OPTION_CUSTOMISATION.nom} · {OPTION_CUSTOMISATION.prix.toLowerCase()}</div>}
                 <div style={{ ...MUTED, fontSize: 13, marginTop: 8 }}>Il est déjà rempli. Vous le validez, vous réglez par virement : votre jeu passe en ligne.</div>
                 <div style={{ marginTop: 12 }}>
-                  <a data-valider-bon href={urlBon} onClick={ouvrirBon} style={{ ...BTN, display: 'inline-block', textDecoration: 'none' }}>Valider mon bon de commande →</a>
+                  <a data-valider-bon href={urlBon} onClick={ouvrirBon} style={{ ...BTN, textDecoration: 'none' }}>Valider mon bon de commande →</a>
                 </div>
               </div>
             )}
@@ -892,9 +892,9 @@ export default function ParcoursCreation({ mode = 'pro', pro, banques, supers, p
                 <div style={{ fontSize: 13, fontWeight: 800, margin: carFait ? '0 0 8px' : '18px 0 8px' }}>Le texte pour l’annoncer</div>
                 <textarea readOnly value={texte} style={{ ...CHAMP, minHeight: 150, resize: 'vertical' }} />
                 <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginTop: 10 }}>
-                  <a style={{ ...BTN2, display: 'inline-block', textDecoration: 'none' }} target="_blank" rel="noreferrer"
+                  <a style={{ ...BTN2, textDecoration: 'none' }} target="_blank" rel="noreferrer"
                     href={`https://mail.google.com/mail/?view=cm&fs=1&su=${encodeURIComponent(nomAffiche)}&body=${encodeURIComponent(texte)}`}>Email</a>
-                  <a style={{ ...BTN2, display: 'inline-block', textDecoration: 'none' }} target="_blank" rel="noreferrer" href={`https://wa.me/?text=${encodeURIComponent(texte)}`}>WhatsApp</a>
+                  <a style={{ ...BTN2, textDecoration: 'none' }} target="_blank" rel="noreferrer" href={`https://wa.me/?text=${encodeURIComponent(texte)}`}>WhatsApp</a>
                   <button style={BTN2} onClick={() => navigator.clipboard?.writeText(texte)}>Copier (Instagram, SMS…)</button>
                 </div>
                 </>}
@@ -907,14 +907,14 @@ export default function ParcoursCreation({ mode = 'pro', pro, banques, supers, p
             <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginTop: 22 }}>
               {sa ? (
                 <>
-                  {fait.superId && (estSuper || rejoindre) && <a style={{ ...BTN, display: 'inline-block', textDecoration: 'none' }} href={`/dashboard/operations/${encodeURIComponent(fait.superId)}`}>Ouvrir le super event →</a>}
-                  {!estSuper && !rejoindre && <a style={{ ...BTN, display: 'inline-block', textDecoration: 'none' }} href="/dashboard/events">Voir les animations →</a>}
-                  {p.id && <a style={{ ...BTN2, display: 'inline-block', textDecoration: 'none' }} href={`/pro/historique${q}${opCle ? `&op=${encodeURIComponent(opCle)}` : ''}`}>Voir l’espace du pro</a>}
+                  {fait.superId && (estSuper || rejoindre) && <a style={{ ...BTN, textDecoration: 'none' }} href={`/dashboard/operations/${encodeURIComponent(fait.superId)}`}>Ouvrir le super event →</a>}
+                  {!estSuper && !rejoindre && <a style={{ ...BTN, textDecoration: 'none' }} href="/dashboard/events">Voir les animations →</a>}
+                  {p.id && <a style={{ ...BTN2, textDecoration: 'none' }} href={`/pro/historique${q}${opCle ? `&op=${encodeURIComponent(opCle)}` : ''}`}>Voir l’espace du pro</a>}
                 </>
               ) : (
                 <>
-                  {opCle && <a style={{ ...BTN, display: 'inline-block', textDecoration: 'none' }} href={`/pro/historique${q}&op=${encodeURIComponent(opCle)}`}>Ouvrir mon opération →</a>}
-                  <a style={{ ...BTN2, display: 'inline-block', textDecoration: 'none' }} href={`/pro${q}`}>Mes opérations</a>
+                  {opCle && <a style={{ ...BTN, textDecoration: 'none' }} href={`/pro/historique${q}&op=${encodeURIComponent(opCle)}`}>Ouvrir mon opération →</a>}
+                  <a style={{ ...BTN2, textDecoration: 'none' }} href={`/pro${q}`}>Mes opérations</a>
                 </>
               )}
             </div>
@@ -1179,7 +1179,7 @@ export default function ParcoursCreation({ mode = 'pro', pro, banques, supers, p
                     )}
                   </div>
                   <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginTop: 10 }}>
-                    {(sa || droits.creer_banques) && <a href={sa ? '/dashboard/banques' : `/pro/banques/nouvelle${q}&tags=quiz&depuis=jeu`} target="_blank" rel="noreferrer" style={{ ...BTN2, display: 'inline-block', textDecoration: 'none', padding: '9px 16px', fontSize: 13 }}>+ Créer une banque</a>}
+                    {(sa || droits.creer_banques) && <a href={sa ? '/dashboard/banques' : `/pro/banques/nouvelle${q}&tags=quiz&depuis=jeu`} target="_blank" rel="noreferrer" style={{ ...BTN2, textDecoration: 'none', padding: '9px 16px', fontSize: 13 }}>+ Créer une banque</a>}
                     <button style={{ ...BTN2, padding: '9px 16px', fontSize: 13, ...(panneauSuggestions ? { borderColor: C.magenta } : {}) }} onClick={() => { setPanneauSuggestions(v => !v); setVoieFlowin(false) }}>3 questions suggérées, à adapter</button>
                     {!sa && <button style={{ ...BTN2, padding: '9px 16px', fontSize: 13, ...(voieFlowin ? { borderColor: C.magenta } : {}) }} onClick={() => { setVoieFlowin(true); setBanqueId(null); setPanneauSuggestions(false) }}>Je n’ai pas de questions : demander à Flowin</button>}
                   </div>
@@ -1192,7 +1192,7 @@ export default function ParcoursCreation({ mode = 'pro', pro, banques, supers, p
                       </div>
                       {suggestions.map((s, i) => (
                         <div key={s.id} style={{ border: `1.5px solid ${C.bordureChamp}`, borderRadius: 14, padding: 12, marginBottom: 10, background: '#fff' }}>
-                          <div style={{ fontSize: 10.5, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '.05em', color: C.attenue, marginBottom: 6 }}>Exemple {i + 1}/3 — à modifier</div>
+                          <div style={{ fontSize: 12, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '.05em', color: C.attenue, marginBottom: 6 }}>Exemple {i + 1}/3 — à modifier</div>
                           <input style={CHAMP} value={s.texte} onChange={e => majSuggestion(i, { texte: e.target.value })} placeholder="Intitulé de la question" />
                           <div style={{ display: 'grid', gap: 7, marginTop: 8 }}>
                             {s.options.map((opt, oi) => (
@@ -1470,7 +1470,7 @@ export default function ParcoursCreation({ mode = 'pro', pro, banques, supers, p
                   <Titre t="Votre logo" s="Il apparaît sur le jeu et sur les billets gagnants." />
                   <div style={{ display: 'flex', alignItems: 'center', gap: 14, border: `1.5px dashed ${C.bordureChamp}`, borderRadius: 16, padding: 16, background: '#fff' }}>
                     <div style={{ width: 84, height: 84, borderRadius: 14, background: C.subtil, display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', flexShrink: 0 }}>
-                      {logoCommerce ? <img src={logoCommerce} alt="Votre logo" style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }} /> : <span style={{ fontSize: 11, ...MUTED, fontWeight: 700 }}>Aucun logo</span>}
+                      {logoCommerce ? <img src={logoCommerce} alt="Votre logo" style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }} /> : <span style={{ fontSize: 12, ...MUTED, fontWeight: 700 }}>Aucun logo</span>}
                     </div>
                     <label style={{ ...BTN2, position: 'relative', display: 'inline-flex', alignItems: 'center', gap: 6 }}>
                       <Ico k="upload" size={14} />{logoEnvoi === 'envoi' ? 'Envoi…' : logoCommerce ? 'Changer' : 'Ajouter mon logo'}
@@ -1487,7 +1487,7 @@ export default function ParcoursCreation({ mode = 'pro', pro, banques, supers, p
                   <div style={{ display: 'grid', gap: 8 }}>
                     {OFFRES_ANIMATION.map((o, k) => (
                       <button key={o.cle} type="button" data-offre={o.cle} aria-pressed={offreAnim === o.cle} style={{ ...choix(offreAnim === o.cle), textAlign: 'left', minHeight: 64, position: 'relative' }} onClick={() => setOffreAnim(o.cle)}>
-                        {k === 0 && <span style={{ display: 'inline-block', fontSize: 10.5, fontWeight: 800, letterSpacing: '.06em', textTransform: 'uppercase', background: C.violet, color: '#fff', borderRadius: 999, padding: '2px 9px', marginBottom: 4 }}>Pour commencer</span>}
+                        {k === 0 && <span style={{ display: 'inline-block', fontSize: 12, fontWeight: 800, letterSpacing: '.06em', textTransform: 'uppercase', background: C.violet, color: '#fff', borderRadius: 999, padding: '2px 9px', marginBottom: 4 }}>Pour commencer</span>}
                         <b style={{ display: 'block', fontSize: k === 0 ? 17 : 15 }}>{o.nom}</b><span style={{ fontSize: k === 0 ? 20 : 15, fontWeight: 900 }}>{o.prix}</span>
                         <span style={{ display: 'block', fontSize: 12.5, ...MUTED }}>{o.detail}</span>
                       </button>
@@ -1583,7 +1583,7 @@ export default function ParcoursCreation({ mode = 'pro', pro, banques, supers, p
                 return carFin
                   ? <>
                     {logoManquant && ecransFin[iFin] === 'recap' && <div data-logo-requis style={{ fontSize: 12.5, color: '#B45309', fontWeight: 700, marginTop: 12, textAlign: 'right' }}>Ajoutez votre logo pour personnaliser vos billets.</div>}
-                    {!PAIEMENT_ACTIF && ecransFin[iFin] === 'recap' && <div data-paiement-test style={{ fontSize: 11.5, ...MUTED, marginTop: 8, textAlign: 'right' }}>Paiement désactivé pendant la phase de test</div>}
+                    {!PAIEMENT_ACTIF && ecransFin[iFin] === 'recap' && <div data-paiement-test style={{ fontSize: 12, ...MUTED, marginTop: 8, textAlign: 'right' }}>Paiement désactivé pendant la phase de test</div>}
                     <NavCarrousel n={ecransFin.length} i={iFin} setI={setEcranFin} onAvant={precedent} dernier={publier} />
                   </>
                   : (

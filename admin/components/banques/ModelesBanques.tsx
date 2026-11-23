@@ -53,7 +53,7 @@ export default function ModelesBanques({ proId, onInstalle, lienBase, lienSuffix
   }
 
   const chip = (actif: boolean): React.CSSProperties => ({
-    border: `1.5px solid ${actif ? ACCENT : BORD}`, background: actif ? ACCENT : '#fff', color: actif ? '#fff' : '#1c1024',
+    border: `1.5px solid ${actif ? ACCENT : BORD}`, background: actif ? ACCENT : '#fff', color: actif ? '#fff' : '#1B3A5C',
     borderRadius: 99, padding: '7px 14px', fontSize: 12.5, fontWeight: 800, cursor: 'pointer', fontFamily: 'inherit',
   })
 
@@ -79,8 +79,8 @@ export default function ModelesBanques({ proId, onInstalle, lienBase, lienSuffix
           return (
             <div key={m.id} data-modele={m.id} style={{ background: '#fff', border: `1px solid ${BORD}`, borderRadius: 14, padding: 14, display: 'flex', flexDirection: 'column', gap: 8 }}>
               <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
-                <span style={{ fontSize: 10, fontWeight: 800, letterSpacing: '.04em', textTransform: 'uppercase', color: m.genre === 'bonus' ? '#B45309' : ACCENT, background: m.genre === 'bonus' ? 'rgba(180,83,9,.1)' : 'rgba(122,79,224,.1)', borderRadius: 6, padding: '2px 8px' }}>{m.genre === 'bonus' ? 'Sondage bonus' : 'Quiz'}</span>
-                {m.personnalisable && <span style={{ fontSize: 10, fontWeight: 800, letterSpacing: '.04em', textTransform: 'uppercase', color: '#0B7A4F', background: 'rgba(11,122,79,.1)', borderRadius: 6, padding: '2px 8px' }}>À compléter par le commerçant</span>}
+                <span style={{ fontSize: 12, fontWeight: 800, letterSpacing: '.04em', textTransform: 'uppercase', color: m.genre === 'bonus' ? '#B45309' : ACCENT, background: m.genre === 'bonus' ? 'rgba(180,83,9,.1)' : 'rgba(59,92,196,.1)', borderRadius: 6, padding: '2px 8px' }}>{m.genre === 'bonus' ? 'Sondage bonus' : 'Quiz'}</span>
+                {m.personnalisable && <span style={{ fontSize: 12, fontWeight: 800, letterSpacing: '.04em', textTransform: 'uppercase', color: '#15803D', background: 'rgba(11,122,79,.1)', borderRadius: 6, padding: '2px 8px' }}>À compléter par le commerçant</span>}
               </div>
               <div style={{ fontWeight: 800, fontSize: 14, lineHeight: 1.3 }}>{m.nom}</div>
               <div style={{ fontSize: 12.5, opacity: 0.75, lineHeight: 1.45 }}>{m.description}</div>
@@ -104,12 +104,12 @@ export default function ModelesBanques({ proId, onInstalle, lienBase, lienSuffix
                     const intitule = quiz ? enonceApercu(quiz) : (q as QuestionBonus).label
                     return (
                       <li key={q.id} style={{ padding: '8px 0', borderBottom: `1px solid ${BORD}`, fontSize: 12.5, lineHeight: 1.45 }}>
-                        <div style={{ opacity: 0.6, fontSize: 11, fontWeight: 800 }}>
+                        <div style={{ opacity: 0.6, fontSize: 12, fontWeight: 800 }}>
                           Q{i + 1}{q.theme ? ` · ${q.theme}` : ''}{q.difficulte ? ` · ${q.difficulte}` : ''}
                         </div>
                         <div style={{ fontWeight: 700 }}>{intitule}</div>
                         {quiz && !quiz.modele && <div style={{ color: '#15803D' }}>Bonne réponse : {quiz.options[quiz.bonne]}</div>}
-                        {quiz && quiz.modele && <div style={{ color: '#0B7A4F' }}>Réponse : à compléter par le commerçant</div>}
+                        {quiz && quiz.modele && <div style={{ color: '#15803D' }}>Réponse : à compléter par le commerçant</div>}
                         {!quiz && <div style={{ opacity: 0.7 }}>{(q as QuestionBonus).options.map(o => o.label).join(' · ')}</div>}
                       </li>
                     )
@@ -120,7 +120,7 @@ export default function ModelesBanques({ proId, onInstalle, lienBase, lienSuffix
           )
         })}
       </div>
-      <p style={{ fontSize: 11.5, opacity: 0.6, marginTop: 10 }}>{BANQUES_MODELES.length} banques modèles · les faits sont des connaissances générales, relisez-les avant de valider.</p>
+      <p style={{ fontSize: 12, opacity: 0.6, marginTop: 10 }}>{BANQUES_MODELES.length} banques modèles · les faits sont des connaissances générales, relisez-les avant de valider.</p>
     </section>
   )
 }

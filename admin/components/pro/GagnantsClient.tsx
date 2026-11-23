@@ -73,7 +73,7 @@ export function BlocGagnants({ op, data, onChange }: { op: DonneesOperation; dat
   const kpi = (n: number, l: string) => (
     <div style={{ flex: '1 1 110px', background: '#faf7fd', borderRadius: 10, padding: '9px 12px' }}>
       <div style={{ fontSize: 20, fontWeight: 900, color: '#3B5CC4' }}>{n}</div>
-      <div style={{ fontSize: 11, ...MUTED }}>{l}</div>
+      <div style={{ fontSize: 12, ...MUTED }}>{l}</div>
     </div>
   )
   return (
@@ -136,7 +136,7 @@ function RelancerLots({ op, setMessage, onChange }: { op: DonneesOperation; setM
       <button style={btnPrimaire} disabled={envoi} onClick={lancer} data-relancer-lots>
         <Ico k="bell" size={13} style={{ marginRight: 6, verticalAlign: -2 }} />{envoi ? 'Relance…' : `Relancer des lots (${aRelancer.length})`}
       </button>
-      <span style={{ fontSize: 11.5, ...MUTED }}>Lots non utilisés · dans l’application, l’e-mail en relance.</span>
+      <span style={{ fontSize: 12, ...MUTED }}>Lots non utilisés · dans l’application, l’e-mail en relance.</span>
     </div>
   )
 }
@@ -235,14 +235,14 @@ function Tirage({ op, data, setMessage, onChange }: {
       )}
       {propose && (
         <div style={{ background: '#fff', border: '1px solid #E3E8EF', borderRadius: 10, padding: 12 }}>
-          <div style={{ fontSize: 11, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '.05em', color: '#5a6b80' }}>Gagnant proposé</div>
+          <div style={{ fontSize: 12, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '.05em', color: '#5a6b80' }}>Gagnant proposé</div>
           <div style={{ fontWeight: 800, fontSize: 15, marginTop: 2 }}>{propose.nom}</div>
           <div style={{ fontSize: 12, ...MUTED }}>{propose.email ?? 'pas d’email'}{propose.tel ? ` · ${propose.tel}` : ''}</div>
           {dejaGagnants.indexOf(propose.nom) >= 0 && (
-            <div style={{ fontSize: 11.5, color: '#B45309', marginTop: 4 }}>A déjà gagné sur cette animation.</div>
+            <div style={{ fontSize: 12, color: '#B45309', marginTop: 4 }}>A déjà gagné sur cette animation.</div>
           )}
           {!propose.email && (
-            <div style={{ fontSize: 11.5, color: '#B45309', marginTop: 4 }}>Sans email, le billet ne peut pas lui être envoyé — il faudra le prévenir vous-même.</div>
+            <div style={{ fontSize: 12, color: '#B45309', marginTop: 4 }}>Sans email, le billet ne peut pas lui être envoyé — il faudra le prévenir vous-même.</div>
           )}
           <div style={{ display: 'flex', gap: 8, marginTop: 10, flexWrap: 'wrap' }}>
             <button style={btnPrimaire} onClick={confirmer} disabled={envoi}>{envoi ? 'Enregistrement…' : 'Confirmer et envoyer le billet'}</button>
@@ -334,16 +334,16 @@ function LigneGain({ g, superEvent, opId, opNom, partenaireNom, setMessage, onCh
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
         <div style={{ minWidth: 0 }}>
           <div style={{ fontWeight: 700, fontSize: 13.5 }}>{g.joueurNom ?? '—'}</div>
-          <div style={{ fontSize: 11.5, ...MUTED }}>
+          <div style={{ fontSize: 12, ...MUTED }}>
             {g.lotNom ?? 'Lot'}{g.lotValeur ? ` · ${g.lotValeur} €` : ''}{g.ticketCode ? ` · billet ${g.ticketCode}` : ''}
           </div>
-          {g.joueurEmail && <div style={{ fontSize: 11.5, ...MUTED }}>{g.joueurEmail}</div>}
-          {g.retireAt && <div style={{ fontSize: 11.5, color: '#15803D', fontWeight: 700 }}>{libelleRemise(g.retireAt)}</div>}
-          {!g.retireAt && g.valableJusquAu && <div style={{ fontSize: 11.5, ...MUTED }}>Valable jusqu’au {new Date(g.valableJusquAu.length <= 10 ? g.valableJusquAu + 'T12:00:00' : g.valableJusquAu).toLocaleDateString('fr-FR')}</div>}
-          {g.offertLe && <div style={{ fontSize: 11.5, color: '#3B5CC4', fontWeight: 700 }}>Offert à un ami</div>}
+          {g.joueurEmail && <div style={{ fontSize: 12, ...MUTED }}>{g.joueurEmail}</div>}
+          {g.retireAt && <div style={{ fontSize: 12, color: '#15803D', fontWeight: 700 }}>{libelleRemise(g.retireAt)}</div>}
+          {!g.retireAt && g.valableJusquAu && <div style={{ fontSize: 12, ...MUTED }}>Valable jusqu’au {new Date(g.valableJusquAu.length <= 10 ? g.valableJusquAu + 'T12:00:00' : g.valableJusquAu).toLocaleDateString('fr-FR')}</div>}
+          {g.offertLe && <div style={{ fontSize: 12, color: '#3B5CC4', fontWeight: 700 }}>Offert à un ami</div>}
           {g.retraitToken && (
             <a href={`/nds/billets-partenaires.html?t=${encodeURIComponent(g.retraitToken)}`} target="_blank" rel="noreferrer"
-              style={{ fontSize: 11.5, color: '#3B5CC4', fontWeight: 700, textDecoration: 'none' }}>Voir le billet ↗</a>
+              style={{ fontSize: 12, color: '#3B5CC4', fontWeight: 700, textDecoration: 'none' }}>Voir le billet ↗</a>
           )}
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
@@ -354,7 +354,7 @@ function LigneGain({ g, superEvent, opId, opNom, partenaireNom, setMessage, onCh
               21/10 : lu comme « retire du tirage » (un re-tirage suite a un
               gagnant injoignable), pas « billet utilise en boutique ». */}
           <span style={{
-            fontSize: 10.5, fontWeight: 800, padding: '4px 9px', borderRadius: 99,
+            fontSize: 12, fontWeight: 800, padding: '4px 9px', borderRadius: 99,
             color: remis ? '#15803D' : '#B45309', background: remis ? 'rgba(21,128,61,.09)' : 'rgba(180,83,9,.09)',
           }}>{remis ? 'Utilisé' : 'À retirer'}</span>
           {/* « Marquer remis sans PIN » ci-dessous ne decompte pas le stock --
@@ -362,7 +362,7 @@ function LigneGain({ g, superEvent, opId, opNom, partenaireNom, setMessage, onCh
               le cas normal. */}
           {remis && g.stockDestocke === false && (
             <span style={{
-              fontSize: 10.5, fontWeight: 800, padding: '4px 9px', borderRadius: 99,
+              fontSize: 12, fontWeight: 800, padding: '4px 9px', borderRadius: 99,
               color: '#B45309', background: 'rgba(245,158,11,.13)',
             }}><Ico k="warning" size={12} style={{ marginRight: 5, verticalAlign: -2 }} />Stock non décompté</span>
           )}
@@ -382,7 +382,7 @@ function LigneGain({ g, superEvent, opId, opNom, partenaireNom, setMessage, onCh
       {ouvert && (
         <div style={{ marginTop: 10, background: '#faf7fd', border: '1px solid #E3E8EF', borderRadius: 10, padding: 12 }}>
           <div style={{ fontSize: 12, fontWeight: 700, marginBottom: 4 }}>Validation en caisse</div>
-          <div style={{ fontSize: 11.5, ...MUTED, marginBottom: 8 }}>
+          <div style={{ fontSize: 12, ...MUTED, marginBottom: 8 }}>
             Saisissez votre code PIN à 4 chiffres — celui de votre fiche de retrait. Le lot est alors décompté de votre stock.
           </div>
           <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
@@ -398,7 +398,7 @@ function LigneGain({ g, superEvent, opId, opNom, partenaireNom, setMessage, onCh
             <button style={btn} onClick={basculerManuel} disabled={envoi}>{remis ? 'Remettre en attente' : 'Marquer remis sans PIN'}</button>
           </div>
           {superEvent && (
-            <div style={{ fontSize: 11.5, ...MUTED, marginTop: 8 }}>
+            <div style={{ fontSize: 12, ...MUTED, marginTop: 8 }}>
               Gagnant injoignable ? Le remplacement se demande à Flowin — sur un super event, le tirage reste piloté par l’organisateur.
             </div>
           )}

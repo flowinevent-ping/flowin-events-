@@ -74,7 +74,7 @@ export default async function Page({ searchParams }: { searchParams: { pro?: str
               <b>{b.nom}</b><span style={MUTED}>{(b.questions || []).length} questions · {b.statut === 'valide' ? 'validée' : 'brouillon'} →</span>
             </Link>
           ))}
-          {peutBanques && <Link href={`/pro/banques/nouvelle${q}`} style={{ ...BTN2, display: 'inline-block', textDecoration: 'none', marginTop: 14 }}>+ Créer une banque</Link>}
+          {peutBanques && <Link href={`/pro/banques/nouvelle${q}`} style={{ ...BTN2, textDecoration: 'none', marginTop: 14 }}>+ Créer une banque</Link>}
         </div>
       )}
     </ProShell>

@@ -108,11 +108,11 @@ export async function fetchCrmLanding(): Promise<LigneCrmLanding[]> {
 }
 
 export const COULEUR_ETAT: Record<string, string> = {
-  nouveau: '#6366f1',
+  nouveau: '#3B5CC4',
   en_discussion: '#0ea5e9',
   devis_envoye: '#f59e0b',
   a_valider: '#f97316',
-  paiement: '#8b5cf6',
+  paiement: '#2B47A8',
   gagne: '#10b981',
   perdu: '#ef4444',
 }

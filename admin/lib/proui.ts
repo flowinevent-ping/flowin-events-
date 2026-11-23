@@ -4,7 +4,7 @@ import { CHARTE_PRO as C, POLICE_PRO } from './charte'
 /* Styles partages des ecrans Pro — charte de l application joueur (P6,
    lib/charte.ts CHARTE_PRO). Un seul jeu de styles pour toutes les pages pro. */
 export const CARD: CSSProperties = { background: C.carte, border: `1px solid ${C.bordure}`, borderRadius: 18, padding: 18, marginBottom: 14, boxShadow: '0 6px 18px rgba(27,58,92,.05)' }
-export const TH: CSSProperties = { textAlign: 'left', fontSize: 10, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '.08em', color: C.attenue, padding: '10px 16px', borderBottom: `1px solid ${C.bordure}`, background: C.subtil, whiteSpace: 'nowrap' }
+export const TH: CSSProperties = { textAlign: 'left', fontSize: 12, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '.08em', color: C.attenue, padding: '10px 16px', borderBottom: `1px solid ${C.bordure}`, background: C.subtil, whiteSpace: 'nowrap' }
 export const TD: CSSProperties = { padding: '11px 16px', borderBottom: `1px solid ${C.bordure}`, fontSize: 13, verticalAlign: 'middle' }
 export const MUTED: CSSProperties = { color: C.attenue }
 export const H1: CSSProperties = { fontSize: 23, fontWeight: 900, letterSpacing: '-.01em', fontFamily: POLICE_PRO, color: C.texte }
@@ -13,14 +13,14 @@ export const ACC = C.accent
 
 /** Champ de saisie, bouton principal et bouton secondaire de l application. */
 export const CHAMP: CSSProperties = { width: '100%', padding: '12px 14px', background: C.champ, border: `1.5px solid ${C.bordureChamp}`, borderRadius: 13, color: C.texte, fontSize: 15, fontWeight: 600, fontFamily: POLICE_PRO, outline: 'none', boxSizing: 'border-box' }
-export const LABEL: CSSProperties = { display: 'block', fontSize: 10.5, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '.08em', color: C.attenue, marginBottom: 6 }
+export const LABEL: CSSProperties = { display: 'block', fontSize: 12, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '.08em', color: C.attenue, marginBottom: 6 }
 /* Halo du bouton et teinte de selection : la charte etait passee au bleu
    le 17/09 (lib/charte.ts, CHARTE_PRO) mais ces deux valeurs etaient restees
    codees en dur sur l ancien rose/magenta -- un bouton au degrade bleu avec
    une ombre rose, une carte choisie teintee de rose. Alignees sur C.accent
-   (#7A4FE0 -> 37,99,235), meme famille que C.degrade. */
-export const BTN: CSSProperties = { border: 'none', borderRadius: 50, padding: '14px 26px', fontFamily: POLICE_PRO, fontWeight: 800, fontSize: 15, color: '#fff', cursor: 'pointer', background: C.degrade, boxShadow: '0 10px 24px rgba(122,79,224,.26)' }
-export const BTN2: CSSProperties = { border: `1.5px solid ${C.bordureChamp}`, borderRadius: 50, padding: '12px 22px', fontFamily: POLICE_PRO, fontWeight: 700, fontSize: 14, color: C.accent, cursor: 'pointer', background: '#fff' }
+   (#3B5CC4 -> 37,99,235), meme famille que C.degrade. */
+export const BTN: CSSProperties = { display: 'inline-flex', alignItems: 'center', justifyContent: 'center', minHeight: 44, border: 'none', borderRadius: 50, padding: '14px 26px', fontFamily: POLICE_PRO, fontWeight: 800, fontSize: 15, color: '#fff', cursor: 'pointer', background: C.degrade, boxShadow: '0 10px 24px rgba(59,92,196,.26)' }
+export const BTN2: CSSProperties = { display: 'inline-flex', alignItems: 'center', justifyContent: 'center', minHeight: 44, border: `1.5px solid ${C.bordureChamp}`, borderRadius: 50, padding: '12px 22px', fontFamily: POLICE_PRO, fontWeight: 700, fontSize: 14, color: C.accent, cursor: 'pointer', background: '#fff' }
 /** Carte a choisir (jeu, type d operation) : bordure violette (C.magenta = violet commun) quand choisie. */
 export function choix(actif: boolean): CSSProperties {
   return {

@@ -36,6 +36,9 @@ Sources : `docs/E2E-verification-2026-11-20.md` (E2E), `docs/SECURITE-*.md` (SEC
 - `/moi` : lots NDS « Expiré », détail des tickets par commerce réduit à un total | régression de l'audit 17/11 | rétablis | comparer les blocs avant / après (inventaire du registre)
 - Liste ou bouton sans clic (fiche jamais branchée, `cursor:pointer` sans `onClick`) ; gagnants lus sur la mauvaise table | PAT A et B (`tirages` = vraie source des gains) | corrigés fin 08/2026 | `grep -c onClick` ; compteurs dérivés de la table de faits
 
+## Ergonomie
+- Progression du Configurateur qui saute (7, 9 puis 10 points) ; boutons-liens à 36 px ; trois verts de succès ; violet #7A4FE0 résiduel | `...BTN` + `display:inline-block` annulait min-height sur un lien ; points calculés sur le nombre d'écrans ; valeurs codées en dur | 23/11 : 4 groupes fixes, `BTN`/`BTN2` en inline-flex min 44 px, `VERT_OK` dans `lib/charte.ts`, violet remplacé par #3B5CC4 | mesurer la hauteur rendue de toute cible tactile
+
 ## Outils et procédure
 - Le connecteur Supabase bascule sur un autre compte ou projet | un connecteur n'a qu'une identité active ; ré-authentifier Vercel ou Google peut faire changer Supabase de `ywcqtupgoxfzkddqkztk` (docs/rapatriement-compte-maitre.md, observé 26/10) ; autres projets : `atddutvzklcgiqxlpvla` vide, `pxqeelvavgzfyrwtgmib` Jeffrey CRM, `wmiawwaxwlvascyflpba` Nexto | `list_projects` et contrôle du ref avant TOUTE écriture | ne jamais écrire dans un projet non confirmé
 - Questions répétées à Romain (accès, faits déjà écrits) | mémoire non relue ; des jours perdus | `docs/claude` lu en premier | avant de demander : `grep` dans `docs/claude` puis `docs`

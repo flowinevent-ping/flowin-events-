@@ -35,7 +35,7 @@ export default function ConnexionProPage() {
     const { data: pro } = await supabase.from('pros').select('id, nom, statut').eq('auth_id', data.user.id).maybeSingle()
     /* Retour vers une demande en cours (?retour=/rejoindre?...) : le compte est libre, la demande part meme avant le paiement. */
     const retour = retourSur(new URLSearchParams(window.location.search).get('retour'))
-    if (pro && retour && retour.indexOf('/rejoindre') === 0) { router.push(retour); return }
+    if (pro && retour && (retour.indexOf('/rejoindre') === 0 || retour.indexOf('/pro/nouvelle') === 0)) { router.push(retour); return }
     if (!pro) {
       setErreur("Compte connecté mais aucun profil pro associé — contactez l'équipe Flowin.")
       setEtat('error')

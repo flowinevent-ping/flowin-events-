@@ -42,7 +42,7 @@ export function ConnexionRequiseCrm() {
   return (
     <div style={CARD} data-crm-connexion>
       <div style={{ fontSize: 14, marginBottom: 10 }}>{MESSAGE_CONNEXION_CRM}</div>
-      <Link href="/pro/connexion" style={{ fontWeight: 800, fontSize: 14 }}>Me connecter</Link>
+      <Link href="/pro/connexion" style={{ display: 'inline-flex', alignItems: 'center', minHeight: 44, fontWeight: 800, fontSize: 14 }}>Me connecter</Link>
     </div>
   )
 }

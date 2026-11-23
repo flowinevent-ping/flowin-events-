@@ -19,7 +19,7 @@ export default async function AlerteLotsRetires({ partenaireId }: { partenaireId
         ))}
         {lots.length > 6 && <div>… et {lots.length - 6} de plus.</div>}
       </div>
-      <div style={{ marginTop: 4, fontSize: 11, color: C.accentFonce, opacity: .7 }}>Dernières 72h — voir l&apos;historique complet dans Mes données → Gagnants.</div>
+      <div style={{ marginTop: 4, fontSize: 12, color: C.accentFonce, opacity: .7 }}>Dernières 72h — voir l&apos;historique complet dans Mes données → Gagnants.</div>
     </div>
   )
 }

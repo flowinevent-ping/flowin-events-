@@ -79,7 +79,7 @@ function AjustementStockLigne({ lotId, dispo, total, onAjuste }: { lotId: string
   }
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
-      <span style={{ fontSize: 11.5, fontWeight: 800, color: dispo > 0 ? '#15803D' : '#B45309', background: dispo > 0 ? 'rgba(34,197,94,.1)' : 'rgba(245,158,11,.13)', borderRadius: 99, padding: '3px 9px' }}>
+      <span style={{ fontSize: 11.5, fontWeight: 800, color: dispo > 0 ? '#15803D' : '#B45309', background: dispo > 0 ? 'rgba(21,128,61,.1)' : 'rgba(245,158,11,.13)', borderRadius: 99, padding: '3px 9px' }}>
         stock {dispo} / {total}
       </span>
       <input type="number" min={1} value={n} onChange={e => setN(e.target.value)} style={{ width: 48, border: `1px solid ${BRD}`, borderRadius: 8, padding: '4px 6px', fontSize: 12 }} />
@@ -103,7 +103,7 @@ function SousTitre({ children }: { children: React.ReactNode }) {
    action ou une attention (stock bas, gagnants a relancer) ; le reste (nom,
    valeur, quantite, type) est du texte simple, pas des pastilles. */
 function badgeStyle(couleur: 'gris' | 'ambre' | 'vert'): React.CSSProperties {
-  const c = { gris: ['#64748B', 'rgba(100,116,139,.1)'], ambre: ['#B45309', 'rgba(245,158,11,.13)'], vert: ['#15803D', 'rgba(34,197,94,.1)'] }[couleur]
+  const c = { gris: ['#64748B', 'rgba(100,116,139,.1)'], ambre: ['#B45309', 'rgba(245,158,11,.13)'], vert: ['#15803D', 'rgba(21,128,61,.1)'] }[couleur]
   return { fontSize: 11, fontWeight: 700, color: c[0], background: c[1], borderRadius: 99, padding: '2px 8px', whiteSpace: 'nowrap' }
 }
 

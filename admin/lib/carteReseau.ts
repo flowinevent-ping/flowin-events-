@@ -36,7 +36,7 @@ export interface CommerceCarte {
 export const COULEUR_TYPE: Record<TypeCommerce, string> = {
   animation: ACCENT_ANIM,
   super_event: ACCENT_SUPER,
-  les_deux: '#7A4FE0',
+  les_deux: '#1B3A5C',
 }
 
 export const LIBELLE_TYPE: Record<TypeCommerce, string> = {

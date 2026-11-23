@@ -17,10 +17,10 @@ export default function PhasesOrganisateur({ phases, compte }: { phases: PhasesS
       {(['avant', 'pendant'] as Phase[]).map(ph => (
         <div key={ph} data-phase-orga={ph} style={{ flex: '1 1 200px', border: `1.5px solid ${ORANGE_SE}`, borderRadius: 14, padding: 12 }}>
           <div style={{ fontSize: 12.5, fontWeight: 900, color: ORANGE_SE }}>{LIBELLE_PHASE[ph]}{demo && !phases.actif ? ' · DÉMO' : ''}</div>
-          <div style={{ fontSize: 11.5, color: '#8a7e93', marginBottom: 6 }}>{periodePhase(phases, ph) || '—'}</div>
+          <div style={{ fontSize: 12, color: '#8a7e93', marginBottom: 6 }}>{periodePhase(phases, ph) || '—'}</div>
           <div style={{ display: 'flex', gap: 16 }}>
-            <div><div style={{ fontSize: 22, fontWeight: 900 }}>{compte[ph].passages}</div><div style={{ fontSize: 11.5, color: '#8a7e93' }}>passages</div></div>
-            <div><div style={{ fontSize: 22, fontWeight: 900 }}>{compte[ph].tickets}</div><div style={{ fontSize: 11.5, color: '#8a7e93' }}>tickets</div></div>
+            <div><div style={{ fontSize: 22, fontWeight: 900 }}>{compte[ph].passages}</div><div style={{ fontSize: 12, color: '#8a7e93' }}>passages</div></div>
+            <div><div style={{ fontSize: 22, fontWeight: 900 }}>{compte[ph].tickets}</div><div style={{ fontSize: 12, color: '#8a7e93' }}>tickets</div></div>
           </div>
         </div>
       ))}

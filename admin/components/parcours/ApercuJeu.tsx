@@ -69,7 +69,7 @@ export default function ApercuJeu({ module, eventId, saisie, titre }: {
       <Phone src={src} empty="Choisissez un jeu : il s’affiche ici, tel que vos clients le verront." />
       {src && (
         <a href={src.replace('&bar=0', '')} target="_blank" rel="noreferrer"
-          style={{ display: 'inline-block', marginTop: 10, fontSize: 12.5, fontWeight: 700, color: '#3B5CC4', textDecoration: 'none' }}>
+          style={{ display: 'inline-flex', alignItems: 'center', minHeight: 44, marginTop: 4, fontSize: 13, fontWeight: 700, color: '#3B5CC4', textDecoration: 'none' }}>
           Ouvrir en plein écran ↗
         </a>
       )}

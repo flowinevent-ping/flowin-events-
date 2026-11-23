@@ -147,7 +147,7 @@ export default async function ProSuperPage({ searchParams }: { searchParams: { p
   const parties = myStations.reduce((s, x) => s + (x.commencees ?? 0), 0)
   const scans = myStations.reduce((s, x) => s + (x.scans ?? 0), 0)
   const q = proId ? `?pro=${encodeURIComponent(proId)}` : ''
-  const hk = (v: React.ReactNode, k: string) => <div style={{ flex: 1, minWidth: 90 }}><div style={{ fontSize: 26, fontWeight: 900, letterSpacing: '-1px' }}>{v}</div><div style={{ fontSize: 11.5, opacity: 0.9 }}>{k}</div></div>
+  const hk = (v: React.ReactNode, k: string) => <div style={{ flex: 1, minWidth: 90 }}><div style={{ fontSize: 26, fontWeight: 900, letterSpacing: '-1px' }}>{v}</div><div style={{ fontSize: 12, opacity: 0.9 }}>{k}</div></div>
 
   const nF = joueursSe.filter(j => (j as any).genre === 'F').length
   const nH = joueursSe.filter(j => (j as any).genre === 'H').length
@@ -188,7 +188,7 @@ export default async function ProSuperPage({ searchParams }: { searchParams: { p
       <div style={{ ...SUB, marginBottom: 16, display: estOrganisateur ? 'none' : undefined }}>Vous ne voyez ici que vos propres stations. Le bilan global du super event est suivi par Flowin, organisateur de l'opération. Vos chiffres sont calculés de la même façon, limités à vos stations.</div>
       {blocDemandes}
       <div style={{ borderRadius: 18, padding: 20, color: '#fff', marginBottom: 16, background: 'linear-gradient(135deg,#FF8A14 0%,#EA580C 55%,#C2410C 100%)' }}>
-        <div style={{ fontSize: 11, fontWeight: 800, letterSpacing: '.1em', opacity: 0.9 }}>MA PARTICIPATION · BILAN</div>
+        <div style={{ fontSize: 12, fontWeight: 800, letterSpacing: '.1em', opacity: 0.9 }}>MA PARTICIPATION · BILAN</div>
         <div style={{ fontSize: 22, fontWeight: 900, margin: '4px 0 14px' }}>{data.pro?.nom ?? 'Mon établissement'}</div>
         <div style={{ display: 'flex', gap: 14, flexWrap: 'wrap' }}>{hk(joueurs, 'mes joueurs')}{hk(parties, 'parties')}{hk(scans, 'flashs QR')}{hk(myStations.length, 'mes stations actives')}</div>
       </div>
@@ -201,7 +201,7 @@ export default async function ProSuperPage({ searchParams }: { searchParams: { p
 
       <StationsCarteGPS lieux={lieux as any} />
       <div style={{ ...CARD, overflowX: 'auto' }}>
-        <div style={{ fontSize: 11, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '.05em', color: '#8a7e93', marginBottom: 10 }}>Mes stations</div>
+        <div style={{ fontSize: 12, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '.05em', color: '#8a7e93', marginBottom: 10 }}>Mes stations</div>
         {tri.length === 0 ? <div style={{ fontSize: 13, ...MUTED }}>Aucune station.</div> : (
           <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: 480 }}>
             <thead><tr><th style={TH}>Station</th><th style={TH}>Joueurs</th><th style={TH}>Parties</th><th style={TH}>Flashs QR</th></tr></thead>
@@ -211,7 +211,7 @@ export default async function ProSuperPage({ searchParams }: { searchParams: { p
       </div>
       {estOrganisateur && (
         <div data-organisateur style={{ ...CARD, overflowX: 'auto', borderLeft: '3px solid #C2410C' }}>
-          <div style={{ fontSize: 11, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '.05em', color: '#C2410C', marginBottom: 10 }}>Organisateur · passages par station</div>
+          <div style={{ fontSize: 12, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '.05em', color: '#C2410C', marginBottom: 10 }}>Organisateur · passages par station</div>
           {phasesOrga && compteOrga && <PhasesOrganisateur phases={phasesOrga} compte={compteOrga} />}
           {toutes.length === 0 ? <div style={{ fontSize: 13, ...MUTED }}>Aucune station pour l’instant.</div> : (
             <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: 480 }}>

@@ -21,7 +21,7 @@ export default function AccesBloque({ proId }: { proId: string }) {
   const virer = c ? montantAVirer(c) : 0
   return (
     <div style={{ ...CARD, maxWidth: 640, padding: 24 }}>
-      <div style={{ fontSize: 11, fontWeight: 800, letterSpacing: '.14em', textTransform: 'uppercase', color: C.violet }}>Espace pro</div>
+      <div style={{ fontSize: 12, fontWeight: 800, letterSpacing: '.14em', textTransform: 'uppercase', color: C.violet }}>Espace pro</div>
       <div style={{ fontSize: 22, fontWeight: 900, letterSpacing: '-.01em', margin: '6px 0 8px' }}>Votre espace s’ouvre dès votre paiement</div>
       <div style={{ fontSize: 14, ...MUTED, lineHeight: 1.6 }}>Votre compte est créé. Il reste à régler votre commande.</div>
 
@@ -43,7 +43,7 @@ export default function AccesBloque({ proId }: { proId: string }) {
       )}
       {c === null && (
         <div style={{ marginTop: 16 }}>
-          <LienBonCommande proId={proId} style={{ ...BTN, display: 'inline-block', textDecoration: 'none' }}>Valider mon bon de commande</LienBonCommande>
+          <LienBonCommande proId={proId} style={{ ...BTN, textDecoration: 'none' }}>Valider mon bon de commande</LienBonCommande>
         </div>
       )}
       <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginTop: 18 }}>

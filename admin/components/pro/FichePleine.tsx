@@ -51,7 +51,7 @@ export function EntrepriseFormPleine({ initial, avecFicheEntreprise = false }: {
     return (
       <div style={CARD}>
         <div style={{ fontSize: 14, marginBottom: 10 }}>Connectez-vous pour voir et modifier les coordonnées de votre établissement.</div>
-        <Link href="/pro/connexion" style={{ fontWeight: 800, fontSize: 14 }}>Me connecter</Link>
+        <Link href="/pro/connexion" style={{ display: 'inline-flex', alignItems: 'center', minHeight: 44, fontWeight: 800, fontSize: 14 }}>Me connecter</Link>
       </div>
     )
   }

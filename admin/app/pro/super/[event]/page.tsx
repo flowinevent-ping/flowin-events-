@@ -97,9 +97,9 @@ export default async function ProStationPage({ params, searchParams }: { params:
           <Link key={j.jour} href={`/pro/super/${ev.id}?jour=${j.jour}${q}`}
             style={{
               textDecoration: 'none', fontSize: 12.5, fontWeight: 700, borderRadius: 20, padding: '6px 12px',
-              border: `1.5px solid ${j.jour === jourSel ? ACC : '#efe9f2'}`,
-              background: j.jour === jourSel ? 'rgba(122,79,224,.08)' : '#fff',
-              color: j.jour === jourSel ? ACC : '#1c1024',
+              border: `1.5px solid ${j.jour === jourSel ? ACC : '#DCE3EC'}`,
+              background: j.jour === jourSel ? 'rgba(59,92,196,.08)' : '#fff',
+              color: j.jour === jourSel ? ACC : '#1B3A5C',
             }}>
             {fr(j.jour)}{j.hors_periode ? ' (hors période)' : ''}
           </Link>
@@ -116,7 +116,7 @@ export default async function ProStationPage({ params, searchParams }: { params:
 
       {pointStation && (
         <div style={{ ...CARD, marginBottom: 14 }}>
-          <div style={{ fontSize: 11, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '.05em', color: '#8a7e93', marginBottom: 10 }}>
+          <div style={{ fontSize: 12, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '.05em', color: '#8a7e93', marginBottom: 10 }}>
             Bilan sur toute la période du festival
           </div>
           <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
@@ -126,14 +126,14 @@ export default async function ProStationPage({ params, searchParams }: { params:
             {kpi(pointStation.avec_coordonnees, 'avec coordonnées')}
             {kpi(pointStation.heure_pic != null ? `${pointStation.heure_pic}h` : '—', 'heure de pic')}
           </div>
-          <div style={{ fontSize: 11.5, color: '#94A3B8', marginTop: 8 }}>
+          <div style={{ fontSize: 12, color: '#94A3B8', marginTop: 8 }}>
             Borné aux dates du super event — mêmes chiffres que le bilan suivi par Flowin.
           </div>
         </div>
       )}
 
       <div style={{ ...CARD, marginBottom: 14 }}>
-        <div style={{ fontSize: 11, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '.05em', color: '#8a7e93', marginBottom: 10 }}>
+        <div style={{ fontSize: 12, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '.05em', color: '#8a7e93', marginBottom: 10 }}>
           Tickets &amp; gains émis sur cette station
         </div>
         <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
@@ -144,18 +144,18 @@ export default async function ProStationPage({ params, searchParams }: { params:
       </div>
 
       <div style={{ ...CARD, marginBottom: 14 }}>
-        <div style={{ fontSize: 11, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '.05em', color: '#8a7e93', marginBottom: 10 }}>Taux de finition du quiz</div>
+        <div style={{ fontSize: 12, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '.05em', color: '#8a7e93', marginBottom: 10 }}>Taux de finition du quiz</div>
         <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
           {kpi(ontOuvert, 'ont ouvert')}
           {kpi(ontFini, 'ont fini')}
           {kpi(finitionPct !== null ? `${finitionPct}%` : '—', 'finition')}
           {kpi(coupures, 'coupures réseau')}
         </div>
-        <div style={{ fontSize: 11.5, color: '#94A3B8', marginTop: 8 }}>Coupures réseau = reprises après perte de connexion pendant le jeu (source : suivi de parcours réel).</div>
+        <div style={{ fontSize: 12, color: '#94A3B8', marginTop: 8 }}>Coupures réseau = reprises après perte de connexion pendant le jeu (source : suivi de parcours réel).</div>
       </div>
 
       <div style={{ ...CARD, marginBottom: 14 }}>
-        <div style={{ fontSize: 11, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '.05em', color: '#8a7e93', marginBottom: 10 }}>Scores obtenus (quiz)</div>
+        <div style={{ fontSize: 12, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '.05em', color: '#8a7e93', marginBottom: 10 }}>Scores obtenus (quiz)</div>
         {Object.keys(scoreDist).length === 0 ? <div style={{ fontSize: 13, ...MUTED }}>Aucune partie ce jour-là.</div> : (
           <table style={{ width: '100%', borderCollapse: 'collapse' }}>
             <thead><tr><th style={TH}>Score</th><th style={TH}>Joueurs</th></tr></thead>
@@ -167,7 +167,7 @@ export default async function ProStationPage({ params, searchParams }: { params:
       </div>
 
       <div style={CARD}>
-        <div style={{ fontSize: 11, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '.05em', color: '#8a7e93', marginBottom: 10 }}>Réponses aux questions bonus{nbReponses ? ` (${nbReponses} joueurs ont répondu)` : ''}</div>
+        <div style={{ fontSize: 12, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '.05em', color: '#8a7e93', marginBottom: 10 }}>Réponses aux questions bonus{nbReponses ? ` (${nbReponses} joueurs ont répondu)` : ''}</div>
         {Object.keys(bonusTally).length === 0 ? <div style={{ fontSize: 13, ...MUTED }}>Aucune réponse bonus ce jour-là.</div> : (
           grouperParTheme(bonusTally).map(g => (
             <div key={g.theme} data-theme-bonus={g.theme} style={{ marginBottom: 16 }}>
@@ -189,7 +189,7 @@ export default async function ProStationPage({ params, searchParams }: { params:
 
       {/* FAMILLE I — un event qui existe se previsualise par son vrai parcours. */}
       <div style={CARD}>
-        <div style={{ fontSize: 11, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '.05em', color: '#8a7e93', marginBottom: 10 }}>Aperçu du parcours joueur</div>
+        <div style={{ fontSize: 12, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '.05em', color: '#8a7e93', marginBottom: 10 }}>Aperçu du parcours joueur</div>
         <ParcoursMobil events={[{ id: ev.id, module: ev.module, nom: ev.nom, super_event_id: ev.super_event_id }]} showTitle={false} />
       </div>
     </ProShell>

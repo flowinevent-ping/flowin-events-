@@ -15,7 +15,7 @@ import { creerAnimation, enregistrerDemandeQuiz, enregistrerDemandeKit, idAnimat
 import type { Banque, QuestionQuiz } from '@/lib/banques'
 import { creerBanque, enregistrerBanque, nouvelleQuestionQuiz } from '@/lib/banques'
 import { GABARIT_MODULE } from '@/lib/gabarit'
-import { creerQrTrace, slugQr, QR_INCLUS, type TypeQr } from '@/lib/qrTraces'
+import { creerQrTrace, slugQr, QR_INCLUS, urlDuQr, type TypeQr } from '@/lib/qrTraces'
 import { PictoSupport } from '@/components/operations/PictoSupport'
 import { lienAncien } from '@/lib/qrPermalien'
 import { qrFlowinPng } from '@/lib/qrLogo'
@@ -26,10 +26,12 @@ import { NavCarrousel, useGlisser } from '@/components/pro/Carrousel'
 import QrVirement from '@/components/pro/QrVirement'
 import { PRIX_ANIMATION, PRIX_KIT_PHYSIQUE, PAIEMENT_ACTIF, lienBonCommande, referenceVirement } from '@/lib/reglement'
 import { chiffres, siretValide } from '@/lib/entreprise'
-import { CHARTE_PRO as C } from '@/lib/charte'
+import { CHARTE_PRO as C, VERT_OK } from '@/lib/charte'
+import EnLigne, { Celebration, type QrFin } from './EnLigne'
 import { BTN, BTN2, MUTED } from '@/lib/proui'
 
 const BLEU = '#3B5CC4'
+const GROUPES = ['Jeu', 'Lots', 'Diffusion', 'Validation']
 export interface ProConfigurateur {
   id: string; nom: string | null; adresse: string | null; code_postal: string | null; ville: string | null
   email: string | null; tel: string | null; contact: string | null; partenaire_id: string | null; siret?: string | null
@@ -67,7 +69,7 @@ const lotVide = (): LotC => ({ id: 'l' + Math.random().toString(36).slice(2, 8),
 const eur = (n: number) => n.toLocaleString('fr-FR', { minimumFractionDigits: n % 1 ? 2 : 0, maximumFractionDigits: 2 }) + ' €'
 
 const IN: CSSProperties = { width: '100%', padding: '11px 13px', background: '#fff', border: `1.5px solid ${C.bordureChamp}`, borderRadius: 12, color: C.texte, fontSize: 15, fontWeight: 600, fontFamily: 'inherit', outline: 'none', boxSizing: 'border-box' }
-const LAB: CSSProperties = { display: 'block', fontSize: 11, fontWeight: 800, color: C.attenue, margin: '0 0 4px' }
+const LAB: CSSProperties = { display: 'block', fontSize: 12.5, fontWeight: 800, color: C.attenue, margin: '0 0 4px' }
 const carte = (on: boolean): CSSProperties => ({ border: `2px solid ${on ? BLEU : C.bordure}`, background: on ? '#EEF2FC' : '#fff', borderRadius: 16, padding: 12, cursor: 'pointer', fontFamily: 'inherit', color: C.texte, textAlign: 'left' })
 const puce = (on: boolean): CSSProperties => ({ border: `1.5px solid ${on ? BLEU : C.bordureChamp}`, background: on ? BLEU : '#fff', color: on ? '#fff' : C.texte, borderRadius: 99, padding: '8px 13px', fontSize: 13.5, fontWeight: 800, cursor: 'pointer', fontFamily: 'inherit' })
 
@@ -185,6 +187,16 @@ export default function Configurateur({ pro, banques }: { pro: ProConfigurateur;
   /* Arrivé au récapitulatif, le mode « Modifier » s'arrête. */
   useEffect(() => { if (ecran === 'recap') setRetourRecap(false) }, [ecran])
   const modifier = (cle: string) => { setRetourRecap(true); allerA(cle) }
+  /* Progression STABLE (23/11/2026, AMEL-DES-04) : 4 groupes fixes, quels que soient les choix (quiz ou non,
+     je rédige ou Flowin rédige). Le nombre d'écrans varie de 7 à 10, jamais le décor de progression. */
+  const groupeDe = (e: string) => e === 'lots' ? 1 : e === 'supports' || e === 'kit' ? 2 : e === 'recap' || e === 'prix' ? 3 : 0
+  const grCur = groupeDe(ecran)
+  const allerGroupe = (g: number) => {
+    const cible = ecrans.findIndex(e => groupeDe(e) === g)
+    if (cible < 0 || g === grCur) return
+    for (let k = cur; k < cible; k++) if (bloque[ecrans[k]]) { setTente(true); return }
+    setTente(false); setRetourRecap(false); setI(cible)
+  }
   /* Un choix unique fait avancer tout seul (moins de clics). */
   const choisirPuisSuivant = (fn: () => void) => { fn(); setTimeout(() => setI(k => k + 1), 160) }
 
@@ -195,7 +207,7 @@ export default function Configurateur({ pro, banques }: { pro: ProConfigurateur;
   /* Validation */
   const [envoi, setEnvoi] = useState<'' | 'envoi'>('')
   const [erreur, setErreur] = useState('')
-  const [fait, setFait] = useState<{ info: string } | null>(null)
+  const [fait, setFait] = useState<{ info: string; qrs: QrFin[] } | null>(null)
   const supportsChoisis = SUPPORTS.filter(s => supports.indexOf(s.k) >= 0)
   async function valider() {
     setEnvoi('envoi'); setErreur('')
@@ -252,11 +264,14 @@ export default function Configurateur({ pro, banques }: { pro: ProConfigurateur;
     })
     if (!r.ok) { setEnvoi(''); setErreur(r.error || 'Votre jeu n’a pas pu être enregistré.'); return }
     const pris: string[] = []
+    const qrsFin: QrFin[] = []
     let ko = 0
     for (const s of supportsChoisis) {
       const q = await creerQrTrace(evId, { nom: s.t, support: s.support, type: s.type }, pris)
-      if (q.qr) pris.push(q.qr.source_qr); else ko++
+      if (q.qr) { pris.push(q.qr.source_qr); qrsFin.push({ nom: s.t, support: s.support, code: q.qr.code_court ?? null, url: urlDuQr(q.qr, evId, module_) }) } else ko++
     }
+    /* Aucun QR enregistre : on montre quand meme le lien du jeu (jamais un ecran final sans QR). */
+    if (!qrsFin.length && supportsChoisis[0]) qrsFin.push({ nom: supportsChoisis[0].t, support: supportsChoisis[0].support, code: null, url: lienAncien(evId, module_, slugs[supportsChoisis[0].k]) })
     if (ko) infos.push(`${ko} QR à recréer depuis Diffusion.`)
     if (quizFlowin) {
       const d = await enregistrerDemandeQuiz({
@@ -281,7 +296,7 @@ export default function Configurateur({ pro, banques }: { pro: ProConfigurateur;
         conditions_lots: Array.from(new Set(lotsOk.map(l => l.conditions.trim()).filter(Boolean))).join(' ; '),
       }))
     } catch { /* stockage indisponible : le bon reprend la fiche du compte */ }
-    setEnvoi(''); setFait({ info: infos.join(' ') })
+    setEnvoi(''); setFait({ info: infos.join(' '), qrs: qrsFin })
   }
 
   const q = `?pro=${encodeURIComponent(p.id)}`
@@ -290,18 +305,21 @@ export default function Configurateur({ pro, banques }: { pro: ProConfigurateur;
   /* ── Validé ── */
   if (fait) {
     const urlBon = lienBonCommande({ proId: p.id, offre: 'lancement', quizFlowin, customisation: false, eventId: evId, kit })
+    if (!PAIEMENT_ACTIF) {
+      return <Cadre><EnLigne commerce={commerce.trim()} qrs={fait.qrs} lienEspace={lienEspace} info={fait.info} quizFlowin={quizFlowin} /></Cadre>
+    }
     return (
       <Cadre>
         <div data-ecran="valide" style={{ textAlign: 'center' }}>
-          <div style={{ width: 58, height: 58, borderRadius: 99, background: '#DCFCE7', color: '#15803D', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 10px', fontSize: 30, fontWeight: 900 }}>✓</div>
-          <div style={{ fontSize: 21, fontWeight: 900 }}>{PAIEMENT_ACTIF ? 'Bon de commande validé' : 'Votre jeu est en ligne'}</div>
+          <Celebration />
+          <div style={{ fontSize: 21, fontWeight: 900 }}>Bon de commande validé</div>
           <div style={{ fontSize: 13.5, ...MUTED, marginTop: 4 }}>Votre facture vous est envoyée par email.{quizFlowin ? ' Votre quiz : retour sous 72 h.' : ''}</div>
         </div>
-        {PAIEMENT_ACTIF && <div style={{ marginTop: 12 }}>
+        <div style={{ marginTop: 12 }}>
           <QrVirement montant={Math.round(totalHt * 1.2 * 100) / 100} reference={referenceVirement(evId)} taille={150} />
           <a href={urlBon} style={{ ...BTN2, display: 'block', textAlign: 'center', textDecoration: 'none', marginTop: 10 }}>Payer par prélèvement SEPA</a>
-        </div>}
-        {fait.info && <div style={{ fontSize: 12.5, color: '#B45309', fontWeight: 700, marginTop: 10 }}>{fait.info}</div>}
+        </div>
+        {fait.info && <div style={{ fontSize: 13, color: '#B45309', fontWeight: 700, marginTop: 10 }}>{fait.info}</div>}
         <a data-espace href={lienEspace} style={{ ...BTN, display: 'block', textAlign: 'center', textDecoration: 'none', marginTop: 16 }}>Mon espace pro</a>
       </Cadre>
     )
@@ -487,7 +505,7 @@ export default function Configurateur({ pro, banques }: { pro: ProConfigurateur;
           {blocs.map(b => (
             <div key={b.t} data-recap={b.cle} style={{ display: 'flex', alignItems: 'center', gap: 10, border: `1.5px solid ${C.bordure}`, borderRadius: 14, padding: '9px 12px', background: '#fff' }}>
               <div style={{ minWidth: 0, flex: 1 }}>
-                <div style={{ fontSize: 11, fontWeight: 800, ...MUTED }}>{b.t}</div>
+                <div style={{ fontSize: 12, fontWeight: 800, ...MUTED }}>{b.t}</div>
                 <div style={{ fontSize: 13.5, fontWeight: 700, overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}>{b.v}</div>
               </div>
               <button type="button" data-modifier={b.cle} onClick={() => modifier(b.cle)} style={{ border: 'none', background: 'none', color: BLEU, fontWeight: 800, fontSize: 13, cursor: 'pointer', fontFamily: 'inherit' }}>Modifier</button>
@@ -514,11 +532,22 @@ export default function Configurateur({ pro, banques }: { pro: ProConfigurateur;
   const msg = tente ? bloque[ecran] : null
   return (
     <Cadre>
+      <div data-progression role="group" aria-label={`Étape ${grCur + 1} sur ${GROUPES.length} : ${GROUPES[grCur]}`} style={{ marginBottom: 14 }}>
+        <div style={{ display: 'flex', gap: 6 }}>
+          {GROUPES.map((g, k) => (
+            <button key={g} type="button" data-groupe={k} aria-current={k === grCur ? 'step' : undefined} aria-label={`${g}${k < grCur ? ' : fait' : ''}`} onClick={() => allerGroupe(k)}
+              style={{ flex: 1, minHeight: 44, border: 'none', background: 'transparent', padding: '0', cursor: 'pointer', fontFamily: 'inherit', display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: 5 }}>
+              <span style={{ display: 'block', height: 6, borderRadius: 6, background: k < grCur ? VERT_OK : k === grCur ? BLEU : C.bordureChamp, transition: 'background .25s' }} />
+              <span style={{ fontSize: 12.5, fontWeight: 800, textAlign: 'left', color: k < grCur ? VERT_OK : k === grCur ? BLEU : C.attenue, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{k < grCur ? '✓ ' : ''}{g}</span>
+            </button>
+          ))}
+        </div>
+      </div>
       <div {...glisser} data-ecran={ecran}>
         {contenu}
         {retourRecap && ecran !== 'recap' && ecran !== 'quiz' && <button type="button" data-retour-recap style={{ ...BTN2, width: '100%', marginTop: 10 }} onClick={() => { if (bloque[ecran]) { setTente(true); return } setRetourRecap(false); allerA('recap') }}>Retour au récapitulatif</button>}
         {msg && <div style={{ fontSize: 12.5, color: '#B45309', fontWeight: 700, marginTop: 8, textAlign: 'right' }}>{msg}</div>}
-        <NavCarrousel n={ecrans.length} i={cur} setI={setEcran} suivantBloque={bloque[ecran]} onTenter={() => setTente(true)}
+        <NavCarrousel sansPoints n={ecrans.length} i={cur} setI={setEcran} suivantBloque={bloque[ecran]} onTenter={() => setTente(true)}
           dernier={<button type="button" data-valider style={{ ...BTN, opacity: envoi ? 0.6 : 1 }} disabled={!!envoi} onClick={valider}>{envoi ? 'Validation…' : 'Valider mon bon de commande'}</button>} />
       </div>
     </Cadre>

@@ -35,7 +35,7 @@ export default function SondageLandingPro({ s, nomsDuPro }: { s: SondageLanding;
 
   return (
     <div style={{ ...CARD }}>
-      <div style={{ fontSize: 11, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '.05em', color: '#5a6b80' }}>
+      <div style={{ fontSize: 12, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '.05em', color: '#5a6b80' }}>
         Questionnaire terrain — landing
       </div>
       <div style={{ fontSize: 13.5, color: '#5a6b80', marginTop: 2, marginBottom: 14, lineHeight: 1.5 }}>
@@ -82,7 +82,7 @@ export default function SondageLandingPro({ s, nomsDuPro }: { s: SondageLanding;
         </div>
       ) : (
         <>
-          <div style={{ fontSize: 11, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '.05em', color: '#5a6b80', margin: '20px 0 10px' }}>
+          <div style={{ fontSize: 12, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '.05em', color: '#5a6b80', margin: '20px 0 10px' }}>
             Dépouillement — {total} saisie{total > 1 ? 's' : ''}
           </div>
           <div style={{ fontSize: 12, ...MUTED, marginBottom: 12 }}>Vue d&apos;ensemble — réponse dominante par question.</div>

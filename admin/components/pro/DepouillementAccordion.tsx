@@ -19,12 +19,12 @@ export function ResumeVisuelDepouillement({ questions }: { questions: SondageLan
         const pct = top.pct ?? 0
         return (
           <div key={q.cle} style={{ background: '#fff', border: '1px solid #E3E8EF', borderRadius: 12, padding: '12px 13px' }}>
-            <div style={{ fontSize: 10.5, fontWeight: 800, color: '#94A3B8', textTransform: 'uppercase', letterSpacing: '.04em', marginBottom: 7, lineHeight: 1.35, minHeight: 27 }}>{q.libelle}</div>
+            <div style={{ fontSize: 12, fontWeight: 800, color: '#94A3B8', textTransform: 'uppercase', letterSpacing: '.04em', marginBottom: 7, lineHeight: 1.35, minHeight: 27 }}>{q.libelle}</div>
             <div style={{ fontSize: 13, fontWeight: 800, marginBottom: 6, lineHeight: 1.3 }}>{top.reponse}</div>
             <div style={{ width: '100%', height: 5, borderRadius: 99, background: '#E3E8EF', overflow: 'hidden', marginBottom: 5 }}>
               <div style={{ height: '100%', width: `${pct}%`, background: `linear-gradient(90deg,#3B5CC4,${ACC})`, borderRadius: 99 }} />
             </div>
-            <div style={{ fontSize: 11, color: '#5a6b80' }}>{pct} % · {q.repondants} réponse{q.repondants > 1 ? 's' : ''}</div>
+            <div style={{ fontSize: 12, color: '#5a6b80' }}>{pct} % · {q.repondants} réponse{q.repondants > 1 ? 's' : ''}</div>
           </div>
         )
       })}
@@ -57,13 +57,13 @@ export default function DepouillementAccordion({ questions }: { questions: Sonda
               }}
             >
               <span style={{ flex: 1, fontSize: 12.5, fontWeight: 800, lineHeight: 1.35 }}>{q.libelle}</span>
-              <span style={{ fontSize: 11, ...MUTED, flexShrink: 0 }}>{q.repondants} réponse{q.repondants > 1 ? 's' : ''}</span>
+              <span style={{ fontSize: 12, ...MUTED, flexShrink: 0 }}>{q.repondants} réponse{q.repondants > 1 ? 's' : ''}</span>
               <span style={{ fontSize: 14, color: ACC, transform: estOuvert ? 'rotate(90deg)' : 'none', transition: 'transform .15s', flexShrink: 0 }}>›</span>
             </button>
             {estOuvert && (
               <div style={{ padding: '0 14px 14px' }}>
                 {q.choix_multiple && (
-                  <div style={{ fontSize: 11, ...MUTED, marginBottom: 8 }}>Choix multiple</div>
+                  <div style={{ fontSize: 12, ...MUTED, marginBottom: 8 }}>Choix multiple</div>
                 )}
                 {q.reponses.map(r => {
                   const pct = r.pct ?? 0

@@ -33,6 +33,7 @@ import {
 
 import { messageFr, messageAuth } from '@/lib/erreursFr'
 import { retourSur } from '@/lib/retour'
+import { Celebration } from '@/components/creation/EnLigne'
 import { GARANTIE_ACTIVE } from '@/lib/flowinConfig'
 import PrecisionAutre from '@/components/creation/PrecisionAutre'
 import SelectActivite from '@/components/creation/SelectActivite'
@@ -621,7 +622,7 @@ export default function PremiereFois() {
       {etape === 7 && fin && (
         <main className="pf-col">
           <div className="pf-carte pf-fin">
-            <div className="pf-coche" aria-hidden>✓</div>
+            <Celebration />
             <h2 className="pf-h2">Bienvenue chez Flowin, {perso.prenom || 'et merci'} !</h2>
             <p className="pf-sous">Votre espace pro <b>{f.nomCommercial || f.nom}</b> est créé. L’équipe Flowin valide votre fiche ; en attendant, vous pouvez déjà découvrir votre espace.</p>
             {!fin.session && <div className="pf-info">Un email de confirmation vient de vous être envoyé à <b>{f.email}</b>. Cliquez sur le lien qu’il contient, puis connectez-vous.</div>}
@@ -635,9 +636,11 @@ export default function PremiereFois() {
               {retour && (
                 <a className="pf-btn pf-grand" href={fin.session ? retour : `/pro/connexion?retour=${encodeURIComponent(retour)}`}>Reprendre ma demande pour le super event</a>
               )}
+              {/* Lot ergonomie 1 (AMEL-DES-02) : de la fin d'inscription au Configurateur en UN toucher. */}
               {fin.session
-                ? <a className={retour ? 'pf-btn2' : 'pf-btn pf-grand'} href={`/pro?pro=${encodeURIComponent(fin.proId)}&bienvenue=1`}>Entrer dans mon espace pro</a>
-                : <a className={retour ? 'pf-btn2' : 'pf-btn pf-grand'} href="/pro/connexion">Me connecter</a>}
+                ? <a className={retour ? 'pf-btn2' : 'pf-btn pf-grand'} data-vers-configurateur href={`/pro/nouvelle?pro=${encodeURIComponent(fin.proId)}&type=animation`}>Configurer mon jeu</a>
+                : <a className={retour ? 'pf-btn2' : 'pf-btn pf-grand'} data-vers-configurateur href={`/pro/connexion?retour=${encodeURIComponent(`/pro/nouvelle?pro=${fin.proId}&type=animation`)}`}>Me connecter et configurer</a>}
+              {fin.session && <a className="pf-btn2" href={`/pro?pro=${encodeURIComponent(fin.proId)}&bienvenue=1`}>Entrer dans mon espace pro</a>}
               <a className="pf-btn2" href="/validation/plaquette-animation-v3.html#offres">Découvrir nos offres</a>
             </div>
           </div>
@@ -665,12 +668,12 @@ function Champ({ label, v, set, type = 'text', placeholder, aide, auto, inputMod
 const CSS = `
 .pf{${VARIABLES_PRO_CSS}min-height:100dvh;background:var(--fl-papier);color:var(--fl-encre);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;-webkit-text-size-adjust:100%}
 .pf *{box-sizing:border-box}
-.pf-top{display:flex;align-items:center;gap:10px;padding:14px 16px;max-width:1100px;margin:0 auto}
-.pf-logo{font-size:22px;font-weight:900;letter-spacing:-.02em;color:var(--fl-encre);text-decoration:none}
+.pf-top{display:flex;align-items:center;gap:8px;padding:14px 16px;max-width:1100px;margin:0 auto}
+.pf-logo{display:inline-block;line-height:44px;white-space:nowrap;font-size:20px;font-weight:900;letter-spacing:-.02em;color:var(--fl-encre);text-decoration:none}
 .pf-logo em{color:var(--fl-bleu);font-style:normal}
 .pf-offre{border:1.5px solid var(--fl-trait);border-radius:18px;background:#fff;padding:16px 18px;margin-top:10px}
 .pf-offre-1{border:2px solid #3B5CC4;padding:22px 20px;margin-top:0}
-.pf-offre-tag{display:inline-block;background:#3B5CC4;color:#fff;font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;border-radius:999px;padding:3px 10px}
+.pf-offre-tag{display:inline-block;background:#3B5CC4;color:#fff;font-size:12px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;border-radius:999px;padding:3px 10px}
 .pf-offre-n{font-size:20px;font-weight:900;margin-top:8px}
 .pf-offre-1 .pf-offre-n{font-size:26px}
 .pf-offre-p{font-size:22px;font-weight:900;color:#3B5CC4;margin-top:2px}
@@ -678,8 +681,8 @@ const CSS = `
 .pf-offre-d{font-size:14px;color:var(--fl-texte-2);margin-top:4px}
 .pf-offre-o{display:flex;justify-content:space-between;gap:10px;align-items:center;border-top:1px dashed var(--fl-trait);margin-top:14px;padding-top:12px;font-size:14px}
 .pf-offre-o span{font-weight:900;white-space:nowrap}
-.pf-badge{font-size:10.5px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--fl-violet);background:var(--fl-violet-clair);border-radius:99px;padding:4px 9px}
-.pf-lien{color:var(--fl-bleu);font-weight:700;font-size:13.5px;text-decoration:none}
+.pf-badge{font-size:12px;font-weight:800;letter-spacing:.06em;white-space:nowrap;text-transform:uppercase;color:var(--fl-violet);background:var(--fl-violet-clair);border-radius:99px;padding:4px 9px}
+.pf-lien{white-space:nowrap;color:var(--fl-bleu);font-weight:700;font-size:13.5px;text-decoration:none;display:inline-flex;align-items:center;min-height:44px}
 .pf-col{max-width:600px;margin:0 auto;padding:8px 16px 48px}
 .pf-kicker{font-size:12.5px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;color:var(--fl-violet);margin:22px 0 10px;display:flex;align-items:center;gap:10px}
 .pf-kicker::before{content:'';width:26px;height:3px;border-radius:2px;background:var(--fl-violet)}
@@ -693,17 +696,18 @@ const CSS = `
 .pf-note{font-size:12.5px;color:var(--fl-texte2);text-align:center;margin-top:12px;line-height:1.5}
 .pf-brouillon{background:#fff;border:1.5px solid var(--fl-violet);border-radius:16px;padding:14px 16px;font-size:14px;line-height:1.5;margin-top:12px}
 .pf-row{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px}
-.pf-btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;background:var(--fl-violet);color:#fff;border:none;border-radius:100px;padding:13px 22px;font-size:15px;font-weight:800;cursor:pointer;text-decoration:none;font-family:inherit;box-shadow:0 10px 24px rgba(122,79,224,.24)}
+.pf-btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;background:var(--fl-violet);color:#fff;border:none;border-radius:100px;padding:13px 22px;font-size:15px;font-weight:800;cursor:pointer;text-decoration:none;font-family:inherit;box-shadow:0 10px 24px rgba(59,92,196,.24)}
 .pf-btn:hover{background:var(--fl-violet-fonce)}
 .pf-btn:disabled{opacity:.6;cursor:default}
-.pf-btn2{display:inline-flex;align-items:center;justify-content:center;text-decoration:none;background:#fff;color:var(--fl-encre);border:1.5px solid var(--fl-bordure-champ);border-radius:100px;padding:12px 18px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap}
+.pf-btn2{display:inline-flex;align-items:center;justify-content:center;text-decoration:none;background:#fff;color:var(--fl-encre);border:1.5px solid var(--fl-bordure-champ);border-radius:100px;padding:12px 18px;min-height:44px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap}
 .pf-grand{width:100%;padding:16px;font-size:16px}
 .pf-prog{margin:10px 0 14px}
 .pf-prog-l{display:flex;justify-content:space-between;font-size:12.5px;font-weight:800;color:var(--fl-texte2);margin-bottom:8px}
 .pf-prog-n{color:var(--fl-violet)}
 .pf-barres{display:flex;gap:5px}
-.pf-barre{flex:1;height:6px;border-radius:99px;border:none;padding:0;background:var(--fl-bordure);cursor:default}
-.pf-barre.on{background:var(--fl-violet)}
+.pf-barre{flex:1;height:44px;border:none;padding:0;background:transparent;position:relative;cursor:default}
+.pf-barre::after{content:'';position:absolute;left:0;right:0;top:19px;height:6px;border-radius:99px;background:var(--fl-bordure)}
+.pf-barre.on::after{background:var(--fl-violet)}
 .pf-barre.on:not(:disabled){cursor:pointer}
 .pf-carte{background:#fff;border:1px solid var(--fl-bordure);border-radius:20px;padding:22px 20px;box-shadow:0 8px 28px rgba(27,58,92,.06)}
 .pf-h2{font-size:23px;font-weight:900;letter-spacing:-.01em;margin:0 0 6px;line-height:1.15}

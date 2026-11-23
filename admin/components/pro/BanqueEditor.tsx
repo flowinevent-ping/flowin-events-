@@ -29,7 +29,7 @@ function appliquerPatch(qs: QuestionBanque[], i: number, patch: Partial<Question
 }
 
 const btn: React.CSSProperties = { border: 'none', borderRadius: 10, padding: '9px 16px', fontWeight: 800, fontSize: 13, cursor: 'pointer' }
-const inputStyle: React.CSSProperties = { width: '100%', border: '1.5px solid #efe9f2', borderRadius: 9, padding: '9px 11px', fontSize: 13.5, fontFamily: 'inherit' }
+const inputStyle: React.CSSProperties = { width: '100%', border: '1.5px solid #DCE3EC', borderRadius: 9, padding: '9px 11px', fontSize: 13.5, fontFamily: 'inherit' }
 
 /* Rangement demande par Romain (18/09) : "rangement par theme et difficulte".
    Facultatif -- une question sans theme reste valide, juste non groupee au
@@ -164,7 +164,7 @@ export default function BanqueEditor({ banque, proId, estBonus, lienRetour }: { 
           placeholder="Nom de la banque"
         />
         <span style={{
-          fontSize: 10.5, fontWeight: 800, borderRadius: 6, padding: '3px 9px', flexShrink: 0,
+          fontSize: 12, fontWeight: 800, borderRadius: 6, padding: '3px 9px', flexShrink: 0,
           background: statut === 'valide' ? 'rgba(21,128,61,.1)' : 'rgba(180,83,9,.1)',
           color: statut === 'valide' ? '#15803D' : '#B45309',
         }}>{statut === 'valide' ? 'VALIDÉE' : 'BROUILLON'}</span>
@@ -185,8 +185,8 @@ export default function BanqueEditor({ banque, proId, estBonus, lienRetour }: { 
           return (
             <button key={qst.id} onClick={() => setEtape(i)}
               style={{
-                width: 30, height: 30, borderRadius: '50%', border: `1.5px solid ${actif ? ACC : '#efe9f2'}`,
-                background: actif ? ACC : rempli ? 'rgba(122,79,224,.08)' : '#fff',
+                width: 30, height: 30, borderRadius: '50%', border: `1.5px solid ${actif ? ACC : '#DCE3EC'}`,
+                background: actif ? ACC : rempli ? 'rgba(59,92,196,.08)' : '#fff',
                 color: actif ? '#fff' : rempli ? ACC : '#94A3B8',
                 fontWeight: 800, fontSize: 12, cursor: 'pointer',
               }}
@@ -196,9 +196,9 @@ export default function BanqueEditor({ banque, proId, estBonus, lienRetour }: { 
         })}
         <button onClick={() => setEtape('recap')}
           style={{
-            marginLeft: 4, fontSize: 11.5, fontWeight: 800, borderRadius: 99, padding: '6px 12px',
-            border: `1.5px solid ${etape === 'recap' ? ACC : '#efe9f2'}`,
-            background: etape === 'recap' ? ACC : '#fff', color: etape === 'recap' ? '#fff' : '#1c1024', cursor: 'pointer',
+            marginLeft: 4, fontSize: 12, fontWeight: 800, borderRadius: 99, padding: '6px 12px',
+            border: `1.5px solid ${etape === 'recap' ? ACC : '#DCE3EC'}`,
+            background: etape === 'recap' ? ACC : '#fff', color: etape === 'recap' ? '#fff' : '#1B3A5C', cursor: 'pointer',
           }}
         >Récapitulatif</button>
       </div>
@@ -220,7 +220,7 @@ export default function BanqueEditor({ banque, proId, estBonus, lienRetour }: { 
       {typeof etape === 'number' && (
         <div style={{ display: 'flex', gap: 10, marginBottom: 16 }}>
           <button disabled={etape === 0} onClick={() => setEtape(e => (e as number) - 1)}
-            style={{ ...btn, background: '#fff', border: '1.5px solid #efe9f2', color: '#1c1024', opacity: etape === 0 ? 0.4 : 1 }}>
+            style={{ ...btn, background: '#fff', border: '1.5px solid #DCE3EC', color: '#1B3A5C', opacity: etape === 0 ? 0.4 : 1 }}>
             <Ico k="chevronLeft" size={13} style={{ marginRight: 4 }} />Précédente
           </button>
           <button onClick={() => { setEtape(etape + 1 < questions.length ? etape + 1 : 'recap') }}
@@ -241,13 +241,13 @@ export default function BanqueEditor({ banque, proId, estBonus, lienRetour }: { 
                 const mod = !estBonus && (qst as QuestionQuiz).modele ? diagnostiquerModele(qst as QuestionQuiz) : null
                 const bonne = !estBonus ? (mod ? (mod.resolue ? mod.resolue.options[mod.resolue.bonne] : null) : (qst as QuestionQuiz).options[(qst as QuestionQuiz).bonne]) : null
                 return (
-                  <button key={qst.id} onClick={() => setEtape(i)} style={{ display: 'block', width: '100%', textAlign: 'left', background: 'none', border: 'none', borderTop: '1px solid #efe9f2', padding: '10px 0', cursor: 'pointer' }}>
+                  <button key={qst.id} onClick={() => setEtape(i)} style={{ display: 'block', width: '100%', textAlign: 'left', background: 'none', border: 'none', borderTop: '1px solid #DCE3EC', padding: '10px 0', cursor: 'pointer' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                      <span style={{ fontSize: 11, fontWeight: 800, color: '#94A3B8' }}>Q{i + 1}</span>
-                      {mod && <span data-a-completer style={{ fontSize: 10, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '.04em', color: mod.complet ? '#15803D' : '#B45309', background: mod.complet ? 'rgba(21,128,61,.1)' : 'rgba(180,83,9,.1)', borderRadius: 99, padding: '1px 7px' }}>{mod.complet ? 'Personnalisée' : 'À compléter'}</span>}
-                      {qst.difficulte && <span style={{ fontSize: 10, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '.04em', color: ACC, background: 'rgba(122,79,224,.08)', borderRadius: 99, padding: '1px 7px' }}>{qst.difficulte}</span>}
+                      <span style={{ fontSize: 12, fontWeight: 800, color: '#94A3B8' }}>Q{i + 1}</span>
+                      {mod && <span data-a-completer style={{ fontSize: 12, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '.04em', color: mod.complet ? '#15803D' : '#B45309', background: mod.complet ? 'rgba(21,128,61,.1)' : 'rgba(180,83,9,.1)', borderRadius: 99, padding: '1px 7px' }}>{mod.complet ? 'Personnalisée' : 'À compléter'}</span>}
+                      {qst.difficulte && <span style={{ fontSize: 12, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '.04em', color: ACC, background: 'rgba(59,92,196,.08)', borderRadius: 99, padding: '1px 7px' }}>{qst.difficulte}</span>}
                     </div>
-                    <div style={{ fontSize: 13.5, fontWeight: 700, color: intitule?.trim() ? '#1c1024' : '#B45309' }}>{mod?.resolue ? mod.resolue.texte : (intitule?.trim() || 'Intitulé manquant')}</div>
+                    <div style={{ fontSize: 13.5, fontWeight: 700, color: intitule?.trim() ? '#1B3A5C' : '#B45309' }}>{mod?.resolue ? mod.resolue.texte : (intitule?.trim() || 'Intitulé manquant')}</div>
                     {bonne != null && <div style={{ fontSize: 12, color: '#15803D', marginTop: 2 }}>Bonne réponse : {bonne || '—'}</div>}
                     {mod && !mod.complet && <div style={{ fontSize: 12, color: '#B45309', marginTop: 2 }}>{mod.probleme ?? `Pas encore posée aux joueurs : il manque ${mod.manquants.length} champ${mod.manquants.length > 1 ? 's' : ''} à compléter.`}</div>}
                   </button>
@@ -265,7 +265,7 @@ export default function BanqueEditor({ banque, proId, estBonus, lienRetour }: { 
               })
               return Array.from(groupes.entries()).map(([theme, items]) => (
                 <div key={theme} style={{ marginTop: 6 }}>
-                  <div style={{ fontSize: 11, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '.05em', color: '#94A3B8', marginTop: 10 }}>{theme}</div>
+                  <div style={{ fontSize: 12, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '.05em', color: '#94A3B8', marginTop: 10 }}>{theme}</div>
                   {items.map(({ qst, i }) => uneQuestion(qst, i))}
                 </div>
               ))
@@ -274,19 +274,19 @@ export default function BanqueEditor({ banque, proId, estBonus, lienRetour }: { 
 
           <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginBottom: 10 }}>
             <button onClick={() => ajouter([estBonus ? nouvelleQuestionBonus() : nouvelleQuestionQuiz()])}
-              style={{ ...btn, background: '#fff', border: '1.5px solid #efe9f2', color: '#1c1024' }}
+              style={{ ...btn, background: '#fff', border: '1.5px solid #DCE3EC', color: '#1B3A5C' }}
             ><Ico k="plus" size={13} style={{ marginRight: 6 }} />Une question</button>
             <button onClick={() => ajouter(blocDeQuatre(estBonus))}
-              style={{ ...btn, background: '#fff', border: '1.5px solid #efe9f2', color: '#1c1024' }}
+              style={{ ...btn, background: '#fff', border: '1.5px solid #DCE3EC', color: '#1B3A5C' }}
             ><Ico k="plus" size={13} style={{ marginRight: 6 }} />Un bloc de 4</button>
             <button onClick={() => setPanneau(p => p === 'modeles' ? null : 'modeles')} data-panneau-modeles
-              style={{ ...btn, background: panneau === 'modeles' ? 'rgba(122,79,224,.08)' : '#fff', border: `1.5px solid ${panneau === 'modeles' ? ACC : '#efe9f2'}`, color: ACC }}
+              style={{ ...btn, background: panneau === 'modeles' ? 'rgba(59,92,196,.08)' : '#fff', border: `1.5px solid ${panneau === 'modeles' ? ACC : '#DCE3EC'}`, color: ACC }}
             ><Ico k="plus" size={13} style={{ marginRight: 6 }} />Piocher dans les modèles</button>
             <button onClick={() => setPanneau(p => p === 'ia' ? null : 'ia')}
-              style={{ ...btn, background: panneau === 'ia' ? 'rgba(122,79,224,.08)' : '#fff', border: `1.5px solid ${panneau === 'ia' ? ACC : '#efe9f2'}`, color: ACC }}
+              style={{ ...btn, background: panneau === 'ia' ? 'rgba(59,92,196,.08)' : '#fff', border: `1.5px solid ${panneau === 'ia' ? ACC : '#DCE3EC'}`, color: ACC }}
             ><Ico k="sparkle" size={13} style={{ marginRight: 6 }} />Générer avec l&apos;IA</button>
             <button onClick={() => setPanneau(p => p === 'import' ? null : 'import')}
-              style={{ ...btn, background: panneau === 'import' ? 'rgba(122,79,224,.08)' : '#fff', border: `1.5px solid ${panneau === 'import' ? ACC : '#efe9f2'}`, color: ACC }}
+              style={{ ...btn, background: panneau === 'import' ? 'rgba(59,92,196,.08)' : '#fff', border: `1.5px solid ${panneau === 'import' ? ACC : '#DCE3EC'}`, color: ACC }}
             ><Ico k="upload" size={13} style={{ marginRight: 6 }} />Importer</button>
           </div>
 
@@ -305,11 +305,11 @@ export default function BanqueEditor({ banque, proId, estBonus, lienRetour }: { 
               </div>
               <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'flex-end', marginBottom: 10 }}>
                 <div style={{ flex: 2, minWidth: 200 }}>
-                  <label style={{ fontSize: 11, fontWeight: 700, display: 'block', marginBottom: 4 }}>Thème</label>
+                  <label style={{ fontSize: 12, fontWeight: 700, display: 'block', marginBottom: 4 }}>Thème</label>
                   <input style={inputStyle} value={themeIA} onChange={e => setThemeIA(e.target.value)} placeholder="Ex. Histoire de Vence et des Nuits du Sud" />
                 </div>
                 <div style={{ width: 90 }}>
-                  <label style={{ fontSize: 11, fontWeight: 700, display: 'block', marginBottom: 4 }}>Nombre</label>
+                  <label style={{ fontSize: 12, fontWeight: 700, display: 'block', marginBottom: 4 }}>Nombre</label>
                   <input
                     style={inputStyle} type="number" min={1} max={12} inputMode="numeric"
                     value={nombreIA}
@@ -322,7 +322,7 @@ export default function BanqueEditor({ banque, proId, estBonus, lienRetour }: { 
                   colle donne un vrai contexte a l'IA, plutot que le seul theme court
                   -- un paragraphe d'histoire locale, un extrait de site, des notes. */}
               <div style={{ marginBottom: 10 }}>
-                <label style={{ fontSize: 11, fontWeight: 700, display: 'block', marginBottom: 4 }}>Contexte (optionnel)</label>
+                <label style={{ fontSize: 12, fontWeight: 700, display: 'block', marginBottom: 4 }}>Contexte (optionnel)</label>
                 <textarea
                   style={{ ...inputStyle, minHeight: 90, resize: 'vertical', fontFamily: 'inherit' }}
                   value={contexteIA}
@@ -330,7 +330,7 @@ export default function BanqueEditor({ banque, proId, estBonus, lienRetour }: { 
                   placeholder="Collez ici un texte pour guider l'IA : historique du lieu, programme de la soirée, notes de brief…"
                   maxLength={6000}
                 />
-                <div style={{ fontSize: 10.5, ...MUTED, marginTop: 3, textAlign: 'right' }}>{contexteIA.length}/6000</div>
+                <div style={{ fontSize: 12, ...MUTED, marginTop: 3, textAlign: 'right' }}>{contexteIA.length}/6000</div>
               </div>
               <button
                 disabled={genIA === 'busy' || !themeIA.trim()}
@@ -363,7 +363,7 @@ export default function BanqueEditor({ banque, proId, estBonus, lienRetour }: { 
           <div style={{ marginTop: 8 }} />
 
           <div style={{ ...CARD, display: 'flex', gap: 12, alignItems: 'center', flexWrap: 'wrap', position: 'sticky', bottom: 12, boxShadow: '0 8px 24px rgba(15,23,42,.08)' }}>
-            <button disabled={pending} onClick={() => sauvegarder(false)} style={{ ...btn, background: '#fff', border: '1.5px solid #efe9f2', color: '#1c1024', opacity: pending ? 0.6 : 1 }}><Ico k="save" size={13} style={{ marginRight: 6 }} />Enregistrer en brouillon</button>
+            <button disabled={pending} onClick={() => sauvegarder(false)} style={{ ...btn, background: '#fff', border: '1.5px solid #DCE3EC', color: '#1B3A5C', opacity: pending ? 0.6 : 1 }}><Ico k="save" size={13} style={{ marginRight: 6 }} />Enregistrer en brouillon</button>
             <button disabled={pending} onClick={() => sauvegarder(true)} style={{ ...btn, background: ACC, color: '#fff', opacity: pending ? 0.6 : 1 }}><Ico k="check" size={13} style={{ marginRight: 6 }} />Valider</button>
             {message && <span style={{ fontSize: 12.5, ...MUTED }}>{message}</span>}
             <a href={lienRetour ?? `/pro/banques${q}`} style={{ marginLeft: 'auto', fontSize: 13, color: ACC, fontWeight: 700, textDecoration: 'none' }}>← Retour aux banques</a>
@@ -388,7 +388,7 @@ function UneQuestionQuiz({ question: qst, index, total, onChange, onRetirer }: {
   return (
     <div style={{ ...CARD }}>
       <div style={{ display: 'flex', gap: 10, alignItems: 'flex-start', marginBottom: 10 }}>
-        <span style={{ fontSize: 11, fontWeight: 800, color: '#94A3B8', paddingTop: 10, flexShrink: 0 }}>Q{index + 1}/{total}</span>
+        <span style={{ fontSize: 12, fontWeight: 800, color: '#94A3B8', paddingTop: 10, flexShrink: 0 }}>Q{index + 1}/{total}</span>
         <input value={qst.texte} onChange={e => onChange({ texte: e.target.value })} placeholder="Intitulé de la question" style={{ ...inputStyle, flex: 1 }} autoFocus />
         {total > 1 && <button onClick={onRetirer} style={{ ...btn, background: 'transparent', color: '#B45309', flexShrink: 0 }} title="Retirer la question">×</button>}
       </div>
@@ -397,7 +397,7 @@ function UneQuestionQuiz({ question: qst, index, total, onChange, onRetirer }: {
       </div>
       {qst.modele && <BlocModele question={qst} onChange={onChange} />}
       {!qst.modele && <div style={{ paddingLeft: 30, display: 'flex', flexDirection: 'column', gap: 7, marginTop: 10 }}>
-        <div style={{ fontSize: 11, fontWeight: 700, color: '#94A3B8', marginBottom: -2 }}>Réponses — cochez la bonne</div>
+        <div style={{ fontSize: 12, fontWeight: 700, color: '#94A3B8', marginBottom: -2 }}>Réponses — cochez la bonne</div>
         {qst.options.map((opt, oi) => (
           <div key={oi} style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
             <input type="radio" name={`bonne-${qst.id}`} checked={qst.bonne === oi} onChange={() => onChange({ bonne: oi })} title="Bonne réponse" />
@@ -406,7 +406,7 @@ function UneQuestionQuiz({ question: qst, index, total, onChange, onRetirer }: {
           </div>
         ))}
         <button onClick={ajoutOpt} style={{ ...btn, background: 'transparent', color: ACC, alignSelf: 'flex-start', padding: '4px 0', fontSize: 12 }}>+ Ajouter une réponse</button>
-        <div style={{ fontSize: 11, fontWeight: 700, color: '#94A3B8', marginTop: 4 }}>En cas de mauvaise réponse</div>
+        <div style={{ fontSize: 12, fontWeight: 700, color: '#94A3B8', marginTop: 4 }}>En cas de mauvaise réponse</div>
         <input value={qst.explication ?? ''} onChange={e => onChange({ explication: e.target.value })} placeholder="Explication affichée après une réponse fausse (optionnel)" style={{ ...inputStyle, fontSize: 12.5 }} />
       </div>}
     </div>
@@ -426,7 +426,7 @@ function UneQuestionBonus({ question: qst, index, total, onChange, onRetirer }: 
   return (
     <div style={{ ...CARD }}>
       <div style={{ display: 'flex', gap: 10, alignItems: 'flex-start', marginBottom: 10 }}>
-        <span style={{ fontSize: 11, fontWeight: 800, color: '#94A3B8', paddingTop: 10, flexShrink: 0 }}>Q{index + 1}/{total}</span>
+        <span style={{ fontSize: 12, fontWeight: 800, color: '#94A3B8', paddingTop: 10, flexShrink: 0 }}>Q{index + 1}/{total}</span>
         <input value={qst.label} onChange={e => onChange({ label: e.target.value })} placeholder="Intitulé de la question" style={{ ...inputStyle, flex: 1 }} autoFocus />
         <select value={qst.type} onChange={e => onChange({ type: e.target.value as 'single' | 'multi' })} style={{ ...inputStyle, width: 140, flexShrink: 0 }}>
           <option value="single">Choix unique</option>
@@ -469,10 +469,10 @@ function PanneauModeles({ estBonus, metier, onMetier, onAjouter }: {
       </select>
       {banques.length === 0 && <div style={{ fontSize: 12.5, ...MUTED }}>Aucun modèle pour ce métier.</div>}
       {banques.map(b => (
-        <details key={b.id} style={{ borderTop: '1px solid #efe9f2', padding: '8px 0' }}>
+        <details key={b.id} style={{ borderTop: '1px solid #DCE3EC', padding: '8px 0' }}>
           <summary style={{ cursor: 'pointer', fontWeight: 700, fontSize: 13 }}>
             {b.nom} <span style={{ ...MUTED, fontWeight: 600 }}>({b.questions.length})</span>
-            {b.personnalisable && <span style={{ marginLeft: 8, fontSize: 10, fontWeight: 800, color: '#0B7A4F' }}>À COMPLÉTER</span>}
+            {b.personnalisable && <span style={{ marginLeft: 8, fontSize: 12, fontWeight: 800, color: '#15803D' }}>À COMPLÉTER</span>}
           </summary>
           <button onClick={() => onAjouter(copier(b.questions))} style={{ ...btn, background: ACC, color: '#fff', padding: '6px 12px', fontSize: 12, margin: '8px 0' }}>Ajouter les {b.questions.length} questions</button>
           {b.questions.map(q => {
@@ -480,7 +480,7 @@ function PanneauModeles({ estBonus, metier, onMetier, onAjouter }: {
             return (
               <div key={q.id} style={{ display: 'flex', gap: 8, alignItems: 'flex-start', padding: '5px 0', fontSize: 12.5 }}>
                 <span style={{ flex: 1 }}>{t}</span>
-                <button onClick={() => onAjouter(copier([q]))} style={{ ...btn, background: '#fff', border: '1.5px solid #efe9f2', color: ACC, padding: '3px 10px', fontSize: 11.5, flexShrink: 0 }}>Ajouter</button>
+                <button onClick={() => onAjouter(copier([q]))} style={{ ...btn, background: '#fff', border: '1.5px solid #DCE3EC', color: ACC, padding: '3px 10px', fontSize: 12, flexShrink: 0 }}>Ajouter</button>
               </div>
             )
           })}
@@ -498,8 +498,8 @@ function BlocModele({ question: qst, onChange }: { question: QuestionQuiz; onCha
   const majOpt = (i: number, val: string) => onChange({ options: qst.options.map((o, oi) => (oi === i ? val : o)) })
   return (
     <div data-bloc-modele style={{ margin: '4px 0 12px 30px', border: '1.5px solid #bfe3d3', background: '#f3fbf7', borderRadius: 12, padding: 12 }}>
-      <div style={{ fontWeight: 800, fontSize: 13, color: '#0B7A4F', marginBottom: 2 }}>Question personnalisée : à compléter par le commerçant</div>
-      <div style={{ fontSize: 11.5, ...MUTED, marginBottom: 10, lineHeight: 1.5 }}>
+      <div style={{ fontWeight: 800, fontSize: 13, color: '#15803D', marginBottom: 2 }}>Question personnalisée : à compléter par le commerçant</div>
+      <div style={{ fontSize: 12, ...MUTED, marginBottom: 10, lineHeight: 1.5 }}>
         Les mots entre {'{'}accolades{'}'} sont remplacés par vos réponses. Tant qu&apos;un champ est vide, la question n&apos;est jamais posée aux joueurs.
       </div>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
@@ -507,7 +507,7 @@ function BlocModele({ question: qst, onChange }: { question: QuestionQuiz; onCha
           const vide = !(v.valeur ?? '').trim()
           return (
             <label key={v.cle} style={{ display: 'block' }}>
-              <span style={{ fontSize: 11, fontWeight: 700, display: 'flex', gap: 6, alignItems: 'center', marginBottom: 3 }}>
+              <span style={{ fontSize: 12, fontWeight: 700, display: 'flex', gap: 6, alignItems: 'center', marginBottom: 3 }}>
                 {v.label}
                 {vide && <span style={{ fontSize: 9.5, fontWeight: 800, color: '#B45309', background: 'rgba(180,83,9,.1)', borderRadius: 99, padding: '1px 7px' }}>À COMPLÉTER</span>}
               </span>
@@ -520,20 +520,20 @@ function BlocModele({ question: qst, onChange }: { question: QuestionQuiz; onCha
       </div>
       {m.mode === 'choix' && (
         <div style={{ marginTop: 10 }}>
-          <div style={{ fontSize: 11, fontWeight: 700, marginBottom: 4 }}>Mauvaises réponses proposées par défaut (modifiables)</div>
+          <div style={{ fontSize: 12, fontWeight: 700, marginBottom: 4 }}>Mauvaises réponses proposées par défaut (modifiables)</div>
           {[1, 2, 3].map(i => <input key={i} value={qst.options[i] ?? ''} onChange={e => majOpt(i, e.target.value)} style={{ ...inputStyle, boxSizing: 'border-box', marginBottom: 6, background: '#fff' }} />)}
         </div>
       )}
       {(m.mode === 'annee' || m.mode === 'nombre') && (
-        <div style={{ fontSize: 11.5, ...MUTED, marginTop: 10 }}>Les 3 mauvaises propositions sont calculées automatiquement autour de votre réponse.</div>
+        <div style={{ fontSize: 12, ...MUTED, marginTop: 10 }}>Les 3 mauvaises propositions sont calculées automatiquement autour de votre réponse.</div>
       )}
       <div data-apercu-joueur style={{ marginTop: 12, background: '#fff', border: '1px solid #e5e1ea', borderRadius: 10, padding: 10 }}>
-        <div style={{ fontSize: 10.5, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '.05em', color: '#94A3B8', marginBottom: 4 }}>Aperçu joueur</div>
+        <div style={{ fontSize: 12, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '.05em', color: '#94A3B8', marginBottom: 4 }}>Aperçu joueur</div>
         {d.resolue ? (
           <>
             <div style={{ fontWeight: 800, fontSize: 13.5, marginBottom: 6 }}>{d.resolue.texte}</div>
             {d.resolue.options.map((o, i) => (
-              <div key={i} style={{ fontSize: 12.5, padding: '3px 0', color: i === d.resolue!.bonne ? '#15803D' : '#1c1024', fontWeight: i === d.resolue!.bonne ? 800 : 500 }}>
+              <div key={i} style={{ fontSize: 12.5, padding: '3px 0', color: i === d.resolue!.bonne ? '#15803D' : '#1B3A5C', fontWeight: i === d.resolue!.bonne ? 800 : 500 }}>
                 {String.fromCharCode(65 + i)}. {o}{i === d.resolue!.bonne ? '  (bonne réponse)' : ''}
               </div>
             ))}

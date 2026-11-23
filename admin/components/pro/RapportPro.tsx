@@ -50,7 +50,7 @@ export function Egaliseur({ points, couleur = BLEU }: { points: { l: string; n: 
     <div data-egaliseur style={{ display: 'flex', alignItems: 'flex-end', gap: 4, height: 150, padding: '8px 0 0', borderBottom: '1px solid #E2E8F0' }}>
       {points.map(p => (
         <div key={p.l} title={`${p.l} : ${p.n}`} style={{ flex: 1, minWidth: 6, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-end', height: '100%' }}>
-          <div style={{ fontSize: 10, fontWeight: 800, color: '#334155' }}>{p.n}</div>
+          <div style={{ fontSize: 12, fontWeight: 800, color: '#334155' }}>{p.n}</div>
           <div style={{ width: '100%', maxWidth: 28, height: `${Math.max(4, (p.n / max) * 110)}px`, background: couleur, borderRadius: '5px 5px 0 0' }} />
           <div style={{ fontSize: 9.5, color: MUT, marginTop: 3, whiteSpace: 'nowrap' }}>{p.l}</div>
         </div>
@@ -151,13 +151,13 @@ export default function RapportPro({ eventIds, superEventId, contacts, gagnants,
           {contacts && <Tuile v={contacts.importes} l="clients importés" />}
           {gagnants != null && <Tuile c={ORANGE} v={gagnants} l="gagnants" />}
         </div>
-        <div style={{ fontSize: 11.5, color: MUT, marginTop: 8 }}>Un flash est une ouverture du QR ; un joueur est compté une fois.</div>
+        <div style={{ fontSize: 12, color: MUT, marginTop: 8 }}>Un flash est une ouverture du QR ; un joueur est compté une fois.</div>
       </div>
     ) },
     { cle: 'supports', contenu: (
       <div data-slide="supports" style={{ background: '#fff', border: '1px solid #E2E8F0', borderRadius: 16, padding: 16 }}>
         <EgaliseurQrEvents eventIds={eventIds} titre="D’où viennent vos flashs" cadre={false} />
-        <div style={{ fontSize: 11.5, color: MUT, marginTop: 8 }}>Un QR par support : même jeu, mêmes lots ; vous voyez quelle pub vous amène du monde.</div>
+        <div style={{ fontSize: 12, color: MUT, marginTop: 8 }}>Un QR par support : même jeu, mêmes lots ; vous voyez quelle pub vous amène du monde.</div>
       </div>
     ) },
     { cle: 'genre', contenu: (

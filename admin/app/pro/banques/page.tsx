@@ -37,11 +37,11 @@ export default async function ProBanquesPage({ searchParams }: { searchParams: {
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(240px,1fr))', gap: 12 }}>
         {items.map(b => (
           <Link key={b.id} href={`/pro/banques/${b.id}${q}`} style={{ textDecoration: 'none', color: 'inherit' }}>
-            <div style={{ ...CARD, marginBottom: 0, cursor: 'pointer', border: b.statut === 'valide' ? '1px solid #efe9f2' : '1.5px dashed #CBD5E1' }}>
+            <div style={{ ...CARD, marginBottom: 0, cursor: 'pointer', border: b.statut === 'valide' ? '1px solid #DCE3EC' : '1.5px dashed #CBD5E1' }}>
               <div style={{ fontWeight: 700, fontSize: 13.5, marginBottom: 6 }}>{b.nom || 'Sans nom'}</div>
               <div style={{ fontSize: 12, ...MUTED, marginBottom: 8 }}>{b.questions?.length ?? 0} question{(b.questions?.length ?? 0) > 1 ? 's' : ''}</div>
               <span style={{
-                fontSize: 10, fontWeight: 800, borderRadius: 6, padding: '2px 7px',
+                fontSize: 12, fontWeight: 800, borderRadius: 6, padding: '2px 7px',
                 background: b.statut === 'valide' ? 'rgba(21,128,61,.1)' : 'rgba(180,83,9,.1)',
                 color: b.statut === 'valide' ? '#15803D' : '#B45309',
               }}>{b.statut === 'valide' ? 'VALIDÉE' : 'BROUILLON'}</span>

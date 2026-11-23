@@ -18,7 +18,7 @@ import { CHARTE_PRO as C } from '@/lib/charte'
 import { CHAMP } from '@/lib/proui'
 
 const petit: React.CSSProperties = { ...CHAMP, padding: '8px 11px', fontSize: 13, borderRadius: 10, width: 'auto' }
-const th: React.CSSProperties = { textAlign: 'left', fontSize: 10, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '.07em', color: C.attenue, padding: '8px 10px', borderBottom: `1px solid ${C.bordure}`, background: C.subtil, whiteSpace: 'nowrap' }
+const th: React.CSSProperties = { textAlign: 'left', fontSize: 12, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '.07em', color: C.attenue, padding: '8px 10px', borderBottom: `1px solid ${C.bordure}`, background: C.subtil, whiteSpace: 'nowrap' }
 const td: React.CSSProperties = { padding: '9px 10px', borderBottom: `1px solid ${C.bordure}`, fontSize: 12.5, verticalAlign: 'top' }
 const dateFr = (d: string | null) => d ? new Date(`${d.slice(0, 10)}T12:00:00`).toLocaleDateString('fr-FR') : '—'
 
@@ -26,13 +26,13 @@ function Tuile({ v, l }: { v: React.ReactNode; l: string }) {
   return (
     <div style={{ flex: '1 1 120px', background: '#fff', border: `1px solid ${C.bordure}`, borderRadius: 14, padding: '10px 14px' }}>
       <div style={{ fontSize: 22, fontWeight: 800, color: C.accent, lineHeight: 1.1 }}>{v}</div>
-      <div style={{ fontSize: 11.5, fontWeight: 700, color: C.attenue }}>{l}</div>
+      <div style={{ fontSize: 12, fontWeight: 700, color: C.attenue }}>{l}</div>
     </div>
   )
 }
 function Pastille({ ok, texte }: { ok: boolean; texte: string }) {
   return (
-    <span style={{ fontSize: 11, fontWeight: 800, color: ok ? '#15803D' : '#B45309', background: ok ? 'rgba(21,128,61,.09)' : 'rgba(180,83,9,.09)', borderRadius: 99, padding: '3px 8px', whiteSpace: 'nowrap' }}>
+    <span style={{ fontSize: 12, fontWeight: 800, color: ok ? '#15803D' : '#B45309', background: ok ? 'rgba(21,128,61,.09)' : 'rgba(180,83,9,.09)', borderRadius: 99, padding: '3px 8px', whiteSpace: 'nowrap' }}>
       {texte}
     </span>
   )
@@ -152,7 +152,7 @@ export default function ListeFactures({ operations }: { operations: DonneesOpera
                 <tr key={l.cleLigne}>
                   <td style={td}>
                     <div style={{ fontWeight: 800 }}>{l.opNom}</div>
-                    <div style={{ fontSize: 11.5, color: C.attenue }}>{l.opDates}</div>
+                    <div style={{ fontSize: 12, color: C.attenue }}>{l.opDates}</div>
                   </td>
                   <td style={{ ...td, whiteSpace: 'nowrap' }}>{dateFr(l.date)}</td>
                   <td style={td}>

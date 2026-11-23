@@ -136,7 +136,7 @@ export default function ModalPartenaires({ op, onClose, onChange }: { op: Donnee
         </div>
         <div style={{ fontSize: 12.5, opacity: .7, marginBottom: 14 }}>{op.nom} — les partenaires s’affichent dans le bandeau « Nos partenaires » du jeu et sur la page Partenaires.</div>
 
-        {msg && <div role="status" data-msg-partenaires style={{ fontSize: 13, fontWeight: 700, padding: '8px 12px', borderRadius: 10, marginBottom: 12, background: msg.ok ? '#DCFCE7' : '#FEE2E2', color: msg.ok ? '#166534' : '#991B1B' }}>{msg.t}</div>}
+        {msg && <div role="status" data-msg-partenaires style={{ fontSize: 13, fontWeight: 700, padding: '8px 12px', borderRadius: 10, marginBottom: 12, background: msg.ok ? '#DCFCE7' : '#FEE2E2', color: msg.ok ? '#15803D' : '#991B1B' }}>{msg.t}</div>}
 
         <div style={{ fontSize: 12, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '.06em', opacity: .6, marginBottom: 6 }}>Partenaires actuels ({actifs.length})</div>
         {lignes === null && <div style={{ fontSize: 13, opacity: .6 }}>Chargement…</div>}
