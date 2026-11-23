@@ -1,0 +1,113 @@
+<!doctype html><html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Maquette Super Event, page publique</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,Segoe UI,Roboto,sans-serif;background:#d9d9d9;padding:20px;display:flex;gap:24px;flex-wrap:wrap;justify-content:center}
+.col{width:390px}.lab{font:700 13px sans-serif;color:#333;margin:0 0 8px;text-align:center}
+.ph{width:390px;height:780px;background:#fff;position:relative;overflow:hidden;border-radius:26px;box-shadow:0 4px 20px #0003}
+.hd{position:absolute;top:0;left:0;right:0;height:88px;background:linear-gradient(135deg,#B5471E,#E8872F);z-index:5;display:flex;align-items:center;padding:0 14px;gap:10px;color:#fff;border-radius:0 0 22px 22px;box-shadow:0 3px 10px #0003;text-decoration:none}
+.hd .lg{height:44px;background:#fff;border-radius:12px;padding:4px 10px;display:flex;align-items:center;border:3px solid #E9B993}.hd .lg img{height:30px}.hd .ret{position:absolute;left:14px;bottom:5px;font-size:9px;opacity:.85;letter-spacing:.5px}
+.hd b{font-size:14px;line-height:1.1}.hd small{display:block;font-weight:500;font-size:11px;opacity:.9}
+.hd .n{margin-left:auto;background:#fff;color:#B5471E;font-weight:800;font-size:18px;line-height:1;border-radius:14px;padding:6px 10px;text-align:center}.hd .n small{display:block;font-size:9px;font-weight:700;opacity:1;margin:0}
+.map{position:absolute;inset:0;background:#F4F1EC}
+.map svg.st{position:absolute;inset:0;width:100%;height:100%}
+.pin{position:absolute;width:44px;height:44px;margin:-22px 0 0 -22px;border-radius:50%;background:#fff;border:4px solid #B5471E;box-shadow:0 3px 8px #0005;display:flex;align-items:center;justify-content:center;overflow:hidden}
+.pin img{width:78%;height:78%;object-fit:contain}
+.pin.fait{border-color:#15803D}.pin.fait:after{content:"✓";position:absolute;right:-1px;top:-1px;width:16px;height:16px;border-radius:50%;background:#15803D;color:#fff;font:700 11px/16px sans-serif;text-align:center}
+.pin.sel{width:60px;height:60px;margin:-30px 0 0 -30px;border-color:#1D4ED8;z-index:4;box-shadow:0 0 0 6px #1D4ED833,0 3px 10px #0005}
+.pin.ini{background:#FED7AA;font:800 16px sans-serif;color:#9A3412}
+.fest{position:absolute;margin:-15px 0 0 -15px;width:30px;height:30px;border-radius:50%;background:#B5471E;color:#fff;font:800 12px/30px sans-serif;text-align:center;border:2px solid #fff;box-shadow:0 2px 5px #0004}
+.moi{position:absolute;width:18px;height:18px;margin:-9px 0 0 -9px;border-radius:50%;background:#2563EB;border:3px solid #fff;box-shadow:0 0 0 8px #2563EB33}
+.moit{position:absolute;font:700 11px sans-serif;background:#2563EB;color:#fff;border-radius:8px;padding:2px 7px;margin:12px 0 0 -30px;white-space:nowrap}
+.bar{position:absolute;left:0;right:0;bottom:0;background:#fff;border-radius:26px 26px 0 0;box-shadow:0 -4px 18px #0003;z-index:6;padding:8px 0 16px}.bar:before{content:"";display:block;width:44px;height:5px;border-radius:3px;background:#D1D5DB;margin:0 auto 10px}
+.bar .t{padding:0 14px 8px;font:700 15px sans-serif;color:#2563EB;display:flex;justify-content:space-between;align-items:center}
+.bar .t span{font-weight:600;color:#6b7280;font-size:12px}
+.car{display:flex;gap:10px;overflow:hidden;padding:0 14px}
+.lo{flex:0 0 74px;text-align:center}
+.lo .c{width:74px;height:74px;border-radius:16px;background:#fff;border:2px solid #E5E7EB;display:flex;align-items:center;justify-content:center;position:relative}
+.lo .c img{width:80%;height:80%;object-fit:contain}
+.lo.on .c{border-color:#1D4ED8;box-shadow:0 0 0 3px #1D4ED833}
+.lo.fait .c{border-color:#15803D}.lo.fait .c:after{content:"✓";position:absolute;right:-5px;top:-5px;width:20px;height:20px;border-radius:50%;background:#15803D;color:#fff;font:700 12px/20px sans-serif}
+.lo small{display:block;font-size:11px;color:#374151;margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.lo .d{font-size:10px;color:#6b7280}
+.cta{margin:10px 14px 0;height:52px;border-radius:26px;background:linear-gradient(135deg,#B5471E,#D2631F);color:#fff;font:700 17px/52px sans-serif;text-align:center;box-shadow:0 6px 14px #B5471E55}
+.card{margin:0 14px 0;border:1px solid #E5E7EB;border-radius:14px;padding:10px;display:flex;gap:10px;align-items:center}
+.card .lg2{width:56px;height:56px;border:1px solid #eee;border-radius:12px;display:flex;align-items:center;justify-content:center}.card img{width:80%;height:80%;object-fit:contain}
+.card b{font-size:15px}.card p{font-size:12px;color:#4B5563;margin-top:2px}
+.prog{display:flex;gap:5px;padding:0 14px 8px}.prog i{flex:1;height:7px;border-radius:4px;background:#E5E7EB}.prog i.f{background:#15803D}
+.gain{margin:8px 14px 0;background:#FFF7ED;border:1px solid #FDBA74;border-radius:12px;padding:8px 10px;font-size:12px;color:#7C2D12}
+.mini{position:absolute;top:100px;left:12px;right:12px;z-index:5;background:#fff;border-radius:14px;box-shadow:0 2px 10px #0003;padding:8px 12px;display:flex;align-items:center;gap:10px}
+.mini .ring{width:38px;height:38px;border-radius:50%;background:conic-gradient(#15803D 0 37.5%,#E5E7EB 0);display:flex;align-items:center;justify-content:center}
+.mini .ring b{width:30px;height:30px;border-radius:50%;background:#fff;font-size:12px;display:flex;align-items:center;justify-content:center}
+.mini div.x{font-size:12px;color:#374151}.mini div.x b{display:block;font-size:13px;color:#111}
+.note{width:390px;font:12px/1.4 sans-serif;color:#333;margin-top:8px}
+</style></head><body>
+
+<!-- ÉCRAN 1 : arrivée -->
+<div class="col"><div class="lab">1. J'arrive sur la page</div>
+<div class="ph">
+ <div class="hd"><div class="lg"><img src="flowin-super-event-logo.svg" alt=""></div><b style="font-size:17px">Nuits du Sud 2026<small>9 juil. – 18 juil. · Vence</small></b><span class="n">22<small>commerces</small></span></div>
+ <div class="map"><svg class="st" viewBox="0 0 390 780" preserveAspectRatio="none"><rect width="390" height="780" fill="#F4F1EC"/><polygon points="101,233 188,233 188,301 101,301" fill="#E7E4DE"/><polygon points="188,233 194,228 194,296 188,301" fill="#D6D2CA"/><polygon points="222,167 263,167 263,227 222,227" fill="#E7E4DE"/><polygon points="263,167 269,162 269,222 263,227" fill="#D6D2CA"/><polygon points="112,339 176,339 176,414 112,414" fill="#E7E4DE"/><polygon points="176,339 182,334 182,409 176,414" fill="#D6D2CA"/><polygon points="220,587 310,587 310,657 220,657" fill="#E7E4DE"/><polygon points="310,587 316,582 316,652 310,657" fill="#D6D2CA"/><polygon points="57,337 116,337 116,400 57,400" fill="#E7E4DE"/><polygon points="116,337 122,332 122,395 116,400" fill="#D6D2CA"/><polygon points="179,115 227,115 227,155 179,155" fill="#E7E4DE"/><polygon points="227,115 233,110 233,150 227,155" fill="#D6D2CA"/><polygon points="282,143 360,143 360,222 282,222" fill="#E7E4DE"/><polygon points="360,143 366,138 366,217 360,222" fill="#D6D2CA"/><polygon points="-5,375 95,375 95,443 -5,443" fill="#E7E4DE"/><polygon points="95,375 101,370 101,438 95,443" fill="#D6D2CA"/><polygon points="178,537 268,537 268,613 178,613" fill="#E7E4DE"/><polygon points="268,537 274,532 274,608 268,613" fill="#D6D2CA"/><polygon points="275,555 332,555 332,608 275,608" fill="#E7E4DE"/><polygon points="332,555 338,550 338,603 332,608" fill="#D6D2CA"/><polygon points="29,136 86,136 86,197 29,197" fill="#E7E4DE"/><polygon points="86,136 92,131 92,192 86,197" fill="#D6D2CA"/><polygon points="91,364 186,364 186,443 91,443" fill="#E7E4DE"/><polygon points="186,364 192,359 192,438 186,443" fill="#D6D2CA"/><polygon points="300,408 393,408 393,470 300,470" fill="#E7E4DE"/><polygon points="393,408 399,403 399,465 393,470" fill="#D6D2CA"/><polygon points="177,459 285,459 285,526 177,526" fill="#E7E4DE"/><polygon points="285,459 291,454 291,521 285,526" fill="#D6D2CA"/><polygon points="188,337 271,337 271,410 188,410" fill="#E7E4DE"/><polygon points="271,337 277,332 277,405 271,410" fill="#D6D2CA"/><polygon points="-6,386 54,386 54,460 -6,460" fill="#E7E4DE"/><polygon points="54,386 60,381 60,455 54,460" fill="#D6D2CA"/><g fill="none" stroke="#fff" stroke-linecap="round" stroke-linejoin="round"><path d="M-10 330 L400 380" stroke-width="16"/><path d="M110 90 L170 780" stroke-width="12"/><path d="M-10 600 C120 560 260 640 400 580" stroke-width="14"/><path d="M300 90 L270 780" stroke-width="10"/></g><path d="M-10 690 L130 740 L200 780 L-10 780Z" fill="#F7E7A6" stroke="#E9C77B"/><text x="130" y="352" font-size="11" fill="#9A8F80" font-style="italic" transform="rotate(4 130 352)">Rue du Pavillon</text><text x="180" y="590" font-size="11" fill="#9A8F80" font-style="italic">Avenue de la Gare</text><rect x="305" y="140" width="16" height="16" rx="3" fill="#3B82F6"/><text x="309" y="152" font-size="12" font-weight="700" fill="#fff">P</text><text x="20" y="200" font-size="12" fill="#6B8CC7" font-style="italic">L'Ara</text></svg>
+  <div class="pin" style="left:95px;top:150px"><img src="charvolin.png"></div>
+  <div class="pin" style="left:130px;top:185px"><img src="giordano.png"></div>
+  <div class="pin" style="left:250px;top:270px"><img src="pegase.png"></div>
+  <div class="pin" style="left:310px;top:330px"><img src="carrosserie-gp.png"></div>
+  <div class="pin" style="left:215px;top:395px"><img src="nook.png"></div>
+  <div class="pin" style="left:175px;top:345px"><img src="utile.png"></div>
+  <div class="pin" style="left:70px;top:560px"><img src="bergerie.png"></div>
+  <div class="fest" style="left:262px;top:355px">15</div>
+  <div class="moi" style="left:205px;top:470px"></div><div class="moit" style="left:205px;top:470px">Vous êtes ici</div>
+ </div>
+ <div class="bar"><div class="t">Les commerces qui jouent <span>22 · glissez →</span></div>
+  <div class="car"><div class="lo"><div class="c"><img src="nook.png"></div><small>Nook Café</small><div class="d">90 m</div></div>
+  <div class="lo"><div class="c"><img src="utile.png"></div><small>Utile Vence</small><div class="d">180 m</div></div>
+  <div class="lo"><div class="c"><img src="carrosserie-gp.png"></div><small>Carrosserie GP</small><div class="d">310 m</div></div>
+  <div class="lo"><div class="c"><img src="pegase.png"></div><small>Auto-École</small><div class="d">420 m</div></div>
+  <div class="lo"><div class="c"><img src="giordano.png"></div><small>Giordano</small><div class="d">700 m</div></div></div>
+  <div class="cta">Jouer au plus proche</div></div>
+</div><div class="note">Bandeau 88 px (avant 150 px), même dégradé orange que la page actuelle, cliquable : un appui ramène à l'accueil du Super Event. Carte plus riche (bâtiments, noms de rues), comme avant. Le rond « 15 » regroupe les points du festival (bars, caisses, écran) tant qu'on ne zoome pas. Carrousel trié du plus proche au plus loin.</div></div>
+
+<!-- ÉCRAN 2 : je touche un logo -->
+<div class="col"><div class="lab">2. Je touche un logo : la carte s'y déplace</div>
+<div class="ph">
+ <div class="hd"><div class="lg"><img src="flowin-super-event-logo.svg" alt=""></div><b style="font-size:17px">Nuits du Sud 2026<small>9 juil. – 18 juil. · Vence</small></b><span class="n">22<small>commerces</small></span></div>
+ <div class="map"><svg class="st" viewBox="0 0 390 780" preserveAspectRatio="none"><rect width="390" height="780" fill="#F4F1EC"/><polygon points="100,410 153,410 153,486 100,486" fill="#E7E4DE"/><polygon points="153,410 159,405 159,481 153,486" fill="#D6D2CA"/><polygon points="182,590 241,590 241,625 182,625" fill="#E7E4DE"/><polygon points="241,590 247,585 247,620 241,625" fill="#D6D2CA"/><polygon points="14,120 105,120 105,185 14,185" fill="#E7E4DE"/><polygon points="105,120 111,115 111,180 105,185" fill="#D6D2CA"/><polygon points="128,160 196,160 196,223 128,223" fill="#E7E4DE"/><polygon points="196,160 202,155 202,218 196,223" fill="#D6D2CA"/><polygon points="254,468 329,468 329,547 254,547" fill="#E7E4DE"/><polygon points="329,468 335,463 335,542 329,547" fill="#D6D2CA"/><polygon points="68,208 141,208 141,251 68,251" fill="#E7E4DE"/><polygon points="141,208 147,203 147,246 141,251" fill="#D6D2CA"/><polygon points="-7,366 67,366 67,408 -7,408" fill="#E7E4DE"/><polygon points="67,366 73,361 73,403 67,408" fill="#D6D2CA"/><polygon points="64,417 141,417 141,487 64,487" fill="#E7E4DE"/><polygon points="141,417 147,412 147,482 141,487" fill="#D6D2CA"/><polygon points="170,188 253,188 253,260 170,260" fill="#E7E4DE"/><polygon points="253,188 259,183 259,255 253,260" fill="#D6D2CA"/><polygon points="178,618 249,618 249,659 178,659" fill="#E7E4DE"/><polygon points="249,618 255,613 255,654 249,659" fill="#D6D2CA"/><polygon points="106,584 181,584 181,619 106,619" fill="#E7E4DE"/><polygon points="181,584 187,579 187,614 181,619" fill="#D6D2CA"/><polygon points="260,407 300,407 300,455 260,455" fill="#E7E4DE"/><polygon points="300,407 306,402 306,450 300,455" fill="#D6D2CA"/><polygon points="273,419 378,419 378,461 273,461" fill="#E7E4DE"/><polygon points="378,419 384,414 384,456 378,461" fill="#D6D2CA"/><polygon points="191,533 267,533 267,590 191,590" fill="#E7E4DE"/><polygon points="267,533 273,528 273,585 267,590" fill="#D6D2CA"/><polygon points="211,265 280,265 280,314 211,314" fill="#E7E4DE"/><polygon points="280,265 286,260 286,309 280,314" fill="#D6D2CA"/><polygon points="112,144 162,144 162,176 112,176" fill="#E7E4DE"/><polygon points="162,144 168,139 168,171 162,176" fill="#D6D2CA"/><g fill="none" stroke="#fff" stroke-linecap="round" stroke-linejoin="round"><path d="M-10 330 L400 380" stroke-width="16"/><path d="M110 90 L170 780" stroke-width="12"/><path d="M-10 600 C120 560 260 640 400 580" stroke-width="14"/><path d="M300 90 L270 780" stroke-width="10"/></g><path d="M-10 690 L130 740 L200 780 L-10 780Z" fill="#F7E7A6" stroke="#E9C77B"/><text x="130" y="352" font-size="11" fill="#9A8F80" font-style="italic" transform="rotate(4 130 352)">Rue du Pavillon</text><text x="180" y="590" font-size="11" fill="#9A8F80" font-style="italic">Avenue de la Gare</text><rect x="305" y="140" width="16" height="16" rx="3" fill="#3B82F6"/><text x="309" y="152" font-size="12" font-weight="700" fill="#fff">P</text><text x="20" y="200" font-size="12" fill="#6B8CC7" font-style="italic">L'Ara</text></svg>
+  <div class="pin sel" style="left:195px;top:230px"><img src="carrosserie-gp.png"></div>
+  <div class="pin" style="left:90px;top:330px"><img src="pegase.png"></div>
+  <div class="pin" style="left:80px;top:130px"><img src="nook.png"></div>
+  <div class="moi" style="left:70px;top:440px"></div><div class="moit" style="left:70px;top:440px">Vous êtes ici</div>
+  <svg class="st" viewBox="0 0 390 726" preserveAspectRatio="none"><path d="M70 440 C110 380 160 330 195 262" fill="none" stroke="#1D4ED8" stroke-width="4" stroke-dasharray="2 9" stroke-linecap="round"/></svg>
+ </div>
+ <div class="bar"><div class="t">Les commerces qui jouent <span>glissez →</span></div>
+  <div class="car"><div class="lo"><div class="c"><img src="nook.png"></div><small>Nook Café</small></div>
+  <div class="lo on"><div class="c"><img src="carrosserie-gp.png"></div><small>Carrosserie GP</small></div>
+  <div class="lo"><div class="c"><img src="pegase.png"></div><small>Auto-École</small></div>
+  <div class="lo"><div class="c"><img src="giordano.png"></div><small>Giordano</small></div></div>
+  <div class="card" style="margin-top:10px"><div class="lg2"><img src="carrosserie-gp.png"></div><div><b>Carrosserie GP</b><p>310 m · 4 min à pied · ouvert</p><p>À gagner : tickets du Grand tirage</p></div></div>
+  <div class="cta">Jouer ici</div></div>
+</div><div class="note">Un appui sur le logo : la carte se centre, le logo grossit, un tracé pointillé montre le chemin depuis « Vous êtes ici ». Un seul bouton : Jouer ici.</div></div>
+
+<!-- ÉCRAN 3 : phase de jeu -->
+<div class="col"><div class="lab">3. En jeu : je vois où j'en suis</div>
+<div class="ph">
+ <div class="hd"><div class="lg"><img src="flowin-super-event-logo.svg" alt=""></div><b style="font-size:17px">Nuits du Sud 2026<small>9 juil. – 18 juil. · Vence</small></b><span class="n">22<small>commerces</small></span></div>
+ <div class="mini"><div class="ring"><b>3/8</b></div><div class="x"><b>3 commerces joués</b>2 tickets de plus pour le Grand tirage</div></div>
+ <div class="map"><svg class="st" viewBox="0 0 390 780" preserveAspectRatio="none"><rect width="390" height="780" fill="#F4F1EC"/><polygon points="298,361 383,361 383,441 298,441" fill="#E7E4DE"/><polygon points="383,361 389,356 389,436 383,441" fill="#D6D2CA"/><polygon points="333,129 432,129 432,208 333,208" fill="#E7E4DE"/><polygon points="432,129 438,124 438,203 432,208" fill="#D6D2CA"/><polygon points="107,153 167,153 167,190 107,190" fill="#E7E4DE"/><polygon points="167,153 173,148 173,185 167,190" fill="#D6D2CA"/><polygon points="170,580 241,580 241,634 170,634" fill="#E7E4DE"/><polygon points="241,580 247,575 247,629 241,634" fill="#D6D2CA"/><polygon points="258,204 329,204 329,234 258,234" fill="#E7E4DE"/><polygon points="329,204 335,199 335,229 329,234" fill="#D6D2CA"/><polygon points="90,517 165,517 165,558 90,558" fill="#E7E4DE"/><polygon points="165,517 171,512 171,553 165,558" fill="#D6D2CA"/><polygon points="179,263 228,263 228,301 179,301" fill="#E7E4DE"/><polygon points="228,263 234,258 234,296 228,301" fill="#D6D2CA"/><polygon points="296,555 352,555 352,593 296,593" fill="#E7E4DE"/><polygon points="352,555 358,550 358,588 352,593" fill="#D6D2CA"/><polygon points="-20,105 46,105 46,184 -20,184" fill="#E7E4DE"/><polygon points="46,105 52,100 52,179 46,184" fill="#D6D2CA"/><polygon points="90,269 151,269 151,317 90,317" fill="#E7E4DE"/><polygon points="151,269 157,264 157,312 151,317" fill="#D6D2CA"/><polygon points="140,303 249,303 249,376 140,376" fill="#E7E4DE"/><polygon points="249,303 255,298 255,371 249,376" fill="#D6D2CA"/><polygon points="300,309 363,309 363,383 300,383" fill="#E7E4DE"/><polygon points="363,309 369,304 369,378 363,383" fill="#D6D2CA"/><polygon points="80,492 158,492 158,523 80,523" fill="#E7E4DE"/><polygon points="158,492 164,487 164,518 158,523" fill="#D6D2CA"/><polygon points="164,524 225,524 225,563 164,563" fill="#E7E4DE"/><polygon points="225,524 231,519 231,558 225,563" fill="#D6D2CA"/><polygon points="115,166 197,166 197,215 115,215" fill="#E7E4DE"/><polygon points="197,166 203,161 203,210 197,215" fill="#D6D2CA"/><polygon points="288,103 371,103 371,137 288,137" fill="#E7E4DE"/><polygon points="371,103 377,98 377,132 371,137" fill="#D6D2CA"/><g fill="none" stroke="#fff" stroke-linecap="round" stroke-linejoin="round"><path d="M-10 330 L400 380" stroke-width="16"/><path d="M110 90 L170 780" stroke-width="12"/><path d="M-10 600 C120 560 260 640 400 580" stroke-width="14"/><path d="M300 90 L270 780" stroke-width="10"/></g><path d="M-10 690 L130 740 L200 780 L-10 780Z" fill="#F7E7A6" stroke="#E9C77B"/><text x="130" y="352" font-size="11" fill="#9A8F80" font-style="italic" transform="rotate(4 130 352)">Rue du Pavillon</text><text x="180" y="590" font-size="11" fill="#9A8F80" font-style="italic">Avenue de la Gare</text><rect x="305" y="140" width="16" height="16" rx="3" fill="#3B82F6"/><text x="309" y="152" font-size="12" font-weight="700" fill="#fff">P</text><text x="20" y="200" font-size="12" fill="#6B8CC7" font-style="italic">L'Ara</text></svg>
+  <div class="pin fait" style="left:110px;top:200px"><img src="charvolin.png"></div>
+  <div class="pin fait" style="left:70px;top:290px"><img src="giordano.png"></div>
+  <div class="pin fait" style="left:240px;top:260px"><img src="nook.png"></div>
+  <div class="pin" style="left:300px;top:400px"><img src="utile.png"></div>
+  <div class="pin" style="left:120px;top:470px"><img src="pegase.png"></div>
+  <div class="pin ini" style="left:330px;top:210px">S</div>
+  <div class="moi" style="left:215px;top:400px"></div><div class="moit" style="left:215px;top:400px">Vous êtes ici</div>
+ </div>
+ <div class="bar"><div class="t">Prochains commerces <span>vert = joué</span></div>
+  <div class="car"><div class="lo"><div class="c"><img src="utile.png"></div><small>Utile Vence</small><div class="d">120 m</div></div>
+  <div class="lo"><div class="c"><img src="pegase.png"></div><small>Auto-École</small><div class="d">260 m</div></div>
+  <div class="lo"><div class="c"><img src="carrosserie-gp.png"></div><small>Carrosserie GP</small><div class="d">310 m</div></div>
+  <div class="lo fait"><div class="c"><img src="nook.png"></div><small>Nook Café</small><div class="d">joué</div></div>
+  <div class="lo fait"><div class="c"><img src="giordano.png"></div><small>Giordano</small><div class="d">joué</div></div></div>
+  <div class="gain">Utile Vence : 1 ticket + un lot immédiat à gagner</div>
+  <div class="cta">Aller à Utile Vence</div></div>
+</div><div class="note">Plus de « chasse au trésor » : pas de liste à deviner. Les commerces déjà joués passent au vert avec une coche et vont en fin de carrousel. Les plus proches restent devant. Une pastille « 3/8 » donne la progression, discrète, en haut de la carte.</div></div>
+</body></html>
