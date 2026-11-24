@@ -80,3 +80,4 @@ Ce journal n'est pas une preuve de production : l'état vérifié est dans `ETAT
 - 24/11/2026 · Page /se/[se] lot 4 mise en ligne (repères logo, carrousel, jeu sur place 150 m) ; audit jeux/pro/carte : 3 techno de carte (MapLibre 7 écrans, Leaflet 4), gains pro encore en maquette. tsc OK, build lu par l'agent.
 - 24/11/2026 · Une seule carte : repère commun admin/components/carte/repere.ts, nds-carte et dashboard.html en MapLibre, lien carte des commerces sur /se ; non vérifié avec vrai compte SA ni iPhone.
 - 24/11/2026 · Maquettes lot 5 (jeu, roue, tombola, quiz animé, stats, affiche) dans docs/maquette/lot5, en attente de validation de Romain (9 décisions dans lot5-LISEZMOI.md), aucun code.
+- 24/11/2026 · Retour Romain lot 5 : validé sauf formulaire de lot complet et QR de traçabilité par support avec nombre de flashs ; lot 6 de maquettes lancé (lots, Mes QR, tableau de bord commerce). Aucun code.
