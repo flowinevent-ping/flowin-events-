@@ -45,3 +45,4 @@
 - 24/11 une seule carte : composant commun SuperEventMap + components/carte/repere.ts (rond 44 px, anneau #B5471E, vert si joué). nds-carte et dashboard.html en MapLibre. Restent Leaflet : nds-parcours.html et NDS2026Client (décision Romain : on garde).
 - Piège : clé de reconstruction de SuperEventMap ignore les positions en mode éditable (sinon recadrage à chaque dépôt). Ne pas pkill next : port libre dédié.
 - 24/11 lot 5 maquettes (docs/maquette/lot5/) : choix du jeu et questions (banque ou Flowin rédige), roue à 3 types de case, tombola, quiz animé (sons autorisés par Romain, bouton couper), stats pro (flashs, opt-in, genre, âge, CP, chalandise), affiche avec logo. Décisions en attente : lot5-LISEZMOI.md.
+- 24/11 lot 6 maquettes (docs/maquette/lot6/) : formulaire de lot + ticket en direct, QR par support et Mes QR, accueil commerce, compte joueur sans mot de passe. Décisions : lot6-LISEZMOI.md.
