@@ -82,3 +82,4 @@ Ce journal n'est pas une preuve de production : l'état vérifié est dans `ETAT
 - 24/11/2026 · Maquettes lot 5 (jeu, roue, tombola, quiz animé, stats, affiche) dans docs/maquette/lot5, en attente de validation de Romain (9 décisions dans lot5-LISEZMOI.md), aucun code.
 - 24/11/2026 · Retour Romain lot 5 : validé sauf formulaire de lot complet et QR de traçabilité par support avec nombre de flashs ; lot 6 de maquettes lancé (lots, Mes QR, tableau de bord commerce). Aucun code.
 - 24/11/2026 · Maquettes lot 6 (lots avec ticket en direct, Mes QR, accueil commerce, compte joueur sans mot de passe) dans docs/maquette/lot6, en attente de validation de Romain, aucun code.
+- 24/11/2026 · Historique 6 mois (Notion + git) injecté dans les mémoires des 13 agents, ERREURS.md (+22), REGLES.md (+9) ; 4 points À TRANCHER (base Révision, région Supabase, prix, signature) ; pages Notion non lues : SPEC, Technique, Produit, Commercial, Suivi des tâches.
