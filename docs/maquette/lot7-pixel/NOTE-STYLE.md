@@ -1,51 +1,33 @@
-# Note de style : pixel arcade (lot 7, maquette)
+# Note de style : pixel dans la charte Flowin (lot 7, maquette, version claire)
 
-Variante à part du style Classique, pour le quiz et la roue seulement. Planche visuelle : `lot7-0-style.html` / `lot7-0-style-ensemble.png`.
+Principe : on garde la charte Flowin (fond clair, cartes blanches, texte encre, boutons pastille, cartouche logo) et on ajoute des éléments pixel. Aucun personnage ni mascotte : uniquement des formes, des envahisseurs géométriques, pièces, étoiles, coeurs, coffres, jauges, pixels qui éclatent. Planche : `lot7-0-style.html`.
 
-## Références analysées (ref-1 à ref-3, sans copier le contenu)
-Fond très sombre avec étoiles pixel ; police pixel ; étiquettes à contour 2 px (menthe, jaune, rouge) ; cases à cocher en haut qui se cochent ; sprites 16 bits ; flèches pointillées ; texte qui se révèle bloc par bloc ; gros titre blanc dans un cadre, un mot clé en jaune. Tout cela est repris dans le principe, avec nos propres dessins.
+## Palette (charte existante, rien de violet)
+Orange #B5471E (dégradé vers #D2631F), orange clair #E8872F, bleu animation #3B5CC4, encre #1B3A5C, vert OK #15803D, rouge Flowin #C2410C, jaune #F5B82E, orange pâle #FFF4EA, bleu pâle #E3E9F8, fond #FFFDFA. Seul ajout : un rouge vif #DC2626 pour les coeurs et la croix (à valider ; sinon #C2410C).
+Accent du commerce : la variable `--a` (orange Flowin par défaut) prend la couleur dominante du logo quand il en a (exemple en framboise #BE123C). Boutons, mots clés, envahisseurs, aiguille et bandeau suivent. Règle de code : si le contraste du blanc sur cette couleur est inférieur à 4,5, retour à l'orange Flowin.
 
-## Palette (hex), contraste mesuré sur le fond bleu nuit
-| Rôle | Hex | Contraste |
-|---|---|---|
-| Fond (bleu nuit) | #0B1230 | |
-| Panneaux, réponses | #16214F | crème dessus 13,6 |
-| Décor, cases vides, sol | #24336E | pas de texte dessus |
-| Contours et ombres dures | #05081A | |
-| Texte, contour clair | #F7F1DC | 16,2 |
-| Accent, mot clé, bouton | #FFD23F | 12,7 |
-| Bonne réponse, ticket | #5CE6A8 | 11,7 |
-| Erreur, vie, aiguille | #FF6B6B | 6,6 |
-| Texte secondaire | #A9B4E0 | 9,0 |
-| Bouton secondaire (bleu Flowin) | #3B5CC4 | crème dessus 5,3 |
+## Contrastes mesurés
+Blanc sur orange #B5471E 5,4 ; blanc sur #D2631F 3,8 (texte gras 18 px, seuil gros texte 3) ; encre sur blanc 11,6 ; gris #52647A sur blanc 6,1 ; vert foncé #0F5A2B sur vert pâle 7,3 ; rouge #C2410C sur rouge pâle 4,5 ; blanc sur framboise 6,3.
 
-Fond : le bleu nuit (teinte 229°) respecte la règle « jamais de violet ». L'aubergine de la référence (#26122B, teinte 283°) est un violet sombre : écartée, montrée seulement en variante (quiz écran 8).
-Couleur du commerçant : la variable `--accent` (jaune par défaut) prend la couleur du commerce (règle « le jeu prend les couleurs du commerçant »), à condition que son contraste sur le fond soit d'au moins 4,5 ; sinon retour au jaune.
+## Typographie
+Police pixel (Press Start 2P, Google Fonts) pour les titres et les chiffres de score seulement. Tout le reste en police du système, gras, 16 à 22 px ; 13 px minimum pour les petits textes.
 
-## Polices (Google Fonts, libres)
-- Press Start 2P : titres, score, boutons. 14 px minimum.
-- Silkscreen gras : questions et réponses (18 à 21 px), textes secondaires 13 px minimum.
-- Repli : `Courier New`, monospace.
+## Pixel : grille 4 px, contour 2 px (4 px en B), ombre dure 4 px sans flou
+- Sprites en SVG (un rectangle par suite de cases, contour encre ajouté automatiquement) : 3 envahisseurs, canon, explosion, pièce, coeur plein et vide, étoile, ticket, coffre, bonbon (inspiration gourmande, aucune marque), croix, coche, haut-parleur, 4 formes (carré, rond, triangle, losange). Sources dans `_sprites.py` et `_extra.py`.
+- Tramage (dithering de Bayer 4 x 4) : bandeau d'en-tête sous le cartouche, rayons derrière la roue, dégradé des cases de la roue en B.
+- Lignes de balayage : 2 px sur 4 à 3,5 % d'opacité sur tout l'écran (supprimables).
+- Curseur carré qui clignote en fin de texte tapé.
+- Éclatement : carrés de 4 et 8 px aux couleurs de la charte, bordés d'encre.
 
-## Grille et formes
-- Tout est un multiple de 4 px (marges, hauteurs, sprites à 3, 4, 6 ou 8 px la case).
-- Contour 2 px, ombre dure 4 px (`4px 4px 0 #05081A`), aucun flou, aucun dégradé, coins carrés.
-- Fond : étoiles de 4 px, 20 à 50 % d'opacité. Sol en briques de 32 px, ligne crème de 4 px.
+## Composants communs
+Cartouche logo en haut à gauche sur tous les écrans (logo sur tuile blanche 56 x 40 comme le ticket du lot 6). Bouton son 52 px. Vies : 3 coeurs. Cases à cocher : 5 carrés, cochée verte, courante à la couleur d'accent. Chrono : 15 blocs, vert puis jaune sous 60 %, rouge sous 30 %, secondes écrites. Réponses : 60 px de haut minimum. L'état n'est jamais donné par la couleur seule (coche, croix, lettre).
 
-## Composants
-- Bouton : jaune, hauteur 60 px, texte noir, bande sombre de 6 px en bas (effet relief). Secondaire : bleu Flowin. Neutre : contour crème.
-- Réponse : 60 px de haut, pastille lettre 44 px. Bonne : fond vert sombre, pastille menthe, coche. Mauvaise : fond rouge sombre, croix. Les autres s'éteignent. L'état n'est jamais donné par la couleur seule.
-- Étiquette : contour 2 px colorié, 13 px.
-- Vies : 3 coeurs 7x6 (plein rouge, vide bleu sombre). Score : 4 chiffres. Cases à cocher : 5 carrés de 24 px (cochée menthe, courante jaune). Chrono : 15 blocs, vert puis jaune sous 60 %, rouge sous 30 %, avec les secondes écrites.
-- Cartouche du commerce : en haut à gauche, logo sur tuile blanche 44 px + nom. Reste sur tous les écrans.
-- Bouton son : 48 px, en haut à droite, pictogramme haut-parleur / barré.
+## Les deux directions
+- A, sobre-arcade : cartes carrées à contour 2 px, réponses en liste, score en chiffres pixel, rangée d'envahisseurs en bas (un par question), canon qui tire sur la bonne réponse, la rangée descend sur une erreur. Ticket du lot 6 avec touches pixel.
+- B, audacieuse : coins en escalier, bandeau tramé orange plus dense, plaque de score encre, réponses en grandes tuiles carrées avec forme (carré, rond, triangle, losange), formation d'envahisseurs de 3 types en page de départ, jauge de combo x1 x2 x3 avec éclats, podium de score, fente INSERT COIN, rayons tramés derrière la roue, lampes, ticket imprimé en escalier. Boutons pastille à contour 4 px.
 
-## Sprites (SVG pixel, un rectangle par suite de cases, contour noir ajouté automatiquement)
-Héros 10x14, pièce 8x8, coeur 7x6, étoile 7x7, ticket 12x8, tasse (logo exemple) 11x9, coffre 14x10, croix 7x6, coche 8x5, aiguille 9x5, haut-parleur 10x8. Source : `_sprites.py` (grilles en texte, modifiables). Aucun emoji.
-La roue : disque de 45 cases à 7 px généré par `_sprites.py` (8 cases de 45°, lampes sur le bord). Les icônes (pièce, croix, ticket) restent droites pendant la rotation.
-
-## Mouvement (coupé si `prefers-reduced-motion: reduce`)
-Tout par paliers (`steps()`), jamais lissé : clignotement INSERT COIN (1 s), pièces qui sautillent (2 positions), tremblement 0,4 s sur erreur, +100 qui monte en 6 paliers, roue qui ralentit. Révélation de la question lettre à lettre (30 ms par lettre, tick léger) : affichage immédiat si mouvement réduit. Rien de clignotant plus de 3 fois par seconde.
+## Séquences d'états (`lot7-5-sequences.html`)
+Texte tapé avec curseur puis réponses en cascade (0,12 s d'écart) ; appui puis éclatement de pixels, score qui passe de 0200 à 0300, +100 qui monte ; combo x1, x2, x3 ; roue dont les cases s'allument au passage de l'aiguille, un tick par case ; ticket qui sort d'une fente ligne par ligne (12 paliers en 2,4 s). Tout en `steps()`, jamais lissé. Les HTML jouent ces animations ; elles sont coupées sous `prefers-reduced-motion: reduce` (états finaux seulement). Rien ne clignote plus de 3 fois par seconde.
 
 ## Accessibilité
-Contrastes ci-dessus (tous au-dessus de 4,5). Cibles 44 px minimum (réponses et boutons 60 px). Coche et croix en plus de la couleur. Roue : `aria-label` et légende icône + mot. Chrono : secondes en texte. Focus visible (contour crème 4 px). Texte pixel jamais en dessous de 13 px.
+Contrastes ci-dessus. Cibles 56 à 60 px (44 px minimum partout, y compris légende de la roue). Roue : `aria-label` et légende icône + mot. Chrono en texte. Focus visible (contour bleu 4 px). Sons : voir `SONS.md`, bouton couper.

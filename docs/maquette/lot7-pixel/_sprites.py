@@ -1,22 +1,26 @@
-# Sprites pixel (ASCII -> SVG rects). Source des maquettes lot 7, aucun code applicatif.
+# Sprites pixel version claire (charte Flowin). Dessins originaux, esprit borne d'arcade. Maquette seulement.
 import math, random
-P = dict(K='#05081A', R='#FF6B6B', S='#F2B98C', E='#05081A', B='#3B5CC4', W='#F7F1DC', Y='#FFD23F',
-         O='#D98E04', N='#6B3F2A', G='#A9B4E0', M='#5CE6A8', H='#FFF3B0', D='#24336E', C='#8A5A33',
-         T='#3B2416', U='#A8632B', V='#6B3B16', L='#7FA3FF')
+# A = accent (couleur du commerce, orange Flowin par defaut) via variable CSS ; B = bleu animation
+P = dict(K='#1B3A5C', I='#1B3A5C', A='var(--a)', B='#3B5CC4', W='#FFFFFF', Y='#F5B82E', O='#C98A0B', H='#FFE9A8',
+         R='#DC2626', D='#CBD5E1', M='#15803D', U='#A8541A', V='#6E3411', G='#94A3B8', T='#3B2416', L='#7FA3FF', S='#F2B98C')
 SP = {
- 'hero': ["...RRRR...","..RRRRRR..",".RRRRRRRR.","..SSSSSS..","..SESSES..","..SSSSSS..","...SSSS...","..BBBBBB..",".SBBYYBBS.",".SBBBBBBS.","..BBBBBB..","..BB..BB..","..BB..BB..",".NNN..NNN."],
- 'coin': ["..YYYY..",".YHHYYY.","YHHYYYYO","YHYYYYYO","YYYYYYYO","YYYYYYOO",".YYYYOO.","..OOOO.."],
- 'heart': [".RR.RR.","RWRRRRR","RRRRRRR",".RRRRR.","..RRR..","...R..."],
- 'heartv': [".DD.DD.","DDDDDDD","DDDDDDD",".DDDDD.","..DDD..","...D..."],
- 'star': ["...Y...","...Y...","YYYYYYY",".YYYYY.","..YYY..",".YY.YY.",".Y...Y."],
- 'ticket': [".YYYYYYYYYY.","YYYYYYYOYYYY","YYWWWYYYYYYY","YYYYYYYOYYYY","YYWWWYYYYYYY","YYYYYYYOYYYY","YYYYYYYYYYYY",".YYYYYYYYYY."],
- 'cup': ["...G..G....","....G..G...","...........","UUUUUUUU...","UTTTTTTU.UU","UTTTTTTU..U","UUUUUUUU.UU",".UUUUUU....","..UUUU....."],
- 'chest': ["..UUUUUUUUUU..",".UUUUUUUUUUUU.","UUUUUUUUUUUUUU","UUUUUUUUUUUUUU","VVVVVVVVVVVVVV","UUUUUUYYUUUUUU","UUUUUUYYUUUUUU","UUUUUUUUUUUUUU","UUUUUUUUUUUUUU","UUUUUUUUUUUUUU"],
- 'croix': ["RR...RR",".RR.RR.","..RRR..","..RRR..",".RR.RR.","RR...RR"],
- 'coche': ["......MM","....MMM.","MM.MMM..",".MMMM...","..MM...."],
- 'son': ["...G......","..GG..G...","GGGG...G..","GGGG..G.G.","GGGG..G.G.","GGGG...G..","..GG..G...","...G......"],
- 'muet': ["...G......","..GG......","GGGG.R..R.","GGGG..RR..","GGGG..RR..","GGGG.R..R.","..GG......","...G......"],
- 'aiguille': ["RRRRRRRRR",".RRRRRRR.","..RRRRR..","...RRR...","....R...."],
+ 'inv1': ["..A.....A..", "...A...A...", "..AAAAAAA..", ".AAWAAAWAA.", "AAAAAAAAAAA", "A.AAAAAAA.A", "A.A.....A.A", "...AA.AA..."],
+ 'inv2': ["...BB...", "..BBBB..", ".BBBBBB.", "BB.BB.BB", "BBBBBBBB", "..B..B..", ".B.BB.B.", "B.B..B.B"],
+ 'ship': ["....B....", "...BBB...", "...BBB...", ".BBBBBBB.", "BBBBBBBBB", "BBBBBBBBB", "BBBBBBBBB"],
+ 'boom': ["A...Y...A", ".A..Y..A.", "..A.Y.A..", "...AYA...", "YYYYAYYYY", "...AYA...", "..A.Y.A..", ".A..Y..A.", "A...Y...A"],
+ 'coin': ["..YYYY..", ".YHHYYY.", "YHHYYYYO", "YHYYYYYO", "YYYYYYYO", "YYYYYYOO", ".YYYYOO.", "..OOOO.."],
+ 'heart': [".RR.RR.", "RWRRRRR", "RRRRRRR", ".RRRRR.", "..RRR..", "...R..."],
+ 'heartv': [".DD.DD.", "DDDDDDD", "DDDDDDD", ".DDDDD.", "..DDD..", "...D..."],
+ 'star': ["...Y...", "...Y...", "YYYYYYY", ".YYYYY.", "..YYY..", ".YY.YY.", ".Y...Y."],
+ 'ticket': [".YYYYYYYYYY.", "YYYYYYYOYYYY", "YYWWWYYYYYYY", "YYYYYYYOYYYY", "YYWWWYYYYYYY", "YYYYYYYOYYYY", "YYYYYYYYYYYY", ".YYYYYYYYYY."],
+ 'cup': ["...G..G....", "....G..G...", "...........", "UUUUUUUU...", "UTTTTTTU.UU", "UTTTTTTU..U", "UUUUUUUU.UU", ".UUUUUU....", "..UUUU....."],
+ 'chest': ["..UUUUUUUUUU..", ".UUUUUUUUUUUU.", "UUUUUUUUUUUUUU", "UUUUUUUUUUUUUU", "VVVVVVVVVVVVVV", "UUUUUUYYUUUUUU", "UUUUUUYYUUUUUU", "UUUUUUUUUUUUUU", "UUUUUUUUUUUUUU", "UUUUUUUUUUUUUU"],
+ 'candy': ["R.R.....R.R", ".RRYYYYYRR.", "RRRYWYWYRRR", ".RRYYYYYRR.", "R.R.....R.R"],
+ 'croix': ["RR...RR", ".RR.RR.", "..RRR..", "..RRR..", ".RR.RR.", "RR...RR"],
+ 'coche': ["......MM", "....MMM.", "MM.MMM..", ".MMMM...", "..MM...."],
+ 'son': ["...I......", "..II..I...", "IIII...I..", "IIII..I.I.", "IIII..I.I.", "IIII...I..", "..II..I...", "...I......"],
+ 'muet': ["...I......", "..II......", "IIII.R..R.", "IIII..RR..", "IIII..RR..", "IIII.R..R.", "..II......", "...I......"],
+ 'aiguille': ["AAAAAAAAA", ".AAAAAAA.", "..AAAAA..", "...AAA...", "....A...."],
 }
 
 def sprite(name, s=4, outline=True, rows=None, cls=''):
@@ -49,14 +53,17 @@ def sprite(name, s=4, outline=True, rows=None, cls=''):
             x2 = x
             while x2 < w and row[x2] == c:
                 x2 += 1
-            out.append(f'<rect x="{x}" y="{y}" width="{x2 - x}" height="1" fill="{P[c]}"/>')
+            col = P[c]
+            fill = f'style="fill:{col}"' if col.startswith('var') else f'fill="{col}"'
+            out.append(f'<rect x="{x}" y="{y}" width="{x2 - x}" height="1" {fill}/>')
             x = x2
     return (f'<svg class="sp {cls}" width="{w * s}" height="{h * s}" viewBox="0 0 {w} {h}" shape-rendering="crispEdges" '
             f'aria-hidden="true">' + ''.join(out) + '</svg>')
 
 SEG = ['LOT', 'PERDU', 'TICKET', 'PERDU', 'LOT', 'PERDU', 'TICKET', 'PERDU']
-SEGC = {'LOT': '#FFD23F', 'PERDU': '#2E3F86', 'TICKET': '#5CE6A8'}
+SEGC = {'LOT': '#E8872F', 'PERDU': '#E3E9F8', 'TICKET': '#3B5CC4'}
 ICON = {'LOT': 'coin', 'PERDU': 'croix', 'TICKET': 'ticket'}
+INK = '#1B3A5C'
 
 def wheel(rot=0.0, N=45, cs=7, R=22):
     c = (N - 1) / 2
@@ -69,23 +76,23 @@ def wheel(rot=0.0, N=45, cs=7, R=22):
                 continue
             a = math.degrees(math.atan2(dx, -dy)) % 360
             if r > R - 1.3:
-                col = '#F7F1DC'
+                col = INK
+            elif r > R - 4.0:
+                col = '#FFFFFF'
+                arc = a % 22.5
+                arc = min(arc, 22.5 - arc)
+                if abs(r - (R - 2.6)) < 0.7 and r * math.sin(math.radians(arc)) < 0.8:
+                    col = '#F5B82E' if int(a // 22.5) % 2 else '#E8872F'
             elif r <= 3.4:
-                col = '#F7F1DC' if r > 1.6 else '#05081A'
+                col = '#FFFFFF' if r > 1.6 else INK
             else:
                 aa = (a - rot) % 360
                 seg = int(aa // 45)
                 d = aa % 45
                 dist = min(d, 45 - d)
-                if r * math.sin(math.radians(dist)) < 0.75:
-                    col = '#05081A'
-                else:
-                    col = SEGC[SEG[seg]]
-                if abs(r - (R - 2.6)) < 0.6:
-                    arc = a % 22.5
-                    arc = min(arc, 22.5 - arc)
-                    if r * math.sin(math.radians(arc)) < 0.8:
-                        col = '#F7F1DC' if int(a // 22.5) % 2 else '#FFD23F'
+                col = INK if r * math.sin(math.radians(dist)) < 0.75 else SEGC[SEG[seg]]
+                if r > R - 5.0 and r <= R - 4.0:
+                    col = INK
             cells[(i, j)] = col
     out = []
     for j in range(N):
@@ -105,7 +112,7 @@ def wheel(rot=0.0, N=45, cs=7, R=22):
     icons = []
     for k, nom in enumerate(SEG):
         ang = math.radians(k * 45 + 22.5 + rot)
-        rr = 13.5
+        rr = 12.5
         x = (c + rr * math.sin(ang)) * cs
         y = (c - rr * math.cos(ang)) * cs
         icons.append(f'<div class="ico" style="left:{x:.0f}px;top:{y:.0f}px">{sprite(ICON[nom], 4, True)}</div>')
@@ -114,11 +121,10 @@ def wheel(rot=0.0, N=45, cs=7, R=22):
 def stars_uri(seed=7):
     rnd = random.Random(seed)
     rects = []
-    for _ in range(70):
+    for _ in range(46):
         x, y = rnd.randrange(0, 390, 4), rnd.randrange(0, 844, 4)
-        col = rnd.choice(('%23F7F1DC', '%237FA3FF', '%23F7F1DC'))
-        op = rnd.choice(('.35', '.5', '.2'))
-        rects.append(f"<rect x='{x}' y='{y}' width='4' height='4' fill='{col}' opacity='{op}'/>")
+        col = rnd.choice(('%23F3D3BC', '%23C9D5F5', '%23F3D3BC'))
+        rects.append(f"<rect x='{x}' y='{y}' width='4' height='4' fill='{col}'/>")
     return ("url(\"data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='390' height='844' "
             "shape-rendering='crispEdges'>" + ''.join(rects) + "</svg>\")")
 
@@ -133,4 +139,4 @@ def qr(n=21, seed=3):
     rects = ''.join(f'<rect x="{x}" y="{y}" width="1" height="1"/>' for y in range(n) for x in range(n) if g[y][x])
     return (f'<svg width="{(n + 2) * 5}" height="{(n + 2) * 5}" viewBox="-1 -1 {n + 2} {n + 2}" shape-rendering="crispEdges" '
             f'role="img" aria-label="Emplacement du QR du ticket (exemple)"><rect x="-1" y="-1" width="{n + 2}" height="{n + 2}" fill="#fff"/>'
-            f'<g fill="#05081A">{rects}</g></svg>')
+            f'<g fill="#1B3A5C">{rects}</g></svg>')
