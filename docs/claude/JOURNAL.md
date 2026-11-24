@@ -87,3 +87,4 @@ Ce journal n'est pas une preuve de production : l'état vérifié est dans `ETAT
 - 24/11/2026 · Notifications push par défaut : agent lancé (code, VAPID privée à déposer par Romain dans les secrets Supabase), non poussé.
 - 24/11/2026 · Lot 3 validé, codage lancé en parallèle (inscription+rejoindre, configurateur+lots+QR, jeux animés+sons) ; maquette pixel art arcade (lot 7) lancée ; disque libéré (10 worktrees retirés, déjà publiés).
 - 24/11/2026 · Rappels Web Push : migration push_abonnements appliquée, code fusionné (be7db9a2). Secret VAPID, déploiement push-envoyer et cron : à faire.
+- 24/11/2026 · Maquettes lot 7 pixel arcade (quiz, roue, choix du style, sons 8 bits) livrées dans docs/maquette/lot7-pixel, en attente de validation de Romain, aucun code.
