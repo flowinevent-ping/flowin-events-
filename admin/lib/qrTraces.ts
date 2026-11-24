@@ -196,6 +196,29 @@ export async function publierQrTrace(id: string, publie: boolean): Promise<boole
   return !error
 }
 
+/** Remplacer un QR (lot 6 B, 24/11/2026) : le pro seul, sans confirmation de Flowin. Le QR actuel est désactivé
+ *  (publie=false : /q/<code> affiche « QR désactivé »), un nouveau QR du même support est créé. Les flashs d'avant
+ *  restent comptés (visites.source inchangé). `desactive_le` / `remplace_par` : sql/2026-11-24-lots-cessible-qr-remplacer.sql
+ *  (tant que non appliqué, seule la colonne `publie` est écrite). Un QR sans id (par défaut non enregistré) ne se remplace pas. */
+export async function remplacerQrTrace(eventId: string, q: QrTrace, existants: string[]): Promise<{ qr: QrTrace | null; desactiveA?: string; erreur?: string }> {
+  if (!q.id) return { qr: null, erreur: 'Ce QR n’est pas encore enregistré.' }
+  const maintenant = new Date().toISOString()
+  /* Le nouveau QR d'abord : si la création échoue, l'ancien reste actif (jamais un support sans QR). */
+  const n = await creerQrTrace(eventId, { nom: q.nom, support: q.support || q.nom, type: q.type }, existants)
+  if (!n.qr) return { qr: null, erreur: n.erreur ?? 'Le nouveau QR n’a pas pu être créé.' }
+  let r = await supabase.from('qr_stations').update({ publie: false, desactive_le: maintenant, remplace_par: n.qr.source_qr }).eq('id', q.id)
+  if (r.error && /desactive_le|remplace_par|column/i.test(r.error.message)) r = await supabase.from('qr_stations').update({ publie: false }).eq('id', q.id)
+  if (r.error) return { qr: n.qr, erreur: 'Le nouveau QR est créé, mais l’ancien n’a pas pu être désactivé (droits).' }
+  return { qr: n.qr, desactiveA: maintenant }
+}
+
+/** Flashs du jour pour un QR (visites sans étape portant cette source, depuis minuit heure locale). */
+export async function fetchFlashsAujourdhui(eventId: string, source: string): Promise<number> {
+  const debut = new Date(); debut.setHours(0, 0, 0, 0)
+  const { count, error } = await supabase.from('visites').select('id', { count: 'exact', head: true }).eq('event_id', eventId).eq('source', source).is('etape', null).gte('created_at', debut.toISOString())
+  return error ? 0 : (count ?? 0)
+}
+
 /* ── Statistiques par QR ─────────────────────────────────────────────────────
    Meme mecanique que les stations NDS : flash = ligne visites sans etape
    portant la source ; partie = ligne participations portant source_qr ;

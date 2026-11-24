@@ -18,10 +18,12 @@ import { useEffect, useState } from 'react'
 import Diffusion from '@/components/dashboard/Diffusion'
 import {
   SUPPORTS_QR, typeParDefaut, fetchQrTraces, avecDefauts, creerQrTrace, publierQrTrace, renommerQrTrace, archiverQrTrace,
-  assurerQrParDefaut, changerJeuStation, urlDuQr, estPermanent, QR_INCLUS,
-  type QrTrace, type TypeQr,
+  assurerQrParDefaut, changerJeuStation, urlDuQr, estPermanent, QR_INCLUS, fetchStatsQr, remplacerQrTrace, fetchFlashsAujourdhui,
+  type QrTrace, type TypeQr, type StatQr,
 } from '@/lib/qrTraces'
 import { lienAncien } from '@/lib/qrPermalien'
+import { qrFlowinPng, qrFlowinSvg } from '@/lib/qrLogo'
+import { ouvrirAfficheA4 } from '@/lib/afficheQr'
 import { libelleModule } from '@/lib/operations'
 import { PictoSupport, PictoQr } from './PictoSupport'
 
@@ -111,6 +113,140 @@ export function FormulaireQr({ onAjouter, occupe, libelle = '+ Créer le QR' }: 
       </div>
       <button type="button" style={btnP} disabled={occupe || !ok} onClick={valider}>{occupe ? 'Création…' : libelle}</button>
       <div style={{ flexBasis: '100%', fontSize: 11, color: MUT }}>{type === 'physique' ? 'QR physique' : 'QR digital'} : {REGLE_TYPE_QR[type]}</div>
+    </div>
+  )
+}
+
+/**
+ * MES QR (lot 6 B, maquette validée le 24/11/2026) : vue du pro en UN écran. Un QR identifié par support, le nombre de FLASHS
+ * de chacun (fetchStatsQr), puis un QR : plein écran, flashs du jour, copier le lien, imprimer l'affiche, « Remplacer ce QR ».
+ * Remplacer = le pro seul : l'ancien QR affiche « QR désactivé » (app/q/[code]/route.ts), un nouveau QR du même support est créé.
+ */
+function MesQr({ eventId, jeu, titre, qrs, tousLesSlugs, onAjouter, onRemplace, occupe, erreur }: {
+  eventId: string; jeu: string; titre: string; qrs: QrTrace[]; tousLesSlugs: string[]
+  onAjouter: (q: { nom: string; support: string; type: TypeQr }) => void | Promise<void>
+  onRemplace: () => void; occupe: boolean; erreur: string
+}) {
+  const [stats, setStats] = useState<StatQr[]>([])
+  const [selSource, setSelSource] = useState('')
+  const [etape, setEtape] = useState<'liste' | 'detail' | 'confirmer' | 'nouveau'>('liste')
+  const [png, setPng] = useState('')
+  const [jour, setJour] = useState<number | null>(null)
+  const [msg, setMsg] = useState('')
+  const [ajout, setAjout] = useState(false)
+  const [nouveau, setNouveau] = useState<{ qr: QrTrace; ancienNom: string; heure: string } | null>(null)
+  const [remplace, setRemplace] = useState(false)
+  useEffect(() => { let v = true; fetchStatsQr([eventId]).then(r => { if (v) setStats(r) }); return () => { v = false } }, [eventId, qrs.length])
+  const affiche = etape === 'nouveau' && nouveau ? nouveau.qr : qrs.find(q => q.source_qr === selSource) ?? null
+  const flashs = (q: QrTrace) => stats.find(x => x.source === q.source_qr)?.flashs ?? 0
+  const total = stats.reduce((a, x) => a + x.flashs, 0)
+  const url = affiche ? urlDuQr(affiche, eventId, jeu) : ''
+  useEffect(() => {
+    if (!affiche) { setPng(''); return }
+    let v = true; setPng(''); setJour(null)
+    qrFlowinPng(urlDuQr(affiche, eventId, jeu), 520).then(s => { if (v) setPng(s) }, () => {})
+    fetchFlashsAujourdhui(eventId, affiche.source_qr).then(n => { if (v) setJour(n) })
+    return () => { v = false }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [affiche?.source_qr, eventId, jeu])
+  async function copier() {
+    try { await navigator.clipboard.writeText(url); setMsg('Lien copié.') } catch { setMsg(url) }
+  }
+  async function imprimer() {
+    if (!affiche) return
+    setMsg('')
+    try {
+      const svg = await qrFlowinSvg(url, 1024)
+      const e = ouvrirAfficheA4({ svg, url, titre, sousTitre: 'Scannez pour jouer', qrNom: affiche.nom, support: affiche.support, code: affiche.code_court, auto: true })
+      if (e) setMsg(e)
+    } catch { setMsg('L’affiche n’a pas pu être créée.') }
+  }
+  async function remplacer() {
+    if (!affiche || !affiche.id) return
+    setRemplace(true); setMsg('')
+    const r = await remplacerQrTrace(eventId, affiche, tousLesSlugs)
+    setRemplace(false)
+    if (!r.qr) { setMsg(r.erreur || 'Remplacement impossible.'); setEtape('detail'); return }
+    const h = new Date(r.desactiveA || Date.now())
+    setNouveau({ qr: r.qr, ancienNom: affiche.nom, heure: `${String(h.getHours()).padStart(2, '0')}:${String(h.getMinutes()).padStart(2, '0')}` })
+    if (r.erreur) setMsg(r.erreur)
+    setEtape('nouveau'); onRemplace()
+  }
+  const B: React.CSSProperties = { minHeight: 44, borderRadius: 99, border: '1.5px solid #3B5CC4', background: '#fff', color: '#3B5CC4', fontWeight: 800, fontSize: 14, padding: '0 16px', cursor: 'pointer', fontFamily: 'inherit' }
+  const BP: React.CSSProperties = { ...B, background: '#3B5CC4', color: '#fff' }
+
+  if (etape === 'liste' || !affiche) {
+    return (
+      <div data-mes-qr style={{ marginTop: 8 }}>
+        <div style={{ fontSize: 20, fontWeight: 900 }}>Mes QR</div>
+        <div style={{ margin: '2px 0 8px', color: MUT, fontSize: 13.5 }}><b data-flashs-total style={{ fontSize: 26, color: '#3B5CC4' }}>{total}</b> flashs au total</div>
+        <div style={{ display: 'grid', gap: 6 }}>
+          {qrs.map(q => {
+            const n = flashs(q)
+            const max = Math.max(1, ...qrs.map(flashs))
+            return (
+              <button key={q.source_qr} type="button" data-mes-qr-ligne={q.source_qr} onClick={() => { setSelSource(q.source_qr); setEtape('detail'); setMsg('') }}
+                style={{ display: 'flex', alignItems: 'center', gap: 10, minHeight: 56, padding: '6px 12px', border: `1.5px solid ${BRD}`, borderRadius: 14, background: '#fff', cursor: 'pointer', fontFamily: 'inherit', color: '#0F172A', textAlign: 'left' }}>
+                <PictoQr support={q.support} source={q.source_qr} taille={34} />
+                <span style={{ flex: 1, minWidth: 0 }}>
+                  <span style={{ display: 'block', fontWeight: 800, fontSize: 14.5 }}>{q.nom}</span>
+                  <span style={{ display: 'block', fontSize: 12.5, color: MUT }}>{q.support ?? ''}</span>
+                  <span style={{ display: 'block', height: 5, borderRadius: 5, background: '#E7ECF6', marginTop: 4 }}><span style={{ display: 'block', height: 5, borderRadius: 5, background: '#3B5CC4', width: `${Math.round((n / max) * 100)}%` }} /></span>
+                </span>
+                <span style={{ textAlign: 'right' }}><b data-flashs style={{ fontSize: 20 }}>{n}</b><span style={{ display: 'block', fontSize: 11.5, color: MUT }}>flashs</span></span>
+              </button>
+            )
+          })}
+        </div>
+        {ajout
+          ? <div style={{ marginTop: 10 }}><FormulaireQr onAjouter={async q => { await onAjouter(q); setAjout(false) }} occupe={occupe} libelle="Créer le QR" /></div>
+          : <button type="button" data-ajouter-support style={{ ...BP, width: '100%', marginTop: 10 }} onClick={() => setAjout(true)}>Ajouter un support</button>}
+        {erreur && <div style={{ fontSize: 12.5, color: '#B45309', fontWeight: 700, marginTop: 6 }}>{erreur}</div>}
+        <div style={{ fontSize: 12.5, color: MUT, marginTop: 8 }}>{QR_INCLUS} QR inclus · chaque flash est compté pour son support. Un support de plus : tarif à confirmer.</div>
+      </div>
+    )
+  }
+
+  return (
+    <div data-mes-qr-detail style={{ marginTop: 8, textAlign: 'center' }}>
+      <button type="button" data-retour-liste onClick={() => { setEtape('liste'); setMsg('') }} style={{ ...B, border: 'none', minWidth: 44 }}>← Mes QR</button>
+      <div style={{ fontSize: 20, fontWeight: 900 }}>{etape === 'nouveau' ? 'Nouveau QR prêt' : affiche.nom}</div>
+      <div style={{ fontSize: 13, color: MUT }}>{affiche.support ?? ''}</div>
+      {etape === 'nouveau' && <div style={{ display: 'inline-block', margin: '6px 0', fontSize: 12.5, fontWeight: 800, color: '#15803D', background: '#E7F6EC', borderRadius: 99, padding: '2px 10px' }}>Actif</div>}
+      <div style={{ width: 220, height: 220, margin: '8px auto', display: 'grid', placeItems: 'center', background: '#fff', border: '2px solid #3B5CC4', borderRadius: 18, padding: 8, boxSizing: 'border-box', filter: etape === 'confirmer' ? 'blur(3px)' : undefined }}>
+        {png ? <img data-qr-grand src={png} alt={`QR ${affiche.nom}`} style={{ width: '100%', height: '100%' }} /> : <span style={{ color: MUT }}>…</span>}
+      </div>
+      {etape === 'nouveau' && nouveau
+        ? <div data-ancien-desactive style={{ border: `1.5px solid ${BRD}`, borderRadius: 14, padding: '8px 12px', textAlign: 'left', fontSize: 13, background: '#fff' }}><b>Ancien QR : désactivé à {nouveau.heure}</b><div style={{ color: MUT }}>Un scan affiche « QR désactivé ». Vos flashs d’avant restent comptés.</div></div>
+        : <div style={{ display: 'flex', justifyContent: 'center', gap: 28, margin: '4px 0 6px' }}>
+            <div><b data-flashs-jour style={{ fontSize: 24, color: '#3B5CC4' }}>{jour ?? '…'}</b><div style={{ fontSize: 12, color: MUT }}>flashs aujourd’hui</div></div>
+            <div><b data-flashs style={{ fontSize: 24 }}>{flashs(affiche)}</b><div style={{ fontSize: 12, color: MUT }}>en tout</div></div>
+          </div>}
+      <div style={{ fontSize: 11.5, color: MUT, fontFamily: 'monospace', wordBreak: 'break-all', margin: '4px 0 8px' }}>{url.replace(/^https?:\/\//, '')}</div>
+      {etape !== 'confirmer' && (
+        <div style={{ display: 'grid', gap: 8 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+            <button type="button" data-copier style={B} onClick={copier}>Copier le lien</button>
+            <button type="button" data-imprimer style={BP} onClick={imprimer}>Imprimer</button>
+          </div>
+          {etape === 'detail' && affiche.id && <button type="button" data-remplacer style={{ ...B, borderColor: '#F3C7B1', color: '#C2410C' }} onClick={() => setEtape('confirmer')}>Il a fuité ? Remplacer ce QR</button>}
+        </div>
+      )}
+      {etape === 'confirmer' && (
+        <div data-confirmer-remplacement role="alertdialog" aria-label="Remplacer ce QR" style={{ textAlign: 'left', border: `1.5px solid ${BRD}`, borderRadius: 16, padding: 14, background: '#fff' }}>
+          <div style={{ fontSize: 17, fontWeight: 900, marginBottom: 6 }}>Remplacer ce QR ?</div>
+          <ul style={{ margin: '0 0 10px', paddingLeft: 18, fontSize: 13.5, lineHeight: 1.6 }}>
+            <li>L’ancien QR s’arrête tout de suite.</li>
+            <li>Un nouveau QR est créé, même support.</li>
+            <li>Vos flashs restent comptés.</li>
+          </ul>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+            <button type="button" data-annuler style={B} onClick={() => setEtape('detail')}>Annuler</button>
+            <button type="button" data-confirmer style={BP} disabled={remplace} onClick={remplacer}>{remplace ? 'Remplacement…' : 'Remplacer'}</button>
+          </div>
+        </div>
+      )}
+      {msg && <div role="status" style={{ fontSize: 13, fontWeight: 700, marginTop: 8, color: msg === 'Lien copié.' ? '#15803D' : '#B45309' }}>{msg}</div>}
     </div>
   )
 }
@@ -222,6 +358,9 @@ export default function QrTraces({ eventId, module, titre, mode, grille = false,
 
   return (
     <div style={{ marginTop: 12 }}>
+      {mode === 'pro' ? (
+        <MesQr eventId={eventId} jeu={jeu} titre={titre} qrs={visibles} tousLesSlugs={qrs.map(x => x.source_qr)} onAjouter={ajouter} onRemplace={charger} occupe={occupe} erreur={erreur} />
+      ) : (<>
       <div style={{ fontSize: 11.5, fontWeight: 800, marginBottom: 4 }}>QR tracés — un QR par support de communication</div>
       <div style={{ fontSize: 11, color: MUT, marginBottom: 6 }}>
         Chaque QR est une station de jeu avec ses propres statistiques (onglet Trafic). Il est utilisable dès sa création.
@@ -290,6 +429,7 @@ export default function QrTraces({ eventId, module, titre, mode, grille = false,
         <FormulaireQr onAjouter={ajouter} occupe={occupe} />
         {erreur && <div style={{ fontSize: 12, color: '#B45309', fontWeight: 700, marginTop: 6 }}>{erreur}</div>}
       </div>
+      </>)}
       {jeu !== 'nds2026' && (
         <div style={{ marginTop: 12, paddingTop: 10, borderTop: `1px solid ${BRD}` }}>
           <div style={{ fontSize: 11.5, fontWeight: 800, marginBottom: 4 }}>Jeu derrière les QR : {libelleModule(jeu)}</div>
@@ -297,10 +437,10 @@ export default function QrTraces({ eventId, module, titre, mode, grille = false,
             Les QR « Permanent » ne contiennent pas le jeu : vous pouvez changer de jeu sans réimprimer. Réservé au propriétaire de l’animation et à Flowin ; chaque changement est journalisé.
           </div>
           <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
-            <select style={{ ...champ, flex: '0 1 200px' }} value={jeuChoix} aria-label="Nouveau jeu" onChange={e => { setJeuChoix(e.target.value); setJeuMsg(null) }}>
+            <select style={{ ...champ, flex: '0 1 200px', minHeight: 44 }} value={jeuChoix} aria-label="Nouveau jeu" onChange={e => { setJeuChoix(e.target.value); setJeuMsg(null) }}>
               {JEUX_CHANGEABLES.map(j => <option key={j} value={j}>{libelleModule(j)}</option>)}
             </select>
-            <button type="button" style={btnP} disabled={jeuOccupe || jeuChoix === jeu} onClick={changerJeu}>{jeuOccupe ? 'Changement…' : 'Changer le jeu'}</button>
+            <button type="button" style={{ ...btnP, minHeight: 44 }} disabled={jeuOccupe || jeuChoix === jeu} onClick={changerJeu}>{jeuOccupe ? 'Changement…' : 'Changer le jeu'}</button>
             {jeuMsg && <span role="status" style={{ fontSize: 12, fontWeight: 700, color: jeuMsg.ok ? '#15803D' : '#B45309' }}>{jeuMsg.t}</span>}
           </div>
         </div>
