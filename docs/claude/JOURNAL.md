@@ -84,3 +84,4 @@ Ce journal n'est pas une preuve de production : l'état vérifié est dans `ETAT
 - 24/11/2026 · Maquettes lot 6 (lots avec ticket en direct, Mes QR, accueil commerce, compte joueur sans mot de passe) dans docs/maquette/lot6, en attente de validation de Romain, aucun code.
 - 24/11/2026 · Historique 6 mois (Notion + git) injecté dans les mémoires des 13 agents, ERREURS.md (+22), REGLES.md (+9) ; 4 points À TRANCHER (base Révision, région Supabase, prix, signature) ; pages Notion non lues : SPEC, Technique, Produit, Commercial, Suivi des tâches.
 - 24/11/2026 · Décision Romain : compte joueur téléphone d'abord, rappels activés par défaut, pas d'invitation écran d'accueil ; maquette lot 6 G à simplifier avant tout code.
+- 24/11/2026 · Notifications push par défaut : agent lancé (code, VAPID privée à déposer par Romain dans les secrets Supabase), non poussé.
