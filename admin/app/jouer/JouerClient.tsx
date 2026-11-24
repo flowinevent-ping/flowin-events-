@@ -22,6 +22,7 @@ import { rendreEcran, etatInitial, rotationPourCase, regleBarre, regleParte, reg
 import { chargerMesTickets, nonVus, versVue, marquerVus, TICKETS_EXEMPLE, type ResultatRow } from '@/lib/masters/tickets'
 import type { VueMaster } from '@/lib/masters/resolve'
 import { estDemo } from '@/lib/demo'
+import { pushSupporte, permissionRefusee, rappelsCoches, definirRappels, armerPremiereDemande } from '@/lib/pushJoueur'
 import { writeJoueur, getJoueurLocal, lookupJoueurByEmail, animationDejaJouee, dejaJoueAujourdhuiCeQr } from '@/lib/parcours'
 
 /* Version du texte de consentement des masters (audit 17/11 : ajout des choix « rester en
@@ -224,6 +225,21 @@ export default function JouerClient(p: Props) {
         QRCode.toString(contenu, { type: 'svg', margin: 0, width: 110, color: { dark: '#1B3A5C', light: '#FFFFFF' } }).then(svg => { q.innerHTML = svg }).catch(() => { /* garde l'illustration */ })
       }
       if (id === 'c-inscription') majValider()
+      /* Rappels (Web Push, 24/11) : case cochee par defaut sur les ecrans de gain / ticket ; la demande du telephone
+         n'est faite qu'une fois, au premier toucher. Masquee si le telephone ne sait pas notifier. Demo : visible, inerte. */
+      if (id === 'c-billet' || id === 'c-ticket') {
+        const lr = el.querySelector('[data-rappels]') as HTMLElement | null
+        if (lr && !p.apercu && ((p.demo && !enCadre) || (pushSupporte() && !permissionRefusee()))) {
+          lr.style.display = 'flex'
+          const cb = lr.querySelector('input') as HTMLInputElement | null
+          const jl = p.demo ? null : getJoueurLocal()
+          if (cb) {
+            cb.checked = p.demo ? true : rappelsCoches()
+            cb.addEventListener('change', () => { if (jl) void definirRappels(jl.id, cb.checked) })
+          }
+          if (jl) armerPremiereDemande(jl.id)
+        }
+      }
       if (id === 'c-profil' && joueurLocal) chargerProfil()
       if (seReel && id === 'sj-carte') monterCarte(el)
       if (seReel && id === 'sj-tickets') chargerTicketsSe(el)
