@@ -1,0 +1,93 @@
+/* Lot 5 : maquettes statiques, CSS seul. Style validé (lot4 / se-page-publique-v2) : orange dégradé #B5471E, cartouche logo,
+   feuille à poignée, boutons pastille. Pas de violet, pas d'emoji. Chiffres et noms marqués « exemple » = fictifs. */
+:root{--o:#B5471E;--o2:#E8872F;--o3:#D2631F;--ol:#FFF4EA;--ob:#F3D3BC;--ink:#1B3A5C;--muted:#52647A;--trait:#E2E7EE;--bleu:#3B5CC4;--bl:#E3E9F8;--ok:#15803D;--okl:#E3F3EC;--jaune:#F5B82E;--rouge:#C2410C;--papier:#F4F1EC}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#E4E7EC;color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;-webkit-font-smoothing:antialiased}
+.page{max-width:1700px;margin:0 auto;padding:22px 16px 40px}
+.page>h1{font-size:21px;font-weight:900}
+.page>p.lead{font-size:14px;color:var(--muted);margin:4px 0 16px;max-width:900px;line-height:1.45}
+.row{display:flex;flex-wrap:wrap;gap:26px;justify-content:center;align-items:flex-start}
+.col{width:390px;max-width:100%}
+.cap{font-size:13px;color:var(--muted);line-height:1.4;margin-bottom:10px;min-height:76px}
+.cap b{color:var(--ink);font-size:14.5px;display:block;margin-bottom:2px}
+.tel{position:relative;width:390px;max-width:100%;height:844px;background:var(--papier);border-radius:28px;overflow:hidden;box-shadow:0 24px 50px -28px rgba(27,58,92,.55);border:1px solid var(--trait);display:flex;flex-direction:column}
+.tag-ex{position:absolute;z-index:60;right:10px;bottom:4px;font-size:12px;font-weight:800;color:var(--muted);background:rgba(255,255,255,.94);border:1px dashed var(--trait);border-radius:99px;padding:1px 8px;pointer-events:none}
+
+/* en-tête orange + cartouche logo */
+.hd{position:relative;flex:none;height:96px;background:linear-gradient(135deg,var(--o),var(--o2));color:#fff;display:flex;align-items:center;gap:12px;padding:0 16px;border-radius:0 0 24px 24px;box-shadow:0 6px 16px -6px rgba(120,30,0,.55);z-index:8}
+.hd::before{content:"";position:absolute;inset:-40%;background:radial-gradient(closest-side,rgba(255,210,63,.35),transparent 70%);animation:halo 3.4s ease-in-out infinite;pointer-events:none}
+.hd>*{position:relative}
+.cart{flex:none;width:76px;height:52px;background:#fff;border:3px solid #E9B993;border-radius:14px;display:grid;place-items:center;padding:4px 6px;animation:reveal .8s cubic-bezier(.2,1.5,.4,1) both}
+.cart img{max-width:100%;max-height:100%;object-fit:contain}
+.hd .tt{flex:1;min-width:0}
+.hd .tt b{display:block;font-size:19px;line-height:1.1;font-weight:900}
+.hd .tt small{display:block;font-size:13px;font-weight:600;opacity:.92;margin-top:2px}
+.hd .pas{flex:none;background:#fff;color:var(--o);font-weight:900;font-size:15px;border-radius:14px;padding:6px 10px;min-height:32px;display:grid;place-items:center}
+
+/* scène (zone visuelle) + feuille à poignée */
+.scene{flex:1 1 auto;min-height:0;position:relative;overflow:hidden}
+.feuille{position:relative;flex:none;background:#fff;border-radius:26px 26px 0 0;box-shadow:0 -6px 20px rgba(27,58,92,.18);padding:8px 16px 22px;z-index:6}
+.feuille::before{content:"";display:block;width:44px;height:5px;border-radius:3px;background:#D1D5DB;margin:0 auto 10px}
+.feuille h3{font-size:19px;font-weight:900;line-height:1.2;margin-bottom:4px}
+.feuille p.s{font-size:13.5px;color:var(--muted);line-height:1.35;margin-bottom:10px}
+.plein{flex:1 1 auto;min-height:0;padding:16px 16px 0;overflow:hidden;position:relative}
+.plein h2{font-size:23px;font-weight:900;line-height:1.15}
+.plein p.s{font-size:14px;color:var(--muted);margin-top:4px;line-height:1.35}
+
+/* boutons pastille */
+.btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;height:52px;border-radius:26px;background:linear-gradient(135deg,var(--o),var(--o3));color:#fff;font-size:17px;font-weight:800;box-shadow:0 6px 14px rgba(181,71,30,.35);border:0}
+.btn.sec{background:#fff;color:var(--o);border:2px solid var(--ob);box-shadow:none}
+.btn svg{width:22px;height:22px}
+.btns{display:flex;gap:10px}
+.btns .btn{flex:1}
+.pill{display:inline-flex;align-items:center;gap:6px;min-height:44px;padding:0 16px;border-radius:22px;background:#fff;border:2px solid var(--trait);font-size:15px;font-weight:800;color:var(--ink)}
+.pill.on{border-color:var(--o);background:var(--ol);color:var(--o)}
+.pills{display:flex;flex-wrap:wrap;gap:8px}
+
+/* cartes de choix */
+.carte{position:relative;display:flex;align-items:center;gap:12px;min-height:64px;background:#fff;border:2px solid var(--trait);border-radius:18px;padding:8px 14px}
+.carte b{display:block;font-size:16.5px;line-height:1.2}
+.carte small{display:block;font-size:13px;color:var(--muted);font-weight:600;line-height:1.3;margin-top:1px}
+.carte.on{border-color:var(--o);box-shadow:0 10px 22px -16px rgba(181,71,30,.9);background:#FFFBF7}
+.carte.on::after{content:"";position:absolute;right:12px;top:12px;width:24px;height:24px;border-radius:50%;background:var(--o) url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path d='M6 12.5l4 4 8-9' fill='none' stroke='white' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'/></svg>") center/16px no-repeat;animation:pop .4s .6s cubic-bezier(.2,1.8,.4,1) both}
+.gros-c{flex-direction:column;align-items:stretch;gap:8px;padding:14px;min-height:0}
+.ic{flex:none;width:52px;height:52px;border-radius:16px;display:grid;place-items:center;background:var(--ol);color:var(--o)}
+.ic svg{width:28px;height:28px}
+.badge{display:inline-block;font-size:12.5px;font-weight:900;border-radius:99px;padding:2px 9px;background:var(--okl);color:var(--ok)}
+.badge.o{background:var(--ol);color:var(--o)}
+.badge.b{background:var(--bl);color:var(--bleu)}
+.badge.g{background:#EEF1F5;color:var(--muted)}
+.champ{display:block;min-height:50px;border:2px solid var(--trait);border-radius:14px;padding:12px 14px;font-size:16px;font-weight:700;background:#fff}
+.champ.f{border-color:var(--o)}
+.champ small{display:block;font-size:12.5px;color:var(--muted);font-weight:700}
+.lab{font-size:13px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin:12px 0 6px}
+.ligne{display:flex;align-items:center;gap:12px}
+.pause{flex:1}
+.coche{flex:none;width:26px;height:26px;border-radius:50%;background:var(--ok);display:grid;place-items:center}
+.coche svg{width:16px;height:16px}
+
+/* animations */
+@keyframes halo{0%,100%{transform:scale(.8);opacity:.5}50%{transform:scale(1.15);opacity:1}}
+@keyframes reveal{0%{transform:scale(.4) rotate(-8deg);opacity:0}60%{transform:scale(1.08) rotate(2deg);opacity:1}}
+@keyframes pop{from{transform:scale(0)}}
+@keyframes monte{from{transform:translateY(14px);opacity:0}}
+@keyframes entre{from{transform:translateX(60px);opacity:0}}
+@keyframes remplit{from{transform:scaleX(0)}}
+@keyframes respire{0%,100%{transform:scale(1)}50%{transform:scale(1.04)}}
+@keyframes chute{0%{transform:translateY(-30px) rotate(0);opacity:1}100%{transform:translateY(620px) rotate(540deg);opacity:0}}
+@keyframes tourne{to{transform:rotate(360deg)}}
+@keyframes onde{0%{transform:scale(.3);opacity:.7}100%{transform:scale(2.2);opacity:0}}
+@keyframes secoue{0%,100%{transform:translateX(0)}25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+@keyframes decolle{from{transform:translateY(0)}to{transform:translateY(-6px)}}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
+
+/* confettis (couleurs sans violet) */
+.conf{position:absolute;inset:0;pointer-events:none;overflow:hidden;z-index:30}
+.conf i{position:absolute;top:0;width:9px;height:15px;border-radius:2px;animation:chute 2.6s linear infinite;animation-delay:var(--d,0s)}
+.conf i:nth-child(4n+1){background:var(--o2)}.conf i:nth-child(4n+2){background:var(--bleu)}.conf i:nth-child(4n+3){background:var(--jaune)}.conf i:nth-child(4n){background:var(--ok)}
+
+/* légende de la page */
+.note{max-width:1100px;margin:22px auto 0;background:#fff;border:1px solid var(--trait);border-radius:18px;padding:14px 18px;font-size:14px;line-height:1.5;color:var(--muted)}
+.note b{color:var(--ink)}
+code{font-size:12px;background:#fff;border:1px solid var(--trait);border-radius:6px;padding:1px 5px}
+.scene.fete>*:not(.conf){position:relative;z-index:35}
