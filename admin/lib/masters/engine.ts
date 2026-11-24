@@ -31,6 +31,10 @@ export interface EtatPartie {
   qi: number
   rep: (number | null)[]
   bonnes: number
+  /** Bonnes reponses d'affilee (affichage seulement : aucun ticket lie, lot 5 D). */
+  serie?: number
+  /** Index de la question bonus affichee (une par ecran, lot 5 D). */
+  bi?: number
   bonusFait: boolean
   ticket: string
   ticketBonus: string
@@ -61,7 +65,7 @@ export interface EtatPartie {
 }
 
 export function etatInitial(): EtatPartie {
-  return { mesTickets: null, resultat: null, qi: 0, rep: [], bonnes: 0, bonusFait: false, ticket: '', ticketBonus: '', gain: null, caseIdx: null, rotation: -12, voteIdx: null, vitrineVote: false, tombolaNo: '', after: null, profil: null, inscrit: false, consent: { jeu: false, anim: false, com: false }, parrainN: 0, erreur: '', envoi: false }
+  return { mesTickets: null, resultat: null, qi: 0, rep: [], bonnes: 0, serie: 0, bi: 0, bonusFait: false, ticket: '', ticketBonus: '', gain: null, caseIdx: null, rotation: -12, voteIdx: null, vitrineVote: false, tombolaNo: '', after: null, profil: null, inscrit: false, consent: { jeu: false, anim: false, com: false }, parrainN: 0, erreur: '', envoi: false }
 }
 
 /* ── Outils ────────────────────────────────────────────────────────────── */
@@ -111,6 +115,7 @@ const P: Record<string, string> = {
   mail: '<rect x="3" y="5" width="18" height="14" rx="2.5"/><path d="M3.5 6.5l8.5 6 8.5-6"/>', phone: '<rect x="7" y="2.5" width="10" height="19" rx="2.5"/><path d="M11 18.5h2"/>', share: '<path d="M12 3v12M7 8l5-5 5 5"/><path d="M5 13v6a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6"/>',
   users: '<circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c0-3.6 2.9-6 6.5-6s6.5 2.4 6.5 6"/><path d="M16 4.6a3.5 3.5 0 0 1 0 6.8M18 14.3c2 .8 3.5 2.8 3.5 5.7"/>',
   handshake: '<path d="M3 12l4-4 4 2 3-2 7 4"/><path d="M7 8v6l4 4 2-1 2 1 4-4"/>', spark: '<path d="M12 3v4M12 17v4M3 12h4M17 12h4M6 6l2.5 2.5M15.5 15.5L18 18M6 18l2.5-2.5M15.5 8.5L18 6"/>', globe: '<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c3 3.5 3 14.5 0 18M12 3c-3 3.5-3 14.5 0 18"/>',
+  bolt: '<path d="M13 3L5 14h6l-1 7 8-11h-6z"/>', speaker: '<path d="M4 9v6h4l5 4V5L8 9z"/><path d="M16.5 8.5a5 5 0 010 7M19 6a8.5 8.5 0 010 12"/>', speakerOff: '<path d="M4 9v6h4l5 4V5L8 9z"/><path d="M17 9l5 6M22 9l-5 6"/>',
   key: '<circle cx="8" cy="15" r="4"/><path d="M11 12l9-9M16 7l3 3"/>', info: '<circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 7.5v.5"/>',
 }
 export function icon(k: string, s?: number, sw?: number): string {
@@ -137,7 +142,7 @@ function mono(v: VueMaster, style?: string): string {
 interface OptsHdr { back?: string; title?: string; small?: string; noMe?: boolean }
 function hdr(v: VueMaster, o?: OptsHdr): string {
   o = o || {}
-  const left = o.back ? '<button class="iconbtn" data-go="@retour" data-repli="\' + o.back + \'" aria-label="Retour">' + icon('chevL', 22, 2) + '</button>' : ''
+  const left = o.back ? '<button class="iconbtn" data-go="@retour" data-repli="' + o.back + '" aria-label="Retour">' + icon('chevL', 22, 2) + '</button>' : ''
   const me = o.noMe ? '<span style="width:44px"></span>' : '<button class="iconbtn" data-go="c-profil" aria-label="Mon profil">' + icon('user', 21) + '</button>'
   if (o.title) return '<div class="hdr">' + (left || '<span style="width:44px"></span>') + '<div class="ttl">' + esc(o.title) + (o.small ? '<small>' + esc(o.small) + '</small>' : '') + '</div>' + me + '</div>'
   return '<div class="hdr">' + left + '<div class="brand" style="flex:1">' + mono(v) + '<div style="min-width:0"><b>' + esc(v.who.nom) + '</b><i>' + esc(v.who.tag) + '</i></div></div>' + me + '</div>'
@@ -266,25 +271,42 @@ S['s-regles'] = { r: function (v) {
     '</div></div>' + foot(btn('C\'est parti', PREMIER_ECRAN[v.key] || 'q-question')) + '</div>'
 } }
 
-/* Quiz */
+/* Quiz (lot 5 D : anime, serie visible, progression vivante, retours friendly) */
+const MOTS_OK = ['Bien vu !', 'Exact !', 'Bravo !']
 function quizScreen(v: VueMaster, r: EtatPartie, state: 'idle' | 'ok' | 'ko'): string {
   const q = v.questions[r.qi] || { txt: '[question à compléter]', opts: ['[réponse]', '[réponse]'], ok: 0, expl: '' }
   const tot = v.questions.length || 1, ring = 138.2, left = 30
   const choix = r.rep[r.qi]
-  let h = '<div class="scr ' + (v.key === 'quiz' ? 'stage' : 'bg-o') + '">' + barre() + '<div class="qtop"><button class="iconbtn" data-go="s-accueil" aria-label="Quitter">' + icon('x', 20, 2) + '</button><div class="mid"><small class="qcom">' + mono(v, 'width:22px;height:22px;font-size:9px;border-radius:7px') + '<span class="qnom">' + esc(v.who.nom) + '</span><span>QUESTION ' + (r.qi + 1) + ' / ' + tot + '</span></small><div class="prog">' + v.questions.map(function (_, i) { return '<i class="' + (i <= r.qi ? 'on' : '') + '"></i>' }).join('') + '</div></div>' +
+  const serie = r.serie || 0
+  /* Progression vivante : un segment par question, vert si juste, orange doux sinon, le courant se remplit. */
+  const segs = v.questions.map(function (_, i) {
+    let c = ''
+    if (i < r.qi) c = r.rep[i] === (v.questions[i] || { ok: -1 }).ok ? 'ok' : 'ko'
+    else if (i === r.qi) c = state === 'ok' ? 'ok fill' : state === 'ko' ? 'ko fill' : 'cur'
+    if (serie >= 3 && c.indexOf('ok') === 0) c += ' hot'
+    return '<i class="' + c + '"></i>'
+  }).join('')
+  const chip = serie >= 2 ? '<span class="serie' + (state === 'ok' ? ' up' : '') + '" aria-label="Série de ' + serie + ' bonnes réponses">' + icon('bolt', 15, 2.6) + 'x' + serie + '</span>' : ''
+  let h = '<div class="scr ' + (v.key === 'quiz' ? 'stage' : 'bg-o') + '">' + barre() + '<div class="qtop"><button class="iconbtn" data-go="s-accueil" aria-label="Quitter">' + icon('x', 20, 2) + '</button><div class="mid"><small class="qcom">' + mono(v, 'width:22px;height:22px;font-size:9px;border-radius:7px') + '<span class="qnom">' + esc(v.who.nom) + '</span><span>QUESTION ' + (r.qi + 1) + ' / ' + tot + '</span></small><div class="progrow"><div class="prog">' + segs + '</div>' + chip + '</div></div>' +
     '<div class="timer"><svg width="54" height="54" viewBox="0 0 54 54"><circle cx="27" cy="27" r="22" fill="#fff" stroke="#E7ECF3" stroke-width="5"/><circle class="tring" cx="27" cy="27" r="22" fill="none" stroke="var(--ring,var(--c))" stroke-width="5" stroke-linecap="round" stroke-dasharray="' + ring + '" stroke-dashoffset="' + (state === 'idle' ? 0 : n1(ring * .6)) + '"/></svg><b class="tnum">' + (state === 'idle' ? left : '') + '</b></div></div>' +
-    BAND + '<div class="body"><div class="card qcard">' + geo([['c', 290, -40, 100, 'var(--c2)']]) + '<div class="kicker" style="position:relative">' + esc(v.who.nom) + '</div><h2 class="qtxt">' + esc(q.txt) + '</h2></div><div class="opts">'
+    BAND + '<div class="body"><div class="card qcard' + (state === 'idle' ? ' qin' : '') + '">' + geo([['c', 290, -40, 100, 'var(--c2)']]) + '<div class="kicker" style="position:relative">' + esc(v.who.nom) + '</div><h2 class="qtxt">' + esc(q.txt) + '</h2></div><div class="opts">'
   q.opts.forEach(function (o, i) {
     let cls = '', end = ''
+    if (state === 'idle') cls = 'mt'
     if (state === 'ok') { if (i === q.ok) { cls = 'ok'; end = icon('check', 24, 3) } else cls = 'faded' }
-    if (state === 'ko') { if (i === choix) { cls = 'ko'; end = icon('x', 22, 3) } else if (i === q.ok) { cls = 'reveal'; end = '<span style="color:var(--ok)">' + icon('check', 24, 3) + '</span>' } else cls = 'faded' }
-    h += '<button class="opt ' + cls + '"' + (state === 'idle' ? ' data-rep="' + i + '"' : '') + '><span class="k">' + 'ABCDEF'[i] + '</span><span>' + esc(o) + '</span><span class="end">' + end + '</span></button>'
+    if (state === 'ko') { if (i === choix) { cls = 'ko'; end = '' } else if (i === q.ok) { cls = 'reveal'; end = '<span style="color:var(--ok)">' + icon('check', 24, 3) + '</span>' } else cls = 'faded' }
+    h += '<button class="opt ' + cls + '"' + (state === 'idle' ? ' data-rep="' + i + '" style="--i:' + i + '"' : '') + '><span class="k">' + 'ABCDEF'[i] + '</span><span>' + esc(o) + '</span><span class="end">' + end + '</span></button>'
   })
   h += '</div>' + (state === 'idle' ? '<p class="mention">Touche une réponse</p>' : '') + '</div>'
   const suite = r.qi + 1 < v.questions.length ? 'q-suivante' : 'q-resultat'
   const lblSuite = r.qi + 1 < v.questions.length ? 'Question suivante' : 'Voir mon score'
-  if (state === 'ok') h += confetti(30, 5) + '<div class="fb"><div class="fh"><span class="badge" style="background:var(--ok)">' + icon('check', 26, 3) + '</span><h3 style="color:var(--ok)">Bonne réponse&nbsp;!</h3></div><p>' + esc(q.expl) + '</p>' + btn(lblSuite, suite) + '</div>'
-  if (state === 'ko') h += '<div class="fb"><div class="fh"><span class="badge" style="background:var(--ko)">' + icon('x', 24, 3) + '</span><h3 style="color:var(--ko)">' + (choix == null ? 'Temps écoulé…' : 'Pas tout à fait…') + '</h3></div><p>La bonne réponse était <b>' + esc(q.opts[q.ok]) + '</b>. ' + esc(q.expl) + '</p>' + btn(lblSuite, suite) + '</div>'
+  if (state === 'ok') {
+    const titre = serie >= 3 ? 'Série de ' + serie + ' !' : MOTS_OK[r.qi % MOTS_OK.length]
+    let eclairs = ''
+    if (serie >= 3) { eclairs = '<span class="bolts" aria-hidden="true">'; for (let k = 0; k < Math.min(serie, 5); k++) eclairs += '<i style="--k:' + k + '">' + icon('bolt', 22, 2.6) + '</i>'; eclairs += '</span>' }
+    h += confetti(serie >= 3 ? 38 : 24, 5) + '<div class="fb"><div class="fh"><span class="badge" style="background:var(--ok)">' + icon('check', 26, 3) + '</span><h3 style="color:var(--ok)">' + titre + '</h3>' + (eclairs || '<span class="pts">+1 point</span>') + '</div><p>' + (serie >= 3 ? 'Encore une, tu es lancé.' : esc(q.expl)) + '</p>' + btn(lblSuite, suite) + '</div>'
+  }
+  if (state === 'ko') h += '<div class="fb"><div class="fh"><span class="badge dou">' + icon('spark', 24, 2.4) + '</span><h3 class="dou">' + (choix == null ? 'Temps écoulé' : 'Presque&nbsp;!') + '</h3></div><p>La bonne réponse était <b>' + esc(q.opts[q.ok]) + '</b>. ' + esc(q.expl) + '</p>' + btn(lblSuite, suite) + '</div>'
   return h + '</div>'
 }
 S['q-question'] = { r: function (v, r) { return quizScreen(v, r, 'idle') } }
@@ -293,7 +315,7 @@ S['q-mauvaise'] = { r: function (v, r) { return quizScreen(v, r, 'ko') } }
 S['q-resultat'] = { r: function (v, r) {
   const bonus = v.key === 'quiz' && v.bonus.length > 0, tot = v.questions.length, parfait = r.bonnes >= tot && tot > 0
   const pct = tot ? r.bonnes / tot : 0
-  return '<div class="scr ' + (v.key === 'quiz' ? 'stage' : 'bg-w') + '">' + (parfait ? confetti(36, 9) : '') + barre() + hdr(v) + BAND + etapes(1) +
+  return '<div class="scr ' + (v.key === 'quiz' ? 'stage' : 'bg-w') + '">' + (parfait ? confetti(36, 9) : pct >= .6 ? confetti(22, 9) : '') + barre() + hdr(v) + BAND + etapes(1) +
     '<div class="body" style="text-align:center"><div class="kicker" style="margin-top:12px">Ton score</div>' +
     '<div class="ring"><svg width="206" height="206" viewBox="0 0 206 206"><circle cx="103" cy="103" r="92" fill="none" stroke="#E7ECF3" stroke-width="14"/><circle class="arc" cx="103" cy="103" r="92" fill="none" stroke="var(--ring,var(--c))" stroke-width="14" stroke-linecap="round" style="stroke-dashoffset:' + n1(578 * (1 - pct)) + '"/></svg><div class="v"><b class="score num" data-score="' + r.bonnes + '" data-tot="' + tot + '">' + r.bonnes + '/' + tot + '</b><small>bonnes réponses</small></div></div>' +
     '<h2 class="h2 a-rise" style="--d:1.1s;margin-top:14px;font-size:34px">' + (parfait ? 'Sans faute&nbsp;!' : 'Presque&nbsp;!') + '</h2>' +
@@ -309,12 +331,17 @@ S['q-bonusintro'] = { r: function (v) {
     '<h2 class="h2 a-rise" style="--d:.5s;margin-top:80px;font-size:32px">Réponds aux<br>questions bonus,</h2><div class="a-rise" style="--d:.6s;font-size:22px;font-weight:800;color:var(--c-ink);margin-top:6px">gagne un ticket supplémentaire</div><p class="sub a-rise" style="--d:.7s">' + v.bonus.length + ' questions rapides pour aider ' + esc(v.who.nom) + ' à mieux te connaître.</p></div>' +
     foot(btn('Je réponds', 'q-bonus') + '<button class="lnk" data-go="c-inscription" data-after="c-ticket">Plus tard</button>') + '</div>'
 } }
-S['q-bonus'] = { tall: true, r: function (v) {
-  const n = v.bonus.length
-  return '<div class="scr bg-o">' + barre() + hdr(v, { back: 'q-bonusintro', title: 'Questions bonus', small: n + ' questions · +1 ticket' }) +
-    '<div class="body" style="padding-top:4px"><span class="plus1" style="align-self:flex-start"><i>+1</i>ticket supplémentaire</span>' +
-    v.bonus.map(function (q, i) { return '<div class="card bcard a-rise" style="--d:' + (i * .07) + 's"><div class="kicker">Bonus ' + (i + 1) + ' / ' + n + '</div><h4>' + esc(q.label) + '</h4><div class="chips">' + q.opts.map(function (o) { return '<button class="chip" data-one="b' + i + '" data-val="' + esc(o) + '">' + esc(o) + '</button>' }).join('') + '</div></div>' }).join('') + '</div>' +
-    foot(btn('Valider mes réponses', 'q-bonusvalider', '', ' data-bonus-need disabled') + '<p class="mention" data-bonus-msg>Réponds aux ' + n + ' questions pour gagner le ticket.</p><button class="lnk" data-go="c-inscription" data-after="c-ticket">Passer</button>') + '</div>'
+S['q-bonus'] = { r: function (v, r) {
+  const n = v.bonus.length || 1, i = Math.min(Math.max(r.bi || 0, 0), n - 1)
+  const q = v.bonus[i] || { label: '[question à compléter]', opts: ['[réponse]'] }
+  const segs = v.bonus.map(function (_, k) { return '<i class="' + (k < i ? 'ok' : k === i ? 'cur fill' : '') + '"></i>' }).join('')
+  const fin = i + 1 >= n
+  return '<div class="scr bg-o">' + barre() + hdr(v, { back: 'q-bonusintro', title: 'Bonus ' + (i + 1) + ' sur ' + n, small: 'Pas de bonne réponse' }) +
+    '<div class="bprogw"><div class="prog">' + segs + '</div></div>' +
+    '<div class="body" style="padding-top:4px"><div class="card bq qin"><div class="kicker">Question bonus</div><h4>' + esc(q.label) + '</h4></div><div class="bopts">' +
+    q.opts.map(function (o, k) { return '<button class="bopt" data-bon="' + i + '" data-val="' + esc(o) + '" style="--i:' + k + '"><span>' + esc(o) + '</span><span class="end">' + icon('check', 22, 3) + '</span></button>' }).join('') + '</div>' +
+    '<div class="bring" aria-live="polite"><svg width="64" height="64" viewBox="0 0 54 54"><circle cx="27" cy="27" r="22" fill="#fff" stroke="#E7ECF3" stroke-width="5"/><circle class="f" cx="27" cy="27" r="22" fill="none" stroke="var(--c)" stroke-width="5" stroke-linecap="round" transform="rotate(-90 27 27)"/></svg><b>' + (fin ? 'Merci !' : 'Question suivante…') + '</b></div></div>' +
+    foot('<p class="mention">Touche une réponse, la suite arrive toute seule</p><button class="lnk" data-go="c-inscription" data-after="c-ticket">Passer</button>') + '</div>'
 } }
 S['q-bonusok'] = { r: function (v, r) {
   const deux = r.bonnes >= v.questions.length
@@ -665,7 +692,7 @@ S['t-impression'] = { r: function (v, r) {
 } }
 S['t-res-tirage'] = { r: function (v, r) {
   const premier = v.lots.find(function (l) { return l.mode === 'tir' }) || v.lots[0]
-  return '<div class="scr bg-w">' + barre() + hdr(v) + BAND + etapes(1) + '<div class="body" style="text-align:center;align-items:center">' +
+  return '<div class="scr bg-w">' + confetti(40, 23) + barre() + hdr(v) + BAND + etapes(1) + '<div class="body" style="text-align:center;align-items:center">' +
     '<div class="tk" style="width:100%;text-align:left"><div class="main"><small>Ticket tombola</small><b class="num">TK-' + esc((r.tombolaNo || '0427').slice(-4)) + '</b><span>Tirage au sort le ' + txt(v.tirage) + '</span></div><div class="stub"><b>N° ' + esc((r.tombolaNo || '0427').slice(-4)) + '</b></div></div>' +
     '<h2 class="h2 a-rise" style="--d:.6s;margin-top:30px;font-size:32px">Ton ticket<br>est dans le tirage</h2><p class="sub a-rise" style="--d:.7s">Valide ton ticket pour être prévenu si tu gagnes' + (premier ? ' : ' + esc(premier.nom.charAt(0).toLowerCase() + premier.nom.slice(1)) : '') + '.</p></div>' +
     foot(btn('Valider mon ticket', 'c-inscription', '', ' data-after="c-ticket"')) + '</div>'
@@ -703,7 +730,7 @@ S['r-roue'] = { r: function (v) {
 S['r-tourne'] = { r: function (v, r) {
   const c = caseCourante(v, r)
   const lib = c ? (c.issue === 'imm' ? 'Gain immédiat' : c.issue === 'tir' ? 'Ticket pour le tirage' : 'Pas cette fois') : ''
-  return '<div class="scr bg-m">' + (c && c.issue !== 'perdu' ? confetti(40, 31, 4.7) : '') + barre() + hdr(v) + BAND + etapes(0) + '<div class="body" style="text-align:center"><div class="kicker" style="margin-top:12px">C\'est parti…</div><h2 class="h2" style="font-size:33px;margin-top:4px">Ça tourne&nbsp;!</h2>' +
+  return '<div class="scr bg-m rt">' + (c && c.issue !== 'perdu' ? confetti(40, 31) : '') + barre() + hdr(v) + BAND + etapes(0) + '<div class="body" style="text-align:center"><div class="kicker" style="margin-top:12px">C\'est parti…</div><h2 class="h2" style="font-size:33px;margin-top:4px">Ça tourne&nbsp;!</h2>' +
     '<div style="position:relative">' + wheelBlock(v, r.rotation) + '<div class="resultchip"><small>' + esc(lib) + '</small><b>' + esc(c ? c.label : '') + '</b></div></div><div class="legend after">La roue s\'est arrêtée sur « ' + esc(c ? c.label : '') + ' ».</div></div>' + foot(btn(c && c.issue === 'perdu' ? 'Voir le résultat' : 'Recevoir mon gain', 'r-resultat', 'after')) + '</div>'
 } }
 S['r-gain'] = { r: function (v, r) {

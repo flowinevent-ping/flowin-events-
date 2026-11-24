@@ -18,12 +18,76 @@ import { supabase } from '@/lib/supabase'
 import { getVisiteurId } from '@/lib/track'
 import QRCode from 'qrcode'
 import { MASTER_CSS } from '@/lib/masters/css'
-import { rendreEcran, etatInitial, rotationPourCase, regleBarre, regleParte, regleSuperReel, reglePastille, ecranExiste, DEROULES, type EtatPartie } from '@/lib/masters/engine'
+import { rendreEcran, icon, etatInitial, rotationPourCase, regleBarre, regleParte, regleSuperReel, reglePastille, ecranExiste, DEROULES, type EtatPartie } from '@/lib/masters/engine'
 import { chargerMesTickets, nonVus, versVue, marquerVus, TICKETS_EXEMPLE, type ResultatRow } from '@/lib/masters/tickets'
 import type { VueMaster } from '@/lib/masters/resolve'
 import { estDemo } from '@/lib/demo'
 import { pushSupporte, permissionRefusee, rappelsCoches, definirRappels, armerPremiereDemande } from '@/lib/pushJoueur'
 import { writeJoueur, getJoueurLocal, lookupJoueurByEmail, animationDejaJouee, dejaJoueAujourdhuiCeQr } from '@/lib/parcours'
+
+
+/* ── Sons (lot 5 D) : Web Audio API, generes en code, style 8 bits, aucun fichier.
+   Jamais de son avant un geste : le contexte audio n'est cree que dans un clic / un toucher.
+   Bouton haut-parleur pour couper ; choix memorise (localStorage). Avec « reduire les animations »,
+   le son est coupe au depart (le joueur peut l'allumer, son choix est alors memorise). ── */
+const CLE_SON = 'flowin_son'
+let ctxAudio: AudioContext | null = null
+let sonActif = true
+function mouvementReduit(): boolean {
+  try { return typeof window !== 'undefined' && !!window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches } catch { return false }
+}
+function lireSon(): boolean {
+  try { const s = localStorage.getItem(CLE_SON); if (s === '0') return false; if (s === '1') return true } catch { /* ignore */ }
+  return !mouvementReduit()
+}
+function ecrireSon(on: boolean) { try { localStorage.setItem(CLE_SON, on ? '1' : '0') } catch { /* ignore */ } }
+/** A appeler dans un geste de l'utilisateur (clic / toucher) : cree ou reveille le contexte audio. */
+function armerAudio() {
+  try {
+    if (!ctxAudio) {
+      const AC = window.AudioContext || (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext
+      if (!AC) return
+      ctxAudio = new AC()
+    }
+    if (ctxAudio.state === 'suspended') void ctxAudio.resume()
+  } catch { /* ignore */ }
+}
+type Note = [number, number, number, OscillatorType?, number?]
+const SONS: Record<string, Note[]> = {
+  bonne: [[784, 0, .07, 'square'], [1175, .07, .13, 'square']],
+  serie: [[659, 0, .07, 'square'], [784, .07, .07, 'square'], [988, .14, .07, 'square'], [1319, .21, .2, 'square']],
+  mauvaise: [[392, 0, .12, 'triangle', .1], [311, .12, .2, 'triangle', .1]],
+  tick: [[1500, 0, .025, 'square', .045]],
+  clic: [[880, 0, .04, 'square', .05]],
+  gain: [[523, 0, .08, 'square'], [659, .08, .08, 'square'], [784, .16, .08, 'square'], [1047, .24, .24, 'square']],
+  fin: [[392, 0, .1, 'square'], [523, .1, .1, 'square'], [659, .2, .1, 'square'], [784, .3, .14, 'square'], [1047, .46, .4, 'square']],
+}
+function son(nom: string) {
+  if (!sonActif || !ctxAudio) return
+  const c = ctxAudio
+  if (c.state === 'suspended') { c.resume().then(() => son(nom)).catch(() => { /* ignore */ }); return }
+  if (c.state !== 'running') return
+  try {
+    const t0 = c.currentTime + .01
+    ;(SONS[nom] || []).forEach(n => {
+      const o = c.createOscillator(), g = c.createGain(), v = n[4] || .07
+      o.type = n[3] || 'square'
+      o.frequency.setValueAtTime(n[0], t0 + n[1])
+      g.gain.setValueAtTime(.0001, t0 + n[1])
+      g.gain.exponentialRampToValueAtTime(v, t0 + n[1] + .008)
+      g.gain.exponentialRampToValueAtTime(.0001, t0 + n[1] + n[2])
+      o.connect(g); g.connect(c.destination)
+      o.start(t0 + n[1]); o.stop(t0 + n[1] + n[2] + .03)
+    })
+  } catch { /* ignore */ }
+}
+/* Ecrans de jeu qui portent le bouton haut-parleur. */
+function ecranAvecSon(id: string): boolean { return /^(q|r|t)-/.test(id) || id === 'c-resultat' }
+/* Son joue a l'arrivee sur un ecran (les sons de la roue sont lies a l'animation). */
+const SON_ECRAN: Record<string, string> = { 'q-bonusok': 'gain', 't-res-instant': 'gain', 't-res-tirage': 'gain', 'c-billet': 'gain' }
+function htmlBoutonSon(): string {
+  return '<button class="iconbtn snd" data-son aria-pressed="' + sonActif + '" aria-label="' + (sonActif ? 'Couper le son' : 'Activer le son') + '">' + icon(sonActif ? 'speaker' : 'speakerOff', 22, 2) + '</button>'
+}
 
 /* Version du texte de consentement des masters (audit 17/11 : ajout des choix « rester en
    contact avec Flowin Event » et « rester en contact avec ce commerce »). */
@@ -31,15 +95,15 @@ const CONSENTEMENT_MASTER_VERSION = 'flowin-consentement-2026-11-17'
 /* Enchainement automatique (ecran -> [suite, delai ms]) des ecrans sans decision. */
 const AUTO_SUITE: Record<string, [string, number]> = {
   's-flash': ['s-accueil', 2600],
-  'q-bonne': ['@suite-quiz', 2200],
-  'q-mauvaise': ['@suite-quiz', 3600],
+  'q-bonne': ['@suite-quiz', 1800],
+  'q-mauvaise': ['@suite-quiz', 3000],
   't-impression': ['t-resultat', 3700],
-  'r-tourne': ['r-resultat', 6000],
+  'r-tourne': ['r-resultat', 7800],
   'v-envoi': ['v-resultat', 2900],
 }
 /* Retour haptique (navigator.vibrate, ignore la ou il n'existe pas, ex. iOS Safari). */
 const VIBRATIONS: Record<string, number | number[]> = {
-  'q-bonne': 35, 'q-mauvaise': [20, 60, 20],
+  'q-bonne': 35, 'q-mauvaise': 15,
   'r-gain': [60, 50, 120], 't-res-instant': [60, 50, 120], 'c-billet': [60, 50, 120],
   'q-bonusok': [40, 40, 80], 'r-ticket': [40, 40, 80], 'c-ticket': 40, 'v-envoi': 30,
 }
@@ -86,6 +150,10 @@ export default function JouerClient(p: Props) {
     const v = p.vue
     const r = etat.current
     regleBarre(p.barre)
+    sonActif = lireSon()
+    const reduit = mouvementReduit()
+    let raf = 0
+    let enSortie = false
     const seReel = !p.demo && v.superEvent && v.superEvent.id ? v.superEvent.id : ''
     regleSuperReel(seReel)
     let carteRoot: Root | null = null
@@ -97,7 +165,7 @@ export default function JouerClient(p: Props) {
       r.connu = !!(local.id && local.prenom && local.nom && (local.tel || '').replace(/\s/g, '').length >= 8)
     }
 
-    function nettoyer() { minuteurs.current.forEach(id => { clearInterval(id); clearTimeout(id) }); minuteurs.current = [] }
+    function nettoyer() { minuteurs.current.forEach(id => { clearInterval(id); clearTimeout(id) }); minuteurs.current = []; if (raf) { cancelAnimationFrame(raf); raf = 0 } }
     function plus_tard(fn: () => void, ms: number) { minuteurs.current.push(window.setTimeout(fn, ms)) }
 
     /* Navigation (audit 31/10) : chaque ecran est une entree d'historique
@@ -136,6 +204,7 @@ export default function JouerClient(p: Props) {
       /* Retour sur une question deja repondue : on remontre la correction. */
       if (id === 'q-question' && r.rep[r.qi] != null) id = r.rep[r.qi] === (v.questions[r.qi] || { ok: -1 }).ok ? 'q-bonne' : 'q-mauvaise'
       nettoyer()
+      enSortie = false
       if (carteRoot) { const cr = carteRoot; carteRoot = null; setTimeout(() => { try { cr.unmount() } catch { /* ignore */ } }, 0) }
       const prec = courant.current
       if (!sansPile && prec && prec !== id) {
@@ -177,6 +246,59 @@ export default function JouerClient(p: Props) {
     }
     window.addEventListener('popstate', surPopstate)
 
+    /* Roue (lot 5 D) : rotation pilotee image par image. Depart avec un petit recul, grande vitesse puis
+       inertie, arret AU BORD de la case gagnante (suspense au dernier cran), tremblement, dernier cran franchi,
+       rebond amorti. Un tick de son + un coup d'aiguille a chaque cran. Le resultat est celui deja tire (r.caseIdx). */
+    function lancerRoue(el: HTMLElement) {
+      const w = el.querySelector('.wheel') as HTMLElement | null, b = el.querySelector('.wheelbox') as HTMLElement | null
+      const aig = el.querySelector('.pointer') as SVGElement | null
+      if (!w || !b) return
+      const cible = r.rotation, n = Math.max(2, v.cases.length), pas = 360 / n
+      const cas = r.caseIdx != null ? v.cases[r.caseIdx] : null
+      const issue = () => {
+        w.style.transform = 'rotate(' + cible + 'deg)'
+        el.classList.remove('en-cours')
+        if (cas && cas.issue !== 'perdu') { son('gain'); vibrer([60, 50, 120]) } else { son('mauvaise'); vibrer(15) }
+      }
+      if (reduit) { issue(); return }
+      el.classList.add('en-cours')
+      const a0 = -12, recul = a0 - 14, bord = cible - pas / 2 - 1.5, apres = cible + 2.5
+      const T1 = 260, T2 = 4200, T3 = 480, T4 = 520, T5 = 560, TOTAL = T1 + T2 + T3 + T4 + T5
+      function angle(t: number): number {
+        if (t < T1) { const x = t / T1; return a0 - 14 * (1 - Math.pow(1 - x, 2)) }
+        t -= T1
+        if (t < T2) { let x = t / T2; x = (x < .1 ? x * x / .2 : x - .05) / .95; return recul + (bord - recul) * (1 - Math.pow(1 - x, 3.2)) }
+        t -= T2
+        if (t < T3) return bord + Math.sin(t / 38) * .35
+        t -= T3
+        if (t < T4) { const x = t / T4; return bord + (apres - bord) * (x * x * (3 - 2 * x)) }
+        t -= T4
+        if (t < T5) { const x = t / 1000; return cible + 2.5 * Math.exp(-5.5 * x) * Math.cos(2 * Math.PI * 1.7 * x) }
+        return cible
+      }
+      let dernier = Math.floor((a0 + pas / 2) / pas), dernierTick = 0
+      const debut = performance.now()
+      w.style.transition = 'none'
+      w.style.transform = 'rotate(' + a0 + 'deg)'
+      const pas_ = (now: number) => {
+        if (courant.current !== 'r-tourne') { raf = 0; return }
+        const t = now - debut
+        if (t >= TOTAL) { raf = 0; b.classList.add('rebond'); issue(); return }
+        const ang = angle(t)
+        w.style.transform = 'rotate(' + ang.toFixed(2) + 'deg)'
+        const seg = Math.floor((ang + pas / 2) / pas)
+        if (seg !== dernier) {
+          dernier = seg
+          if (now - dernierTick > 45) { dernierTick = now; son('tick') }
+          try { if (aig && aig.animate) aig.animate([{ transform: 'rotate(-20deg)' }, { transform: 'rotate(0deg)' }], { duration: 110, easing: 'ease-out' }) } catch { /* ignore */ }
+        }
+        raf = requestAnimationFrame(pas_)
+      }
+      raf = requestAnimationFrame(pas_)
+      /* Filet : si l'onglet est en arriere-plan (pas d'image), l'etat final est pose quand meme. */
+      plus_tard(() => { if (courant.current === 'r-tourne' && el.classList.contains('en-cours')) { if (raf) { cancelAnimationFrame(raf); raf = 0 } issue() } }, TOTAL + 600)
+    }
+
     /* Animations et minuteurs d'entree d'ecran. */
     function entree(id: string, el: HTMLElement | null) {
       if (!el) return
@@ -184,6 +306,15 @@ export default function JouerClient(p: Props) {
          Le bouton reste affiche (le joueur presse peut toucher avant). Jamais dans un cadre
          d'apercu ni sur un ecran de depart impose (navigation manuelle du Super Admin). */
       vibrer(VIBRATIONS[id])
+      if (ecranAvecSon(id)) {
+        const cible = el.querySelector('.qtop') || el.querySelector('.hdr')
+        if (cible && !cible.querySelector('[data-son]')) cible.insertAdjacentHTML('beforeend', htmlBoutonSon())
+      }
+      if (id === 'q-bonne') son((r.serie || 0) >= 3 ? 'serie' : 'bonne')
+      else if (id === 'q-mauvaise') son('mauvaise')
+      else if (id === 'q-resultat') { if (v.questions.length && r.bonnes / v.questions.length >= .6) son('fin') }
+      else if (id === 'c-resultat') { if (r.resultat && r.resultat.statut === 'gagne') son('fin') }
+      else if (SON_ECRAN[id]) son(SON_ECRAN[id])
       const auto = AUTO_SUITE[id]
       if (auto && !enCadre && !p.apercu) plus_tard(() => { if (courant.current === id) aller(auto[0]) }, auto[1])
       if (id === 'q-question' && p.timer > 0) {
@@ -209,16 +340,7 @@ export default function JouerClient(p: Props) {
           }, 300)
         }
       }
-      if (id === 'r-tourne') {
-        const w = el.querySelector('.wheel') as HTMLElement | null, b = el.querySelector('.wheelbox')
-        if (w && b) {
-          w.style.transform = 'rotate(-12deg)'; void w.offsetWidth
-          b.classList.add('spinning')
-          w.style.transition = 'transform 4.6s cubic-bezier(.12,.62,.08,1)'
-          w.style.transform = 'rotate(' + r.rotation + 'deg)'
-          plus_tard(() => b.classList.remove('spinning'), 4600)
-        }
-      }
+      if (id === 'r-tourne') lancerRoue(el)
       const q = el.querySelector('[data-qr]') as HTMLElement | null
       if (q && r.ticket) {
         const contenu = r.gain && r.gain.token ? location.origin + '/lot.html?t=' + encodeURIComponent(r.gain.token) : (q.getAttribute('data-qr') || r.ticket)
@@ -324,7 +446,7 @@ export default function JouerClient(p: Props) {
       const q = v.questions[r.qi]
       r.rep[r.qi] = i
       const ok = q && i === q.ok
-      if (ok) r.bonnes++
+      if (ok) { r.bonnes++; r.serie = (r.serie || 0) + 1 } else r.serie = 0
       montrer(ok ? 'q-bonne' : 'q-mauvaise')
     }
 
@@ -430,15 +552,23 @@ export default function JouerClient(p: Props) {
       if (canal === 'mail') location.href = 'mailto:?subject=' + encodeURIComponent('Viens jouer chez ' + v.who.nom) + '&body=' + encodeURIComponent(texte)
     }
 
+    /* Transition entre deux questions : la carte sort a gauche, la suivante entre a droite (une seule fois). */
+    function sortir(fn: () => void) {
+      if (enSortie) return
+      const scr = host!.firstElementChild as HTMLElement | null
+      if (reduit || !scr) { fn(); return }
+      enSortie = true
+      scr.classList.add('qsort')
+      plus_tard(fn, 210)
+    }
+
     function aller(go: string, repli?: string) {
       if (go === '@retour') { retour(repli || ''); return }
       if (go === '@suite-quiz') { aller(r.qi + 1 < v.questions.length ? 'q-suivante' : 'q-resultat'); return }
-      if (go === 'q-suivante') { r.qi = Math.min(r.qi + 1, v.questions.length - 1); montrer('q-question'); return }
-      if (go === 'q-question') { if (courant.current === 's-regles') { r.qi = 0; r.bonnes = 0; r.rep = [] } montrer('q-question'); return }
-      if (go === 'q-bonusvalider') {
-        host!.querySelectorAll('.chip.on[data-one^="b"]').forEach(c => { reponsesBonus['bonus_' + (c.getAttribute('data-one') || '').slice(1)] = c.getAttribute('data-val') || '' })
-        r.bonusFait = true; montrer('q-bonusok'); return
-      }
+      if (go === 'q-suivante') { sortir(() => { r.qi = Math.min(r.qi + 1, v.questions.length - 1); montrer('q-question') }); return }
+      if (go === 'q-question') { if (courant.current === 's-regles') { r.qi = 0; r.bonnes = 0; r.serie = 0; r.rep = [] } montrer('q-question'); return }
+      if (go === 'q-bonus' && courant.current === 'q-bonusintro') { r.bi = 0; Object.keys(reponsesBonus).forEach(k => { if (k.indexOf('bonus_') === 0) delete reponsesBonus[k] }) }
+      if (go === 'q-bonusvalider') { r.bonusFait = true; montrer('q-bonusok'); return }
       if (go === 'r-lancer') { r.caseIdx = choisirCase(); r.rotation = rotationPourCase(v, r.caseIdx); montrer('r-tourne'); return }
       if (go === 'r-resultat') { const c = r.caseIdx != null ? v.cases[r.caseIdx] : null; montrer(!c ? 'r-perdu' : c.issue === 'imm' ? 'r-gain' : c.issue === 'tir' ? 'r-ticket' : 'r-perdu'); return }
       if (go === 't-impression') { r.ticket = r.ticket || generateTicket(p.prefixe as TicketPrefix); r.tombolaNo = numero(r.ticket); montrer('t-impression'); return }
@@ -477,6 +607,30 @@ export default function JouerClient(p: Props) {
 
     function clic(e: MouseEvent) {
       const t = e.target as HTMLElement
+      armerAudio()
+      const bs = t.closest('[data-son]') as HTMLElement | null
+      if (bs) {
+        sonActif = !sonActif; ecrireSon(sonActif)
+        host!.querySelectorAll('[data-son]').forEach(x => { x.setAttribute('aria-pressed', String(sonActif)); x.setAttribute('aria-label', sonActif ? 'Couper le son' : 'Activer le son'); x.innerHTML = icon(sonActif ? 'speaker' : 'speakerOff', 22, 2) })
+        if (sonActif) son('clic')
+        return
+      }
+      const bon = t.closest('[data-bon]') as HTMLElement | null
+      if (bon) {
+        /* Bonus : une question par ecran, la suite arrive toute seule (pas de bouton Valider). */
+        if (host!.querySelector('.bopt.pick')) return
+        const k = Number(bon.getAttribute('data-bon')), n = v.bonus.length
+        reponsesBonus['bonus_' + k] = bon.getAttribute('data-val') || ''
+        bon.classList.add('pick')
+        host!.querySelectorAll('.bopt').forEach(x => { if (x !== bon) x.classList.add('faded') })
+        const anneau = host!.querySelector('.bring'); if (anneau) anneau.classList.add('on')
+        vibrer(12); son('clic')
+        plus_tard(() => {
+          if (k + 1 < n) sortir(() => { r.bi = k + 1; montrer('q-bonus') })
+          else aller('q-bonusvalider')
+        }, reduit ? 300 : 900)
+        return
+      }
       /* Raccourci : memoriser « installe » / « plus tard » (jamais en apercu). */
       if (!apercuInstall) {
         if (t.closest('[data-pwa-fait]')) { marquerInstallee(); majInstall() }
@@ -604,6 +758,7 @@ export default function JouerClient(p: Props) {
     if (ex && debut === 'r-tourne') { r.caseIdx = 0; r.rotation = rotationPourCase(v, 0) }
     if (ex && (debut === 'r-gain' || debut === 'r-ticket' || debut === 'r-perdu')) { const want = debut === 'r-gain' ? 'imm' : debut === 'r-ticket' ? 'tir' : 'perdu'; const i = Math.max(0, v.cases.findIndex(c => c.issue === want)); r.caseIdx = i; r.rotation = rotationPourCase(v, i) }
     if (ex && debut === 'q-resultat') r.bonnes = v.questions.length
+    if (ex && debut === 'q-bonne') r.serie = 1
     if (ex && (debut === 'q-bonne' || debut === 'q-mauvaise')) { const q = v.questions[0]; r.rep[0] = debut === 'q-bonne' ? q?.ok ?? 0 : ((q?.ok ?? 0) + 1) % Math.max(2, q?.opts.length || 2) }
     if (ex && debut === 'q-bonusok') { r.bonnes = v.questions.length; r.bonusFait = true }
     if (ex && (debut === 'c-billet' || debut === 'c-ticket')) { r.ticket = 'TK-0427'; r.after = debut; r.bonnes = v.questions.length; r.bonusFait = v.key === 'quiz' }
