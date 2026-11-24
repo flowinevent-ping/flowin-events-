@@ -383,9 +383,15 @@ S['c-billet'] = { tall: true, r: function (v, r) {
     '<div class="body" style="padding-top:2px"><h2 class="h2 a-rise" style="text-align:center;font-size:33px">Bravo, c\'est gagné&nbsp;!</h2>' +
     '<div class="billet"><div class="bt">' + geo([['c', 250, -40, 140, '#fff'], ['h', 300, 70, 70, '#fff']]) + '<small>Billet gagnant · ' + esc(v.billetChez) + '</small><h3>' + esc(nom) + '</h3><span>' + esc(cond) + '</span></div><div class="perf"><i></i><i></i></div>' +
     '<div class="bb"><div class="qrw" data-qr="' + esc(code) + '">' + qr(42, 110) + '</div><dl class="kv"><dt>N° de billet</dt><dd class="num">' + esc(code) + '</dd>' + (v.validite ? '<dt>Valable jusqu\'au</dt><dd>' + esc(v.validite) + '</dd>' : '') + '<dt>Où</dt><dd>' + esc(v.billetChez) + '</dd></dl></div></div>' +
-    '<p class="mention" style="color:var(--ink2);font-size:13.5px">Montre ce billet en caisse : le commerçant le valide avec son code. Il est rangé dans ton profil.</p><button class="lnk" data-go="c-profil">Voir mon lot dans mon profil</button></div>' + autresCommerces(v) +
+    '<p class="mention" style="color:var(--ink2);font-size:13.5px">Montre ce billet en caisse : le commerçant le valide avec son code. Il est rangé dans ton profil.</p><button class="lnk" data-go="c-profil">Voir mon lot dans mon profil</button>' + rappelsLigne() + '</div>' + autresCommerces(v) +
     dock({ cta: btn('Parrainer mes amis', 'c-parrainage'), nav: '' }) + '</div>'
 } }
+
+/** Case « Rappels » (Web Push, 24/11/2026) : cochée par défaut, masquée tant que le téléphone ne sait pas recevoir
+ *  de notifications (JouerClient l'affiche si c'est possible). Aucune donnée, aucun texte technique. */
+function rappelsLigne(): string {
+  return '<label data-rappels style="display:none;align-items:center;gap:12px;min-height:44px;margin:10px 0 0;cursor:pointer;text-align:left"><input type="checkbox" data-rappels-case checked style="width:22px;height:22px;flex-shrink:0"><span style="font-size:14.5px;font-weight:800">Rappels<small style="display:block;font-size:13px;font-weight:500;opacity:.8">Un message quand un lot est prêt ou va expirer.</small></span></label>'
+}
 
 /** Invitation a gagner d'autres tickets chez les commerces partenaires. Le nombre n'est affiche QUE s'il est reel
  *  (commerces partenaires actifs reellement connus), jamais en demonstration. */
@@ -411,7 +417,7 @@ S['c-ticket'] = { tall: true, r: function (v, r) {
     '<div class="body" style="padding-top:2px"><h2 class="h2 a-rise" style="font-size:33px">' + (n ? 'Tu es<br>dans le tirage&nbsp;!' : 'Merci<br>d\'avoir joué&nbsp;!') + '</h2>' +
     (n ? '<div class="tk"><div class="main"><small>Ticket · ' + esc(v.who.nom) + '</small><b class="num" style="--n:' + Math.max(8, String(code).length) + '">' + esc(code) + '</b><span>Tirage au sort le ' + txt(v.tirage) + '</span></div><div class="stub"><b>N° ' + esc(numCourt(code)) + '</b></div></div>' : '') +
     '<div class="card stack a-rise" style="--d:.5s"><span class="cnt">' + n + '</span><p>' + (n > 1 ? 'tickets pour ce tirage. ' : 'ticket pour ce tirage. ') + (n ? 'On te prévient par email si tu gagnes.' : 'Fais un sans-faute demain pour gagner ton ticket.') + '</p></div>' +
-    '<div class="card infobox a-rise" style="--d:.6s"><div class="inforow">' + icon('users', 21) + '<span>' + esc(v.parrain) + '</span></div><div class="inforow">' + icon('clock', 21) + 'Reviens demain : une partie par jour et par commerce</div></div></div>' +
+    '<div class="card infobox a-rise" style="--d:.6s"><div class="inforow">' + icon('users', 21) + '<span>' + esc(v.parrain) + '</span></div><div class="inforow">' + icon('clock', 21) + 'Reviens demain : une partie par jour et par commerce</div></div>' + (n ? rappelsLigne() : '') + '</div>' +
     autresCommerces(v) + '<button class="lnk" data-go="c-profil">Voir mes tickets dans mon profil</button>' +
     dock({ cta: btn('Parrainer mes amis', 'c-parrainage'), nav: '' }) + '</div>'
 } }

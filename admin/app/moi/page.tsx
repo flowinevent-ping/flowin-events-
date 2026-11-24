@@ -15,6 +15,7 @@ import { buildInviteLink } from '@/lib/parrainage'
 import { estDemo } from '@/lib/demo'
 import MesLots from '@/components/joueur/MesLots'
 import ConnexionEmail from '@/components/joueur/ConnexionEmail'
+import CaseRappels from '@/components/joueur/CaseRappels'
 import { fetchCarteCommercesPublique, type CommerceCarte } from '@/lib/carteReseau'
 import {
   chargerMesLots, chargerNotifications, marquerCadeauxVus, joursRestants, palierRappel, libelleNotif,
@@ -277,7 +278,7 @@ export default function MonComptePage() {
         <div style={{ maxWidth: 540, margin: '0 auto' }}>
           {rub === 'lots' && (<>
             {/* Mes tickets : en tête du profil (promesse n°1 du jeu), plus cachée dans « Compte » */}
-            <div data-mes-tickets style={{ ...carte, display: 'flex', alignItems: 'center', gap: 12, marginBottom: 12, border: `1.5px solid ${BLEU}` }}>
+            <div data-mes-tickets style={{ ...carte, display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 12, marginBottom: 12, border: `1.5px solid ${BLEU}` }}>
               <div style={{ flexShrink: 0, width: 52, height: 52, borderRadius: 14, background: BLEU, color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Ico k="ticket" size={26} /></div>
               <div style={{ minWidth: 0, flex: 1 }}>
                 <div style={{ fontSize: 17, fontWeight: 800, lineHeight: 1.2 }}>Mes tickets : {tickets.length}</div>
@@ -299,6 +300,7 @@ export default function MonComptePage() {
                   Résultats
                 </button>
               )}
+              <CaseRappels joueurId={joueur.id} demo={joueur.id === 'demo'} />
             </div>
             {titre('Mes lots', actifs.length ? 'Touche le QR pour le montrer en caisse.' : undefined)}
             <MesLots lots={tousLots} joueurId={joueur.id} onChange={joueur.id === 'demo' ? undefined : () => { chargerMesLots(joueur.id).then(setLots).catch(() => { /* */ }) }} vide="Pas encore de lot. Joue dans un commerce près de chez toi !" />
