@@ -88,3 +88,4 @@ Ce journal n'est pas une preuve de production : l'état vérifié est dans `ETAT
 - 24/11/2026 · Lot 3 validé, codage lancé en parallèle (inscription+rejoindre, configurateur+lots+QR, jeux animés+sons) ; maquette pixel art arcade (lot 7) lancée ; disque libéré (10 worktrees retirés, déjà publiés).
 - 24/11/2026 · Rappels Web Push : migration push_abonnements appliquée, code fusionné (be7db9a2). Secret VAPID, déploiement push-envoyer et cron : à faire.
 - 24/11/2026 · Maquettes lot 7 pixel arcade (quiz, roue, choix du style, sons 8 bits) livrées dans docs/maquette/lot7-pixel, en attente de validation de Romain, aucun code.
+- 24/11/2026 · Lot 5 D codé et fusionné (44ec73ce) : quiz animé avec série, bonus une question par écran, roue image par image, sons Web Audio avec bouton couper ; tsc OK, démo 390 px, sons non écoutés, non vérifié en production.
