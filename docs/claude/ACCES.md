@@ -31,3 +31,4 @@ Une ligne par accès. En cas de doute sur un accès : le tester en lecture seule
 - Super Event de référence : `se-nds-2026` (Nuits du Sud 2026, 9 à 18 juillet 2026) : ne jamais mélanger avec d'autres événements.
 - Factures : numérotation interne `FL-AM-AAAA-NNNNN`, bons `AM-AAAAMMJJ-XXXXXXXX` ; CRM de facturation = Jeffrey CRM, autre projet du même propriétaire (Supabase `pxqeelvavgzfyrwtgmib`, org 3opconsult) ; aucune intégration codée, accès API inconnu : voir `agents/facturation-crm/MEMOIRE.md`.
 - Coordonnées publiables de Romain : non confirmées (registre : « WhatsApp et info@opconsult.co ? ») ; utiliser `[… à compléter]` sauf si déjà dans un support validé.
+- 24/11/2026 · Les 5 exports (flowin_export_*, nds_export_*) ne sont plus appelables que par le serveur (service_role). Le script docs/backup/backup-crm-nds-google-sheet.gs ne fonctionne donc plus (non utilisé).

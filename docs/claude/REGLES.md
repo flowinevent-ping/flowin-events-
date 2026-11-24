@@ -86,3 +86,7 @@ Ajout : seulement une règle écrite ou confirmée par Romain. Modification : su
 - Nettoyage des données de test : PAS une priorité ; ne plus en parler à Romain sauf si cela bloque quelque chose (le contrôle nocturne le garde en orange) | 23/11 | Romain | ETAT.md
 - Priorités de Romain : (1) tout fonctionne de bout en bout côté participant, pro, organisateur ; (2) ergonomie et design ; (3) le jeu placé chez les commerçants remplit le CRM (coordonnées, consentements) ; (4) banques de questions (créées par le pro ou par Flowin). La sécurité ne passe devant que si elle bloque ces points | 23/11 | Romain | ETAT.md
 - Stock des lots : lots.quantite BAISSE au retrait (pour tous les événements) ; le contrôle `tirages_depassent_lots` doit compter quantite + retirés (faux positif Bergerie 8/7) | 23/11 | Romain | `sql/2026-11-21-controles-qualite.sql`
+- 24/11/2026 · Super Event : on joue SUR PLACE (objectif = trafic en commerce). Réglage futur par station : sur_place (défaut) ou distance (sponsors) avec 1 fois par jour et par compte. Réglage = maquette d'abord. Compteur du bandeau = commerces visibles (8 pour NDS), c'est voulu. Version « test » à prévoir pour présenter la carte aux futurs commerces.
+- 24/11/2026 · Import fichier client = option A : le pro envoie lui-même l'invitation (lien/QR tracé), Flowin n'écrit pas aux contacts importés.
+- 24/11/2026 · Une seule carte partout (MapLibre/OpenFreeMap, composant commun) : à vérifier par l'audit en cours.
+- 24/11/2026 · Romain n'a pas de téléphone pour tester : les tests réels sur iPhone restent « non vérifié ».
