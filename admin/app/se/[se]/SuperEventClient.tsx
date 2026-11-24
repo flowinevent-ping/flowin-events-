@@ -32,6 +32,11 @@ interface Props {
 }
 
 const HERO = '#3B5CC4'
+/* Règle Romain (24/11) : sur un Super Event on joue SUR PLACE (créer du trafic). Rayon unique, en mètres. */
+const RAYON_SUR_PLACE_M = 150
+/* Futur réglage par station : 'sur_place' | 'distance' (1 fois par jour et par compte). Lu avec ce défaut,
+   aucune colonne ni écran pour l'instant (maquette d'abord). */
+const MODE_JEU_DEFAUT = 'sur_place'
 const ctaStyle: React.CSSProperties = { display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '10px 14px 0', minHeight: 52, borderRadius: 26, background: 'linear-gradient(135deg,#B5471E,#D2631F)', color: '#fff', font: '700 17px system-ui', textDecoration: 'none', boxShadow: '0 6px 14px rgba(181,71,30,.35)', width: 'calc(100% - 28px)', boxSizing: 'border-box' }
 const ENTETE_SE = 'linear-gradient(135deg,#C2410C 0%,#E05A0E 55%,#FF8A14 100%)'
 
@@ -92,12 +97,13 @@ export default function SuperEventClient({ se, lots, lotsPhases = [], lieux, spo
   const [ticketCount, setTicketCount] = useState(0)
   const [gains, setGains] = useState<GainRow[]>([])
   const [userPos, setUserPos] = useState<{ lat: number; lng: number } | null>(null)
+  const [posRefusee, setPosRefusee] = useState(false)
 
   useEffect(() => {
     if (typeof navigator === 'undefined' || !navigator.geolocation) return
     navigator.geolocation.getCurrentPosition(
       (p) => setUserPos({ lat: p.coords.latitude, lng: p.coords.longitude }),
-      () => {},
+      () => setPosRefusee(true),
       { timeout: 8000 }
     )
   }, [])
@@ -197,6 +203,14 @@ export default function SuperEventClient({ se, lots, lotsPhases = [], lieux, spo
   const joues = caro.filter((l) => identified && played.has(l.id)).length
   const hautEntete = demo ? 26 : 0
   const urlJouer = (l: Lieu) => `/parcours/${l.module || 'nds2026'}?ev=${l.id}${demo ? '&demo=1' : ''}`
+  /* Jouer ici : seulement à proximité (démo : règle ignorée ; mode 'distance' : pas de contrainte). Le QR du commerce reste valide. */
+  const modeJeu = (l: Lieu): string => ((l as unknown as { mode_jeu?: string }).mode_jeu) || ((se.cfg_jeu as { mode_jeu?: string } | null | undefined)?.mode_jeu) || MODE_JEU_DEFAUT
+  const distM = (l: Lieu): number | null => distDe(l)
+  const surPlace = (l: Lieu): boolean => {
+    if (demo || modeJeu(l) !== 'sur_place') return true
+    const d = distM(l)
+    return d !== null && d <= RAYON_SUR_PLACE_M
+  }
   const urlAccueil = `/se/${se.id}${demo ? '?demo=1' : ''}`
   const dist = (selected && userPos && typeof selected.lat === 'number' && typeof selected.lng === 'number')
     ? fmtDist(distMeters(userPos.lat, userPos.lng, selected.lat, selected.lng))
@@ -308,8 +322,19 @@ export default function SuperEventClient({ se, lots, lotsPhases = [], lieux, spo
           </div>
         )}
 
-        {selected ? (
+        {selected && surPlace(selected) ? (
           <a data-cta-jouer href={urlJouer(selected)} style={ctaStyle}>Jouer ici</a>
+        ) : selected ? (
+          <div data-sur-place style={{ margin: '10px 14px 0', textAlign: 'center' }}>
+            <div data-cta-jouer="loin" style={{ ...ctaStyle, margin: 0, width: '100%', background: '#FFF1E8', color: '#9A3412', border: '1.5px solid #F8D3BC', boxShadow: 'none', fontSize: 16 }}>Allez sur place pour jouer</div>
+            <div style={{ fontSize: 13, color: '#4B5563', margin: '8px 0 6px' }}>
+              {distM(selected) !== null ? `Vous êtes ${fmtDist(distM(selected) as number).replace(/^à /, 'à ')} du commerce. ` : posRefusee || !userPos ? 'Activez la position ou scannez le QR. ' : ''}
+              {distM(selected) !== null ? 'Ou scannez le QR du commerce.' : ''}
+            </div>
+            {typeof selected.lat === 'number' && typeof selected.lng === 'number' && (
+              <a data-itineraire href={dirUrl(selected.lat, selected.lng)} target="_blank" rel="noopener" style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', minHeight: 44, padding: '0 18px', borderRadius: 22, border: '1.5px solid #B5471E', color: '#B5471E', fontWeight: 800, fontSize: 14, textDecoration: 'none' }}>Itinéraire</a>
+            )}
+          </div>
         ) : (
           <button data-cta-jouer onClick={() => { if (prochain) choisir(prochain) }} style={{ ...ctaStyle, border: 0, cursor: 'pointer' }}>
             {identified && prochain ? `Aller à ${prochain.nom}` : 'Jouer au plus proche'}
