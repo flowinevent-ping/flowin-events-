@@ -24,21 +24,20 @@
  * Le glisser-deposer enregistre immediatement la position.
  */
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import 'leaflet/dist/leaflet.css'
+import SuperEventMap, { type Lieu } from '@/app/se/_components/SuperEventMap'
+import { chargerLogosStations } from '@/lib/seReperes'
 import { PageHeader, EmptyState } from '@/components/dashboard/DashboardUI'
 import { supabase } from '@/lib/supabase'
 import { fetchSuperEvents, SE_DEFAUT, type SuperEvent } from '@/lib/nds'
 
 import { usePorteeInitiale } from '@/lib/portee'
-/* Vence, centre de la carte par defaut */
-const CENTRE: [number, number] = [43.7229, 7.1116]
-
 interface Point {
   id: string
   nom: string
   latitude: number | null
   longitude: number | null
   ville?: string | null
+  logo?: string | null
 }
 
 type Couche = 'stations' | 'partenaires'
@@ -57,12 +56,12 @@ async function fetchStations(se: string): Promise<Point[]> {
 async function fetchCommerces(se: string): Promise<Point[]> {
   const { data, error } = await supabase
     .from('partenaires')
-    .select('id,nom,latitude,longitude,ville')
+    .select('id,nom,latitude,longitude,ville,image_url')
     .eq('super_event_id', se)
     .order('nom')
   if (error) { console.error('[carte partenaires]', error.message); return [] }
-  return ((data ?? []) as { id: string; nom: string | null; latitude: number | null; longitude: number | null; ville: string | null }[])
-    .map(p => ({ id: p.id, nom: p.nom ?? p.id, latitude: p.latitude, longitude: p.longitude, ville: p.ville }))
+  return ((data ?? []) as { id: string; nom: string | null; latitude: number | null; longitude: number | null; ville: string | null; image_url: string | null }[])
+    .map(p => ({ id: p.id, nom: p.nom ?? p.id, latitude: p.latitude, longitude: p.longitude, ville: p.ville, logo: (p.image_url || '').trim() || null }))
 }
 
 async function enregistrerPosition(couche: Couche, id: string, lat: number, lng: number) {
@@ -87,13 +86,12 @@ export default function Page() {
   const [couche, setCouche] = useState<Couche>('stations')
   const [stations, setStations] = useState<Point[]>([])
   const [commerces, setCommerces] = useState<Point[]>([])
+  const [logosStations, setLogosStations] = useState<Record<string, string>>({})
   const [charge, setCharge] = useState(true)
   const [message, setMessage] = useState<string | null>(null)
 
-  const conteneur = useRef<HTMLDivElement | null>(null)
-  /* Types Leaflet volontairement larges : le module est charge dynamiquement cote client */
-  const carte = useRef<any>(null)
-  const marqueurs = useRef<any[]>([])
+  /* Rempli par la carte : centre affiche, pour « Placer » un point sans position. */
+  const centreRef = useRef<(() => [number, number] | null) | null>(null)
 
   useEffect(() => { fetchSuperEvents().then(setSupers) }, [])
 
@@ -104,6 +102,7 @@ export default function Page() {
     setStations([]); setCommerces([])
     Promise.all([fetchStations(se), fetchCommerces(se)])
       .then(([s2, c]) => { setStations(s2); setCommerces(c) })
+    chargerLogosStations(se).then(setLogosStations)
       .finally(() => setCharge(false))
   }, [se])
 
@@ -113,70 +112,31 @@ export default function Page() {
   const places = useMemo(() => points.filter(p => p.latitude != null && p.longitude != null), [points])
   const aPlacer = useMemo(() => points.filter(p => p.latitude == null || p.longitude == null), [points])
 
-  /* Initialisation de la carte, une seule fois */
-  useEffect(() => {
-    let annule = false
-    ;(async () => {
-      if (!conteneur.current || carte.current) return
-      const L = (await import('leaflet')).default
-      if (annule || !conteneur.current) return
-      carte.current = L.map(conteneur.current).setView(CENTRE, 14)
-      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '&copy; OpenStreetMap',
-        maxZoom: 19,
-      }).addTo(carte.current)
-    })()
-    return () => { annule = true }
-  }, [])
+  /* Une seule carte pour tout Flowin : MapLibre / OpenFreeMap, repères ronds de 44 px (SuperEventMap). */
+  const lieux: Lieu[] = useMemo(() => points.map(p => ({
+    id: p.id, nom: p.nom, lat: p.latitude, lng: p.longitude,
+    logo: couche === 'stations' ? (logosStations[p.id] ?? null) : (p.logo ?? null),
+  })), [points, couche, logosStations])
 
-  /* Redessine les marqueurs a chaque changement de couche ou de donnees */
-  useEffect(() => {
-    let annule = false
-    ;(async () => {
-      if (!carte.current) return
-      const L = (await import('leaflet')).default
-      if (annule || !carte.current) return
+  /* Enregistrement immédiat de la position (glisser-déposer ou « Placer ») ; en démo l'écriture est court-circuitée. */
+  const deplacer = useCallback(async (id: string, lat: number, lng: number) => {
+    const p = points.find(x => x.id === id)
+    const nom = p?.nom ?? id
+    const la = +lat.toFixed(6), ln = +lng.toFixed(6)
+    const ok = await enregistrerPosition(couche, id, la, ln)
+    setMessage(ok ? `${nom} · position enregistrée` : `${nom} · échec de l'enregistrement`)
+    setTimeout(() => setMessage(null), 2600)
+    if (ok) {
+      const maj = (l: Point[]) => l.map(x => (x.id === id ? { ...x, latitude: la, longitude: ln } : x))
+      if (couche === 'stations') setStations(maj); else setCommerces(maj)
+    }
+  }, [couche, points])
 
-      marqueurs.current.forEach(m => carte.current.removeLayer(m))
-      marqueurs.current = []
-
-      const couleur = couche === 'stations' ? '#5B79E0' : '#F5B544'
-
-      places.forEach(p => {
-        const icone = L.divIcon({
-          className: '',
-          html: `<div style="width:15px;height:15px;border-radius:50%;background:${couleur};border:2.5px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,.4)"></div>`,
-          iconSize: [15, 15],
-          iconAnchor: [7.5, 7.5],
-        })
-        const m = L.marker([p.latitude as number, p.longitude as number], { icon: icone, draggable: true })
-          .addTo(carte.current)
-          .bindTooltip(p.nom, { direction: 'top', offset: [0, -8] })
-
-        m.on('dragend', async () => {
-          const { lat, lng } = m.getLatLng()
-          const ok = await enregistrerPosition(couche, p.id, lat, lng)
-          setMessage(ok ? `${p.nom} · position enregistrée` : `${p.nom} · échec de l'enregistrement`)
-          setTimeout(() => setMessage(null), 2600)
-          if (ok) {
-            const maj = (l: Point[]) => l.map(x => (x.id === p.id ? { ...x, latitude: lat, longitude: lng } : x))
-            if (couche === 'stations') setStations(maj); else setCommerces(maj)
-          }
-        })
-        marqueurs.current.push(m)
-      })
-
-      /* Le conteneur a pu changer de taille (passage en une colonne sur mobile,
-         rotation) : Leaflet doit la relire avant de cadrer, sinon les marqueurs
-         sont centres sur l ancienne largeur. */
-      carte.current.invalidateSize()
-      if (places.length) {
-        const bornes = L.latLngBounds(places.map(p => [p.latitude as number, p.longitude as number] as [number, number]))
-        carte.current.fitBounds(bornes, { padding: [40, 40], maxZoom: 16 })
-      }
-    })()
-    return () => { annule = true }
-  }, [places, couche])
+  function placerAuCentre(id: string) {
+    const c = centreRef.current ? centreRef.current() : null
+    if (!c) { setMessage('Carte non prête'); setTimeout(() => setMessage(null), 2000); return }
+    deplacer(id, c[0], c[1])
+  }
 
   return (
     <div className="sa-page">
@@ -216,8 +176,8 @@ export default function Page() {
 
       <div style={{ fontSize: 11.5, color: 'var(--sa-muted)', marginBottom: 10, lineHeight: 1.5 }}>
         <b>{places.length} placé{places.length > 1 ? 's' : ''}</b> sur {points.length} ·{' '}
-        <b>{aPlacer.length} à placer</b>. Glisse un point pour enregistrer sa position.
-        Un point sans coordonnées n&apos;est pas affiché au centre par défaut — il resterait faux.
+        <b>{aPlacer.length} à placer</b>. Glisse un point pour enregistrer sa position ;
+        « Placer » pose un point sans position au centre de la carte, à ajuster ensuite.
       </div>
 
       {message && (
@@ -227,10 +187,9 @@ export default function Page() {
       <style>{`.nds-carte-grille{display:grid;grid-template-columns:minmax(0,1fr) 280px;gap:14px;align-items:start}
 @media (max-width:760px){.nds-carte-grille{grid-template-columns:minmax(0,1fr)}.nds-carte-grille>div:first-child{height:420px!important}}`}</style>
       <div className="nds-carte-grille">
-        <div
-          ref={conteneur}
-          style={{ height: 540, borderRadius: 14, overflow: 'hidden', border: '1px solid var(--sa-border)', position: 'relative', zIndex: 0 }}
-        />
+        <div style={{ height: 540, borderRadius: 14, overflow: 'hidden', border: '1px solid var(--sa-border)', position: 'relative', zIndex: 0 }}>
+          <SuperEventMap lieux={lieux} height="100%" reperes editable onMove={deplacer} centreRef={centreRef} />
+        </div>
 
         <div style={{ background: 'var(--sa-card)', border: '1px solid var(--sa-border)', borderRadius: 14, padding: 14, maxHeight: 540, overflow: 'auto' }}>
           <div style={{ fontSize: 12.5, fontWeight: 800, marginBottom: 9 }}>
@@ -262,7 +221,7 @@ export default function Page() {
                 />
                 <span style={{ flex: 1, fontSize: 12, fontWeight: 600 }}>{p.nom}</span>
                 {!place && (
-                  <span className="sa-muted" style={{ fontSize: 10, fontStyle: 'italic' }}>à placer</span>
+                  <button className="sa-btn sm" style={{ minHeight: 44 }} onClick={() => placerAuCentre(p.id)}>Placer</button>
                 )}
               </div>
             )

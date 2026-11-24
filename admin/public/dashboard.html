@@ -4148,16 +4148,18 @@ function renderNdsFront(){
 }
 
 /* ============ CARTE NDS — placer & glisser les points (stations + commerces) ============ */
-var NDS_CARTE_CENTER = [43.7225, 7.1118];
-function ndsCarteLeafletReady(){ return (typeof window!=='undefined') && window.L && window.L.map; }
-function ndsCarteEnsureLeaflet(cb){
-  if(ndsCarteLeafletReady()){ cb(); return; }
-  if(window._ndsLeafletLoading){ var t=setInterval(function(){ if(ndsCarteLeafletReady()){ clearInterval(t); cb(); } },120); return; }
-  window._ndsLeafletLoading=true;
-  var css=document.createElement('link'); css.rel='stylesheet'; css.href='https://unpkg.com/leaflet@1.9.4/dist/leaflet.css'; document.head.appendChild(css);
-  var js=document.createElement('script'); js.src='https://unpkg.com/leaflet@1.9.4/dist/leaflet.js';
+var NDS_CARTE_CENTER = [7.1118, 43.7225]; // [lng, lat] : MapLibre
+var NDS_CARTE_STYLE = 'https://tiles.openfreemap.org/styles/liberty';
+function ndsCarteMapReady(){ return (typeof window!=='undefined') && window.maplibregl && window.maplibregl.Map; }
+function ndsCarteEnsureMap(cb){
+  if(ndsCarteMapReady()){ cb(); return; }
+  if(window._ndsMapLibreLoading){ var n=0; var t=setInterval(function(){ n++; if(ndsCarteMapReady()){ clearInterval(t); cb(); } else if(n>100){ clearInterval(t); } },120); return; }
+  window._ndsMapLibreLoading=true;
+  var base='https://cdnjs.cloudflare.com/ajax/libs/maplibre-gl/4.7.1/';
+  var css=document.createElement('link'); css.rel='stylesheet'; css.href=base+'maplibre-gl.min.css'; document.head.appendChild(css);
+  var js=document.createElement('script'); js.src=base+'maplibre-gl.min.js';
   js.onload=function(){ cb(); };
-  js.onerror=function(){ toast('Carte indisponible (Leaflet)','error'); };
+  js.onerror=function(){ window._ndsMapLibreLoading=false; toast('Carte indisponible (MapLibre)','error'); };
   document.head.appendChild(js);
 }
 var NDS_CARTE_STATIONS = ['ev-nds-caisse-1','ev-nds-caisse-2','ev-nds-caisse-3','ev-nds-bar-1','ev-nds-bar-2','ev-nds-bar-3','ev-nds-ecrans','ev-nds-tablette-1','ev-nds-tablette-2','ev-nds-tablette-3'];
@@ -4165,7 +4167,7 @@ async function loadNdsCarte(){
   var ev = await supaFetch('events', 'select=id,nom,lat,lng,module&module=eq.nds2026&order=id.asc');
   var stations = [];
   if(ev){ for(var i=0;i<ev.length;i++){ if(NDS_CARTE_STATIONS.indexOf(ev[i].id)>-1) stations.push(ev[i]); } }
-  var pa = await supaFetch('partenaires', 'select=id,nom,latitude,longitude,actif,visible,super_event_id&order=nom.asc');
+  var pa = await supaFetch('partenaires', 'select=id,nom,latitude,longitude,actif,visible,super_event_id,image_url&order=nom.asc');
   var partners = [];
   if(pa){ for(var k=0;k<pa.length;k++){ partners.push(pa[k]); } }
   state.ndsCarte = { stations: stations, partners: partners };
@@ -4174,7 +4176,7 @@ async function loadNdsCarte(){
 function ndsCarteSetView(v){
   state.ndsCarteView = v;
   if(window._ndsMapObj){ try{ window._ndsMapObj.remove(); }catch(e){} window._ndsMapObj=null; }
-  var el=document.getElementById('nds-leaflet'); if(el) el.setAttribute('data-built','0');
+  var el=document.getElementById('nds-carte-map'); if(el) el.setAttribute('data-built','0');
   render();
 }
 function ndsCarteReload(){ state.ndsCarte=null; if(window._ndsMapObj){ try{ window._ndsMapObj.remove(); }catch(e){} window._ndsMapObj=null; } toast('Rechargement…'); render(); }
@@ -4195,52 +4197,67 @@ function ndsCartePartnerPatch(id, lat, lng){
   if(state.ndsCarte){ for(var i=0;i<state.ndsCarte.partners.length;i++){ if(state.ndsCarte.partners[i].id===id){ state.ndsCarte.partners[i].latitude=lat; state.ndsCarte.partners[i].longitude=lng; } } }
   if(state.ndsFront){ for(var j=0;j<state.ndsFront.length;j++){ if(state.ndsFront[j].id===id){ state.ndsFront[j].latitude=lat; state.ndsFront[j].longitude=lng; } } }
 }
-function ndsCarteIcon(color){
-  return window.L.divIcon({ className:'', html:'<div style="width:22px;height:22px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);background:'+color+';border:2px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,.45)"></div>', iconSize:[22,22], iconAnchor:[11,22], popupAnchor:[0,-20] });
+/* Repère unique Flowin : rond de 44 px, anneau #B5471E, logo ou initiale (même dessin que SuperEventMap.tsx). */
+function ndsCarteInitiale(nom){ var m=String(nom||'').replace(/^[^A-Za-z\u00C0-\u00FF0-9]+/,''); return (m.charAt(0)||'?').toUpperCase(); }
+function ndsCarteRepere(id, nom, logo){
+  var el=document.createElement('div'); el.style.cssText='width:44px;height:44px;cursor:grab'; el.title=nom||id;
+  var ring=document.createElement('div'); ring.setAttribute('data-repere', id);
+  ring.style.cssText='position:relative;width:44px;height:44px;border-radius:50%;background:'+(logo?'#fff':'#FED7AA')+';border:4px solid #B5471E;box-shadow:0 3px 8px rgba(0,0,0,.35);display:flex;align-items:center;justify-content:center;box-sizing:border-box;overflow:visible';
+  if(logo){
+    var im=document.createElement('img'); im.src=logo; im.alt='';
+    im.style.cssText='width:78%;height:78%;object-fit:contain;border-radius:50%';
+    im.onerror=function(){ if(im.parentNode){ im.parentNode.removeChild(im); } ring.style.background='#FED7AA'; ring.textContent=ndsCarteInitiale(nom); };
+    ring.appendChild(im);
+  } else {
+    ring.textContent=ndsCarteInitiale(nom); ring.style.font='800 16px sans-serif'; ring.style.color='#9A3412';
+  }
+  el.appendChild(ring);
+  return el;
 }
 function ndsMapEnsure(){
   if(!state.ndsCarte) return;
-  var el=document.getElementById('nds-leaflet'); if(!el) return;
+  var el=document.getElementById('nds-carte-map'); if(!el) return;
   if(el.getAttribute('data-built')==='1') return;
-  ndsCarteEnsureLeaflet(function(){
-    var elm=document.getElementById('nds-leaflet'); if(!elm || elm.getAttribute('data-built')==='1') return;
+  ndsCarteEnsureMap(function(){
+    var elm=document.getElementById('nds-carte-map'); if(!elm || elm.getAttribute('data-built')==='1') return;
     elm.setAttribute('data-built','1'); ndsMapBuild(elm);
   });
 }
-function ndsMapAddStation(map, s){
-  var L=window.L;
-  var m=L.marker([s.lat,s.lng],{draggable:true,icon:ndsCarteIcon('#2FD89E')}).addTo(map);
-  m.bindTooltip(s.nom||s.id);
-  m.on('dragend', function(){ var ll=m.getLatLng(); ndsCarteStationPatch(s.id, +ll.lat.toFixed(6), +ll.lng.toFixed(6)); });
-  m.on('click', function(){ if(typeof openDrawerFor==='function') openDrawerFor('event', s.id); });
+function ndsMapAddMarker(map, id, nom, logo, lat, lng, onPatch, onOpen){
+  var el=ndsCarteRepere(id, nom, logo);
+  var m=new window.maplibregl.Marker({element:el, draggable:true}).setLngLat([lng,lat]).addTo(map);
+  var glisse=false;
+  m.on('dragstart', function(){ glisse=true; });
+  m.on('dragend', function(){ var ll=m.getLngLat(); onPatch(id, +ll.lat.toFixed(6), +ll.lng.toFixed(6)); setTimeout(function(){ glisse=false; },0); });
+  el.addEventListener('click', function(){ if(!glisse) onOpen(id); });
   return m;
+}
+function ndsMapAddStation(map, s){
+  return ndsMapAddMarker(map, s.id, s.nom||s.id, null, s.lat, s.lng, ndsCarteStationPatch, function(id){ if(typeof openDrawerFor==='function') openDrawerFor('event', id); });
 }
 function ndsMapAddPartner(map, p){
-  var L=window.L;
-  var m=L.marker([p.latitude,p.longitude],{draggable:true,icon:ndsCarteIcon('#F5B544')}).addTo(map);
-  m.bindTooltip(p.nom||p.id);
-  m.on('dragend', function(){ var ll=m.getLatLng(); ndsCartePartnerPatch(p.id, +ll.lat.toFixed(6), +ll.lng.toFixed(6)); });
-  m.on('click', function(){ if(typeof goView==='function') goView('nds-front'); });
-  return m;
+  var logo=(p.image_url||'').replace(/^\s+|\s+$/g,'');
+  return ndsMapAddMarker(map, p.id, p.nom||p.id, logo||null, p.latitude, p.longitude, ndsCartePartnerPatch, function(){ if(typeof goView==='function') goView('nds-front'); });
 }
 function ndsMapBuild(elm){
-  var L=window.L;
+  var ml=window.maplibregl;
   if(window._ndsMapObj){ try{ window._ndsMapObj.remove(); }catch(e){} window._ndsMapObj=null; }
-  var map=L.map(elm).setView(NDS_CARTE_CENTER, 16);
+  var map=new ml.Map({ container:elm, style:NDS_CARTE_STYLE, center:NDS_CARTE_CENTER, zoom:16, attributionControl:{compact:true}, dragRotate:false, pitchWithRotate:false });
+  map.touchZoomRotate.disableRotation();
+  map.addControl(new ml.NavigationControl({showCompass:false}), 'top-right');
   window._ndsMapObj=map;
-  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom:19, attribution:'© OpenStreetMap' }).addTo(map);
   var pts=[];
   var view = state.ndsCarteView || 'stations';
   if(view==='partenaires'){
     var pa=state.ndsCarte.partners||[];
-    for(var k=0;k<pa.length;k++){ var p=pa[k]; if(p.latitude==null||p.longitude==null) continue; ndsMapAddPartner(map,p); pts.push([p.latitude,p.longitude]); }
+    for(var k=0;k<pa.length;k++){ var p=pa[k]; if(p.latitude==null||p.longitude==null) continue; ndsMapAddPartner(map,p); pts.push([p.longitude,p.latitude]); }
   } else {
     var st=state.ndsCarte.stations;
-    for(var i=0;i<st.length;i++){ var s=st[i]; if(s.lat==null||s.lng==null) continue; ndsMapAddStation(map,s); pts.push([s.lat,s.lng]); }
+    for(var i=0;i<st.length;i++){ var s=st[i]; if(s.lat==null||s.lng==null) continue; ndsMapAddStation(map,s); pts.push([s.lng,s.lat]); }
   }
-  if(pts.length>1){ try{ map.fitBounds(pts,{padding:[40,40],maxZoom:17}); }catch(e){} }
-  else if(pts.length===1){ map.setView(pts[0],16); }
-  setTimeout(function(){ try{ map.invalidateSize(); }catch(e){} }, 220);
+  if(pts.length>1){ try{ var b=new ml.LngLatBounds(); for(var q=0;q<pts.length;q++){ b.extend(pts[q]); } map.fitBounds(b,{padding:50,maxZoom:17,duration:0}); }catch(e){} }
+  else if(pts.length===1){ map.jumpTo({center:pts[0],zoom:16}); }
+  setTimeout(function(){ try{ map.resize(); }catch(e){} }, 220);
 }
 function ndsCartePlace(kind, id){
   var map=window._ndsMapObj; if(!map){ toast('Carte non prête','error'); return; }
@@ -4277,7 +4294,7 @@ function renderNdsCarte(){
   if(view==='partenaires'){ h+='<div class="kpi-grid">'+prospKpi(paPlaced+'/'+pa.length,'Commerces placés')+prospKpi(paMiss,'À placer')+'</div>'; }
   else { h+='<div class="kpi-grid">'+prospKpi(stPlaced+'/'+st.length,'Stations placées')+prospKpi(stMiss,'À placer')+'</div>'; }
   h+='<div style="display:grid;grid-template-columns:1fr 300px;gap:14px;align-items:start">';
-  h+='<div id="nds-leaflet" style="height:540px;border-radius:14px;overflow:hidden;border:1px solid var(--sa-border);position:relative;z-index:0"></div>';
+  h+='<div id="nds-carte-map" style="height:540px;border-radius:14px;overflow:hidden;border:1px solid var(--sa-border);position:relative;z-index:0"></div>';
   h+='<div style="background:var(--sa-card);border:1px solid var(--sa-border);border-radius:14px;padding:14px;max-height:540px;overflow:auto">';
   if(view==='partenaires'){
     h+='<div style="font-weight:800;margin-bottom:8px">Partenaires</div>';
@@ -5838,7 +5855,7 @@ else if(v==='maintenance') html = renderMaintenance();
   if(_fsActive){ try{ var _ni=document.querySelector('#viewport .filter-search input, #viewport input.filter-search'); if(_ni){ _ni.focus(); _ni.setSelectionRange(_fsS,_fsE); } }catch(e){} }
   if(state.drawer.open && !state._pollingRender) renderDrawer();
   if(state.modal.open) renderModal();
-  if(typeof ndsMapEnsure==='function' && document.getElementById('nds-leaflet')) ndsMapEnsure();
+  if(typeof ndsMapEnsure==='function' && document.getElementById('nds-carte-map')) ndsMapEnsure();
 }
 
 // ============ COCKPIT PILOTAGE ============

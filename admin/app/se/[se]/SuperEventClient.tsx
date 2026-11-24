@@ -359,6 +359,7 @@ export default function SuperEventClient({ se, lots, lotsPhases = [], lieux, spo
               </div>
             )}
             <div style={{ fontSize: 13, color: '#5a6071', marginBottom: 12 }}>1 ticket par commerce et par jour. Un seul grand tirage.</div>
+            <a data-lien-carte-commerces href="/carte-commerces" style={{ display: 'inline-flex', alignItems: 'center', minHeight: 44, marginBottom: 8, fontSize: 14, fontWeight: 800, color: '#B5471E', textDecoration: 'underline' }}>Carte de tous les commerces Flowin</a>
             {identified && lieux.length > 0 && (
               <div data-progression style={{ marginBottom: 12 }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13, fontWeight: 800, color: '#141a26', marginBottom: 5 }}>

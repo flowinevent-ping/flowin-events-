@@ -4,8 +4,8 @@
 /**
  * Carte Flowin des commerces (audit 17/11/2026).
  * - Fond : MapLibre GL + tuiles vectorielles OpenFreeMap (gratuit, sans clé, lisible).
- * - Marqueurs : bleu = Animation, orange = Super Event, violet = les deux ; halo animé
- *   quand un jeu est en cours ; le commerce choisi grossit.
+ * - Marqueurs : le MÊME repère que la page publique Super Event (SuperEventMap : rond de 44 px,
+ *   anneau #B5471E, logo ou initiale) ; halo animé quand un jeu est en cours ; le commerce choisi grossit.
  * - « Autour de moi » : la géolocalisation n'est demandée qu'au geste du joueur ; elle
  *   affiche la position, la distance de chaque commerce et trie le carrousel.
  * - Carrousel horizontal synchronisé avec les marqueurs (jamais de longue liste).
@@ -15,6 +15,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { COULEUR_TYPE, LIBELLE_TYPE, filtrer, type CommerceCarte, type FiltreCarte } from '@/lib/carteReseau'
 import { libelleModule } from '@/lib/operations'
+import { creerRepere, marquerChoisi } from './repere'
 import { CENTRE_VENCE, STYLE_CARTE, chargerMapLibre, distanceM, itineraires, libelleDistance, minutesAPied } from './maplibre'
 
 const FILTRES: FiltreCarte[] = ['les_deux', 'animation', 'super_event']
@@ -79,16 +80,15 @@ export default function CarteCommerces({ commerces, mode, hauteur = 420 }: {
     Object.values(marqueurs.current).forEach(x => x.m.remove())
     marqueurs.current = {}
     visibles.forEach(({ c }) => {
-      const el = document.createElement('button')
-      el.type = 'button'
-      el.className = 'flpin' + (c.en_cours ? ' flpin-vif' : '')
+      const { el, ring } = creerRepere({ id: c.cle, nom: c.nom ?? 'Commerce', logo: c.logo })
+      el.setAttribute('role', 'button')
+      el.setAttribute('tabindex', '0')
       el.setAttribute('aria-label', c.nom ?? 'Commerce')
-      el.style.setProperty('--c', COULEUR_TYPE[c.type])
-      el.innerHTML = `<span>${(c.nom ?? '?').slice(0, 1).toUpperCase().replace(/[<>&"]/g, '')}</span>`
+      if (c.en_cours) ring.classList.add('flrep-vif')
       el.addEventListener('click', (e) => { e.stopPropagation(); setChoisi(c.cle); defilerVers(c.cle) })
-      const m = new ml.Marker({ element: el, anchor: 'bottom' }).setLngLat([c.lng, c.lat]).addTo(map)
-      el.setAttribute('aria-label', c.nom ?? 'Commerce')
-      marqueurs.current[c.cle] = { m, el }
+      el.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setChoisi(c.cle); defilerVers(c.cle) } })
+      const m = new ml.Marker({ element: el }).setLngLat([c.lng, c.lat]).addTo(map)
+      marqueurs.current[c.cle] = { m, el: ring }
     })
     if (!moi && visibles.length > 1) {
       const b = new ml.LngLatBounds()
@@ -102,7 +102,7 @@ export default function CarteCommerces({ commerces, mode, hauteur = 420 }: {
 
   /* Marqueur choisi : mis en avant + recentrage doux. */
   useEffect(() => {
-    Object.entries(marqueurs.current).forEach(([k, x]) => x.el.classList.toggle('flpin-on', k === choisi))
+    Object.entries(marqueurs.current).forEach(([k, x]) => marquerChoisi(x.el, k === choisi))
     const x = marqueurs.current[choisi]
     if (x && carte.current) carte.current.easeTo({ center: x.m.getLngLat(), offset: [0, -60], duration: 450 })
   }, [choisi])
@@ -299,12 +299,8 @@ const CSS = `
 .flfiche{flex:0 0 min(300px,84%);min-height:168px;scroll-snap-align:center;background:#fff;border-radius:14px;padding:11px 12px;cursor:pointer;display:flex;flex-direction:column;gap:6px;box-sizing:border-box}
 .flbtn{display:inline-flex;align-items:center;justify-content:center;min-height:38px;padding:0 8px;border-radius:10px;font-size:12.5px;font-weight:800;text-decoration:none;white-space:nowrap;box-sizing:border-box}
 .flencours{background:#1D9E75;color:#fff;border-radius:99px;padding:1px 6px;font-size:9.5px;letter-spacing:.03em}
-.flpin{position:relative;width:32px;height:40px;border:0;padding:0;background:transparent;cursor:pointer;transition:transform .18s ease;transform-origin:50% 100%}
-.flpin::before{content:"";position:absolute;left:2px;top:0;width:28px;height:28px;border-radius:50% 50% 50% 0;transform:rotate(-45deg) translate(-3px,3px);background:var(--c);border:2.5px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,.35);box-sizing:border-box}
-.flpin span{position:absolute;left:0;top:5px;width:32px;text-align:center;color:#fff;font:900 13px/18px -apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif}
-.flpin-vif::after{content:"";position:absolute;left:4px;top:2px;width:24px;height:24px;border-radius:50%;background:var(--c);opacity:.5;animation:flpouls 1.8s ease-out infinite;z-index:-1}
-.flpin-on{transform:scale(1.35);z-index:3}
-@keyframes flpouls{0%{transform:scale(1);opacity:.5}100%{transform:scale(2.6);opacity:0}}
-@media (prefers-reduced-motion:reduce){.flpin-vif::after{animation:none}}
+.flrep-vif{animation:flrepouls 1.8s ease-out infinite}
+@keyframes flrepouls{0%{box-shadow:0 0 0 0 rgba(181,71,30,.55),0 3px 8px rgba(0,0,0,.35)}100%{box-shadow:0 0 0 16px rgba(181,71,30,0),0 3px 8px rgba(0,0,0,.35)}}
+@media (prefers-reduced-motion:reduce){.flrep-vif{animation:none}}
 .flmoi{width:18px;height:18px;border-radius:50%;background:#378ADD;border:3px solid #fff;box-shadow:0 0 0 6px rgba(55,138,221,.25);box-sizing:border-box}
 `

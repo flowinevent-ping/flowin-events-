@@ -2,7 +2,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useEffect, useRef, useState } from 'react'
 import { CENTRE_VENCE, STYLE_CARTE, chargerMapLibre, itineraires } from '@/components/carte/maplibre'
-import { initiale, separerReperes } from '@/lib/seReperes'
+import { separerReperes } from '@/lib/seReperes'
+import { creerRepere, marquerChoisi } from '@/components/carte/repere'
 
 export type Lieu = {
   id: string
@@ -43,13 +44,15 @@ interface Props {
   decalageBas?: number
   /** Position du bouton « Autour de moi » (sinon en bas à gauche). */
   geoHaut?: number
+  /** Rempli par la carte : renvoie [lat, lng] du centre affiché (pour « Placer » un point sans position). */
+  centreRef?: { current: (() => [number, number] | null) | null }
 }
 
 function esc(s: string): string {
   return s.replace(/[&<>"]/g, (c) => (({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' } as Record<string, string>)[c]))
 }
 
-export default function SuperEventMap({ lieux, mode = 'vitrine', height = 340, showPosition = false, onSelect, editable = false, onMove, reperes = false, selId = null, decalageBas = 0, geoHaut }: Props) {
+export default function SuperEventMap({ lieux, mode = 'vitrine', height = 340, showPosition = false, onSelect, editable = false, onMove, reperes = false, selId = null, decalageBas = 0, geoHaut, centreRef }: Props) {
   const ref = useRef<HTMLDivElement>(null)
   const mapRef = useRef<any>(null)
   const onSelectRef = useRef(onSelect)
@@ -90,6 +93,7 @@ export default function SuperEventMap({ lieux, mode = 'vitrine', height = 340, s
     )
   }
 
+  /* Éditable + repères : la clé ignore les positions, sinon chaque glisser-déposer reconstruirait la carte et la recadrerait. */
   useEffect(() => {
     let cancelled = false
     const pts = lieux.filter((l) => typeof l.lat === 'number' && typeof l.lng === 'number') as Array<Lieu & { lat: number; lng: number }>
@@ -108,41 +112,29 @@ export default function SuperEventMap({ lieux, mode = 'vitrine', height = 340, s
       map.touchZoomRotate.disableRotation()
       if (!reperes) map.addControl(new ml.NavigationControl({ showCompass: false }), 'top-right')
       mapRef.current = map
+      if (centreRef) centreRef.current = () => { const c = map.getCenter(); return [c.lat, c.lng] }
 
       ringsRef.current = {}
       posRef.current = {}
       if (reperes) {
-        const sep = separerReperes(pts)
+        /* Mode éditable (tableaux de bord) : chaque point reste individuel et déplaçable, jamais regroupé. */
+        const sep = editable ? { commerces: pts, groupes: [] as Array<typeof pts> } : separerReperes(pts)
         sep.commerces.forEach((p) => {
-          const joue = !!p.joue
-          const el = document.createElement('div')
-          el.style.cssText = 'width:44px;height:44px;cursor:pointer'
-          el.title = p.nom
-          const ring = document.createElement('div')
-          ring.setAttribute('data-repere', p.id)
-          ring.style.cssText = `position:relative;width:44px;height:44px;border-radius:50%;background:${p.logo ? '#fff' : '#FED7AA'};border:4px solid ${joue ? '#15803D' : '#B5471E'};box-shadow:0 3px 8px rgba(0,0,0,.35);display:flex;align-items:center;justify-content:center;box-sizing:border-box;overflow:visible;transition:transform .25s,border-color .25s`
-          if (p.logo) {
-            const im = document.createElement('img')
-            im.src = p.logo; im.alt = ''
-            im.style.cssText = 'width:78%;height:78%;object-fit:contain;border-radius:50%'
-            im.onerror = () => { im.remove(); ring.style.background = '#FED7AA'; ring.insertAdjacentText('afterbegin', initiale(p.nom)) }
-            ring.appendChild(im)
-          } else {
-            ring.textContent = initiale(p.nom)
-            ring.style.font = '800 16px sans-serif'
-            ring.style.color = '#9A3412'
-          }
-          if (joue) {
-            const c = document.createElement('span')
-            c.textContent = '\u2713'
-            c.style.cssText = 'position:absolute;right:-5px;top:-5px;width:18px;height:18px;border-radius:50%;background:#15803D;color:#fff;font:700 12px/18px sans-serif;text-align:center'
-            ring.appendChild(c)
-          }
-          el.appendChild(ring)
+          const { el, ring } = creerRepere({ id: p.id, nom: p.nom, logo: p.logo, joue: !!p.joue })
           ringsRef.current[p.id] = ring
           posRef.current[p.id] = [p.lng, p.lat]
-          new ml.Marker({ element: el }).setLngLat([p.lng, p.lat]).addTo(map)
-          el.addEventListener('click', (e) => { e.stopPropagation(); if (onSelectRef.current) onSelectRef.current(p.id) })
+          const m = new ml.Marker({ element: el, draggable: editable }).setLngLat([p.lng, p.lat]).addTo(map)
+          let glisse = false
+          if (editable) {
+            m.on('dragstart', () => { glisse = true })
+            m.on('dragend', () => {
+              const { lat, lng } = m.getLngLat()
+              posRef.current[p.id] = [lng, lat]
+              if (onMoveRef.current) onMoveRef.current(p.id, lat, lng)
+              window.setTimeout(() => { glisse = false }, 0)
+            })
+          }
+          el.addEventListener('click', (e) => { e.stopPropagation(); if (!glisse && onSelectRef.current) onSelectRef.current(p.id) })
         })
         sep.groupes.forEach((g, i) => {
           const lng = g.reduce((s, x) => s + x.lng, 0) / g.length, lat = g.reduce((s, x) => s + x.lat, 0) / g.length
@@ -184,7 +176,7 @@ export default function SuperEventMap({ lieux, mode = 'vitrine', height = 340, s
       if (pts.length > 1) {
         const b = new ml.LngLatBounds()
         pts.forEach((p) => b.extend([p.lng, p.lat]))
-        map.fitBounds(b, reperes ? { padding: { top: 120, bottom: 260, left: 40, right: 40 }, maxZoom: 16, duration: 0 } : { padding: 40, maxZoom: 16, duration: 0 })
+        map.fitBounds(b, reperes && !editable ? { padding: { top: 120, bottom: 260, left: 40, right: 40 }, maxZoom: 16, duration: 0 } : { padding: 50, maxZoom: 16, duration: 0 })
       }
 
       /* Géolocalisation : jamais de demande au chargement. Si l'autorisation est déjà
@@ -206,18 +198,14 @@ export default function SuperEventMap({ lieux, mode = 'vitrine', height = 340, s
       if (mapRef.current) { mapRef.current.remove(); mapRef.current = null; moiRef.current = null }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [JSON.stringify(lieux), mode, showPosition, editable, reperes])
+  }, [editable && reperes ? JSON.stringify(lieux.map((l) => [l.id, l.nom, l.logo, l.joue, typeof l.lat === 'number' && typeof l.lng === 'number'])) : JSON.stringify(lieux), mode, showPosition, editable, reperes])
 
   /* Sélection : la pastille grossit (anneau bleu) et la carte s'y recentre. */
   useEffect(() => {
     Object.keys(ringsRef.current).forEach((id) => {
       const r = ringsRef.current[id]
       const sel = id === selId
-      r.style.transform = sel ? 'scale(1.4)' : 'none'
-      r.style.zIndex = sel ? '5' : ''
-      r.style.boxShadow = sel ? '0 0 0 6px rgba(29,78,216,.25),0 3px 10px rgba(0,0,0,.4)' : '0 3px 8px rgba(0,0,0,.35)'
-      if (sel) r.style.borderColor = '#1D4ED8'
-      else r.style.borderColor = r.querySelector('span') ? '#15803D' : '#B5471E'
+      marquerChoisi(r, sel)
     })
     const map = mapRef.current
     const c = selId ? posRef.current[selId] : null
