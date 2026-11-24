@@ -52,3 +52,4 @@ Source principale : `docs/E2E-verification-2026-11-20.md` (E2E). Comptes de test
 | Page /se/[se] lot 4 + règle sur place + une seule carte | EN LIGNE sur main (52c941ee, bd2d0e02), tsc/build OK, démo 390 px ; production NON vérifiée (403 Vercel), iPhone NON testé | 24/11 | JOURNAL |
 | 5 exports anon fermés | FAIT (migration securite_fermer_exports_anon) | 24/11 | preuve SQL |
 | pros_anon_select | EN ATTENTE du clic de Romain dans Supabase | 24/11 | - |
+| Flowin Hub installable (/hub.html) : accès administrateur, pro, participant + démos des jeux | CODÉ, vérifié en local à 390 px (0 erreur, 0 défilement) ; production NON vérifiée ; fusion en attente | 24/11 | PR hub, `admin/public/hub.html` | ouverture sur iPhone et Android réels |
