@@ -42,3 +42,14 @@
 - Outils : serveur local avec `NODE_USE_ENV_PROXY=1 NODE_EXTRA_CA_CERTS=/root/.ccr/ca-bundle.crt` pour que le serveur Next lise Supabase en GET ; avorter les requêtes non GET vers supabase.co avec `ctx.route`. Les écrans s'ouvrent à froid avec `?m=<master>&demo=1&s=<écran>`. Attention : l'animation d'entrée retarde l'apparition du texte (attendre 3 s avant capture).
 - Non vérifié : appareils réels, onglets phases `/se`, état joueur identifié (RPC POST), tuiles de carte feuille ouverte, contrastes sur dégradés.
 - 24/11 état factuel : roue = meilleur moment ; bonus quiz = seul écran 'tall' avec Valider (DES-13) ; gains pro encore en maquette (inscription, rejoindre, configurateur) ; cartes : voir AMEL-CAR-01..03 (CAR-01/02 faites 24/11, CAR-03 décidée : on garde NDS passées). Sons désormais AUTORISÉS (Romain 24/11, bouton pour couper). Ne pas re-proposer.
+
+## Historique 6 mois (Notion + git, importé le 24/11/2026). Sources : voir SOURCES.md (HUB, REF, REP03)
+- 14/07 · Mesuré : 51 % des joueurs quittent PENDANT le quiz (102 sur 198) ; le formulaire n'est pas la fuite. Tracer la question d'abandon (`quiz:1` à `quiz:4`) était proposé, non fait à l'époque (HUB 14/07). À ne pas re-proposer sans vérifier AMELIORATIONS.md.
+- 31/08 · Sidebar mesurée : 46 entrées, 24 dans un seul groupe, 1 dans EVENTS ; aucun contexte de sélection global ; 5 pages avec 5 sélecteurs différents (HUB 31/08). Regroupement 10 vers 5 groupes puis revert : ne pas proposer de refonte de navigation globale d'un coup.
+- 02/09 · Les tuiles de statistiques cliquables faisaient défiler vers un bloc déjà visible : « rien ne semblait se passer ». Le défaut était le geste choisi : une tuile doit sélectionner la vue (HUB 02/09).
+- 01/09 · Sous-onglet vide qui affiche le contenu du voisin = pire qu'un écran vide : il faut dire « rien ici » (HUB 01/09).
+- 02/09 · 12 blocs de statistiques empilés remplacés par 7 vues sélectionnables ; carte qui superposait 2 opérations (44 stations annoncées pour 22) (HUB 02/09).
+- 03/09 · Style : au moins 16 titres de page sans emoji contre une trentaine avec ; 4 déclarations de couleurs ; police Manrope chargée partout, utilisée seulement côté joueur ; l'espace pro a sa propre grammaire (REP03). Situation de septembre : à relire dans le code avant de la citer.
+- 16/09 · Audit pro vu par le pro : 14 entrées / 5 groupes, la même opération sur 6 pages ; billet montré = ancien modèle avec faux logo ; 8 étapes « Rejoindre », GPS à taper à la main (REF A1 à A7), tous corrigés le 16/09.
+- 27/07 · Le simulateur « VOIR COMME PRO » du monolithe a un design sans rapport avec l'app : ne jamais critiquer ni valider depuis lui (REP27).
+- 31/08 · Meilleur détecteur de défaut : la capture d'écran de Romain ; claude n'a pas d'accès visuel : écrire « pas vérifié à l'écran » quand c'est le cas (HUB 31/08).

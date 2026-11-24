@@ -43,3 +43,12 @@ Le chat principal ne doit PAS reposer ces questions à Romain avant d'avoir lu c
 ## Ouvert
 - Feu vert de Romain pour le projet « câblage facturation » ; valeur `espace` ; préfixe Baïta B ou BT ; mécanisme d'accès externe ; plan Supabase de Jeffrey.
 - Vérifier en lecture seule l'état prod de SQL 08 et lot-a avant toute proposition.
+
+## Historique 6 mois (Notion + git, importé le 24/11/2026). Sources : voir SOURCES.md (HUB, CGV)
+- 24/06 · CGV NDS 2026 en base (`documents_legaux` id `cgv-nds-2026`, v1, validé ; page `cgv-nds.html`, case bloquante dans le bon de commande). Paiement avant le 09/07/2026 par virement ou chèque, sinon commande annulée de plein droit ; retard : pénalités et indemnité forfaitaire de 40 € (CGV art. 5). Aucun paiement en ligne (CGV).
+- 24/06 · Mécanique du bon d'achat : OPConsult achète au commerce un bon (90 / 159 / 259 € selon l'offre), distribué au gagnant par ticket e-mail, honoré à la présentation du ticket (CGV art. 3).
+- 09/07 · Factures jamais créées : la clé anon n'avait aucun droit sur `factures` (seulement authenticated). Après correction : facture auto depuis un bon, numéro figé `FL-2026-XXXX-01`, contenu éditable, PDF. À restreindre ensuite (HUB 09/07). Les bons étaient bien enregistrés, rien n'était perdu : il fallait cliquer « Enregistrer ».
+- 03/08 · Factures NDS 2026 « officialisées » pour deux partenaires ; kit de clôture partenaires et 14 brouillons Gmail créés (titres HUB 03/08, détail non lu). Aucun envoi sans go de Romain.
+- 16/09 · Bon de commande et facture rattachés à CHAQUE opération (onglet Contrat), plus au seul super event NDS (REF #41, lot 6).
+- Git (date non relevée) · Commit `ba889930` : accès public à un bon ou une facture par JETON (« vrai bug derrière renvoie vers accès SA ») ; `96411e43` : facture en lecture seule par défaut.
+- 29/06 · Contact et signature des supports : adresse de contact commune, jamais le nom de Romain sur les supports clients (AUTO28, AUD29). Ne pas recopier coordonnées personnelles dans la mémoire.

@@ -49,3 +49,13 @@
 - Enregistrement humain éventuel : `docs/SCRIPTS-VOIX-OFF-2026-11-18.md` (scripts à lire avec rythme).
 - Charte graphique définitive bleu / orange (REGISTRE L11) toujours en attente.
 - Visuels de prospection et publipostage design : aucun produit à ce jour, cibles dans `docs/claude/CIBLES.md` ; format à compléter.
+
+## Historique 6 mois (Notion + git, importé le 24/11/2026). Sources : voir SOURCES.md (AUTO28, AUD29, PIL, HUB)
+- 28/06 · Stockage des assets NDS : `admin/public/nds/` (visuels, kit-digital par commerce, partenaires, `visuels-src/` = générateurs Python). Règle : rendu ET script source dans le même commit, car le conteneur est éphémère (AUTO28).
+- 28/06 · Affiche A4 « Station » v9 validée par Romain : ordre vertical = logo NDS, « LE GRAND JEU DES NUITS DU SUD », « FLASH ET JOUE » (autre typo, plus visible), « STATION JEUX » + logo du commerce, visuels de gains agrandis, QR sous les gains, pied (cumul des points, grand tirage, mentions). Texte clé en MAJUSCULES et couleur ; lots lus dans `partenaires.lots`, jamais en dur (AUTO28). Reprise à la charte de novembre : à vérifier avant réutilisation.
+- 29/06 · Vidéo écran : le 7e logo (disposition 2-2-2-1) chevauchait le QR persistant ; options : resserrer les logos au-dessus du QR ou réduire le badge QR pendant la scène ; re-rendu 960 images par blocs de 160 puis ffmpeg 24 i/s, `-crf 19`, `yuv420p`, `+faststart` ; QR vérifié par décodage (AUD29).
+- 29/06 · Un support doit être homogène à 3 endroits (kit en ligne, Notion, base) ; contrôler un lien par commerce vers son propre `ev-nds-<slug>` (AUD29 §3.2 et 3.4).
+- 31/08 · Les outils HTML autonomes ont chacun leur thème (sombre ou clair) : l'harmonisation se fait par les variables CSS seulement ; `nds-visuels.html` laissé sombre car couleurs codées en dur partout (HUB 31/08).
+- 02/09 · QR : généré localement (PNG 1024 px, SVG, affiche A4) et décodé après génération ; ne plus dépendre d'un service tiers (HUB 02/09).
+- 23/07 · Billet : 4 rendus distincts de la même chaîne ; logo officiel `flowin_blanc.png` ; conditions d'utilisation lisibles et distinctes des mentions légales (HUB 23/07, REF A3).
+- 28/06 · Style de Romain : français terse (dictée vocale), factuel ; chiffres réels uniquement, jamais d'adresse, lot ou contact inventé (AUTO28).

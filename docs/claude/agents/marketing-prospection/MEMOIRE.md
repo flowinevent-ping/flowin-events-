@@ -43,3 +43,13 @@
 - Liste de prospects (20 premiers commerces de Vence, associations, événements 2027) : à fournir par Romain.
 - Calendrier 30 / 60 / 90 jours : volumes à fixer. Annonces d'activation (posts, message WhatsApp type) : à rédiger sur go.
 - Résultats mesurés : aucun relevé de scans par source consigné à ce jour (à compléter).
+
+## Historique 6 mois (Notion + git, importé le 24/11/2026). Sources : voir SOURCES.md (HUB, CGV, AUTO28, PIL, AUD29)
+- 24/06 à 28/06 · Offres NDS 2026 (CGV, AUTO28) : Visibilité 590 € HT, Animation 1 490 € HT, Sponsor 3 590 € HT. À TRANCHER : commit `f1a72e11` « palier Visibilité à 500 EUR HT (au lieu de 590) » et prix de novembre (445 €, 990 €/an) dans la section « Prix décidés » ci-dessus : ce sont des offres différentes (festival 2026 contre offre générique) ; ne rien annoncer hors de la section « Prix décidés ».
+- 24/06 · Contenu des offres : Visibilité = liste des partenaires + redirection vers contacts et réseaux ; Animation = QR au nom de l'enseigne, tickets cumulés, mise en avant carte, reporting de passage ; Sponsor = tous supports et stations, bandeau défilant, quiz personnalisable (CGV art. 3).
+- 28/06 · Signature de marque : « Animez · Fidélisez · Boostez » (AUTO28) ; novembre : « Flowin, l'animation plug and play » (Romain, 18/11). À TRANCHER si les deux coexistent ; la plus récente écrite par Romain prime en attendant.
+- 14/07 · Mesuré : parrainage 50 flashs vers 9 parties ; lien réseau d'un commerce 35 vers 5 ; liens de trois autres commerces 0 partie (HUB 12/07). Un lien digital sans diffusion ne produit rien : mesurer avant de promettre.
+- 25/07 · Faux constat retiré : « Instagram bloque et 52 personnes n'ont pas pu jouer » (flashs d'avant le correctif `visiteur_id`). Ne jamais attribuer un zéro à un canal sans croiser la date (HUB 25/07).
+- 29/08 · Chiffre publié « 321 répondants bonus » était FAUX : 302 (RSE 240, BV 63). Tout support commercial qui reprend le détail question par question est à régénérer (HUB 29/08). Chiffres sûrs : 617 joueurs uniques, 2 449 flashs, 986 jeux (clôture 18/07) ; 7 432 flashs QR et 959 parties selon REP27 (RPC SA) : vérifier la définition avant de citer.
+- 24/07 · Plaquette commerciale, schéma des fonctions et parcours interactif en plusieurs versions (titres lus seulement) ; vision : outil d'animation digitale récurrente pour commerçants et producteurs (PIL).
+- 29/06 · Conformité à vérifier avant tout message de jeu : règlement de jeu et tirage à rédiger « sans obligation d'achat » pour rester hors des loteries soumises à autorisation (seuils à vérifier par un juriste, rien sourcé ici) ; texte d'opt-in de Romain : « Je souhaite rester en contact avec les Nuits du Sud et les offres Flowin » ; « mes données ne sont ni vendues ni échangées » (AUD29).

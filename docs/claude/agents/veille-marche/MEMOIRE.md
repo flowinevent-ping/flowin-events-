@@ -17,3 +17,7 @@
 
 ## Journal des passages
 - 21/11/2026 : premier passage, 6 recherches (voir AMELIORATIONS.md : AMEL-VEI-01 à 05).
+
+## Historique 6 mois (Notion, importé le 24/11/2026). Sources : voir SOURCES.md (AUD29, CGV)
+- 29/06 · Sujets de conformité à SOURCER (aucune source officielle lue ici) : jeu gratuit sans obligation d'achat et régime des loteries soumises à déclaration ou autorisation (seuils et conditions) ; durée de conservation, base légale et droits RGPD ; texte de consentement par case à cocher. Ce sont des questions posées par Romain (AUD29), pas des constats.
+- 24/06 · CGV : médiation de la consommation écartée parce que la relation est entre professionnels ; pénalités de retard visent les articles L441-10 et D441-5 du Code de commerce (CGV art. 5 et 14) : à re-vérifier sur Légifrance avant de les citer.

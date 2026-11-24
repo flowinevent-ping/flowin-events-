@@ -19,3 +19,14 @@
 
 ## Journal des passages
 - 21/11/2026 : premier passage (voir AMELIORATIONS.md : AMEL-PERF-01 à 04).
+
+## Historique 6 mois (Notion + git, importé le 24/11/2026). Sources : voir SOURCES.md (HUB)
+- 18/07 · `limit=500` sur la sidebar « Joueurs » alors que la table en contenait 769 ; plafonds relevés (500 vers 20000, participations 5000 vers 50000). Le compteur affiché n'est jamais la longueur d'une liste paginée (HUB 18/07). Re-contrôler ce risque à mesure que les tables grossissent.
+- 18/07 · Scans `visites` en fire-and-forget sous réseau saturé : 22 à 29 lignes en base le 17/07 là où le comptage physique dépassait 100. Correctif : file localStorage (`flowin_visites_wq`) rejouée au retour réseau, dédup anti-rafale inférieure à 10 s. Les participations avaient déjà une file durable (`flowin_nds_wq`). Ne pas proposer de retirer ces files (HUB 18/07).
+- 18/07 · Le service worker sert l'ancien bundle tant que le téléphone n'a pas rechargé : l'effet d'un correctif de comptage n'est pas immédiat ni rétroactif (HUB 18/07).
+- 19/07 · `visiteur_id` absent à 100 % des flashs les 09 et 10/07 : « visiteurs uniques » valides seulement à partir du 12/07 ; non corrigeable après coup (HUB 19/07).
+- 31/08 · Écran « Résultat journalier » : 21 jours affichés pour 55 réels ; restructuré en jours du festival (10, visibles) et jours de test (45, repliés) pour ne pas aggraver la lenteur (HUB 31/08).
+- 01/09 · « Toutes les dates » écartait 401 flashs (2 446 contre 2 847), 43 jours (10 contre 53) et 3 stations ; la RPC gagne `p_tout` à défaut `false`, les chiffres publiables restent bornés au 09-18/07 (HUB 01/09). Toujours écrire la période couverte à côté du total.
+- 02/09 · 110 lignes d'aperçu gonflaient l'historique (2 847 vers 2 799) sans toucher le chiffre publiable (2 446 vers 2 445) ; archivées dans `visites_archive_apercu_2026_09` (HUB 02/09). Archiver plutôt que supprimer.
+- 02/09 · QR : service tiers `api.qrserver.com` = dépendance externe et 200 px étirés ; génération locale PNG 1024 px et SVG (HUB 02/09).
+- 19/07 · Chiffres de référence NDS 2026 (clôture 18/07, audit 19/07) : 2 449 flashs, 617 joueurs uniques, 986 jeux ; 887 parties à la date du 18/07 ; ne pas confondre avec les chiffres publiables bornés (HUB 18-19/07).
