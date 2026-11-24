@@ -67,3 +67,73 @@ export async function inscrirePro(
   }
   return { ok: true, proId: idPro, session: aSession }
 }
+
+/* ------------------------------------------------------------------------------------------------------------------
+ * LOT 3-1 (24/11/2026) : inscription pro en 3 ecrans (Vous, Activite, Compte). Logique PURE, sans React ni reseau :
+ * regles de passage par ecran et reprise d'un ancien brouillon a 7 etapes. Memes colonnes `pros` qu'avant ;
+ * secteur detaille, produits et nombre de points de vente ne sont plus demandes ici : ils se completent dans Mon profil
+ * (EntrepriseForm : produits_services, nb_points_vente), jamais bloquants.
+ * ------------------------------------------------------------------------------------------------------------------ */
+export const ETAPES_INSCRIPTION = ['Vous', 'Activité', 'Compte'] as const
+
+export const EMAIL_OK = (v: string) => /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v.trim())
+export const TEL_OK = (v: string) => !v.trim() || /^(\+?\d[\d\s.-]{7,17}\d)$/.test(v.trim())
+export const CP_OK = (v: string) => /^\d{5}$/.test(v.trim())
+
+export interface DonneesEtape {
+  prenom: string; nom: string; email: string; tel: string
+  /** raison sociale / nom de l'etablissement */
+  entreprise: string; adresse: string; codePostal: string; ville: string
+  /** 'recherche' : SIRET pas encore trouve ; 'manuel' : sans SIRET ; 'prerempli' : repris de l'annuaire. */
+  mode: 'recherche' | 'manuel' | 'prerempli'
+  siretInvalide: string | null
+  secteur: string; secteurAutre: string; motdepasse: string
+}
+
+/** Ce qui manque pour quitter l'ecran `etape` (0, 1 ou 2), par champ. Objet vide = on peut avancer. */
+export function erreursEtape(etape: number, d: DonneesEtape): Record<string, string> {
+  const e: Record<string, string> = {}
+  if (etape === 0) {
+    if (d.prenom.trim().length < 1) e.prenom = 'Votre prénom.'
+    if (d.nom.trim().length < 1) e.nom = 'Votre nom.'
+    if (!EMAIL_OK(d.email)) e.email = 'Un email valide : il servira à vous connecter.'
+    if (d.mode === 'recherche') e.siret = d.siretInvalide ?? 'Saisissez votre SIRET (14 chiffres), ou « Pas de SIRET ».'
+    else {
+      if (d.entreprise.trim().length < 2) e.entreprise = 'Le nom de l’établissement.'
+      if (d.adresse.trim().length < 3) e.adresse = 'Le numéro et la rue.'
+      if (!CP_OK(d.codePostal)) e.codePostal = '5 chiffres.'
+      if (d.ville.trim().length < 2) e.ville = 'La ville.'
+    }
+  }
+  if (etape === 1) {
+    if (!d.secteur) e.secteur = 'Choisissez le secteur le plus proche.'
+    if (d.secteur === 'Autre' && d.secteurAutre.replace(/\s+/g, ' ').trim().length < 3) e.secteurAutre = 'Précisez votre activité (3 lettres minimum).'
+  }
+  if (etape === 2) {
+    if (d.motdepasse.length < 8) e.motdepasse = '8 caractères minimum.'
+    if (!TEL_OK(d.tel)) e.tel = 'Ce numéro ne semble pas valide.'
+  }
+  return e
+}
+
+/**
+ * LOT 3-2 : statut montre sur l'ecran « Demande envoyee » du parcours Rejoindre. Lu dans cfg.diffusion_demandee.statut
+ * de la station (events.cfg) quand elle existe ; sinon (demande pas encore validee : aucune station) « Demandé ».
+ * Valeurs connues : 'en_attente_sa' (ecrit a la creation), 'traitee' (soldee par le SA, DiffusionOperation).
+ * 'en_cours' / 'acceptee' : lues si un jour ecrites. Toute valeur inconnue se lit « Demandé » (jamais un statut invente).
+ */
+export function statutDemande(cfg: unknown): 'Demandé' | 'Accepté' | 'En cours' {
+  const dd = cfg && typeof cfg === 'object' ? (cfg as { diffusion_demandee?: { statut?: unknown } }).diffusion_demandee : undefined
+  const s = dd && typeof dd === 'object' ? dd.statut : undefined
+  if (s === 'en_cours') return 'En cours'
+  if (s === 'acceptee' || s === 'accepte' || s === 'traitee') return 'Accepté'
+  return 'Demandé'
+}
+
+/** Un brouillon enregistre par l'ancien parcours a 7 etapes (vous, entreprise, secteur, produits, adresse, points, compte)
+ *  reprend a l'ecran equivalent du parcours a 3 ecrans. Les valeurs saisies sont conservees telles quelles. */
+export function etapeDepuisAncienne(ancienne: number): number {
+  if (ancienne === 2) return 1
+  if (ancienne >= 6) return 2
+  return 0
+}

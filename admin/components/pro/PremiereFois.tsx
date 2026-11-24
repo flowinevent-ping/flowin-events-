@@ -1,18 +1,20 @@
 'use client'
 
 /**
- * « MA PREMIERE FOIS » — le parcours d'inscription d'un pro (31/10/2026).
+ * « MA PREMIERE FOIS » — le parcours d'inscription d'un pro.
  *
- * Accueil engageant, puis sept etapes : vous, votre entreprise (pre-remplie
- * par SIRET / SIREN / nom), secteur, produits & services, adresse, points de
- * vente, creation du compte. Barre de progression, retour possible a chaque
- * etape, brouillon garde dans le navigateur (jamais le mot de passe).
+ * LOT 3-1 (24/11/2026, maquette validee par Romain, docs/maquette/lot3-1-inscription.html) : TROIS ecrans d'une hauteur,
+ * sans ecran d'accueil : 1. Vous et votre commerce (SIRET = nom, adresse, secteur suggere), 2. Activite (secteur),
+ * 3. Compte (mot de passe unique avec oeil, telephone facultatif). Fin : « Configurer mon jeu » en un toucher.
+ * Avant : accueil en 3 ecrans puis 7 etapes (10 touchers, ~11 champs).
  *
- * Meme definition que le parcours SA (lib/proCreation : secteurs, profils,
- * identifiant, colonnes `pros`) ; l'inscription arrive en `en_attente`.
+ * Secteur detaille, produits et nombre de points de vente ne sont plus demandes ici : ils se completent dans
+ * « Mon profil » (EntrepriseForm : produits_services, nb_points_vente), sans etre perdus ni bloquants. Memes colonnes
+ * `pros` qu'avant (lib/proCreation) ; droits `en_attente`, brouillon local (jamais le mot de passe) et e-mail de
+ * confirmation inchanges. Logique de validation : lib/inscriptionPro.ts (erreursEtape).
  *
- * Donnees : rien n'est invente. Ce que l'annuaire officiel ne renvoie pas
- * reste vide, et tout ce qui est pre-rempli reste modifiable.
+ * Donnees : rien n'est invente. Ce que l'annuaire officiel ne renvoie pas reste vide, et tout ce qui est pre-rempli
+ * reste modifiable.
  */
 
 import { useEffect, useMemo, useRef, useState } from 'react'
@@ -23,37 +25,25 @@ import { estDemo } from '@/lib/demo'
 import { capturerSource, tagSource } from '@/lib/source'
 import { CHARTE_PRO as C, VARIABLES_PRO_CSS } from '@/lib/charte'
 import {
-  PROFILS_PRO, SECTEURS_PRO, SECTEUR_AUTRE, nettoyerPrecision, ficheProVide, identifiantPro, lignePro, ligneProEntreprise,
-  type FichePro, type ProfilPro,
+  SECTEURS_PRO, SECTEUR_AUTRE, nettoyerPrecision, ficheProVide, identifiantPro, lignePro, ligneProEntreprise,
+  type FichePro,
 } from '@/lib/proCreation'
-import {
-  chiffres, erreurNumero, formaterSiret, natureRecherche, secteurSuggere, siretValide,
-  type EntrepriseTrouvee,
-} from '@/lib/entreprise'
-
+import { chiffres, erreurNumero, natureRecherche, secteurSuggere, siretValide, type EntrepriseTrouvee } from '@/lib/entreprise'
+import { ETAPES_INSCRIPTION, TEL_OK, EMAIL_OK, CP_OK, erreursEtape, etapeDepuisAncienne } from '@/lib/inscriptionPro'
 import { messageFr, messageAuth } from '@/lib/erreursFr'
 import { retourSur } from '@/lib/retour'
 import { Celebration } from '@/components/creation/EnLigne'
 import { GARANTIE_ACTIVE } from '@/lib/flowinConfig'
 import PrecisionAutre from '@/components/creation/PrecisionAutre'
 import SelectActivite from '@/components/creation/SelectActivite'
-import Carrousel from './Carrousel'
-import { OFFRES_ANIMATION, OPTION_QUIZ_FLOWIN, prixOptionQuiz } from '@/lib/reglement'
-const CLE_BROUILLON = 'flowin.premiere-fois.v1'
 
-const ETAPES = [
-  { id: 'vous', titre: 'Vous', court: 'Vous' },
-  { id: 'entreprise', titre: 'Votre entreprise', court: 'Entreprise' },
-  { id: 'secteur', titre: 'Votre secteur', court: 'Secteur' },
-  { id: 'produits', titre: 'Ce que vous proposez', court: 'Produits' },
-  { id: 'adresse', titre: 'Votre adresse', court: 'Adresse' },
-  { id: 'points', titre: 'Vos points de vente', court: 'Points de vente' },
-  { id: 'compte', titre: 'Votre compte', court: 'Compte' },
-] as const
-type IdEtape = typeof ETAPES[number]['id']
+const CLE_BROUILLON = 'flowin.premiere-fois.v1'
+const NB_ECRANS = ETAPES_INSCRIPTION.length
+const SECTEUR_COMMERCE = 'Commerce & Négoce'
 
 interface Perso { prenom: string; nom: string }
-interface Brouillon { etape: number; f: FichePro; perso: Perso; mode: 'recherche' | 'manuel' | 'prerempli'; selection?: string }
+/** `v: 2` = brouillon du parcours a 3 ecrans ; sans `v`, ancien parcours a 7 etapes (etapeDepuisAncienne). */
+interface Brouillon { v?: number; etape: number; f: FichePro; perso: Perso; mode: 'recherche' | 'manuel' | 'prerempli'; selection?: string }
 
 /* Parametres de la plaquette (offre, kit, options, garantie certifiee, commercial) transmis tels quels au bon de commande. */
 const PARAMS_OFFRE = ['offre', 'kit', 'boutiques', 'quiz', 'bonus', 'garantie', 'panier', 'flux', 'certif_le', 'certif_par', 'commercial']
@@ -81,56 +71,45 @@ function resumeSelection(sel: string): string {
   return morceaux.filter(Boolean).join(', ')
 }
 
-const EMAIL_OK = (v: string) => /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v.trim())
-const TEL_OK = (v: string) => !v.trim() || /^(\+?\d[\d\s.-]{7,17}\d)$/.test(v.trim())
-const CP_OK = (v: string) => /^\d{5}$/.test(v.trim())
-
 function lireBrouillon(): Brouillon | null {
   try {
     const t = window.localStorage.getItem(CLE_BROUILLON)
     if (!t) return null
     const b = JSON.parse(t) as Brouillon
     if (!b || typeof b.etape !== 'number' || !b.f) return null
-    return { ...b, f: { ...ficheProVide(), ...b.f, motdepasse: '' } }
+    const etape = b.v === 2 ? Math.min(Math.max(b.etape, 0), NB_ECRANS - 1) : etapeDepuisAncienne(b.etape)
+    return { ...b, etape, f: { ...ficheProVide(), ...b.f, motdepasse: '' } }
   } catch { return null }
 }
 function ecrireBrouillon(b: Brouillon) {
-  try { window.localStorage.setItem(CLE_BROUILLON, JSON.stringify({ ...b, f: { ...b.f, motdepasse: '' } })) } catch { /* navigation privee */ }
+  try { window.localStorage.setItem(CLE_BROUILLON, JSON.stringify({ ...b, v: 2, f: { ...b.f, motdepasse: '' } })) } catch { /* navigation privee */ }
 }
 function effacerBrouillon() {
   try { window.localStorage.removeItem(CLE_BROUILLON) } catch { /* rien */ }
 }
 
-const dateFr = (iso: string) => {
-  if (!iso) return ''
-  const d = new Date(`${iso.slice(0, 10)}T12:00:00`)
-  return isNaN(d.getTime()) ? iso : d.toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })
-}
-
 export default function PremiereFois() {
-  /* -1 = page d'accueil ; 0..6 = etapes ; 7 = termine */
-  const [etape, setEtape] = useState(-1)
+  /* 0..2 = les trois ecrans ; 3 = termine */
+  const [etape, setEtape] = useState(0)
   const [f, setF] = useState<FichePro>({ ...ficheProVide(), profil: 'commerce' })
   const [perso, setPerso] = useState<Perso>({ prenom: '', nom: '' })
   const [mode, setMode] = useState<Brouillon['mode']>('recherche')
   const [brouillonTrouve, setBrouillonTrouve] = useState<Brouillon | null>(null)
   const [pret, setPret] = useState(false)
   const [tente, setTente] = useState(false)
-  const [confirmation, setConfirmation] = useState('')
   const [voirMdp, setVoirMdp] = useState(false)
   const [envoi, setEnvoi] = useState<'idle' | 'loading' | 'error'>('idle')
   const [erreur, setErreur] = useState('')
   const [fin, setFin] = useState<{ proId: string; session: boolean; degrade: boolean } | null>(null)
   const [selection, setSelection] = useState('')
-  const [ecranAccueil, setEcranAccueil] = useState(0)
   const haut = useRef<HTMLDivElement>(null)
-  /* Compte d'acces deja cree pendant cette visite (reprise apres un echec d'enregistrement de la fiche). */
   /* Retour vers une demande en cours (parcours « rejoindre un super event » sans compte) : ?retour=/rejoindre?... */
   const [retour, setRetour] = useState<string | null>(null)
   useEffect(() => { try { setRetour(retourSur(new URLSearchParams(window.location.search).get('retour'))) } catch { /* rien */ } }, [])
+  /* Compte d'acces deja cree pendant cette visite (reprise apres un echec d'enregistrement de la fiche). */
   const compteCree = useRef<{ email: string; id: string } | null>(null)
 
-  /* Recherche entreprise */
+  /* Recherche entreprise par SIRET */
   const [recherche, setRecherche] = useState('')
   const [etatRecherche, setEtatRecherche] = useState<'idle' | 'loading' | 'ok' | 'vide' | 'indispo' | 'erreur'>('idle')
   const [messageRecherche, setMessageRecherche] = useState('')
@@ -140,7 +119,7 @@ export default function PremiereFois() {
 
   useEffect(() => {
     const b = lireBrouillon()
-    if (b && b.etape >= 0) setBrouillonTrouve(b)
+    if (b) setBrouillonTrouve(b)
     const sel = lireSelection() || b?.selection || ''
     setSelection(sel)
     const nb = new URLSearchParams(sel).get('boutiques')
@@ -156,10 +135,11 @@ export default function PremiereFois() {
     setPret(true)
   }, [])
 
+  /* Le brouillon trouve attend la decision (Reprendre / Recommencer) : tant qu'elle n'est pas prise, on ne l'ecrase pas. */
   useEffect(() => {
-    if (!pret || etape < 0 || etape > 6) return
+    if (!pret || brouillonTrouve || etape > NB_ECRANS - 1) return
     ecrireBrouillon({ etape, f, perso, mode, selection })
-  }, [pret, etape, f, perso, mode, selection])
+  }, [pret, brouillonTrouve, etape, f, perso, mode, selection])
 
   const maj = (c: Partial<FichePro>) => setF(x => ({ ...x, ...c }))
   const allerA = (n: number) => {
@@ -168,73 +148,55 @@ export default function PremiereFois() {
     try { haut.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }); window.scrollTo({ top: 0 }) } catch { /* rien */ }
   }
 
-  const id: IdEtape | null = etape >= 0 && etape <= 6 ? ETAPES[etape].id : null
-
   /** Ce qui manque pour avancer, par champ (affiche apres un premier essai). */
-  const erreurs = useMemo(() => {
-    const e: Record<string, string> = {}
-    if (id === 'vous') {
-      if (perso.prenom.trim().length < 1) e.prenom = 'Votre prénom.'
-      if (perso.nom.trim().length < 1) e.nom = 'Votre nom.'
-      if (!EMAIL_OK(f.email)) e.email = 'Un email valide : il servira à vous connecter.'
-      if (!TEL_OK(f.tel)) e.tel = 'Ce numéro ne semble pas valide.'
-    }
-    if (id === 'entreprise') {
-      if (mode !== 'recherche' && f.nom.trim().length < 2) e.nom = 'La raison sociale ou le nom de l’établissement.'
-      if (mode === 'recherche') e.recherche = 'Choisissez votre entreprise dans les résultats, ou saisissez-la à la main.'
-      if (f.siret.trim() && !siretValide(f.siret)) e.siret = erreurNumero(f.siret) ?? 'SIRET invalide.'
-    }
-    if (id === 'secteur' && !f.secteur) e.secteur = 'Choisissez le secteur le plus proche (ou « Autre »).'
-    if (id === 'secteur' && (f.secteur === SECTEUR_AUTRE || (f.secteur === 'Commerce & Négoce' && f.activite === SECTEUR_AUTRE)) && nettoyerPrecision(f.secteurAutre).length < 3) e.secteurAutre = 'Précisez votre activité (3 lettres minimum).'
-    if (id === 'produits' && (f.produits ?? '').trim().length < 3) e.produits = 'Quelques mots suffisent : ce que vos clients viennent chercher chez vous.'
-    if (id === 'adresse') {
-      if (f.profil !== 'annonceur' && f.adresse.trim().length < 3) e.adresse = 'Le numéro et la rue.'
-      if (!CP_OK(f.codePostal)) e.codePostal = '5 chiffres.'
-      if (f.ville.trim().length < 2) e.ville = 'La ville.'
-    }
-    if (id === 'points') {
-      const n = parseInt(f.nbPointsVente ?? '', 10)
-      if (!Number.isFinite(n) || n < 1) e.nbPointsVente = 'Au moins 1.'
-    }
-    if (id === 'compte') {
-      if (f.motdepasse.length < 8) e.motdepasse = '8 caractères minimum.'
-      if (confirmation !== f.motdepasse) e.confirmation = 'Les deux mots de passe ne sont pas identiques.'
-    }
-    return e
-  }, [id, perso, f, mode, confirmation])
+  const erreurs = useMemo(() => erreursEtape(etape, {
+    prenom: perso.prenom, nom: perso.nom, email: f.email, tel: f.tel,
+    entreprise: f.nom, adresse: f.adresse, codePostal: f.codePostal, ville: f.ville, mode,
+    siretInvalide: recherche.trim() ? (erreurNumero(recherche) ?? (etatRecherche === 'vide' ? 'Aucune entreprise trouvée : vérifiez le numéro, ou « Pas de SIRET ».' : etatRecherche === 'indispo' || etatRecherche === 'erreur' ? messageRecherche : null)) : null,
+    secteur: f.secteur, secteurAutre: f.secteurAutre ?? '', motdepasse: f.motdepasse,
+  }), [etape, perso, f, mode, recherche, etatRecherche, messageRecherche])
   const ok = Object.keys(erreurs).length === 0
-  const err = (k: string) => (tente && erreurs[k] ? <div className="pf-err">{erreurs[k]}</div> : null)
+  const err = (k: string) => (tente && erreurs[k] ? <div className="pf-err" role="alert">{erreurs[k]}</div> : null)
 
   /* Mode demo (lib/demo.ts) : jamais bloque, l'ecran incomplet est complete de valeurs « Démo ». */
-  function completerDemo() {
-    if (id === 'vous') {
+  function completerDemo(): Partial<FichePro> {
+    if (etape === 0) {
       setPerso(x => ({ prenom: x.prenom.trim() || 'Prénom', nom: x.nom.trim() || 'Démo' }))
-      maj({ email: EMAIL_OK(f.email) ? f.email : 'demo@demo.invalid', tel: TEL_OK(f.tel) ? f.tel : '' })
+      const c: Partial<FichePro> = { email: EMAIL_OK(f.email) ? f.email : 'demo@demo.invalid' }
+      if (mode === 'recherche') {
+        setMode('manuel')
+        Object.assign(c, { nom: 'Commerce Démo', adresse: '1 rue Démo', codePostal: '00000', ville: 'Ville Démo' })
+      } else {
+        Object.assign(c, {
+          nom: f.nom.trim().length >= 2 ? f.nom : 'Commerce Démo', adresse: f.adresse.trim().length >= 3 ? f.adresse : '1 rue Démo',
+          codePostal: CP_OK(f.codePostal) ? f.codePostal : '00000', ville: f.ville.trim().length >= 2 ? f.ville : 'Ville Démo',
+        })
+      }
+      maj(c); return c
     }
-    if (id === 'entreprise') {
-      if (mode === 'recherche') setMode('manuel')
-      maj({ nom: f.nom.trim().length >= 2 ? f.nom : 'Commerce Démo', siret: f.siret.trim() && !siretValide(f.siret) ? '' : f.siret })
+    if (etape === 1) {
+      const c: Partial<FichePro> = { secteur: f.secteur || SECTEURS_PRO[0], secteurAutre: nettoyerPrecision(f.secteurAutre).length >= 3 ? f.secteurAutre : 'Activité Démo' }
+      maj(c); return c
     }
-    if (id === 'secteur') maj({ secteur: f.secteur || SECTEURS_PRO[0], secteurAutre: nettoyerPrecision(f.secteurAutre).length >= 3 ? f.secteurAutre : 'Activité Démo' })
-    if (id === 'produits') maj({ produits: (f.produits ?? '').trim().length >= 3 ? f.produits : 'Produits Démo' })
-    if (id === 'adresse') maj({ adresse: f.adresse.trim().length >= 3 ? f.adresse : '1 rue Démo', codePostal: CP_OK(f.codePostal) ? f.codePostal : '00000', ville: f.ville.trim().length >= 2 ? f.ville : 'Ville Démo' })
-    if (id === 'points') maj({ nbPointsVente: parseInt(f.nbPointsVente ?? '', 10) >= 1 ? f.nbPointsVente : '1' })
-    if (id === 'compte') { maj({ motdepasse: f.motdepasse.length >= 8 ? f.motdepasse : 'demo-demo-2026' }); setConfirmation(f.motdepasse.length >= 8 ? f.motdepasse : 'demo-demo-2026') }
+    const c: Partial<FichePro> = { motdepasse: f.motdepasse.length >= 8 ? f.motdepasse : 'demo-demo-2026', tel: TEL_OK(f.tel) ? f.tel : '' }
+    maj(c); return c
   }
 
   function suivant() {
-    if (!ok && estDemo()) completerDemo()
-    else if (!ok) { setTente(true); return }
-    if (id === 'vous') maj({ contact: `${perso.prenom.trim()} ${perso.nom.trim()}`.trim() })
-    if (id === 'compte') { creer(); return }
+    let over: Partial<FichePro> = {}
+    if (!ok) {
+      if (estDemo()) over = completerDemo()
+      else { setTente(true); return }
+    }
+    if (etape === NB_ECRANS - 1) { creer(over); return }
     allerA(etape + 1)
   }
 
-  async function chercher() {
-    const q = recherche.trim()
+  async function chercher(brut: string) {
+    const q = brut.trim()
     const e = erreurNumero(q)
     if (e) { setEtatRecherche('erreur'); setMessageRecherche(e); return }
-    if (natureRecherche(q) === 'invalide') { setEtatRecherche('erreur'); setMessageRecherche('Saisissez un SIRET (14 chiffres), un SIREN (9 chiffres) ou au moins 3 lettres du nom.'); return }
+    if (natureRecherche(q) === 'invalide') { setEtatRecherche('erreur'); setMessageRecherche('Saisissez un SIRET (14 chiffres).'); return }
     setEtatRecherche('loading'); setMessageRecherche(''); setResultats([])
     try {
       const rep = await fetch(`/api/pro/entreprise?q=${encodeURIComponent(q)}`)
@@ -247,9 +209,17 @@ export default function PremiereFois() {
       const r = (j.resultats ?? []) as EntrepriseTrouvee[]
       setResultats(r)
       setEtatRecherche(r.length ? 'ok' : 'vide')
+      if (r.length === 1) choisir(r[0])
     } catch {
-      setEtatRecherche('indispo'); setMessageRecherche('Le service public ne répond pas.')
+      setEtatRecherche('indispo'); setMessageRecherche('Le service public ne répond pas : saisissez vos informations à la main.')
     }
+  }
+
+  /** Le SIRET complet (14 chiffres, cle valide) lance la recherche tout seul : un toucher de moins. */
+  function surSiret(v: string) {
+    setRecherche(v); setEtatRecherche('idle'); setMessageRecherche(''); setResultats([])
+    const c = chiffres(v)
+    if (c.length === 14 && /^[\d\s.-]+$/.test(v.trim()) && siretValide(c)) chercher(c)
   }
 
   function choisir(r: EntrepriseTrouvee) {
@@ -263,9 +233,9 @@ export default function PremiereFois() {
     setMode('prerempli'); setTente(false)
   }
 
-  async function creer() {
+  async function creer(over: Partial<FichePro> = {}) {
     setEnvoi('loading'); setErreur('')
-    const fiche: FichePro = { ...f, contact: `${perso.prenom.trim()} ${perso.nom.trim()}`.trim(), siret: chiffres(f.siret) }
+    const fiche: FichePro = { ...f, ...over, contact: `${perso.prenom.trim()} ${perso.nom.trim()}`.trim(), siret: chiffres(f.siret) }
     const adresse = fiche.email.trim()
     /* Reprise apres un echec de l'enregistrement de la fiche : le compte d'acces existe deja (cree au 1er essai).
        On le reutilise au lieu de refaire un signUp, qui repondrait « compte deja existant » et bloquerait le pro. */
@@ -333,10 +303,11 @@ export default function PremiereFois() {
     } catch { /* navigation privee : le bon de commande se remplit a la main */ }
     setEnvoi('idle')
     setFin({ proId: idPro, session: aSession, degrade })
-    setEtape(7)
+    setEtape(NB_ECRANS)
   }
 
-  const progression = etape < 0 ? 0 : Math.min(etape + 1, ETAPES.length)
+  const suggere = secteurSuggere(f.codeNaf, f.formeJuridiqueCode)
+  const adresseIncomplete = mode === 'prerempli' && (f.adresse.trim().length < 3 || !CP_OK(f.codePostal) || f.ville.trim().length < 2)
 
   /* ------------------------------------------------------------------ */
   return (
@@ -349,300 +320,177 @@ export default function PremiereFois() {
         <Link href="/pro/connexion" className="pf-lien">Déjà un compte ?</Link>
       </header>
 
-      {etape === -1 && (
-        <main className="pf-col">
-          {brouillonTrouve && (
-            <div className="pf-brouillon">
-              <div><b>Vous aviez commencé.</b> Votre brouillon est gardé sur cet appareil (étape {brouillonTrouve.etape + 1} sur {ETAPES.length}).</div>
+      {etape < NB_ECRANS && (
+        <main className="pf-col" data-ecran={etape + 1}>
+          <div className="pf-prog" role="group" aria-label={`Étape ${etape + 1} sur ${NB_ECRANS}`}>
+            <div className="pf-gs">
+              {ETAPES_INSCRIPTION.map((nom, n) => (
+                <button key={nom} type="button" className={`pf-g${n < etape ? ' done' : n === etape ? ' cur' : ''}`} disabled={n >= etape} onClick={() => allerA(n)} aria-label={n < etape ? `Revenir à ${nom}` : nom}>
+                  <i /><span>{n < etape && <Coche taille={13} />}{nom}</span>
+                </button>
+              ))}
+            </div>
+            <div className="pf-nn">{etape + 1}<small>/{NB_ECRANS}</small></div>
+          </div>
+
+          {brouillonTrouve && etape === 0 && (
+            <div className="pf-brouillon" data-brouillon>
+              <div><b>Vous aviez commencé.</b> Brouillon gardé sur cet appareil.</div>
               <div className="pf-row">
-                <button className="pf-btn" onClick={() => { setF(brouillonTrouve.f); setPerso(brouillonTrouve.perso ?? { prenom: '', nom: '' }); setMode(brouillonTrouve.mode ?? 'recherche'); allerA(brouillonTrouve.etape) }}>Reprendre</button>
+                <button className="pf-btn pf-petit" onClick={() => { setF(brouillonTrouve.f); setPerso(brouillonTrouve.perso ?? { prenom: '', nom: '' }); setMode(brouillonTrouve.mode ?? 'recherche'); const e = brouillonTrouve.etape; setBrouillonTrouve(null); allerA(e) }}>Reprendre</button>
                 <button className="pf-btn2" onClick={() => { effacerBrouillon(); setBrouillonTrouve(null) }}>Recommencer</button>
               </div>
             </div>
           )}
-          {/* Accueil en carrousel (Romain, 10/11/2026) : d'abord « Tester Flowin », puis seulement les offres mensuelle et annuelle. */}
-          <Carrousel nom="Découvrir Flowin" i={ecranAccueil} setI={setEcranAccueil}
-            dernier={<button className="pf-btn" onClick={() => allerA(0)}>C’est parti</button>}
-            ecrans={[
-              { cle: 'promesse', contenu: (<>
-                <div className="pf-kicker">Ma première fois</div>
-                <h1 className="pf-h1">Votre commerce, <span>animé</span> en quelques minutes.</h1>
-                <ul className="pf-promesses">
-                  <li><span className="pf-ic">1</span><div><b>Vous vous présentez</b><br />Votre SIRET suffit.</div></li>
-                  <li><span className="pf-ic">2</span><div><b>Vous configurez votre jeu</b><br />Jeu, lots, QR : vous le voyez avant de payer.</div></li>
-                  <li><span className="pf-ic">3</span><div><b>Vous payez pour le mettre en ligne</b><br />Par virement, en un scan.</div></li>
-                </ul>
-              </>) },
-              { cle: 'tester', contenu: (
-                <div className="pf-offre pf-offre-1" data-offre="lancement">
-                  <span className="pf-offre-tag">Pour commencer</span>
-                  <div className="pf-offre-n">{OFFRES_ANIMATION[0].nom}</div>
-                  <div className="pf-offre-p">{OFFRES_ANIMATION[0].prix}</div>
-                  <div className="pf-offre-d">{OFFRES_ANIMATION[0].detail}. Toutes les fonctions.</div>
-                  <div className="pf-offre-o"><b>{OPTION_QUIZ_FLOWIN.nom}</b><span>{prixOptionQuiz('lancement')}</span></div>
-                </div>
-              ) },
-              { cle: 'offres', contenu: (<>
-                <div className="pf-kicker">Nos autres offres</div>
-                {OFFRES_ANIMATION.filter(o => o.cle !== 'lancement').map(o => (
-                  <div key={o.cle} className="pf-offre" data-offre={o.cle}>
-                    <div className="pf-offre-n">{o.nom}</div>
-                    <div className="pf-offre-p">{o.prix}</div>
-                    <div className="pf-offre-d">{o.detail}</div>
-                  </div>
-                ))}
-                <div className="pf-offre-o"><b>{OPTION_QUIZ_FLOWIN.nom}</b><span>{prixOptionQuiz('annuelle')}</span></div>
-              </>) },
-            ]} />
-          {selection && <div className="pf-info">Votre sélection : <b>{resumeSelection(selection)}</b>. Elle sera reprise dans votre bon de commande.</div>}
-          <div className="pf-note">Environ 3 minutes · {ETAPES.length} étapes · vous pouvez revenir en arrière à tout moment</div>
-        </main>
-      )}
 
-      {etape >= 0 && etape <= 6 && (
-        <main className="pf-col">
-          <div className="pf-prog" aria-label={`Étape ${progression} sur ${ETAPES.length}`}>
-            <div className="pf-prog-l">
-              <span>Étape {progression} sur {ETAPES.length}</span>
-              <span className="pf-prog-n">{ETAPES[etape].court}</span>
-            </div>
-            <div className="pf-barres">
-              {ETAPES.map((e, n) => (
-                <button key={e.id} className={`pf-barre${n <= etape ? ' on' : ''}`} disabled={n >= etape} onClick={() => allerA(n)} aria-label={`Revenir à l’étape ${e.court}`} />
-              ))}
-            </div>
-          </div>
-
-          <div className="pf-carte">
-            {id === 'vous' && (
+          <div className="pf-corps">
+            {etape === 0 && (
               <>
-                <h2 className="pf-h2">Faisons connaissance</h2>
-                <p className="pf-sous">La personne que l’équipe Flowin contactera, et l’email qui ouvrira votre espace.</p>
+                <h1 className="pf-h2">Vous et votre commerce</h1>
                 <div className="pf-g2">
-                  <Champ label="Prénom *" v={perso.prenom} set={v => setPerso(p => ({ ...p, prenom: v }))} auto="given-name" />
-                  <Champ label="Nom *" v={perso.nom} set={v => setPerso(p => ({ ...p, nom: v }))} auto="family-name" />
+                  <Champ label="Prénom" v={perso.prenom} set={v => setPerso(p => ({ ...p, prenom: v }))} auto="given-name" ko={tente && !!erreurs.prenom} />
+                  <Champ label="Nom" v={perso.nom} set={v => setPerso(p => ({ ...p, nom: v }))} auto="family-name" ko={tente && !!erreurs.nom} />
                 </div>
                 {err('prenom')}{err('nom')}
-                <Champ label="Votre rôle" v={f.roleContact} set={v => maj({ roleContact: v })} placeholder="Gérant, responsable de magasin…" auto="organization-title" />
-                <Champ label="Email professionnel *" v={f.email} set={v => maj({ email: v })} type="email" placeholder="vous@votre-commerce.fr" auto="email" />
+                <Champ label="E-mail" v={f.email} set={v => maj({ email: v })} type="email" auto="email" ko={tente && !!erreurs.email} />
                 {err('email')}
-                <Champ label="Téléphone" v={f.tel} set={v => maj({ tel: v })} type="tel" placeholder="06 00 00 00 00" auto="tel" aide="Facultatif. Pour vous joindre au lancement de votre première animation." />
-                {err('tel')}
-              </>
-            )}
-
-            {id === 'entreprise' && (
-              <>
-                <h2 className="pf-h2">Votre entreprise</h2>
-                <p className="pf-sous">Saisissez votre SIRET : on récupère la raison sociale, l’adresse et l’activité dans l’annuaire officiel des entreprises.</p>
-                <div className="pf-label">Vous êtes</div>
-                <div className="pf-choix2">
-                  {PROFILS_PRO.map(p => (
-                    <button key={p.id} className={`pf-opt${f.profil === p.id ? ' on' : ''}`} onClick={() => maj({ profil: p.id as ProfilPro })}>
-                      <b>{p.titre}</b><span>{p.sous}</span>
-                    </button>
-                  ))}
-                </div>
 
                 {mode === 'recherche' && (
                   <>
-                    <label className="pf-label" htmlFor="pf-q">SIRET, SIREN ou nom de l’entreprise</label>
-                    <div className="pf-cherche">
-                      <input id="pf-q" className="pf-in" value={recherche} inputMode="search" placeholder="Ex. 123 456 789 00012"
-                        onChange={e => { setRecherche(e.target.value); if (etatRecherche === 'erreur') setEtatRecherche('idle') }}
-                        onKeyDown={e => { if (e.key === 'Enter') chercher() }} />
-                      <button className="pf-btn" onClick={chercher} disabled={etatRecherche === 'loading'}>{etatRecherche === 'loading' ? 'Recherche…' : 'Rechercher'}</button>
-                    </div>
-                    {etatRecherche === 'erreur' && <div className="pf-err">{messageRecherche}</div>}
-                    {etatRecherche === 'vide' && <div className="pf-info">Aucune entreprise trouvée. Vérifiez le numéro, ou saisissez vos informations à la main.</div>}
-                    {etatRecherche === 'indispo' && (
-                      <div className="pf-info">L’annuaire officiel des entreprises ne répond pas pour le moment. Pas de souci : saisissez vos informations à la main.
-                        <div style={{ marginTop: 8 }}><button className="pf-btn2" onClick={() => { setMode('manuel'); if (natureRecherche(recherche) === 'siret') maj({ siret: chiffres(recherche) }) }}>Saisir à la main</button></div>
-                      </div>
-                    )}
-                    {resultats.length > 0 && (
+                    <Champ label="SIRET · 14 chiffres" v={recherche} set={surSiret} inputMode="numeric" auto="off" ko={tente && !!erreurs.siret} />
+                    {etatRecherche === 'loading' && <div className="pf-info" role="status">Recherche dans l’annuaire officiel…</div>}
+                    {etatRecherche === 'erreur' && <div className="pf-err" role="alert">{messageRecherche}</div>}
+                    {etatRecherche === 'vide' && <div className="pf-info">Aucune entreprise trouvée : vérifiez le numéro, ou « Pas de SIRET ».</div>}
+                    {etatRecherche === 'indispo' && <div className="pf-info">{messageRecherche || 'L’annuaire officiel ne répond pas.'} Saisissez vos informations à la main.</div>}
+                    {resultats.length > 1 && (
                       <div className="pf-resultats">
                         {resultats.map(r => (
-                          <button key={r.siret || r.siren} className="pf-res" onClick={() => choisir(r)}>
-                            <div className="pf-res-n">{r.nom || '[nom non communiqué]'}{r.nomCommercial ? <span> · {r.nomCommercial}</span> : null}</div>
-                            <div className="pf-res-d">{[r.formeJuridique, [r.codePostal, r.ville].filter(Boolean).join(' ')].filter(Boolean).join(' · ')}</div>
-                            <div className="pf-res-d">SIRET {r.siret ? formaterSiret(r.siret) : '—'}{!r.enActivite && <b className="pf-ferme"> · fermé</b>}</div>
+                          <button key={r.siret || r.siren} type="button" className="pf-res" onClick={() => choisir(r)}>
+                            <b>{r.nom || '[nom non communiqué]'}</b><span>{[r.codePostal, r.ville].filter(Boolean).join(' ')}</span>
                           </button>
                         ))}
                       </div>
                     )}
-                    {tente && erreurs.recherche && <div className="pf-err">{erreurs.recherche}</div>}
-                    <button className="pf-lien-btn" onClick={() => setMode('manuel')}>Pas de SIRET (association, projet en création…) ? Saisir à la main</button>
+                    {tente && erreurs.siret && etatRecherche === 'idle' && <div className="pf-err" role="alert">{erreurs.siret}</div>}
                   </>
                 )}
 
-                {mode !== 'recherche' && (
+                {mode === 'prerempli' && (
                   <>
-                    {mode === 'prerempli' && (
-                      <div className="pf-ok">Fiche pré-remplie depuis l’annuaire officiel des entreprises (INSEE). Vérifiez et corrigez si besoin.</div>
-                    )}
-                    <Champ label="Raison sociale ou nom de l’établissement *" v={f.nom} set={v => maj({ nom: v })} auto="organization" />
-                    {err('nom')}
-                    <Champ label="Nom commercial (enseigne)" v={f.nomCommercial ?? ''} set={v => maj({ nomCommercial: v })} aide="Le nom que voient vos clients, s’il diffère de la raison sociale." />
-                    <Champ label="SIRET" v={f.siret} set={v => maj({ siret: v })} inputMode="numeric" placeholder="14 chiffres" aide="Facultatif, utile pour vos factures." />
-                    {err('siret')}
-                    <Champ label="Forme juridique" v={f.formeJuridique ?? ''} set={v => maj({ formeJuridique: v })} />
-                    <div className="pf-g2">
-                      <Champ label="Date de création" v={f.dateCreation ?? ''} set={v => maj({ dateCreation: v })} type="date" />
+                    <div className="pf-carte-ok" data-entreprise-trouvee>
+                      <span className="pf-c"><Coche taille={16} /></span>
+                      <div>
+                        <b>{f.nomCommercial || f.nom}</b>
+                        <small>{[f.codePostal, f.ville].filter(Boolean).join(' ')}{f.adresse ? ' · adresse reprise de l’annuaire' : ''}</small>
+                      </div>
                     </div>
-                    <button className="pf-lien-btn" onClick={() => { setMode('recherche'); setResultats([]); setEtatRecherche('idle') }}>Rechercher une autre entreprise</button>
+                    {adresseIncomplete && (
+                      <>
+                        <Champ label="Adresse" v={f.adresse} set={v => maj({ adresse: v })} auto="street-address" ko={tente && !!erreurs.adresse} />
+                        <div className="pf-g2 pf-cp">
+                          <Champ label="Code postal" v={f.codePostal} set={v => maj({ codePostal: v })} inputMode="numeric" auto="postal-code" ko={tente && !!erreurs.codePostal} />
+                          <Champ label="Ville" v={f.ville} set={v => maj({ ville: v })} auto="address-level2" ko={tente && !!erreurs.ville} />
+                        </div>
+                        {err('adresse')}{err('codePostal')}{err('ville')}
+                      </>
+                    )}
+                    {suggere && <div className="pf-moment"><span className="pf-c"><Coche taille={15} /></span><span>Secteur suggéré : {suggere}</span></div>}
                   </>
                 )}
+
+                {mode === 'manuel' && (
+                  <>
+                    <Champ label="Nom de l’établissement" v={f.nom} set={v => maj({ nom: v })} auto="organization" ko={tente && !!erreurs.entreprise} />
+                    {err('entreprise')}
+                    <Champ label="Adresse" v={f.adresse} set={v => maj({ adresse: v })} auto="street-address" ko={tente && !!erreurs.adresse} />
+                    {err('adresse')}
+                    <div className="pf-g2 pf-cp">
+                      <Champ label="Code postal" v={f.codePostal} set={v => maj({ codePostal: v })} inputMode="numeric" auto="postal-code" ko={tente && !!erreurs.codePostal} />
+                      <Champ label="Ville" v={f.ville} set={v => maj({ ville: v })} auto="address-level2" ko={tente && !!erreurs.ville} />
+                    </div>
+                    {err('codePostal')}{err('ville')}
+                  </>
+                )}
+                {selection && <div className="pf-aide">Votre sélection : <b>{resumeSelection(selection)}</b>. Elle sera reprise dans votre bon de commande.</div>}
               </>
             )}
 
-            {id === 'secteur' && (
+            {etape === 1 && (
               <>
-                <h2 className="pf-h2">Votre secteur d’activité</h2>
-                <p className="pf-sous">Il sert à vous proposer les bons jeux et les bons lots.</p>
-                {f.codeNaf && (
-                  <div className="pf-info">Activité déclarée (code NAF {f.codeNaf}){f.activiteNaf ? ` : ${f.activiteNaf}` : ''}.</div>
+                <h1 className="pf-h2">Votre activité</h1>
+                {f.secteur && (
+                  <div className="pf-carte-ok pf-bleu" data-secteur-choisi>
+                    <span className="pf-c"><Coche taille={16} /></span>
+                    <div><b>{f.secteur}</b><small>{f.secteur === suggere ? `Suggéré d’après votre code NAF${f.codeNaf ? ` (${f.codeNaf})` : ''}` : 'Votre choix'}</small></div>
+                  </div>
                 )}
-                <div className="pf-choix">
-                  {(SECTEURS_PRO as readonly string[]).map(s => {
-                    const suggere = s === secteurSuggere(f.codeNaf, f.formeJuridiqueCode)
-                    return (
-                      <button key={s} className={`pf-opt${f.secteur === s ? ' on' : ''}`} onClick={() => maj({ secteur: s })}>
-                        <b>{s}</b>{suggere && <span className="pf-suggere">Suggéré d’après votre activité</span>}
-                      </button>
-                    )
-                  })}
-                </div>
-                {err('secteur')}
-                <PrecisionAutre secteur={f.secteur} valeur={f.secteurAutre ?? ''} onChange={v => maj({ secteurAutre: v })} id="pf-secteur-autre" erreur={tente ? erreurs.secteurAutre : null} />
-                {f.secteur === 'Commerce & Négoce' && (
-                  <div style={{ display: 'block', marginTop: 12 }}>
-                    <span style={{ display: 'block', fontSize: 12, fontWeight: 800, marginBottom: 5 }}>Votre activité (facultatif)</span>
-                    <SelectActivite id="pf-activite" valeur={f.activite ?? ''} onChange={v => maj({ activite: v })} style={{ width: '100%', padding: '12px 14px', borderRadius: 12, border: '1.5px solid #C9D4E3', fontSize: 16, fontFamily: 'inherit' }} />
+                {f.secteur === SECTEUR_COMMERCE && (
+                  <div className="pf-champ-select">
+                    <label className="pf-lbl" htmlFor="pf-activite">Votre activité (facultatif)</label>
+                    <SelectActivite id="pf-activite" valeur={f.activite ?? ''} onChange={v => maj({ activite: v })} style={STYLE_SELECT} />
                     <PrecisionAutre secteur={f.activite ?? ''} valeur={f.secteurAutre ?? ''} onChange={v => maj({ secteurAutre: v })} id="pf-activite-autre" />
                   </div>
                 )}
-              </>
-            )}
-
-            {id === 'produits' && (
-              <>
-                <h2 className="pf-h2">Ce que vous proposez</h2>
-                <p className="pf-sous">Vos produits ou services, en quelques mots. Cela nous aide à imaginer des lots qui ont du sens.</p>
-                <label className="pf-label" htmlFor="pf-prod">Produits et services *</label>
-                <textarea id="pf-prod" className="pf-in pf-zone" value={f.produits ?? ''} onChange={e => maj({ produits: e.target.value })}
-                  placeholder="Ex. pain au levain, viennoiseries, pâtisseries maison, snacking le midi" />
-                {err('produits')}
-              </>
-            )}
-
-            {id === 'adresse' && (
-              <>
-                <h2 className="pf-h2">Votre adresse</h2>
-                <p className="pf-sous">{f.profil === 'annonceur' ? 'L’adresse de votre siège, pour vos factures.' : 'Elle place votre commerce sur la carte des animations.'}</p>
-                {mode === 'prerempli' && f.adresse && <div className="pf-ok">Adresse reprise de l’annuaire officiel. Modifiez-la si votre point de vente est ailleurs.</div>}
-                <Champ label={f.profil === 'annonceur' ? 'Adresse' : 'Adresse *'} v={f.adresse} set={v => maj({ adresse: v })} placeholder="Numéro et rue" auto="street-address" />
-                {err('adresse')}
-                <div className="pf-g2 pf-cp">
-                  <Champ label="Code postal *" v={f.codePostal} set={v => maj({ codePostal: v })} inputMode="numeric" auto="postal-code" />
-                  <Champ label="Ville *" v={f.ville} set={v => maj({ ville: v })} auto="address-level2" />
-                </div>
-                {err('codePostal')}{err('ville')}
-              </>
-            )}
-
-            {id === 'points' && (
-              <>
-                <h2 className="pf-h2">Combien de points de vente ?</h2>
-                <p className="pf-sous">Chaque point de vente peut avoir ses propres QR et ses propres statistiques.</p>
-                <div className="pf-stepper">
-                  <button aria-label="Moins" onClick={() => maj({ nbPointsVente: String(Math.max(1, (parseInt(f.nbPointsVente ?? '', 10) || 1) - 1)) })}>−</button>
-                  <input className="pf-in" inputMode="numeric" value={f.nbPointsVente ?? ''} onChange={e => maj({ nbPointsVente: e.target.value.replace(/\D/g, '').slice(0, 4) })} placeholder="1" aria-label="Nombre de points de vente" />
-                  <button aria-label="Plus" onClick={() => maj({ nbPointsVente: String((parseInt(f.nbPointsVente ?? '', 10) || 0) + 1) })}>+</button>
-                </div>
-                <div className="pf-puces">
-                  {['1', '2', '3', '5', '10'].map(n => (
-                    <button key={n} className={`pf-puce${f.nbPointsVente === n ? ' on' : ''}`} onClick={() => maj({ nbPointsVente: n })}>{n === '10' ? '10 et +' : n}</button>
+                <PrecisionAutre secteur={f.secteur} valeur={f.secteurAutre ?? ''} onChange={v => maj({ secteurAutre: v })} id="pf-secteur-autre" erreur={tente ? erreurs.secteurAutre : null} />
+                <div className="pf-lbl">{f.secteur ? 'Autre secteur' : 'Choisissez votre secteur'}</div>
+                <div className="pf-puces" role="group" aria-label="Secteur d’activité">
+                  {(SECTEURS_PRO as readonly string[]).filter(s => s !== f.secteur).map(s => (
+                    <button key={s} type="button" className="pf-puce" onClick={() => maj({ secteur: s, activite: s === SECTEUR_COMMERCE ? f.activite : '' })}>{s}</button>
                   ))}
                 </div>
-                {err('nbPointsVente')}
+                {err('secteur')}
+                <div className="pf-aide">Produits et points de vente : à compléter plus tard dans Mon profil.</div>
               </>
             )}
 
-            {id === 'compte' && (
+            {etape === 2 && (
               <>
-                <h2 className="pf-h2">Créez votre accès</h2>
-                <p className="pf-sous">Dernière étape. Relisez, choisissez un mot de passe, et votre espace pro est ouvert.</p>
-                <div className="pf-recap">
-                  {[
-                    { k: 'Vous', v: [`${perso.prenom} ${perso.nom}`.trim(), f.roleContact].filter(Boolean).join(' · '), e: 0 },
-                    { k: 'Email', v: f.email, e: 0 },
-                    { k: 'Entreprise', v: [f.nom, f.nomCommercial].filter(Boolean).join(' · '), e: 1 },
-                    { k: 'SIRET', v: f.siret ? formaterSiret(f.siret) : '', e: 1 },
-                    { k: 'Forme · création', v: [f.formeJuridique, f.dateCreation ? `créée le ${dateFr(f.dateCreation)}` : ''].filter(Boolean).join(' · '), e: 1 },
-                    { k: 'Secteur', v: f.secteur, e: 2 },
-                    { k: 'Produits', v: f.produits ?? '', e: 3 },
-                    { k: 'Adresse', v: [f.adresse, `${f.codePostal} ${f.ville}`.trim()].filter(Boolean).join(', '), e: 4 },
-                    { k: 'Points de vente', v: f.nbPointsVente ?? '', e: 5 },
-                  ].map(l => (
-                    <div key={l.k} className="pf-recap-l">
-                      <span className="pf-recap-k">{l.k}</span>
-                      <span className="pf-recap-v">{l.v || '—'}</span>
-                      <button className="pf-lien-btn" onClick={() => allerA(l.e)}>Modifier</button>
-                    </div>
-                  ))}
+                <h1 className="pf-h2">Votre compte</h1>
+                <div className="pf-ch pf-ok" data-email-repris>
+                  <span className="pf-ch-l">E-mail</span>
+                  <span className="pf-val">{f.email}</span>
                 </div>
-                <label className="pf-label" htmlFor="pf-mdp">Mot de passe *</label>
-                <div className="pf-cherche">
-                  <input id="pf-mdp" className="pf-in" type={voirMdp ? 'text' : 'password'} autoComplete="new-password" value={f.motdepasse} onChange={e => maj({ motdepasse: e.target.value })} />
-                  <button className="pf-btn2" onClick={() => setVoirMdp(v => !v)}>{voirMdp ? 'Masquer' : 'Afficher'}</button>
-                </div>
-                <div className="pf-aide">8 caractères minimum.</div>
+                <Champ label="Mot de passe · 8 caractères minimum" v={f.motdepasse} set={v => maj({ motdepasse: v })} type={voirMdp ? 'text' : 'password'} auto="new-password" ko={tente && !!erreurs.motdepasse}
+                  droite={<button type="button" className="pf-oeil" onClick={() => setVoirMdp(v => !v)} aria-label={voirMdp ? 'Masquer le mot de passe' : 'Afficher le mot de passe'} aria-pressed={voirMdp}><Oeil barre={voirMdp} /></button>} />
                 {err('motdepasse')}
-                <label className="pf-label" htmlFor="pf-mdp2">Confirmez le mot de passe *</label>
-                <input id="pf-mdp2" className="pf-in" type={voirMdp ? 'text' : 'password'} autoComplete="new-password" value={confirmation} onChange={e => setConfirmation(e.target.value)} />
-                {err('confirmation')}
-                <div className="pf-aide" style={{ marginTop: 12 }}>Ensuite : vous configurez votre jeu, puis vous validez votre bon de commande, déjà rempli.</div>
-                {erreur && <div className="pf-err" style={{ marginTop: 12 }}>{erreur} {/existe déjà/.test(erreur) && <Link href="/pro/connexion" className="pf-lien">Se connecter</Link>}</div>}
+                <Champ label="Téléphone · facultatif" v={f.tel} set={v => maj({ tel: v })} type="tel" auto="tel" inputMode="tel" ko={tente && !!erreurs.tel} />
+                {err('tel')}
+                <div className="pf-moment"><span className="pf-c"><Coche taille={15} /></span><span>2 étapes faites</span></div>
+                {erreur && <div className="pf-err" role="alert">{erreur} {/existe déjà/.test(erreur) && <Link href="/pro/connexion" className="pf-lien">Se connecter</Link>}</div>}
               </>
             )}
-
-            <div className="pf-nav">
-              <button className="pf-btn2" onClick={() => allerA(etape - 1)} disabled={envoi === 'loading'}>← Retour</button>
-              <span style={{ flex: 1 }} />
-              <button className="pf-btn" onClick={suivant} disabled={envoi === 'loading'}>
-                {id === 'compte' ? (envoi === 'loading' ? 'Création…' : 'Créer mon espace') : 'Continuer'}
-              </button>
-            </div>
           </div>
-          <div className="pf-note">Brouillon enregistré sur cet appareil (sans le mot de passe).</div>
+
+          <div className="pf-pied">
+            <button className="pf-btn pf-grand" onClick={suivant} disabled={envoi === 'loading'} data-suivant>
+              {etape === NB_ECRANS - 1 ? (envoi === 'loading' ? 'Création…' : 'Créer mon compte') : 'Continuer'}
+            </button>
+            {etape === 0 && mode === 'recherche' && <button type="button" className="pf-lien-btn" onClick={() => { setMode('manuel'); setTente(false) }}>Pas de SIRET</button>}
+            {etape === 0 && mode === 'manuel' && <button type="button" className="pf-lien-btn" onClick={() => { setMode('recherche'); setTente(false) }}>J’ai un SIRET</button>}
+            {etape === 0 && mode === 'prerempli' && <button type="button" className="pf-lien-btn" onClick={() => { setMode('recherche'); setRecherche(''); setResultats([]); setEtatRecherche('idle'); setTente(false) }}>Ce n’est pas mon entreprise</button>}
+            {etape > 0 && <button type="button" className="pf-lien-btn" onClick={() => allerA(etape - 1)} disabled={envoi === 'loading'}>← Retour</button>}
+          </div>
         </main>
       )}
 
-      {etape === 7 && fin && (
-        <main className="pf-col">
-          <div className="pf-carte pf-fin">
+      {etape === NB_ECRANS && fin && (
+        <main className="pf-col" data-ecran="fin">
+          <div className="pf-corps pf-fin">
             <Celebration />
-            <h2 className="pf-h2">Bienvenue chez Flowin, {perso.prenom || 'et merci'} !</h2>
-            <p className="pf-sous">Votre espace pro <b>{f.nomCommercial || f.nom}</b> est créé. L’équipe Flowin valide votre fiche ; en attendant, vous pouvez déjà découvrir votre espace.</p>
+            <h1 className="pf-h2">Compte créé{perso.prenom ? `, ${perso.prenom}` : ''}</h1>
+            <p className="pf-sous">Il reste à régler votre jeu. Flowin valide votre fiche en parallèle.</p>
             {!fin.session && <div className="pf-info">Un email de confirmation vient de vous être envoyé à <b>{f.email}</b>. Cliquez sur le lien qu’il contient, puis connectez-vous.</div>}
-            {fin.degrade && <div className="pf-aide">Certaines informations (forme juridique, produits, points de vente) seront complétées dans votre profil.</div>}
-            <div className="pf-suite">
-              <div className="pf-suite-l"><span className="pf-ic">✓</span><span><b>Inscription</b> : faite</span></div>
-              <div className="pf-suite-l"><span className="pf-ic">2</span><span><b>Configurez votre jeu</b>, puis réglez pour le mettre en ligne</span></div>
-              <div className="pf-suite-l"><span className="pf-ic">3</span><span><b>Espace pro</b> : vos animations, vos lots, vos contacts</span></div>
-            </div>
-            <div className="pf-row" style={{ justifyContent: 'center', marginTop: 16 }}>
-              {retour && (
-                <a className="pf-btn pf-grand" href={fin.session ? retour : `/pro/connexion?retour=${encodeURIComponent(retour)}`}>Reprendre ma demande pour le super event</a>
-              )}
-              {/* Lot ergonomie 1 (AMEL-DES-02) : de la fin d'inscription au Configurateur en UN toucher. */}
-              {fin.session
-                ? <a className={retour ? 'pf-btn2' : 'pf-btn pf-grand'} data-vers-configurateur href={`/pro/nouvelle?pro=${encodeURIComponent(fin.proId)}&type=animation`}>Configurer mon jeu</a>
-                : <a className={retour ? 'pf-btn2' : 'pf-btn pf-grand'} data-vers-configurateur href={`/pro/connexion?retour=${encodeURIComponent(`/pro/nouvelle?pro=${fin.proId}&type=animation`)}`}>Me connecter et configurer</a>}
-              {fin.session && <a className="pf-btn2" href={`/pro?pro=${encodeURIComponent(fin.proId)}&bienvenue=1`}>Entrer dans mon espace pro</a>}
-              <a className="pf-btn2" href="/validation/plaquette-animation-v3.html#offres">Découvrir nos offres</a>
-            </div>
+            {fin.degrade && <div className="pf-aide">Certaines informations seront à compléter dans votre profil.</div>}
+          </div>
+          <div className="pf-pied">
+            {retour && (
+              <a className="pf-btn pf-grand" href={fin.session ? retour : `/pro/connexion?retour=${encodeURIComponent(retour)}`}>Reprendre ma demande pour le super event</a>
+            )}
+            {/* Lot ergonomie 1 (AMEL-DES-02) : de la fin d'inscription au Configurateur en UN toucher. */}
+            {fin.session
+              ? <a className={retour ? 'pf-lien-btn pf-centre' : 'pf-btn pf-grand'} data-vers-configurateur href={`/pro/nouvelle?pro=${encodeURIComponent(fin.proId)}&type=animation`}>Configurer mon jeu</a>
+              : <a className={retour ? 'pf-lien-btn pf-centre' : 'pf-btn pf-grand'} data-vers-configurateur href={`/pro/connexion?retour=${encodeURIComponent(`/pro/nouvelle?pro=${fin.proId}&type=animation`)}`}>Me connecter et configurer</a>}
+            {fin.session && <a className="pf-lien-btn pf-centre" href={`/pro?pro=${encodeURIComponent(fin.proId)}&bienvenue=1`}>Aller à mon espace pro</a>}
           </div>
         </main>
       )}
@@ -650,119 +498,100 @@ export default function PremiereFois() {
   )
 }
 
-function Champ({ label, v, set, type = 'text', placeholder, aide, auto, inputMode }: {
-  label: string; v: string; set: (v: string) => void; type?: string; placeholder?: string; aide?: string; auto?: string
-  inputMode?: 'numeric' | 'text' | 'tel' | 'email'
+const STYLE_SELECT = { width: '100%', minHeight: 54, padding: '12px 14px', borderRadius: 14, border: `1.5px solid ${C.bordure}`, fontSize: 16, fontFamily: 'inherit', background: '#fff', color: C.texte } as const
+
+function Coche({ taille = 14 }: { taille?: number }) {
+  return <svg width={taille} height={taille} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5" /></svg>
+}
+function Oeil({ barre }: { barre: boolean }) {
+  return (
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z" /><circle cx="12" cy="12" r="3" />{barre && <path d="M4 4l16 16" />}
+    </svg>
+  )
+}
+
+/** Champ « etiquette dans la boite » de la maquette lot 3-1 : etiquette 13 px, valeur 17 px, boite >= 58 px. */
+function Champ({ label, v, set, type = 'text', auto, inputMode, ko, droite }: {
+  label: string; v: string; set: (v: string) => void; type?: string; auto?: string
+  inputMode?: 'numeric' | 'text' | 'tel' | 'email'; ko?: boolean; droite?: React.ReactNode
 }) {
   const idc = 'pf-' + label.replace(/[^a-zA-Z]/g, '').toLowerCase().slice(0, 18)
   return (
-    <div className="pf-champ">
-      <label className="pf-label" htmlFor={idc}>{label}</label>
-      <input id={idc} className="pf-in" type={type} value={v} placeholder={placeholder} autoComplete={auto} inputMode={inputMode}
+    <label className={`pf-ch${ko ? ' ko' : ''}${droite ? ' avec-droite' : ''}`} htmlFor={idc}>
+      <span className="pf-ch-l">{label}</span>
+      <input id={idc} type={type} value={v} autoComplete={auto} inputMode={inputMode} aria-invalid={ko ? true : undefined}
         autoCapitalize={type === 'email' ? 'none' : undefined} onChange={e => set(e.target.value)} />
-      {aide && <div className="pf-aide">{aide}</div>}
-    </div>
+      {droite}
+    </label>
   )
 }
 
 const CSS = `
-.pf{${VARIABLES_PRO_CSS}min-height:100dvh;background:var(--fl-papier);color:var(--fl-encre);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;-webkit-text-size-adjust:100%}
+.pf{${VARIABLES_PRO_CSS}min-height:100dvh;display:flex;flex-direction:column;background:var(--fl-papier);color:var(--fl-encre);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;-webkit-text-size-adjust:100%}
 .pf *{box-sizing:border-box}
-.pf-top{display:flex;align-items:center;gap:8px;padding:14px 16px;max-width:1100px;margin:0 auto}
+.pf-top{display:flex;align-items:center;gap:8px;padding:6px 16px;width:100%;max-width:600px;margin:0 auto}
 .pf-logo{display:inline-block;line-height:44px;white-space:nowrap;font-size:20px;font-weight:900;letter-spacing:-.02em;color:var(--fl-encre);text-decoration:none}
 .pf-logo em{color:var(--fl-bleu);font-style:normal}
-.pf-offre{border:1.5px solid var(--fl-trait);border-radius:18px;background:#fff;padding:16px 18px;margin-top:10px}
-.pf-offre-1{border:2px solid #3B5CC4;padding:22px 20px;margin-top:0}
-.pf-offre-tag{display:inline-block;background:#3B5CC4;color:#fff;font-size:12px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;border-radius:999px;padding:3px 10px}
-.pf-offre-n{font-size:20px;font-weight:900;margin-top:8px}
-.pf-offre-1 .pf-offre-n{font-size:26px}
-.pf-offre-p{font-size:22px;font-weight:900;color:#3B5CC4;margin-top:2px}
-.pf-offre-1 .pf-offre-p{font-size:30px}
-.pf-offre-d{font-size:14px;color:var(--fl-texte-2);margin-top:4px}
-.pf-offre-o{display:flex;justify-content:space-between;gap:10px;align-items:center;border-top:1px dashed var(--fl-trait);margin-top:14px;padding-top:12px;font-size:14px}
-.pf-offre-o span{font-weight:900;white-space:nowrap}
-.pf-badge{font-size:12px;font-weight:800;letter-spacing:.06em;white-space:nowrap;text-transform:uppercase;color:var(--fl-violet);background:var(--fl-violet-clair);border-radius:99px;padding:4px 9px}
+.pf-badge{font-size:12px;font-weight:800;letter-spacing:.06em;white-space:nowrap;text-transform:uppercase;color:var(--fl-bleu);background:var(--fl-violet-clair);border-radius:99px;padding:4px 9px}
 .pf-lien{white-space:nowrap;color:var(--fl-bleu);font-weight:700;font-size:13.5px;text-decoration:none;display:inline-flex;align-items:center;min-height:44px}
-.pf-col{max-width:600px;margin:0 auto;padding:8px 16px 48px}
-.pf-kicker{font-size:12.5px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;color:var(--fl-violet);margin:22px 0 10px;display:flex;align-items:center;gap:10px}
-.pf-kicker::before{content:'';width:26px;height:3px;border-radius:2px;background:var(--fl-violet)}
-.pf-h1{font-size:34px;line-height:1.08;font-weight:900;letter-spacing:-.02em;margin:0 0 14px}
-.pf-h1 span{color:var(--fl-violet)}
-.pf-lead{font-size:16px;line-height:1.55;color:var(--fl-texte2);margin:0 0 20px}
-.pf-promesses{list-style:none;padding:0;margin:0 0 24px;display:grid;gap:10px}
-.pf-promesses li{display:flex;gap:12px;align-items:flex-start;background:#fff;border:1px solid var(--fl-bordure);border-radius:16px;padding:14px 16px;font-size:14px;line-height:1.5;color:var(--fl-texte2)}
-.pf-promesses b{color:var(--fl-encre)}
-.pf-ic{width:34px;height:34px;border-radius:11px;background:var(--fl-violet-clair);color:var(--fl-violet);display:grid;place-items:center;font-weight:900;flex-shrink:0}
-.pf-note{font-size:12.5px;color:var(--fl-texte2);text-align:center;margin-top:12px;line-height:1.5}
-.pf-brouillon{background:#fff;border:1.5px solid var(--fl-violet);border-radius:16px;padding:14px 16px;font-size:14px;line-height:1.5;margin-top:12px}
-.pf-row{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px}
-.pf-btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;background:var(--fl-violet);color:#fff;border:none;border-radius:100px;padding:13px 22px;font-size:15px;font-weight:800;cursor:pointer;text-decoration:none;font-family:inherit;box-shadow:0 10px 24px rgba(59,92,196,.24)}
-.pf-btn:hover{background:var(--fl-violet-fonce)}
-.pf-btn:disabled{opacity:.6;cursor:default}
-.pf-btn2{display:inline-flex;align-items:center;justify-content:center;text-decoration:none;background:#fff;color:var(--fl-encre);border:1.5px solid var(--fl-bordure-champ);border-radius:100px;padding:12px 18px;min-height:44px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap}
-.pf-grand{width:100%;padding:16px;font-size:16px}
-.pf-prog{margin:10px 0 14px}
-.pf-prog-l{display:flex;justify-content:space-between;font-size:12.5px;font-weight:800;color:var(--fl-texte2);margin-bottom:8px}
-.pf-prog-n{color:var(--fl-violet)}
-.pf-barres{display:flex;gap:5px}
-.pf-barre{flex:1;height:44px;border:none;padding:0;background:transparent;position:relative;cursor:default}
-.pf-barre::after{content:'';position:absolute;left:0;right:0;top:19px;height:6px;border-radius:99px;background:var(--fl-bordure)}
-.pf-barre.on::after{background:var(--fl-violet)}
-.pf-barre.on:not(:disabled){cursor:pointer}
-.pf-carte{background:#fff;border:1px solid var(--fl-bordure);border-radius:20px;padding:22px 20px;box-shadow:0 8px 28px rgba(27,58,92,.06)}
-.pf-h2{font-size:23px;font-weight:900;letter-spacing:-.01em;margin:0 0 6px;line-height:1.15}
-.pf-sous{font-size:14px;line-height:1.55;color:var(--fl-texte2);margin:0 0 16px}
-.pf-champ{margin-bottom:12px}
-.pf-label{display:block;font-size:12px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;color:var(--fl-texte2);margin:10px 0 6px}
-.pf-in{width:100%;padding:13px 14px;border-radius:13px;border:1.5px solid var(--fl-bordure-champ);background:var(--fl-champ);font-size:16px;font-family:inherit;color:var(--fl-encre);outline:none}
-.pf-in:focus{border-color:var(--fl-violet);background:#fff}
-.pf-zone{min-height:110px;resize:vertical}
-.pf-aide{font-size:12.5px;color:var(--fl-texte2);margin-top:5px;line-height:1.5}
-.pf-err{font-size:13px;color:var(--fl-erreur);font-weight:700;margin:4px 0 8px}
-.pf-info{background:#EEF2FB;color:var(--fl-encre);border-radius:12px;padding:11px 14px;font-size:13.5px;line-height:1.5;margin:10px 0}
-.pf-ok{background:#EAF6EE;color:#14532D;border-radius:12px;padding:11px 14px;font-size:13.5px;line-height:1.5;margin:4px 0 10px}
+.pf-col{flex:1;display:flex;flex-direction:column;width:100%;max-width:600px;margin:0 auto;padding:0 18px 0}
+.pf-corps{flex:1 1 auto;display:flex;flex-direction:column;gap:10px;padding-top:6px}
+.pf-pied{padding:14px 0 22px;display:flex;flex-direction:column;gap:2px}
+.pf-h2{font-size:24px;font-weight:900;letter-spacing:-.01em;margin:2px 0 4px;line-height:1.15}
+.pf-sous{font-size:14px;line-height:1.45;color:var(--fl-texte2);margin:0}
+.pf-prog{display:flex;align-items:flex-end;gap:10px;padding-top:2px}
+.pf-gs{flex:1;display:flex;gap:6px}
+.pf-g{flex:1;min-height:44px;display:flex;flex-direction:column;justify-content:center;gap:5px;background:none;border:0;padding:0;font-family:inherit;cursor:default;text-align:left}
+.pf-g i{display:block;height:6px;border-radius:6px;background:var(--fl-bordure);position:relative;overflow:hidden;width:100%}
+.pf-g i::after{content:"";position:absolute;inset:0;background:var(--fl-bleu);transform-origin:left;opacity:0}
+.pf-g.done i::after{background:var(--fl-ok);opacity:1}
+.pf-g.cur i::after{opacity:1;right:50%}
+.pf-g span{font-size:13px;font-weight:800;color:var(--fl-texte2);white-space:nowrap;display:flex;align-items:center;gap:4px}
+.pf-g.cur span{color:var(--fl-bleu)}
+.pf-g.done span{color:var(--fl-ok);cursor:pointer}
+.pf-g.done{cursor:pointer}
+.pf-nn{flex:none;font-size:20px;font-weight:900;color:var(--fl-bleu);line-height:1;padding-bottom:16px}
+.pf-nn small{font-size:13px;color:var(--fl-texte2);font-weight:800}
+.pf-ch{background:#fff;border:1.5px solid var(--fl-bordure);border-radius:14px;padding:7px 14px;min-height:58px;position:relative;display:block}
+.pf-ch .pf-ch-l{display:block;font-size:13px;color:var(--fl-texte2);font-weight:700}
+.pf-ch input{display:block;width:100%;border:0;outline:0;background:transparent;padding:0;font-size:17px;font-weight:700;font-family:inherit;color:var(--fl-encre);line-height:1.3;min-height:26px}
+.pf-ch:focus-within{border-color:var(--fl-bleu);box-shadow:0 0 0 3px var(--fl-violet-clair)}
+.pf-ch.ko{border-color:var(--fl-erreur)}
+.pf-ch.pf-ok{border-color:var(--fl-ok)}
+.pf-ch .pf-val{display:block;font-size:17px;font-weight:700;line-height:1.3;word-break:break-all}
+.pf-ch.avec-droite input{padding-right:46px}
+.pf-oeil{position:absolute;right:6px;top:7px;width:44px;height:44px;border-radius:50%;display:grid;place-items:center;color:var(--fl-texte2);background:none;border:0;cursor:pointer}
 .pf-g2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.pf-cp{grid-template-columns:130px 1fr}
-.pf-cherche{display:flex;gap:8px}
-.pf-cherche .pf-in{flex:1;min-width:0}
-.pf-choix,.pf-choix2{display:grid;gap:8px;margin-bottom:6px}
-.pf-choix2{grid-template-columns:1fr 1fr}
-.pf-opt{text-align:left;background:var(--fl-champ);border:1.5px solid var(--fl-bordure-champ);border-radius:14px;padding:12px 14px;cursor:pointer;font-family:inherit;color:var(--fl-encre);display:flex;flex-direction:column;gap:3px}
-.pf-opt b{font-size:14.5px;font-weight:800}
-.pf-opt span{font-size:12.5px;color:var(--fl-texte2);line-height:1.4}
-.pf-opt.on{border:2px solid var(--fl-violet);background:var(--fl-violet-clair)}
-.pf-suggere{color:var(--fl-violet)!important;font-weight:800}
-.pf-resultats{display:grid;gap:8px;margin:12px 0}
-.pf-res{text-align:left;background:#fff;border:1.5px solid var(--fl-bordure-champ);border-radius:14px;padding:12px 14px;cursor:pointer;font-family:inherit;color:var(--fl-encre)}
-.pf-res:hover{border-color:var(--fl-violet)}
-.pf-res-n{font-weight:800;font-size:15px}
-.pf-res-n span{font-weight:600;color:var(--fl-texte2)}
-.pf-res-d{font-size:12.5px;color:var(--fl-texte2);margin-top:2px}
-.pf-ferme{color:var(--fl-erreur)}
-.pf-lien-btn{background:none;border:none;color:var(--fl-bleu);font-weight:700;font-size:13.5px;cursor:pointer;padding:8px 0;font-family:inherit;text-align:left}
-.pf-stepper{display:flex;align-items:center;gap:10px;margin:6px 0 12px}
-.pf-stepper button{width:52px;height:52px;border-radius:50%;border:1.5px solid var(--fl-bordure-champ);background:#fff;font-size:24px;font-weight:700;color:var(--fl-encre);cursor:pointer}
-.pf-stepper .pf-in{text-align:center;font-size:28px;font-weight:900;flex:1}
+.pf-cp{grid-template-columns:1fr 2fr}
+.pf-lbl{display:block;font-size:13px;font-weight:800;color:var(--fl-texte2);margin-top:2px}
+.pf-champ-select{display:grid;gap:5px}
 .pf-puces{display:flex;gap:8px;flex-wrap:wrap}
-.pf-puce{border:1.5px solid var(--fl-bordure-champ);background:#fff;border-radius:99px;padding:8px 15px;font-weight:800;font-size:13.5px;cursor:pointer;color:var(--fl-encre);font-family:inherit}
-.pf-puce.on{border-color:var(--fl-violet);background:var(--fl-violet-clair);color:var(--fl-violet-fonce)}
-.pf-recap{border:1px solid var(--fl-bordure);border-radius:14px;padding:4px 14px;margin-bottom:8px}
-.pf-recap-l{display:flex;align-items:baseline;gap:10px;padding:8px 0;border-bottom:1px solid var(--fl-bordure)}
-.pf-recap-l:last-child{border-bottom:none}
-.pf-recap-k{flex:0 0 120px;font-size:12px;font-weight:800;color:var(--fl-texte2)}
-.pf-recap-v{flex:1;font-size:13.5px;word-break:break-word}
-.pf-recap-l .pf-lien-btn{padding:0;font-size:12.5px}
-.pf-nav{display:flex;align-items:center;gap:10px;margin-top:20px;padding-top:16px;border-top:1px solid var(--fl-bordure)}
-.pf-fin{text-align:center;margin-top:26px}
-.pf-suite{text-align:left;display:grid;gap:8px;margin:14px 0 4px}
-.pf-suite-l{display:flex;gap:10px;align-items:center;font-size:14px;line-height:1.4}
-.pf-coche{width:68px;height:68px;border-radius:50%;background:var(--fl-violet-clair);color:var(--fl-violet);font-size:34px;font-weight:900;display:grid;place-items:center;margin:0 auto 14px}
-@media (max-width:520px){
-  .pf-h1{font-size:29px}
-  .pf-choix2{grid-template-columns:1fr}
-  .pf-g2{grid-template-columns:1fr}
-  .pf-cp{grid-template-columns:1fr 2fr}
-  .pf-carte{padding:18px 16px}
-  .pf-recap-k{flex-basis:92px}
-}
+.pf-puce{display:inline-flex;align-items:center;min-height:44px;padding:0 16px;border-radius:99px;background:#fff;border:1.5px solid var(--fl-bordure);font-size:15px;font-weight:800;color:var(--fl-encre);font-family:inherit;cursor:pointer}
+.pf-puce:active{background:var(--fl-violet-clair);border-color:var(--fl-bleu)}
+.pf-carte-ok{display:flex;gap:12px;align-items:center;background:#fff;border:2px solid var(--fl-ok);border-radius:18px;padding:10px 14px}
+.pf-carte-ok.pf-bleu{border-color:var(--fl-bleu)}
+.pf-carte-ok.pf-bleu .pf-c{background:var(--fl-bleu)}
+.pf-carte-ok b{display:block;font-size:16.5px;line-height:1.2}
+.pf-carte-ok small{font-size:13px;color:var(--fl-texte2);font-weight:600}
+.pf-c{flex:none;width:28px;height:28px;border-radius:50%;background:var(--fl-ok);color:#fff;display:grid;place-items:center}
+.pf-moment{display:flex;align-items:center;gap:10px;background:#E3F3EC;border:1.5px solid #B7DFCB;border-radius:16px;padding:10px 14px;font-size:15px;font-weight:800;color:var(--fl-ok)}
+.pf-aide{font-size:13px;color:var(--fl-texte2);line-height:1.45}
+.pf-err{font-size:13px;color:var(--fl-erreur);font-weight:700;margin:-4px 0 0}
+.pf-info{background:#EEF2FB;color:var(--fl-encre);border-radius:12px;padding:10px 14px;font-size:13.5px;line-height:1.45}
+.pf-resultats{display:grid;gap:8px}
+.pf-res{text-align:left;background:#fff;border:1.5px solid var(--fl-bordure-champ);border-radius:14px;padding:10px 14px;min-height:44px;cursor:pointer;font-family:inherit;color:var(--fl-encre);display:flex;flex-direction:column}
+.pf-res span{font-size:13px;color:var(--fl-texte2)}
+.pf-brouillon{background:#fff;border:1.5px solid var(--fl-bleu);border-radius:16px;padding:10px 14px;font-size:14px;line-height:1.4;margin-top:6px}
+.pf-row{display:flex;gap:10px;flex-wrap:wrap;margin-top:8px}
+.pf-btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:54px;background:linear-gradient(135deg,var(--fl-bleu),#5576DA);color:#fff;border:none;border-radius:100px;padding:13px 22px;font-size:17px;font-weight:900;cursor:pointer;text-decoration:none;font-family:inherit;box-shadow:0 12px 22px -12px rgba(59,92,196,.9)}
+.pf-btn:disabled{opacity:.6;cursor:default}
+.pf-petit{min-height:44px;font-size:15px;padding:10px 20px}
+.pf-btn2{display:inline-flex;align-items:center;justify-content:center;text-decoration:none;background:#fff;color:var(--fl-encre);border:1.5px solid var(--fl-bordure-champ);border-radius:100px;padding:10px 18px;min-height:44px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap}
+.pf-grand{width:100%}
+.pf-lien-btn{display:flex;align-items:center;justify-content:center;min-height:44px;background:none;border:none;color:var(--fl-bleu);font-weight:800;font-size:14px;text-decoration:underline;cursor:pointer;font-family:inherit;padding:0 8px}
+.pf-centre{text-align:center}
+.pf-fin{text-align:center;align-items:stretch;justify-content:center}
+.pf-fin .pf-sous{text-align:center}
+@media (prefers-reduced-motion:reduce){.pf *{animation:none!important;transition:none!important}}
 `

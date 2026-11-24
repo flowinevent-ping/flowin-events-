@@ -65,12 +65,14 @@ import { creerQrTrace, QR_PAR_DEFAUT, type TypeQr } from '@/lib/qrTraces'
 import SelecteurLot, { RecapLots, LogoSuperEvent, CarteSuperEvent } from '@/components/masters/SelecteurLot'
 import PersoMaster, { ChoixAchat, cfgMaster, MASTER_VIDE, type EtatMaster } from '@/components/masters/PersoMaster'
 import { DROITS_DEFAUT, type DroitsPro } from '@/lib/droitsPro'
-import { inscrirePro } from '@/lib/inscriptionPro'
+import { inscrirePro, statutDemande } from '@/lib/inscriptionPro'
+import QRCode from 'qrcode'
+import { Celebration } from '@/components/creation/EnLigne'
 import { messageFr } from '@/lib/erreursFr'
 import PrecisionAutre from '@/components/creation/PrecisionAutre'
 import SelectActivite from '@/components/creation/SelectActivite'
 import GrilleTarifs from '@/components/creation/GrilleTarifs'
-import { SECTEUR_AUTRE, nettoyerPrecision, categorieAvecPrecision } from '@/lib/proCreation'
+import { SECTEUR_AUTRE, nettoyerPrecision, categorieAvecPrecision, lireActivite, lireSecteurAutre } from '@/lib/proCreation'
 import { texteDemandePack, packsPourSuperEvent, MENTION_TARIF_A_CONFIRMER, prixAffiche } from '@/lib/commercial'
 import { estFeteHautMoyenPays, cfgApercuDemo, estSuperEventDemo, FHMP_DEMO } from '@/lib/demoFetes'
 import { retourSur } from '@/lib/retour'
@@ -135,6 +137,94 @@ function Titre({ t, s }: { t: string; s?: string }) {
 
 /* Codes visuels de la maquette « Parcours Pro Flowin » : cartes a halo,
    pastilles d etapes numerotees, tuiles QR, bloc d aide. */
+
+/* ── LOT 3-2 : Rejoindre un super event en 3 ecrans (maquette docs/maquette/lot3-2-rejoindre.html) ─────────────────── */
+function IcoCoche() {
+  return <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5" /></svg>
+}
+/** Bande orange (couleur Super Event) : pastille « Rejoindre », logo, progression Station / Pack / Envoi. */
+function BandeRejoindre({ etape }: { etape: 1 | 2 | 3 }) {
+  const noms = ['Station', 'Pack', 'Envoi']
+  return (
+    <div className="rj-bande">
+      <div className="rj-plq"><span className="rj-rub">Rejoindre</span><span className="rj-plaque"><LogoSuperEvent taille={26} /></span></div>
+      <div className="rj-prog" role="group" aria-label={`Étape ${etape} sur 3`}>
+        <div className="rj-gs">
+          {noms.map((n, k) => (
+            <div key={n} className={`rj-g${k + 1 < etape ? ' done' : k + 1 === etape ? ' cur' : ''}`}><i /><span>{k + 1 < etape && <IcoCoche />}{n}</span></div>
+          ))}
+        </div>
+        <div className="rj-nn">{etape}<small>/3</small></div>
+      </div>
+    </div>
+  )
+}
+/** QR (lien public du super event) : le seul QR qui existe avant la validation ; celui de la station est cree a la validation. */
+function QrOperation({ url }: { url: string }) {
+  const [src, setSrc] = useState('')
+  useEffect(() => { QRCode.toDataURL(url, { errorCorrectionLevel: 'M', margin: 1, width: 380 }).then(setSrc, () => setSrc('')) }, [url])
+  return src
+    ? <img src={src} alt="QR du super event" width={170} height={170} style={{ display: 'block', margin: '0 auto' }} />
+    : <div style={{ width: 170, height: 170, margin: '0 auto', background: '#F4F6F9', borderRadius: 8 }} />
+}
+const RJ_CSS = `
+.rj{max-width:480px;margin:0 auto;min-height:calc(100dvh - 116px);display:flex;flex-direction:column;background:#F4F6F9;border-radius:0 0 26px 26px;color:#1B3A5C}
+.rj *{box-sizing:border-box}
+.rj-bande{background:linear-gradient(135deg,#C2410C 0%,#E05A0E 55%,#FF8A14 100%);color:#fff;border-radius:0 0 26px 26px;box-shadow:0 14px 28px -16px rgba(120,30,0,.6);padding:10px 18px 4px;flex:none}
+.rj-plq{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.rj-rub{background:#fff;color:#C2410C;font-weight:900;font-size:13px;letter-spacing:.1em;text-transform:uppercase;padding:3px 10px;border-radius:99px}
+.rj-plaque{background:#fff;border-radius:14px;padding:4px 10px;line-height:1}
+.rj-prog{display:flex;align-items:flex-end;gap:10px}
+.rj-gs{flex:1;display:flex;gap:6px}
+.rj-g{flex:1;min-height:44px;display:flex;flex-direction:column;justify-content:center;gap:5px}
+.rj-g i{display:block;height:6px;border-radius:6px;background:rgba(255,255,255,.35);position:relative;overflow:hidden}
+.rj-g.done i::after,.rj-g.cur i::after{content:"";position:absolute;inset:0;background:#fff}
+.rj-g.cur i::after{right:50%}
+.rj-g span{font-size:13px;font-weight:800;color:rgba(255,255,255,.9);display:flex;align-items:center;gap:4px;white-space:nowrap}
+.rj-nn{font-size:20px;font-weight:900;line-height:1;padding-bottom:16px}
+.rj-nn small{font-size:13px;opacity:.9}
+.rj-corps{flex:1 1 auto;display:flex;flex-direction:column;gap:10px;padding:12px 18px 0}
+.rj-centre{align-items:center;text-align:center;gap:8px}
+.rj-t{font-size:24px;font-weight:900;line-height:1.15;margin:0}
+.rj-s{font-size:14px;color:#52647A;line-height:1.35;margin:2px 0 0}
+.rj-carte{border-radius:20px;overflow:hidden;border:1px solid #DCE3EC}
+.rj-ok{display:flex;gap:12px;align-items:center;background:#fff;border:2px solid #C2410C;border-radius:18px;padding:10px 14px}
+.rj-ok b{display:block;font-size:16.5px;line-height:1.2}
+.rj-ok small{font-size:13px;color:#52647A;font-weight:600}
+.rj-ok>div{flex:1;min-width:0}
+.rj-neutre{border-color:#DCE3EC}
+.rj-coche{flex:none;width:28px;height:28px;border-radius:50%;background:#C2410C;color:#fff;display:grid;place-items:center}
+.rj-moment{display:flex;align-items:center;gap:10px;background:#FFF1E8;border:1.5px solid #F8D3BC;border-radius:16px;padding:10px 14px;font-size:15px;font-weight:800;color:#9A3412}
+.rj-pk{background:#fff;border:1.5px solid #DCE3EC;border-radius:16px;padding:0 14px}
+.rj-pk.on{border-color:#C2410C;box-shadow:0 10px 22px -16px rgba(194,65,12,.8)}
+.rj-pk-ent{display:flex;align-items:center;gap:10px;width:100%;min-height:52px;background:none;border:0;padding:0;font-family:inherit;color:inherit;cursor:pointer;text-align:left}
+.rj-pk-ent b{font-size:16px;flex:1}
+.rj-pk-ent strong{font-size:15px;font-weight:800;white-space:nowrap}
+.rj-rd{flex:none;width:22px;height:22px;border-radius:50%;border:2px solid #DCE3EC;display:grid;place-items:center}
+.rj-pk.on .rj-rd{border-color:#C2410C}
+.rj-rd i{width:12px;height:12px;border-radius:50%;background:#C2410C}
+.rj-chev{width:20px;height:20px;color:#52647A;display:grid;place-items:center}
+.rj-pk.on .rj-chev{transform:rotate(180deg);color:#C2410C}
+.rj-pk ul{list-style:none;padding:0 0 12px 32px;margin:0;font-size:14px;font-weight:600;color:#52647A;line-height:1.5}
+.rj-pk li::before{content:"";display:inline-block;width:6px;height:6px;border-radius:50%;background:#C2410C;margin-right:8px;vertical-align:middle}
+.rj-pk em{font-style:normal;font-size:13px;font-weight:800;background:#FFF1E8;color:#9A3412;border-radius:99px;padding:1px 8px}
+.rj-pied{flex:none;padding:10px 18px 14px;display:flex;flex-direction:column;gap:2px}
+.rj-btn{display:flex;align-items:center;justify-content:center;width:100%;min-height:54px;border:0;border-radius:99px;font:inherit;font-weight:900;font-size:17px;color:#fff;background:linear-gradient(135deg,#C2410C,#FF8A14);box-shadow:0 12px 22px -12px rgba(194,65,12,.85);text-decoration:none;cursor:pointer}
+.rj-btn:disabled{opacity:.55;cursor:default}
+.rj-lien{background:none;border:0;padding:0;font:inherit;font-weight:800;font-size:14px;color:#C2410C;text-decoration:underline;cursor:pointer;display:inline-flex;align-items:center;min-height:44px}
+.rj-bas{justify-content:center;display:flex}
+.rj-modif{padding:0 4px}
+.rj-err{font-size:13px;color:#B45309;font-weight:700;line-height:1.4}
+.rj-qr{background:#fff;border:2px solid #C2410C;border-radius:22px;padding:12px 14px 6px;box-shadow:0 14px 28px -16px rgba(194,65,12,.8)}
+.rj-qr small{display:block;font-size:14px;font-weight:800;margin-top:6px}
+.rj-statut{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:6px 8px;font-size:14px;color:#52647A;font-weight:700}
+.rj-statut b{background:#FFF1E8;border:1px solid #F8D3BC;color:#9A3412;border-radius:99px;padding:4px 14px;font-size:14px;font-weight:800}
+.rj-att{flex-basis:100%;font-size:13px}
+.rj-virement{width:100%;text-align:left;font-size:13px;line-height:1.5}
+.rj-virement summary{min-height:44px;display:flex;align-items:center;justify-content:center;font-weight:800;color:#C2410C;cursor:pointer}
+@media (prefers-reduced-motion:reduce){.rj *{animation:none!important;transition:none!important}}
+`
+
 export const PC_CSS = `.nop-carte{position:relative;overflow:hidden;display:flex;flex-direction:column;align-items:center;text-align:center;transition:transform .18s ease,box-shadow .18s ease,border-color .18s ease}
   .nop-carte:hover{transform:translateY(-4px);box-shadow:0 16px 34px rgba(28,16,36,.12);border-color:var(--acc)}
   .nop-carte .nop-filet{position:absolute;top:0;left:0;right:0;height:3px;background:var(--acc)}
@@ -266,6 +356,11 @@ export default function ParcoursCreation({ mode = 'pro', pro, banques, supers, p
   const [uploadEnCours, setUploadEnCours] = useState(false)
   const [uploadErreur, setUploadErreur] = useState('')
   const se = supers.find(s => s.id === seId) ?? null
+  /* LOT 3-2 : « Rejoindre » en 3 ecrans d'une hauteur (Station, Pack, Envoi) pour le pro et le visiteur. Le SA garde son parcours. */
+  const rejoindre3 = rejoindre && !sa
+  const [demo, setDemo] = useState(false)
+  useEffect(() => { setDemo(estDemo()) }, [])
+  const [stationGeo, setStationGeo] = useState<{ lat: number; lng: number } | null>(null)
   /* VISITEUR : coordonnees saisies a la fin (2e chemin d'inscription). Vide = on reprend nom / ville deja saisis plus haut. */
   const [coNom, setCoNom] = useState('')
   const [coSecteur, setCoSecteur] = useState('')
@@ -359,6 +454,28 @@ export default function ParcoursCreation({ mode = 'pro', pro, banques, supers, p
   const [packChoisi, setPackChoisi] = useState<string | null>(null)
   const packsSE = packsPourSuperEvent(se)
   void packs
+  /* LOT 3-2 : un seul super event ouvert = choisi d'office ; pack « Animation » preselectionne (le plus choisi) ; categorie reprise du profil. */
+  useEffect(() => { if (rejoindre3 && !seId && supers.length === 1) setSeId(supers[0].id) }, [rejoindre3, seId, supers])
+  useEffect(() => {
+    if (!rejoindre3 || !se || packChoisi) return
+    const pk = packsSE.find(x => x.cle === 'animation') ?? packsSE[0]
+    if (pk) { setPackChoisi(pk.cle); setPersona(pk.cle === 'visible' ? 'annonceur' : 'commerce') }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [rejoindre3, seId])
+  useEffect(() => {
+    if (!rejoindre3 || !p.id) return
+    const tags = (p as unknown as { tags?: string[] | null }).tags
+    const act = lireActivite(tags)
+    const sect = p.secteur ?? ''
+    setCategorie(v => v || act || sect)
+    if (!act && sect === SECTEUR_AUTRE) setCategorieAutre(v => v || lireSecteurAutre(tags))
+  }, [rejoindre3, p.id, p.secteur, p])
+  useEffect(() => {
+    if (!rejoindre3 || demo || !se || se.lat == null || !ville.trim()) { setStationGeo(null); return }
+    let fini = false
+    const t = setTimeout(() => { geocoderAdresse(adresse.trim() || null, cp.trim() || null, ville.trim()).then(g => { if (!fini) setStationGeo(g) }).catch(() => {}) }, 400)
+    return () => { fini = true; clearTimeout(t) }
+  }, [rejoindre3, demo, se, adresse, cp, ville])
 
   /* Proposition de super event a Flowin (pro) */
   const [dNom, setDNom] = useState('')
@@ -374,7 +491,7 @@ export default function ParcoursCreation({ mode = 'pro', pro, banques, supers, p
   const glisserFin = useGlisser(sens => setEcranFin(k => Math.max(0, k + sens)))
   const [tenteEtape, setTenteEtape] = useState<Record<string, boolean>>({})
   const [erreur, setErreur] = useState('')
-  const [fait, setFait] = useState<{ eventId: string | null; superId: string | null; info?: string } | null>(null)
+  const [fait, setFait] = useState<{ eventId: string | null; superId: string | null; info?: string; cfg?: unknown } | null>(null)
 
   useEffect(() => {
     if (!p.id) return
@@ -461,7 +578,7 @@ export default function ParcoursCreation({ mode = 'pro', pro, banques, supers, p
       if (typeof b.coEmail === 'string') setCoEmail(b.coEmail)
       if (typeof b.coTel === 'string') setCoTel(b.coTel)
       if (typeof b.coVille === 'string') setCoVille(b.coVille)
-      setEtape(FIN)
+      setEtape(rejoindre ? 2 : FIN)
     } catch { /* brouillon illisible : on repart de zero */ }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [visiteur, reprise])
@@ -485,7 +602,11 @@ export default function ParcoursCreation({ mode = 'pro', pro, banques, supers, p
   const segmentsOk = ((cfgJeu.spinSegments as { label?: string }[]) ?? []).filter(x => (x.label ?? '').trim()).length >= 2
   const itemsOk = ((cfgJeu.voteItems as { nom?: string }[]) ?? []).filter(x => (x.nom ?? '').trim()).length >= 2
   const bloque: Record<number, string | null> = {
-    1: rejoindre
+    1: rejoindre3
+      ? (!seId ? 'Choisissez le super event.'
+        : !demo && !nomCommerce.trim() ? 'Complétez votre profil : le nom de votre commerce.'
+        : !demo && !ville.trim() ? 'Complétez votre profil : la ville.' : null)
+      : rejoindre
       ? (!seId ? 'Choisissez le super event.'
         : !nomCommerce.trim() ? 'Indiquez le nom.'
         : !categorie ? 'Choisissez la catégorie.'
@@ -594,7 +715,7 @@ export default function ParcoursCreation({ mode = 'pro', pro, banques, supers, p
       /* Demande a Flowin : le pack coche presélectionne la demande (texte dans `offre`, colonne existante, + colonnes
          pack_souhaite / tarif_souhaite_ht si sql/13 est applique). Tarif a confirmer par Flowin : rien n'est facture. */
       let proIdEnvoi = p.id
-      if (visiteur && !p.id) {
+      if (visiteur && !p.id && !demo) {
         /* 2e chemin d'inscription : le compte pro se cree ici avec les coordonnees saisies (meme mecanisme que « Ma premiere fois »). */
         if (coordonneesKo) { setEnvoi('echec'); setErreur(coordonneesKo); return }
         const fiche = {
@@ -771,6 +892,39 @@ export default function ParcoursCreation({ mode = 'pro', pro, banques, supers, p
             </div>
           </div>
           <BlocAide />
+        </div>
+      )
+    }
+    if (rejoindre3) {
+      /* LOT 3-2 : ecran 3/3 « Demande envoyee » : coche, QR, statut honnete, une seule action. */
+      const pk = packsSE.find(x => x.cle === packChoisi)
+      return (
+        <div className="rj" data-rejoindre-resultat>
+          <style dangerouslySetInnerHTML={{ __html: RJ_CSS }} />
+          <BandeRejoindre etape={3} />
+          <div className="rj-corps rj-centre">
+            <Celebration />
+            <h2 className="rj-t">Demande envoyée</h2>
+            <div className="rj-qr" data-qr-resultat>
+              <QrOperation url={`${BASE}/se/${encodeURIComponent(seId)}`} />
+              <small>QR de {se?.nom ?? 'l’opération'}</small>
+            </div>
+            <div className="rj-statut" data-statut-demande>
+              <span>Statut</span><b>{statutDemande(fait.cfg)}</b>
+              <span className="rj-att">Votre station sera active à la validation, {DELAI_VALIDATION}</span>
+            </div>
+            <details className="rj-virement" data-virement-se>
+              <summary>Règlement par virement, après validation</summary>
+              <div>
+                {pk ? <>{pk.nom} · {prixAffiche(pk)} ({MENTION_TARIF_A_CONFIRMER.toLowerCase()}).<br /></> : null}
+                Bénéficiaire {REGLEMENT.titulaire} · IBAN {REGLEMENT.iban} · BIC {REGLEMENT.bic}<br />
+                Référence à indiquer : <b>{referenceVirement(fait.eventId || seId, 'SE')}</b>
+              </div>
+            </details>
+          </div>
+          <div className="rj-pied">
+            <a className="rj-btn" data-suivre-demande href={p.id ? `/pro?pro=${encodeURIComponent(p.id)}` : '/pro'}>Suivre ma demande</a>
+          </div>
         </div>
       )
     }
@@ -1014,6 +1168,111 @@ export default function ParcoursCreation({ mode = 'pro', pro, banques, supers, p
       <b>{b.nom}</b> <span style={MUTED}>· {(b.questions || []).length} questions · {b.statut === 'valide' ? 'validée' : 'brouillon'}</span>
     </button>
   )
+
+  if (rejoindre3 && etape >= 1) {
+    const peutEnvoyer = !!p.id || demo
+    const retourReprise = `/rejoindre?se=${encodeURIComponent(seId)}&reprise=1`
+    const nomAff = nomCommerce.trim() || (demo ? 'Commerce Démo' : '')
+    const villeAff = ville.trim() || (demo ? 'Ville Démo' : '')
+    const b1 = bloque[1]
+    const lieux = se && se.lat != null && se.lng != null
+      ? [{ id: se.id, nom: se.nom, lat: se.lat, lng: se.lng, module: se.module, couleur: ACCENT_SUPER }]
+        .concat(stationGeo ? [{ id: 'ma-station', nom: nomAff || 'Votre station', lat: stationGeo.lat, lng: stationGeo.lng, module: se.module, couleur: ACCENT_ANIM }] : [])
+      : []
+    const pkChoisi = packsSE.find(x => x.cle === packChoisi)
+    return (
+      <div className="rj" data-rejoindre-ecran={etape}>
+        <style dangerouslySetInnerHTML={{ __html: RJ_CSS }} />
+        <BandeRejoindre etape={etape === 2 ? 2 : 1} />
+        {etape === 1 && (
+          <>
+            <div className="rj-corps">
+              {!se ? (
+                <>
+                  <h2 className="rj-t">Quel super event ?</h2>
+                  {supers.length === 0 && <p className="rj-s">Aucun super event ouvert aux inscriptions pour le moment.</p>}
+                  <div style={{ display: 'grid', gap: 10 }}>
+                    {supers.map(x => (
+                      <CarteSuperEvent key={x.id} nom={x.nom} dates={(x.date_d ? libelleDates(x.date_d, x.date_f) : '[dates à compléter]') + (estSuperEventDemo(x) ? ' · DÉMO' : '')} jeu={libelleModule(x.module || GABARIT_MODULE)} actif={false} onClick={() => setSeId(x.id)} />
+                    ))}
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div>
+                    <h2 className="rj-t">{se.nom}</h2>
+                    <p className="rj-s">{se.date_d ? libelleDates(se.date_d, se.date_f) : '[dates à compléter]'}{supers.length > 1 && <> · <button type="button" className="rj-lien" onClick={() => setSeId('')}>Changer</button></>}</p>
+                  </div>
+                  {lieux.length > 0 && <div className="rj-carte"><SuperEventMap lieux={lieux} height={150} /></div>}
+                  {peutEnvoyer ? (
+                    <div className="rj-ok" data-identite-reprise>
+                      <span className="rj-coche"><IcoCoche /></span>
+                      <div><b>{nomAff || '—'}</b><small>{villeAff || '—'} · repris de votre profil</small></div>
+                      {p.id && <a className="rj-lien rj-modif" href={`/pro/compte?pro=${encodeURIComponent(p.id)}`}>Modifier</a>}
+                    </div>
+                  ) : (
+                    <div className="rj-ok rj-neutre" data-visiteur-info>
+                      <div><b>Vous parcourez sans compte</b><small>Un compte pro est nécessaire pour envoyer la demande.</small></div>
+                    </div>
+                  )}
+                </>
+              )}
+              {tenteEtape['1'] && b1 && <div className="rj-err" role="alert">{b1}{peutEnvoyer && p.id ? <> <a className="rj-lien" href={`/pro/compte?pro=${encodeURIComponent(p.id)}`}>Mon profil</a></> : null}</div>}
+            </div>
+            <div className="rj-pied">
+              <button className="rj-btn" data-suivant onClick={() => { if (b1) { setTenteEtape(t => ({ ...t, '1': true })); return } setEtape(2); window.scrollTo({ top: 0 }) }}>Suivant</button>
+              {!visiteur && <button type="button" className="rj-lien rj-bas" onClick={() => { setType(null); setEtape(0) }}>Changer de choix</button>}
+            </div>
+          </>
+        )}
+        {etape === 2 && (
+          <>
+            <div className="rj-corps">
+              <h2 className="rj-t">Votre pack</h2>
+              <div role="radiogroup" aria-label="Packs de participation" data-grille-tarifs style={{ display: 'grid', gap: 8 }}>
+                {packsSE.map(pk => {
+                  const on = packChoisi === pk.cle
+                  return (
+                    <div key={pk.cle} className={`rj-pk${on ? ' on' : ''}`} data-pack={pk.cle}>
+                      <button type="button" role="radio" aria-checked={on} className="rj-pk-ent" onClick={() => { setPackChoisi(pk.cle); setPersona(pk.cle === 'visible' ? 'annonceur' : 'commerce') }}>
+                        <span className="rj-rd">{on && <i />}</span>
+                        <b>{pk.cle === 'visible' ? 'Simplement visible' : pk.nom}</b>
+                        <strong>{pk.prixHt === null ? 'À définir' : prixAffiche(pk)}</strong>
+                        <span className="rj-chev" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round"><path d="M6 9l6 6 6-6" /></svg></span>
+                      </button>
+                      {on && (
+                        <ul>
+                          {pk.badge && <li><em>{pk.badge}</em></li>}
+                          {pk.lotEuros > 0 && <li>Lot en jeu : {pk.lotEuros} €</li>}
+                        </ul>
+                      )}
+                    </div>
+                  )
+                })}
+              </div>
+              <p className="rj-s" style={{ margin: 0 }}>{MENTION_TARIF_A_CONFIRMER}.</p>
+              {pkChoisi && <div className="rj-moment"><span className="rj-coche"><IcoCoche /></span><span>Pack {pkChoisi.cle === 'visible' ? 'Simplement visible' : pkChoisi.nom} choisi</span></div>}
+              {envoi === 'echec' && <div className="rj-err" role="alert">Enregistrement impossible{erreur ? ` : ${erreur.replace(/\.+$/, '')}` : ''}. Réessayez.</div>}
+            </div>
+            <div className="rj-pied">
+              {peutEnvoyer ? (
+                <button className="rj-btn" data-publier disabled={envoi === 'envoi' || !packChoisi} onClick={envoyer}>{envoi === 'envoi' ? 'Envoi…' : 'Envoyer ma demande'}</button>
+              ) : !sessionVerifiee ? (
+                <button className="rj-btn" disabled>Un instant…</button>
+              ) : (
+                <div data-compte-requis style={{ display: 'grid', gap: 8 }}>
+                  <p className="rj-s" style={{ margin: 0, textAlign: 'center' }}>Un compte pro gratuit est nécessaire pour envoyer.</p>
+                  <a className="rj-btn" onClick={sauverBrouillon} href={`/pro/premiere-fois?retour=${encodeURIComponent(retourReprise)}`}>Créer mon compte</a>
+                  <a className="rj-lien rj-bas" onClick={sauverBrouillon} href={`/pro/connexion?retour=${encodeURIComponent(retourReprise)}`}>J’ai déjà un compte</a>
+                </div>
+              )}
+              <button type="button" className="rj-lien rj-bas" onClick={() => setEtape(1)}>← Retour</button>
+            </div>
+          </>
+        )}
+      </div>
+    )
+  }
 
   return (
     <div>
