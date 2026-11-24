@@ -86,3 +86,4 @@ Ce journal n'est pas une preuve de production : l'état vérifié est dans `ETAT
 - 24/11/2026 · Décision Romain : compte joueur téléphone d'abord, rappels activés par défaut, pas d'invitation écran d'accueil ; maquette lot 6 G à simplifier avant tout code.
 - 24/11/2026 · Notifications push par défaut : agent lancé (code, VAPID privée à déposer par Romain dans les secrets Supabase), non poussé.
 - 24/11/2026 · Lot 3 validé, codage lancé en parallèle (inscription+rejoindre, configurateur+lots+QR, jeux animés+sons) ; maquette pixel art arcade (lot 7) lancée ; disque libéré (10 worktrees retirés, déjà publiés).
+- 24/11/2026 · Rappels Web Push : migration push_abonnements appliquée, code fusionné (be7db9a2). Secret VAPID, déploiement push-envoyer et cron : à faire.
