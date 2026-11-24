@@ -122,7 +122,9 @@ export interface CreationAnimation {
   /* `valeur` : montant affiche sur le billet (« Valeur du bon »). */
   lots: { nom: string; quantite: number; valeur?: number; type: 'tirage' | 'instantane'; conditions: string
     /** Validité du lot gagné (configurateur 10/11/2026) : nombre de jours (lots.validite_jours), ou période du / au (cfg.lots). */
-    validiteJours?: number | null; validiteDu?: string | null; validiteAu?: string | null }[]
+    validiteJours?: number | null; validiteDu?: string | null; validiteAu?: string | null
+    /** Lot 6 A (24/11/2026) : cessible à un tiers (décision par défaut : non). Colonne lots.cessible = sql/2026-11-24-lots-cessible-qr-remplacer.sql ; toujours aussi dans cfg.lots. */
+    cessible?: boolean }[]
   /** Identifiant décidé à l'avance (QR montrés avant la publication) ; sinon tiré ici. */
   id?: string
   regleRecompense?: { mode: 'tousLesX' | 'aleatoire'; everyX: number; probabilite: number }
@@ -188,7 +190,7 @@ export async function creerAnimation(params: CreationAnimation): Promise<{ ok: b
      sql/materialiser_lots_cfg_en_table.sql ('lot-<event>-<rang>'). */
   if (params.lots.length) {
     const { data: pro } = await supabase.from('pros').select('partenaire_id').eq('id', params.proId).maybeSingle()
-    const { error: eLots } = await supabase.from('lots').insert(params.lots.map((l, i) => ({
+    const lignesLots = (avecCessible: boolean) => params.lots.map((l, i) => ({
       id: `lot-${id}-${i + 1}`,
       event_id: id,
       partenaire_id: (pro as { partenaire_id: string | null } | null)?.partenaire_id ?? null,
@@ -204,7 +206,11 @@ export async function creerAnimation(params: CreationAnimation): Promise<{ ok: b
       /* Période « du … au … » (sql/2026-11-10-finitions.sql) : appliquée aux billets par date_limite_tirage / valider_lot. */
       ...(l.validiteDu ? { valide_du: l.validiteDu } : {}),
       ...(l.validiteAu ? { valide_au: l.validiteAu } : {}),
-    })))
+      ...(avecCessible && typeof l.cessible === 'boolean' ? { cessible: l.cessible } : {}),
+    }))
+    let { error: eLots } = await supabase.from('lots').insert(lignesLots(true))
+    /* Colonne lots.cessible pas encore créée (SQL non appliqué) : on retombe sur les colonnes existantes, cessible reste dans cfg.lots. */
+    if (eLots && /cessible|column/i.test(eLots.message)) ({ error: eLots } = await supabase.from('lots').insert(lignesLots(false)))
     if (eLots) {
       console.error('[creerAnimation] lots', eLots.message)
       return { ok: false, eventId: id, error: `Animation créée, mais ses lots n’ont pas été enregistrés : ${eLots.message}` }
