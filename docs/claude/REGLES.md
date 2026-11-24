@@ -90,3 +90,4 @@ Ajout : seulement une règle écrite ou confirmée par Romain. Modification : su
 - 24/11/2026 · Import fichier client = option A : le pro envoie lui-même l'invitation (lien/QR tracé), Flowin n'écrit pas aux contacts importés.
 - 24/11/2026 · Une seule carte partout (MapLibre/OpenFreeMap, composant commun) : à vérifier par l'audit en cours.
 - 24/11/2026 · Romain n'a pas de téléphone pour tester : les tests réels sur iPhone restent « non vérifié ».
+- 24/11/2026 · QR : on accepte le jeu à distance (anti-fraude = 1 fois par jour et par compte). La règle 150 m reste sur la page carte seulement, pas de blocage serveur. Si un QR fuit : on le change dans la journée. Sons autorisés dans les jeux (bouton pour couper). Stats pro = nombre de FLASHS (visites via QR), opt-in, H/F, tranches d'âge, code postal, zone de chalandise si adresse ; pas de 'passages attendus'.
