@@ -1,0 +1,40 @@
+<!doctype html><html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Lot 7 : écoute des sons 8 bits</title><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Silkscreen:wght@400;700&display=swap" rel="stylesheet"><link rel="stylesheet" href="lot7.css">
+<style>.b{display:flex;gap:10px;flex-wrap:wrap;margin:16px 0}.b button{min-height:48px;padding:0 18px;border:2px solid #05081A;background:#FFD23F;font:700 15px system-ui;border-radius:0;box-shadow:4px 4px 0 #05081A;cursor:pointer}
+.b button:focus-visible{outline:4px solid #3B5CC4}#etat{font-size:15px;margin:8px 0}table{border-collapse:collapse;background:#fff;font-size:14px;margin-top:14px}td,th{border:1px solid #D5DBEA;padding:6px 10px;text-align:left}</style></head><body><div class="page">
+<h1>Lot 7 : écoute des sons 8 bits</h1><p class="lead">Chaque son est fabriqué à la volée par le navigateur (Web Audio), sans fichier. Page d’écoute pour Romain : cliquer sur un bouton. Aucun code d’application.</p>
+<div class="b"><button data-s="demarrage">Démarrage</button><button data-s="piece">Pièce</button><button data-s="bonne">Bonne réponse</button><button data-s="erreur">Erreur</button><button data-s="combo">Combo</button><button data-s="tick">Tick de roue</button><button data-s="roue">Roue complète (20 ticks)</button><button data-s="perdu">Perdu</button><button data-s="jackpot">Jackpot</button></div>
+<div class="b"><button id="coupe" aria-pressed="false">Couper le son</button></div><div id="etat" role="status">Son activé. Volume maximal 0,2.</div>
+<table><tr><th>Son</th><th>Forme</th><th>Notes (Hz)</th><th>Durée</th></tr>
+<tr><td>Démarrage</td><td>carrée</td><td>523 · 659 · 784 · 1047</td><td>4 x 90 ms, dernière 260 ms</td></tr>
+<tr><td>Pièce</td><td>carrée</td><td>988 puis 1319</td><td>70 ms puis 300 ms (décroît)</td></tr>
+<tr><td>Bonne réponse</td><td>carrée</td><td>659 · 784 · 1047</td><td>80 + 80 + 220 ms</td></tr>
+<tr><td>Erreur</td><td>triangle</td><td>220 vers 110 (glissé)</td><td>380 ms</td></tr>
+<tr><td>Combo</td><td>carrée</td><td>784 · 1047 · 1319 · 1568</td><td>4 x 60 ms, dernière 240 ms</td></tr>
+<tr><td>Tick de roue</td><td>triangle</td><td>880</td><td>30 ms, de plus en plus espacé</td></tr>
+<tr><td>Perdu</td><td>triangle</td><td>392 · 330 · 262</td><td>3 x 160 ms</td></tr>
+<tr><td>Jackpot</td><td>carrée (+ accord)</td><td>523 à 1568, puis accord 1047 + 1319 + 1568</td><td>≈ 1,5 s</td></tr></table></div>
+<script>
+var ctx=null,coupe=false;
+function ac(){if(!ctx){var C=window.AudioContext||window.webkitAudioContext;ctx=new C();}if(ctx.state==='suspended'){ctx.resume();}return ctx;}
+function note(f,t0,d,type,vol,f2){var c=ac(),o=c.createOscillator(),g=c.createGain();o.type=type;o.frequency.setValueAtTime(f,t0);
+ if(f2){o.frequency.linearRampToValueAtTime(f2,t0+d);}
+ g.gain.setValueAtTime(0.0001,t0);g.gain.linearRampToValueAtTime(vol||0.2,t0+0.005);g.gain.setValueAtTime(vol||0.2,t0+d*0.7);g.gain.linearRampToValueAtTime(0.0001,t0+d);
+ o.connect(g);g.connect(c.destination);o.start(t0);o.stop(t0+d+0.02);}
+function seq(list,type,vol){var t=ac().currentTime+0.02;for(var i=0;i<list.length;i++){note(list[i][0],t,list[i][1],type,vol);t+=list[i][1];}}
+var S={
+ demarrage:function(){seq([[523.25,.09],[659.25,.09],[783.99,.09],[1046.5,.26]],'square');},
+ piece:function(){seq([[987.77,.07],[1318.51,.3]],'square');},
+ bonne:function(){seq([[659.25,.08],[783.99,.08],[1046.5,.22]],'square');},
+ erreur:function(){note(220,ac().currentTime+0.02,.38,'triangle',.2,110);},
+ combo:function(){seq([[783.99,.06],[1046.5,.06],[1318.51,.06],[1567.98,.24]],'square');},
+ tick:function(){note(880,ac().currentTime+0.02,.03,'triangle',.2);},
+ roue:function(){var t=ac().currentTime+0.02,gap=0.06;for(var i=0;i<20;i++){note(880,t,.03,'triangle',.2);t+=gap;gap=gap*1.16;}},
+ perdu:function(){seq([[392,.16],[329.63,.16],[261.63,.3]],'triangle');},
+ jackpot:function(){var t=ac().currentTime+0.02,n=[523.25,659.25,783.99,1046.5,1318.51,1567.98],i;for(i=0;i<n.length;i++){note(n[i],t,.07,'square',.18);t+=.07;}
+  for(i=0;i<2;i++){note(1046.5,t,.18,'square',.1);note(1318.51,t,.18,'square',.1);note(1567.98,t,.18,'square',.1);t+=.22;}
+  note(1046.5,t,.5,'square',.1);note(1318.51,t,.5,'square',.1);note(1567.98,t,.5,'square',.1);}
+};
+var bs=document.querySelectorAll('[data-s]');
+for(var i=0;i<bs.length;i++){bs[i].addEventListener('click',function(){if(coupe){return;}S[this.getAttribute('data-s')]();});}
+document.getElementById('coupe').addEventListener('click',function(){coupe=!coupe;this.setAttribute('aria-pressed',coupe);this.textContent=coupe?'Remettre le son':'Couper le son';document.getElementById('etat').textContent=coupe?'Son coupé.':'Son activé. Volume maximal 0,2.';});
+</script></body></html>
