@@ -317,7 +317,7 @@ export default function Configurateur({ pro, banques }: { pro: ProConfigurateur;
   if (fait) {
     const urlBon = lienBonCommande({ proId: p.id, offre: 'lancement', quizFlowin, customisation: false, eventId: evId, kit })
     if (!PAIEMENT_ACTIF) {
-      return <Cadre><EnLigne commerce={commerce.trim()} qrs={fait.qrs} lienEspace={lienEspace} info={fait.info} quizFlowin={quizFlowin} /></Cadre>
+      return <Cadre><EnLigne commerce={commerce.trim()} qrs={fait.qrs} lienEspace={lienEspace} info={fait.info} quizFlowin={quizFlowin} eventId={evId} logoUrl={logoUrl} /></Cadre>
     }
     return (
       <Cadre>

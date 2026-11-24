@@ -10,7 +10,8 @@ import { useEffect, useState } from 'react'
 import { VERT_OK, VERT_OK_FOND, CHARTE_PRO as C } from '@/lib/charte'
 import { BTN, BTN2, MUTED } from '@/lib/proui'
 import { qrFlowinPng, qrFlowinSvg } from '@/lib/qrLogo'
-import { ouvrirAfficheA4 } from '@/lib/afficheQr'
+import { ouvrirAfficheA4, lirePersoAffiche } from '@/lib/afficheQr'
+import { PersonnaliserAffiche } from '@/components/operations/QrTraces'
 
 export type QrFin = { nom: string; support: string; code: string | null; url: string }
 
@@ -57,7 +58,8 @@ export function Celebration() {
   )
 }
 
-export default function EnLigne({ commerce, qrs, lienEspace, info, quizFlowin }: { commerce: string; qrs: QrFin[]; lienEspace: string; info: string; quizFlowin: boolean }) {
+export default function EnLigne({ commerce, qrs, lienEspace, info, quizFlowin, eventId, logoUrl }: { commerce: string; qrs: QrFin[]; lienEspace: string; info: string; quizFlowin: boolean; eventId?: string; logoUrl?: string | null }) {
+  const [perso, setPerso] = useState(false)
   const [k, setK] = useState(0)
   const sel = qrs[Math.min(k, qrs.length - 1)]
   const [png, setPng] = useState('')
@@ -75,7 +77,7 @@ export default function EnLigne({ commerce, qrs, lienEspace, info, quizFlowin }:
     setMsg('')
     try {
       const svg = await qrFlowinSvg(sel.url, 1024)
-      const e = ouvrirAfficheA4({ svg, url: sel.url, titre: commerce, sousTitre: 'Scannez pour jouer', qrNom: sel.nom, support: sel.support, code: sel.code })
+      const e = ouvrirAfficheA4({ svg, url: sel.url, titre: commerce, sousTitre: 'Scannez pour jouer', qrNom: sel.nom, support: sel.support, code: sel.code, auto: true, logoUrl: logoUrl ?? null, ...(eventId ? lirePersoAffiche(eventId) : {}) })
       if (e) setMsg(e)
     } catch { setMsg('L’affiche n’a pas pu être créée.') }
   }
@@ -94,7 +96,16 @@ export default function EnLigne({ commerce, qrs, lienEspace, info, quizFlowin }:
       <Celebration />
       <div style={{ fontSize: 22, fontWeight: 900 }}>C’est en ligne</div>
       <div style={{ fontSize: 13.5, ...MUTED, marginTop: 4 }}>Vos clients peuvent jouer.{quizFlowin ? ' Votre quiz : retour sous 72 h.' : ''}</div>
-      {sel && (
+      {sel && perso && eventId && (
+        <div data-affiche-perso style={{ marginTop: 12 }}>
+          <PersonnaliserAffiche eventId={eventId} commerce={commerce} logoUrl={logoUrl ?? null} />
+          <div style={{ display: 'grid', gap: 8, marginTop: 12 }}>
+            <button type="button" data-affiche style={{ ...BTN, minHeight: 48 }} onClick={affiche}>Imprimer l’affiche A4</button>
+            <button type="button" data-perso-fin style={{ ...BTN2, minHeight: 48 }} onClick={() => setPerso(false)}>Retour</button>
+          </div>
+        </div>
+      )}
+      {sel && !perso && (
         <div data-qr-fin style={{ marginTop: 12 }}>
           <div style={{ width: 188, height: 188, margin: '0 auto', display: 'grid', placeItems: 'center', background: '#fff', border: `1.5px solid ${C.bordure}`, borderRadius: 16, padding: 8, boxSizing: 'border-box' }}>
             {png ? <img src={png} alt={`QR du jeu : ${sel.nom}`} style={{ width: '100%', height: '100%' }} /> : <span style={{ fontSize: 13, ...MUTED }}>…</span>}
@@ -112,6 +123,7 @@ export default function EnLigne({ commerce, qrs, lienEspace, info, quizFlowin }:
           <div style={{ display: 'grid', gap: 8, marginTop: 10 }}>
             <button type="button" data-affiche style={{ ...BTN, minHeight: 48 }} onClick={affiche}>Imprimer l’affiche A4</button>
             <button type="button" data-partager style={{ ...BTN2, minHeight: 48 }} onClick={partager}>Partager</button>
+            {eventId && <button type="button" data-perso style={{ ...BTN2, minHeight: 48, border: 'none' }} onClick={() => setPerso(true)}>Logo, couleur, texte de l’affiche</button>}
           </div>
         </div>
       )}

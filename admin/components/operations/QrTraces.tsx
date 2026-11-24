@@ -23,7 +23,8 @@ import {
 } from '@/lib/qrTraces'
 import { lienAncien } from '@/lib/qrPermalien'
 import { qrFlowinPng, qrFlowinSvg } from '@/lib/qrLogo'
-import { ouvrirAfficheA4 } from '@/lib/afficheQr'
+import { ouvrirAfficheA4, lirePersoAffiche, ecrirePersoAffiche, COULEURS_AFFICHE, TEXTES_AFFICHE, TEXTE_AFFICHE_MAX, type PersoAffiche } from '@/lib/afficheQr'
+import { supabase } from '@/lib/supabase'
 import { libelleModule } from '@/lib/operations'
 import { PictoSupport, PictoQr } from './PictoSupport'
 
@@ -118,6 +119,47 @@ export function FormulaireQr({ onAjouter, occupe, libelle = '+ Créer le QR' }: 
 }
 
 /**
+ * PERSONNALISER L'AFFICHE (lot 5 F, maquette validée le 24/11/2026) : aperçu en direct, 6 couleurs de la charte (sans violet),
+ * texte court de 40 caractères au plus. Retenu sur l'appareil (lib/afficheQr) ; le logo est celui du profil du commerce.
+ */
+export function PersonnaliserAffiche({ eventId, commerce, logoUrl, onChange }: { eventId: string; commerce: string; logoUrl: string | null; onChange?: (p: PersoAffiche) => void }) {
+  const [perso, setPerso] = useState<PersoAffiche>({ couleur: COULEURS_AFFICHE[0].v, texte: '' })
+  useEffect(() => { const p = lirePersoAffiche(eventId); setPerso(p); onChange?.(p) }, [eventId]) // eslint-disable-line react-hooks/exhaustive-deps
+  const maj = (patch: Partial<PersoAffiche>) => { const p = { ...perso, ...patch, texte: (patch.texte ?? perso.texte).slice(0, TEXTE_AFFICHE_MAX) }; setPerso(p); ecrirePersoAffiche(eventId, p); onChange?.(p) }
+  const puce = (on: boolean): React.CSSProperties => ({ minHeight: 44, borderRadius: 99, border: `1.5px solid ${on ? '#3B5CC4' : BRD}`, background: on ? '#EEF2FB' : '#fff', color: '#0F172A', fontWeight: 800, fontSize: 13.5, padding: '0 14px', cursor: 'pointer', fontFamily: 'inherit' })
+  return (
+    <div data-perso-affiche style={{ textAlign: 'left' }}>
+      <div data-affiche-apercu style={{ width: 150, margin: '0 auto 10px', background: '#fff', borderRadius: 8, boxShadow: '0 4px 14px rgba(27,58,92,.18)', overflow: 'hidden', textAlign: 'center' }}>
+        <div style={{ background: perso.couleur, padding: '10px 10px 14px', minHeight: 54, display: 'grid', placeItems: 'center' }}>
+          <div style={{ background: '#fff', borderRadius: 8, padding: '4px 10px', minHeight: 30, minWidth: 70, display: 'grid', placeItems: 'center', fontWeight: 900, fontSize: 13, color: perso.couleur }}>
+            {logoUrl ? <img src={logoUrl} alt="" style={{ maxWidth: 100, maxHeight: 28 }} /> : commerce}
+          </div>
+        </div>
+        <div data-affiche-texte style={{ fontWeight: 900, fontSize: 14, color: perso.couleur, padding: '8px 8px 4px', lineHeight: 1.15 }}>{perso.texte.trim() || commerce}</div>
+        <div style={{ width: 62, height: 62, margin: '2px auto 6px', background: 'repeating-conic-gradient(#1B3A5C 0% 25%, #fff 0% 50%) 0 0/10px 10px', borderRadius: 4 }} aria-hidden="true" />
+        <div style={{ background: perso.couleur, color: '#fff', borderRadius: 99, fontSize: 9.5, fontWeight: 800, margin: '0 14px 8px', padding: '3px 0' }}>Scannez et jouez</div>
+      </div>
+      <div style={{ fontSize: 12.5, fontWeight: 800, color: MUT, margin: '6px 0 4px' }}>COULEUR</div>
+      <div role="radiogroup" aria-label="Couleur de l’affiche" style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+        {COULEURS_AFFICHE.map(c => (
+          <button key={c.v} type="button" role="radio" aria-checked={perso.couleur === c.v} aria-label={c.nom} data-couleur={c.v} onClick={() => maj({ couleur: c.v })}
+            style={{ width: 44, height: 44, borderRadius: 99, background: c.v, cursor: 'pointer', border: perso.couleur === c.v ? '3px solid #fff' : '3px solid transparent', boxShadow: perso.couleur === c.v ? `0 0 0 2.5px ${c.v}` : 'none', color: '#fff', fontWeight: 900 }}>{perso.couleur === c.v ? '✓' : ''}</button>
+        ))}
+      </div>
+      <div style={{ fontSize: 12.5, fontWeight: 800, color: MUT, margin: '10px 0 4px' }}>TEXTE COURT</div>
+      <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 6 }}>
+        {TEXTES_AFFICHE.map(t => <button key={t} type="button" data-texte-propose style={puce(perso.texte === t)} onClick={() => maj({ texte: t })}>{t}</button>)}
+      </div>
+      <div style={{ position: 'relative' }}>
+        <input data-texte-affiche maxLength={TEXTE_AFFICHE_MAX} value={perso.texte} onChange={e => maj({ texte: e.target.value })} aria-label="Texte de l’affiche" placeholder="Ou écrivez le vôtre"
+          style={{ ...champ, width: '100%', minHeight: 44, fontSize: 15, paddingRight: 56 }} />
+        <span data-compteur style={{ position: 'absolute', right: 12, top: 13, fontSize: 12, color: MUT }}>{perso.texte.length}/{TEXTE_AFFICHE_MAX}</span>
+      </div>
+    </div>
+  )
+}
+
+/**
  * MES QR (lot 6 B, maquette validée le 24/11/2026) : vue du pro en UN écran. Un QR identifié par support, le nombre de FLASHS
  * de chacun (fetchStatsQr), puis un QR : plein écran, flashs du jour, copier le lien, imprimer l'affiche, « Remplacer ce QR ».
  * Remplacer = le pro seul : l'ancien QR affiche « QR désactivé » (app/q/[code]/route.ts), un nouveau QR du même support est créé.
@@ -129,7 +171,16 @@ function MesQr({ eventId, jeu, titre, qrs, tousLesSlugs, onAjouter, onRemplace, 
 }) {
   const [stats, setStats] = useState<StatQr[]>([])
   const [selSource, setSelSource] = useState('')
-  const [etape, setEtape] = useState<'liste' | 'detail' | 'confirmer' | 'nouveau'>('liste')
+  const [etape, setEtape] = useState<'liste' | 'detail' | 'confirmer' | 'nouveau' | 'affiche'>('liste')
+  const [logoUrl, setLogoUrl] = useState<string | null>(null)
+  useEffect(() => {
+    let v = true
+    supabase.from('events').select('photo_url,cfg').eq('id', eventId).maybeSingle().then(r => {
+      const d = r.data as { photo_url?: string | null; cfg?: { logoUrl?: string | null } | null } | null
+      if (v) setLogoUrl(d?.cfg?.logoUrl || d?.photo_url || null)
+    }, () => {})
+    return () => { v = false }
+  }, [eventId])
   const [png, setPng] = useState('')
   const [jour, setJour] = useState<number | null>(null)
   const [msg, setMsg] = useState('')
@@ -157,7 +208,7 @@ function MesQr({ eventId, jeu, titre, qrs, tousLesSlugs, onAjouter, onRemplace, 
     setMsg('')
     try {
       const svg = await qrFlowinSvg(url, 1024)
-      const e = ouvrirAfficheA4({ svg, url, titre, sousTitre: 'Scannez pour jouer', qrNom: affiche.nom, support: affiche.support, code: affiche.code_court, auto: true })
+      const e = ouvrirAfficheA4({ svg, url, titre, sousTitre: 'Scannez pour jouer', qrNom: affiche.nom, support: affiche.support, code: affiche.code_court, auto: true, logoUrl, ...lirePersoAffiche(eventId) })
       if (e) setMsg(e)
     } catch { setMsg('L’affiche n’a pas pu être créée.') }
   }
@@ -207,6 +258,18 @@ function MesQr({ eventId, jeu, titre, qrs, tousLesSlugs, onAjouter, onRemplace, 
     )
   }
 
+  if (etape === 'affiche') {
+    return (
+      <div data-mes-qr-affiche style={{ marginTop: 8 }}>
+        <button type="button" data-retour-detail onClick={() => { setEtape('detail'); setMsg('') }} style={{ ...B, border: 'none', minWidth: 44 }}>← {affiche.nom}</button>
+        <div style={{ fontSize: 20, fontWeight: 900, textAlign: 'center', marginBottom: 8 }}>Mon affiche</div>
+        <PersonnaliserAffiche eventId={eventId} commerce={titre} logoUrl={logoUrl} />
+        <button type="button" data-imprimer style={{ ...BP, width: '100%', marginTop: 12 }} onClick={imprimer}>Imprimer</button>
+        {msg && <div role="status" style={{ fontSize: 13, fontWeight: 700, marginTop: 8, color: '#B45309', textAlign: 'center' }}>{msg}</div>}
+      </div>
+    )
+  }
+
   return (
     <div data-mes-qr-detail style={{ marginTop: 8, textAlign: 'center' }}>
       <button type="button" data-retour-liste onClick={() => { setEtape('liste'); setMsg('') }} style={{ ...B, border: 'none', minWidth: 44 }}>← Mes QR</button>
@@ -229,6 +292,7 @@ function MesQr({ eventId, jeu, titre, qrs, tousLesSlugs, onAjouter, onRemplace, 
             <button type="button" data-copier style={B} onClick={copier}>Copier le lien</button>
             <button type="button" data-imprimer style={BP} onClick={imprimer}>Imprimer</button>
           </div>
+          {etape === 'detail' && <button type="button" data-personnaliser style={B} onClick={() => setEtape('affiche')}>Personnaliser l’affiche</button>}
           {etape === 'detail' && affiche.id && <button type="button" data-remplacer style={{ ...B, borderColor: '#F3C7B1', color: '#C2410C' }} onClick={() => setEtape('confirmer')}>Il a fuité ? Remplacer ce QR</button>}
         </div>
       )}
