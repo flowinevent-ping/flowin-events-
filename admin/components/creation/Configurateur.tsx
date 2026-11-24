@@ -1,9 +1,10 @@
 'use client'
 
 /**
- * CONFIGURATEUR DU JEU (pro) — parcours dicté par Romain le 10/11/2026, un écran = une idée, carrousel sans scroll :
- *   coordonnées (sauté si connues) · jeu · configuration du quiz (je rédige / Flowin rédige) · demande à Flowin
- *   · lots qui font revenir · supports + QR · kit · récapitulatif (Modifier) · prix · « Valider mon bon de commande ».
+ * CONFIGURATEUR DU JEU (pro) — maquette lot 3-4 validée le 24/11/2026 : QUATRE écrans pré-remplis, carrousel sans scroll :
+ *   Jeu (roue présélectionnée ; quiz : questions en banque ou rédigées par Flowin) · Lots (formulaire complet + aperçu du ticket,
+ *   LotFormulaire.tsx) · Diffusion (supports, QR, kit digital par défaut) · Validation (récapitulatif + prix, « Valider mon bon de commande »).
+ *   Les coordonnées sont reprises du profil : seuls les champs manquants s'affichent, sur l'écran Validation.
  * Écritures : pros (coordonnées), events + lots (creerAnimation, lots.validite_jours, lots.valide_du / valide_au),
  * qr_stations (creerQrTrace), crm_retours (enregistrerDemandeQuiz, enregistrerDemandeKit — même avec PAIEMENT_ACTIF=false), banques (questions à écrire après).
  * PAIEMENT_ACTIF=false : validation sans paiement, le jeu passe en ligne ; true : bon de commande pré-rempli + virement.
@@ -16,6 +17,7 @@ import type { Banque, QuestionQuiz } from '@/lib/banques'
 import { creerBanque, enregistrerBanque, nouvelleQuestionQuiz } from '@/lib/banques'
 import { GABARIT_MODULE } from '@/lib/gabarit'
 import { creerQrTrace, slugQr, QR_INCLUS, urlDuQr, type TypeQr } from '@/lib/qrTraces'
+import LotsEcran, { lotVide, verifierLot, valeurNombre, casesRoue, type LotC } from './LotFormulaire'
 import { PictoSupport } from '@/components/operations/PictoSupport'
 import { lienAncien } from '@/lib/qrPermalien'
 import { qrFlowinPng } from '@/lib/qrLogo'
@@ -32,24 +34,20 @@ import { BTN, BTN2, MUTED } from '@/lib/proui'
 
 const BLEU = '#3B5CC4'
 const GROUPES = ['Jeu', 'Lots', 'Diffusion', 'Validation']
+const THEMES_QUIZ = ['Mon métier', 'Ma ville', 'Saison', 'Culture générale']
+const TONS = ['Léger', 'Neutre', 'Sérieux']
+const DELAIS = ['Sous 1 semaine', 'Urgent', 'À une date']
 export interface ProConfigurateur {
   id: string; nom: string | null; adresse: string | null; code_postal: string | null; ville: string | null
   email: string | null; tel: string | null; contact: string | null; partenaire_id: string | null; siret?: string | null
 }
 type Jeu = 'quizsolo' | 'quizbonus' | 'spin' | 'tombola'
-type Validite = 'sans' | 'jours' | 'dates'
-type LotC = { id: string; nom: string; quantite: number; conditions: string; validite: Validite; jours: number; du: string; au: string }
 
 const JEUX: { k: Jeu; module: string; t: string; s: string; illu: ReactNode }[] = [
   { k: 'quizsolo', module: 'quizsolo', t: 'Quiz', s: '3 bonnes réponses = 1 ticket', illu: <IlluQuiz /> },
   { k: 'quizbonus', module: GABARIT_MODULE, t: 'Quiz + bonus', s: 'Le quiz, plus vos questions pour sonder', illu: <IlluQuiz bonus /> },
   { k: 'spin', module: 'spin', t: 'Roue', s: 'On tourne, on gagne tout de suite', illu: <IlluRoue /> },
   { k: 'tombola', module: 'tombola', t: 'Tombola', s: 'On s’inscrit, grand tirage à la fin', illu: <IlluTombola /> },
-]
-const EXEMPLES_LOTS = [
-  { t: 'Remise', nom: '-10 % sur votre prochain achat', cond: 'Valable dès 20 € d’achat' },
-  { t: 'Bon d’achat', nom: 'Bon d’achat de 5 €', cond: 'Bon de 5 € valable dès 30 € d’achat' },
-  { t: 'Produit offert', nom: 'Un produit offert', cond: 'Pour tout achat en magasin' },
 ]
 /** Supports de diffusion : ceux des QR tracés (lib/qrTraces SUPPORTS_QR), un QR par support coché. */
 const SUPPORTS: { k: string; t: string; support: string; type: TypeQr; p: string }[] = [
@@ -65,7 +63,6 @@ const SUPPORTS: { k: string; t: string; support: string; type: TypeQr; p: string
   { k: 'presse', t: 'Presse / magazine', support: 'Presse / magazine', type: 'physique', p: 'presse' },
   { k: 'radio', t: 'Radio', support: 'Radio', type: 'physique', p: 'radio' },
 ]
-const lotVide = (): LotC => ({ id: 'l' + Math.random().toString(36).slice(2, 8), nom: '', quantite: 10, conditions: '', validite: 'sans', jours: 30, du: '', au: '' })
 const eur = (n: number) => n.toLocaleString('fr-FR', { minimumFractionDigits: n % 1 ? 2 : 0, maximumFractionDigits: 2 }) + ' €'
 
 const IN: CSSProperties = { width: '100%', padding: '11px 13px', background: '#fff', border: `1.5px solid ${C.bordureChamp}`, borderRadius: 12, color: C.texte, fontSize: 15, fontWeight: 600, fontFamily: 'inherit', outline: 'none', boxSizing: 'border-box' }
@@ -99,20 +96,34 @@ export default function Configurateur({ pro, banques }: { pro: ProConfigurateur;
     : !commerce.trim() ? 'Indiquez le nom du commerce.'
     : !siretValide(siret) ? 'Indiquez un SIRET valide (14 chiffres).'
     : !adresse.trim() || !ville.trim() ? 'Indiquez l’adresse et la ville.' : null
-  /* Coordonnées déjà complètes au profil : l'écran est sauté (calculé une fois, à l'ouverture). */
-  const [coordConnues] = useState(() => !coordKo)
+  /* Coordonnées reprises du profil : seuls les champs manquants sont demandés (calculé une fois, à l'ouverture). */
+  const [manque] = useState(() => ({
+    nom: !prenom.trim() || !nomFam.trim(), tel: !tel.trim(), email: !/^[^@\s]+@[^@\s]+\.[^@\s]{2,}$/.test(email.trim()),
+    commerce: !commerce.trim(), siret: !siretValide(siret), adresse: !adresse.trim() || !ville.trim(),
+  }))
+  const [logoUrl, setLogoUrl] = useState<string | null>(null)
+  useEffect(() => {
+    if (!p.partenaire_id) return
+    supabase.from('partenaires').select('image_url').eq('id', p.partenaire_id).maybeSingle().then(r => setLogoUrl(((r.data as { image_url: string | null } | null)?.image_url) ?? null), () => {})
+  }, [p.partenaire_id])
 
   /* 2-4. Jeu et quiz */
-  const [jeu, setJeu] = useState<Jeu | null>(null)
+  /* Pré-rempli : la roue est présélectionnée (1 toucher pour changer). */
+  const [jeu, setJeu] = useState<Jeu | null>('spin')
   const [voie, setVoie] = useState<'' | 'moi' | 'flowin'>('')
   const [banqueId, setBanqueId] = useState<string>('')
   const [theme, setTheme] = useState('')
+  /* Demande à Flowin de rédiger le quiz (maquette lot 5 A) : nombre, ton, délai. Rien d'obligatoire sauf le thème. */
+  const [nbQuiz, setNbQuiz] = useState(30)
+  const [nbBonus, setNbBonus] = useState(5)
+  const [ton, setTon] = useState('Neutre')
+  const [delai, setDelai] = useState('Sous 1 semaine')
+  const [motFlowin, setMotFlowin] = useState('')
   const [commerceQuiz, setCommerceQuiz] = useState(p.nom || '')
-  const [objectif, setObjectif] = useState('')
   const estQuiz = jeu === 'quizsolo' || jeu === 'quizbonus'
   /* Audit promesse L3 (19/11/2026) : « c'est toi qui choisis le gain, immédiat ou par tirage au sort ».
      La roue gagne tout de suite, la tombola tire au sort ; pour le quiz, le pro choisit. */
-  const [gainQuiz, setGainQuiz] = useState<'' | 'immediat' | 'tirage'>('')
+  const [gainQuiz, setGainQuiz] = useState<'' | 'immediat' | 'tirage'>('immediat')
   const gainImmediat = jeu === 'spin' || (estQuiz && gainQuiz === 'immediat')
   const banquesQuiz = useMemo(() => banques.slice(0, 3), [banques])
 
@@ -121,10 +132,12 @@ export default function Configurateur({ pro, banques }: { pro: ProConfigurateur;
   const [lotI, setLotI] = useState(0)
   const lot = lots[Math.min(lotI, lots.length - 1)]
   const majLot = (patch: Partial<LotC>) => setLots(ls => ls.map(l => (l.id === lot.id ? { ...l, ...patch } : l)))
-  const lotsOk = lots.filter(l => l.nom.trim())
-  const lotsKo = !lotsOk.length ? 'Ajoutez au moins un lot.'
-    : lotsOk.some(l => l.validite === 'dates' && (!l.du || !l.au || l.au < l.du)) ? 'Indiquez les dates de validité.'
-    : lotsOk.some(l => l.validite === 'jours' && !(l.jours > 0)) ? 'Indiquez la durée de validité.' : null
+  /* Roue : cases perdues et tickets pour le prochain tirage (3 types de cases : lot, perdu, ticket). */
+  const [nbPerdu, setNbPerdu] = useState(2)
+  const [nbTicket, setNbTicket] = useState(0)
+  /* Formulaire complet obligatoire : un lot commencé doit être complet ; au moins un lot complet. */
+  const lotsOk = lots.filter(l => l.nom.trim() || l.conditions.trim())
+  const lotsKo = !lotsOk.length ? 'Ajoutez au moins un lot.' : (lotsOk.map(verifierLot).find(x => !!x) ?? null)
 
   /* 6. Supports et QR (identifiant de l'animation décidé à l'avance : les QR montrés sont les définitifs) */
   const [evId] = useState(() => idAnimation(p.id || 'pro'))
@@ -155,41 +168,38 @@ export default function Configurateur({ pro, banques }: { pro: ProConfigurateur;
   /* Écrans */
   const ecrans = useMemo(() => {
     const e: string[] = []
-    if (!coordConnues) e.push('coord')
     e.push('jeu')
-    if (estQuiz) { e.push('gain'); e.push('quiz'); if (voie === 'flowin') e.push('flowin'); if (voie === 'moi') e.push('questions') }
-    e.push('lots', 'supports', 'kit', 'recap', 'prix')
+    if (estQuiz) { e.push('quiz'); if (voie === 'flowin') e.push('flowin'); if (voie === 'moi') e.push('questions') }
+    e.push('lots', 'diffusion', 'validation')
     return e
-  }, [coordConnues, estQuiz, voie])
+  }, [estQuiz, voie])
   const [i, setI] = useState(0)
   const cur = Math.min(i, ecrans.length - 1)
   const ecran = ecrans[cur]
   const [retourRecap, setRetourRecap] = useState(false)
   const [tente, setTente] = useState(false)
   const bloque: Record<string, string | null> = {
-    coord: coordKo,
     jeu: !jeu ? 'Choisissez un jeu.' : null,
-    gain: !gainQuiz ? 'Choisissez le gain.' : null,
     quiz: !voie ? 'Choisissez qui rédige le quiz.' : null,
     flowin: !theme.trim() ? 'Indiquez le thème du quiz.' : null,
     questions: null,
     lots: lotsKo,
-    supports: !supports.length ? 'Cochez au moins un support.' : null,
-    kit: null, recap: null, prix: null,
+    diffusion: !supports.length ? 'Cochez au moins un support.' : null,
+    validation: coordKo,
   }
   const allerA = (cle: string) => { const k = ecrans.indexOf(cle); if (k >= 0) { setI(k); setTente(false) } }
   const setEcran = (k: number) => {
     setTente(false)
-    if (retourRecap && k > cur && ecran !== 'quiz' && ecran !== 'recap') { setRetourRecap(false); allerA('recap'); return }
+    if (retourRecap && k > cur && ecran !== 'quiz' && ecran !== 'validation') { setRetourRecap(false); allerA('validation'); return }
     setI(k)
   }
   const glisser = useGlisser(s => { const k = cur + s; if (k < 0 || k >= ecrans.length) return; if (s > 0 && bloque[ecran]) { setTente(true); return } setEcran(k) })
   /* Arrivé au récapitulatif, le mode « Modifier » s'arrête. */
-  useEffect(() => { if (ecran === 'recap') setRetourRecap(false) }, [ecran])
+  useEffect(() => { if (ecran === 'validation') setRetourRecap(false) }, [ecran])
   const modifier = (cle: string) => { setRetourRecap(true); allerA(cle) }
   /* Progression STABLE (23/11/2026, AMEL-DES-04) : 4 groupes fixes, quels que soient les choix (quiz ou non,
-     je rédige ou Flowin rédige). Le nombre d'écrans varie de 7 à 10, jamais le décor de progression. */
-  const groupeDe = (e: string) => e === 'lots' ? 1 : e === 'supports' || e === 'kit' ? 2 : e === 'recap' || e === 'prix' ? 3 : 0
+     je rédige ou Flowin rédige). Le nombre d'écrans varie de 4 (roue, tombola) à 5-6 (quiz), jamais le décor de progression. */
+  const groupeDe = (e: string) => e === 'lots' ? 1 : e === 'diffusion' ? 2 : e === 'validation' ? 3 : 0
   const grCur = groupeDe(ecran)
   const allerGroupe = (g: number) => {
     const cible = ecrans.findIndex(e => groupeDe(e) === g)
@@ -209,6 +219,7 @@ export default function Configurateur({ pro, banques }: { pro: ProConfigurateur;
   const [erreur, setErreur] = useState('')
   const [fait, setFait] = useState<{ info: string; qrs: QrFin[] } | null>(null)
   const supportsChoisis = SUPPORTS.filter(s => supports.indexOf(s.k) >= 0)
+  const objectifFlowin = [`Nombre : ${nbQuiz} questions${jeu === 'quizbonus' ? ` + ${nbBonus} bonus` : ''}`, `Ton : ${ton}`, `Délai : ${delai}`, motFlowin.trim() ? `Mot pour Flowin : ${motFlowin.trim()}` : ''].filter(Boolean).join(' · ')
   async function valider() {
     setEnvoi('envoi'); setErreur('')
     const contact = `${prenom.trim()} ${nomFam.trim()}`.trim()
@@ -234,7 +245,7 @@ export default function Configurateur({ pro, banques }: { pro: ProConfigurateur;
     /* Position du commerce pour la carte des commerces participants (jamais inventée : sans résultat, pas de point). */
     const gps = await geocoderAdresse(adresse.trim(), cp.trim() || null, ville.trim()).catch(() => null)
     const lotsEnvoi = lotsOk.map(l => ({
-      nom: l.nom.trim(), quantite: Number(l.quantite) || 1, valeur: 0, type: gainImmediat ? 'instantane' as const : 'tirage' as const, conditions: l.conditions.trim(),
+      nom: l.nom.trim(), quantite: Number(l.quantite) || 1, valeur: valeurNombre(l.valeur) ?? undefined, cessible: l.cessible, type: gainImmediat ? 'instantane' as const : 'tirage' as const, conditions: l.conditions.trim(),
       validiteJours: l.validite === 'jours' ? Number(l.jours) || null : null,
       validiteDu: l.validite === 'dates' ? l.du : null, validiteAu: l.validite === 'dates' ? l.au : null,
     }))
@@ -247,11 +258,11 @@ export default function Configurateur({ pro, banques }: { pro: ProConfigurateur;
       id: evId, proId: p.id, module: module_, nom: `Jeu ${commerce.trim()}`, dateD: null, dateF: null,
       banqueId: estQuiz ? bq : null,
       cfgJeu: {
-        ...(spin ? { spinSegments: lotsOk.map((l, k): { label: string; color: string; perdant?: boolean } => ({ label: l.nom.trim(), color: k % 2 ? '#7FA1F0' : BLEU })).concat([{ label: 'Perdu', color: '#CBD5E1', perdant: true }] as { label: string; color: string; perdant?: boolean }[]) } : cfgDepuisTirage({ mode: 'manuel', date: '', publier: false, notifierPerdants: true })),
+        ...(spin ? { spinSegments: casesRoue(lotsOk, nbPerdu, nbTicket).map(c => ({ label: c.label, color: c.color, ...(c.perdant ? { perdant: true } : {}), ...(c.mode ? { mode: c.mode } : {}), ...(c.textes && c.textes.length ? { textes: c.textes } : {}) })) } : cfgDepuisTirage({ mode: 'manuel', date: '', publier: false, notifierPerdants: true })),
         ...cfgMaster(module_, MASTER_VIDE),
         ...(logoUrl ? { logoUrl } : {}),
         commande: { offre: 'lancement', quiz_flowin: quizFlowin, kit, ...(kit === 'physique' ? { nb_boutiques: nbBoutiques } : {}), total_ht: totalHt, supports: supportsChoisis.map(s => s.t), paiement_actif: PAIEMENT_ACTIF, cree_le: new Date().toISOString() },
-        ...(quizFlowin ? { quizFlowin: { statut: 'demande', theme: theme.trim(), objectif: objectif.trim(), bonus: jeu === 'quizbonus' } } : {}),
+        ...(quizFlowin ? { quizFlowin: { statut: 'demande', theme: theme.trim(), objectif: objectifFlowin, bonus: jeu === 'quizbonus', nb_quiz: nbQuiz, nb_bonus: jeu === 'quizbonus' ? nbBonus : 0, ton, delai } } : {}),
       },
       lots: lotsEnvoi,
       /* Quiz en gain immédiat : un lot par joueur et par jour tant qu'il en reste (appliquer_regle_gain). */
@@ -275,7 +286,7 @@ export default function Configurateur({ pro, banques }: { pro: ProConfigurateur;
     if (ko) infos.push(`${ko} QR à recréer depuis Diffusion.`)
     if (quizFlowin) {
       const d = await enregistrerDemandeQuiz({
-        proId: p.id, proNom: commerce.trim(), theme, objectif, bonus: jeu === 'quizbonus', commerce: commerceQuiz || commerce,
+        proId: p.id, proNom: commerce.trim(), theme, objectif: objectifFlowin, bonus: jeu === 'quizbonus', commerce: commerceQuiz || commerce,
         contactNom: contact, contactTel: tel, contactEmail: email, siret: chiffres(siret), adresse, cp, ville,
         animationNom: `Jeu ${commerce.trim()}`, jeu: JEUX.find(j => j.k === jeu)?.t, eventId: evId,
       })
@@ -327,77 +338,61 @@ export default function Configurateur({ pro, banques }: { pro: ProConfigurateur;
 
   /* ── Écrans ── */
   let contenu: ReactNode = null
-  if (ecran === 'coord') contenu = (
-    <>
-      <Titre t="Vos coordonnées" s="Pour votre bon de commande." />
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
-        <C2 l="Prénom"><input style={IN} value={prenom} onChange={e => setPrenom(e.target.value)} autoComplete="given-name" /></C2>
-        <C2 l="Nom"><input style={IN} value={nomFam} onChange={e => setNomFam(e.target.value)} autoComplete="family-name" /></C2>
-        <C2 l="Téléphone"><input style={IN} value={tel} onChange={e => setTel(e.target.value)} inputMode="tel" autoComplete="tel" /></C2>
-        <C2 l="Email"><input style={IN} value={email} onChange={e => setEmail(e.target.value)} inputMode="email" autoComplete="email" /></C2>
-      </div>
-      <C2 l="Commerce"><input style={IN} value={commerce} onChange={e => setCommerce(e.target.value)} autoComplete="organization" /></C2>
-      <C2 l="SIRET"><input style={IN} value={siret} onChange={e => setSiret(e.target.value)} inputMode="numeric" placeholder="14 chiffres" /></C2>
-      <C2 l="Adresse"><input style={IN} value={adresse} onChange={e => setAdresse(e.target.value)} autoComplete="street-address" /></C2>
-      <div style={{ display: 'grid', gridTemplateColumns: '110px 1fr', gap: 8 }}>
-        <C2 l="Code postal"><input style={IN} value={cp} onChange={e => setCp(e.target.value)} inputMode="numeric" autoComplete="postal-code" /></C2>
-        <C2 l="Ville"><input style={IN} value={ville} onChange={e => setVille(e.target.value)} autoComplete="address-level2" /></C2>
-      </div>
-    </>
-  )
   if (ecran === 'jeu') contenu = (
     <>
-      <Titre t="Choisissez votre jeu" s="Un seul jeu par animation. Pour un autre jeu, créez une autre animation." />
+      <Titre t="Votre jeu" s="Choisi pour démarrer : touchez pour en changer." />
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
         {JEUX.map(j => (
-          <button key={j.k} type="button" data-jeu={j.k} style={{ ...carte(jeu === j.k), textAlign: 'center' }}
-            onClick={() => choisirPuisSuivant(() => { setJeu(j.k); if (j.k === 'spin' || j.k === 'tombola') setVoie('') })}>
-            <div style={{ height: 70, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{j.illu}</div>
-            <div style={{ fontSize: 16, fontWeight: 900, marginTop: 6 }}>{j.t}</div>
+          <button key={j.k} type="button" data-jeu={j.k} aria-pressed={jeu === j.k} style={{ ...carte(jeu === j.k), textAlign: 'center', minHeight: 44 }}
+            onClick={() => { setJeu(j.k); if (j.k === 'spin' || j.k === 'tombola') setVoie('') }}>
+            <div style={{ height: 64, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{j.illu}</div>
+            <div style={{ fontSize: 16, fontWeight: 900, marginTop: 4 }}>{j.t}</div>
             <div style={{ fontSize: 12.5, ...MUTED, marginTop: 2, lineHeight: 1.35 }}>{j.s}</div>
           </button>
         ))}
       </div>
-    </>
-  )
-  if (ecran === 'gain') contenu = (
-    <>
-      <Titre t="Le gain" s="Immédiat ou par tirage au sort ?" />
-      <div style={{ display: 'grid', gap: 12 }}>
-        <button type="button" data-gain="immediat" style={{ ...carte(gainQuiz === 'immediat'), padding: 18 }} onClick={() => choisirPuisSuivant(() => setGainQuiz('immediat'))}>
-          <div style={{ fontSize: 17, fontWeight: 900 }}>Gain immédiat</div>
-          <div style={{ fontSize: 13, ...MUTED, marginTop: 3 }}>Le client gagne tout de suite</div>
-        </button>
-        <button type="button" data-gain="tirage" style={{ ...carte(gainQuiz === 'tirage'), padding: 18 }} onClick={() => choisirPuisSuivant(() => setGainQuiz('tirage'))}>
-          <div style={{ fontSize: 17, fontWeight: 900 }}>Tirage au sort</div>
-          <div style={{ fontSize: 13, ...MUTED, marginTop: 3 }}>Un ticket, puis le tirage</div>
-        </button>
-      </div>
+      {estQuiz && (
+        <div style={{ marginTop: 12 }}>
+          <span style={LAB}>Le gain</span>
+          <div style={{ display: 'flex', gap: 6 }}>
+            <button type="button" data-gain="immediat" style={{ ...puce(gainQuiz === 'immediat'), flex: 1 }} onClick={() => setGainQuiz('immediat')}>Gain immédiat</button>
+            <button type="button" data-gain="tirage" style={{ ...puce(gainQuiz === 'tirage'), flex: 1 }} onClick={() => setGainQuiz('tirage')}>Tirage au sort</button>
+          </div>
+        </div>
+      )}
     </>
   )
   if (ecran === 'quiz') contenu = (
     <>
-      <Titre t="Vos questions" s="Qui rédige le quiz ?" />
+      <Titre t="Vos questions" s="Comment avoir les questions ?" />
       <div style={{ display: 'grid', gap: 12 }}>
         <button type="button" data-voie="moi" style={{ ...carte(voie === 'moi'), padding: 18 }} onClick={() => choisirPuisSuivant(() => setVoie('moi'))}>
-          <div style={{ fontSize: 17, fontWeight: 900 }}>Je rédige mes questions</div>
-          <div style={{ fontSize: 13, ...MUTED, marginTop: 3 }}>Inclus</div>
+          <div style={{ fontSize: 17, fontWeight: 900 }}>Choisir dans une banque</div>
+          <div style={{ fontSize: 13, ...MUTED, marginTop: 3 }}>Mes banques, ou j’écris après · inclus</div>
         </button>
         <button type="button" data-voie="flowin" style={{ ...carte(voie === 'flowin'), padding: 18 }} onClick={() => choisirPuisSuivant(() => setVoie('flowin'))}>
-          <div style={{ fontSize: 17, fontWeight: 900 }}>Je demande à Flowin de rédiger mon quiz</div>
-          <div style={{ fontSize: 13, ...MUTED, marginTop: 3 }}><s>{eur(PRIX_ANIMATION.quizFlowin)}</s> <b style={{ color: BLEU }}>{eur(PRIX_ANIMATION.quizFlowinLancement)} HT</b> · 30 questions + 5 bonus</div>
+          <div style={{ fontSize: 17, fontWeight: 900 }}>Demander à Flowin de rédiger mes questions</div>
+          <div style={{ fontSize: 13, ...MUTED, marginTop: 3 }}>Quiz et questions bonus, prêts à jouer</div>
+          <div style={{ fontSize: 12.5, fontWeight: 800, color: BLEU, marginTop: 6 }}>Option Flowin · {eur(PRIX_ANIMATION.quizFlowinLancement)} HT la 1re année</div>
         </button>
       </div>
     </>
   )
   if (ecran === 'flowin') contenu = (
     <>
-      <Titre t="L’équipe Flowin rédige votre quiz." s={jeu === 'quizbonus' ? 'Quiz + bonus : sondez vos clients.' : 'Retour sous 72 h.'} />
-      <C2 l="Thème"><input style={IN} value={theme} onChange={e => setTheme(e.target.value)} placeholder="Ex. le vin, la Provence, le cinéma" /></C2>
-      <C2 l="Votre commerce"><input style={IN} value={commerceQuiz} onChange={e => setCommerceQuiz(e.target.value)} /></C2>
-      <C2 l={jeu === 'quizbonus' ? 'Ce que vous voulez faire connaître ou sonder' : 'Ce que vous voulez faire connaître'}>
-        <textarea style={{ ...IN, minHeight: 84, resize: 'none' }} value={objectif} onChange={e => setObjectif(e.target.value)} placeholder="Ex. notre nouvelle carte, l’avis sur nos horaires" />
-      </C2>
+      <Titre t="Flowin rédige votre quiz" s={jeu === 'quizbonus' ? 'Quiz + questions bonus.' : 'Quelques choix, rien d’autre.'} />
+      <span style={LAB}>Thème</span>
+      <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 6 }}>
+        {THEMES_QUIZ.map(t => <button key={t} type="button" data-theme={t} style={puce(theme === t)} onClick={() => setTheme(t)}>{t}</button>)}
+      </div>
+      <input data-theme-libre style={{ ...IN, marginBottom: 10 }} value={theme} onChange={e => setTheme(e.target.value)} aria-label="Thème" placeholder="Ou votre thème" />
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}><b style={{ fontSize: 14 }}>Questions du quiz</b><Pas v={nbQuiz} set={setNbQuiz} min={10} max={60} pas={5} label="Questions du quiz" /></div>
+      {jeu === 'quizbonus' && <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}><b style={{ fontSize: 14 }}>Questions bonus</b><Pas v={nbBonus} set={setNbBonus} min={1} max={15} pas={1} label="Questions bonus" /></div>}
+      <span style={LAB}>Ton</span>
+      <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 8 }}>{TONS.map(t => <button key={t} type="button" data-ton={t} style={puce(ton === t)} onClick={() => setTon(t)}>{t}</button>)}</div>
+      <span style={LAB}>Délai · à confirmer par Flowin</span>
+      <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 8 }}>{DELAIS.map(t => <button key={t} type="button" data-delai={t} style={puce(delai === t)} onClick={() => setDelai(t)}>{t}</button>)}</div>
+      <input style={IN} value={motFlowin} onChange={e => setMotFlowin(e.target.value)} aria-label="Un mot pour Flowin" placeholder="Un mot pour Flowin (facultatif)" />
     </>
   )
   if (ecran === 'questions') contenu = (
@@ -405,11 +400,11 @@ export default function Configurateur({ pro, banques }: { pro: ProConfigurateur;
       <Titre t="Vos questions" s="Vous les écrivez ou modifiez à tout moment dans Banques." />
       <div style={{ display: 'grid', gap: 8 }}>
         {banquesQuiz.map(b => (
-          <button key={b.id} type="button" style={carte(banqueId === b.id)} onClick={() => setBanqueId(b.id)}>
+          <button key={b.id} type="button" style={{ ...carte(banqueId === b.id), minHeight: 44 }} onClick={() => setBanqueId(b.id)}>
             <b style={{ fontSize: 14.5 }}>{b.nom}</b>
           </button>
         ))}
-        <button type="button" data-banque="apres" style={carte(banqueId === 'apres' || !banqueId)} onClick={() => setBanqueId('apres')}>
+        <button type="button" data-banque="apres" style={{ ...carte(banqueId === 'apres' || !banqueId), minHeight: 44 }} onClick={() => setBanqueId('apres')}>
           <b style={{ fontSize: 14.5 }}>J’écris mes questions après</b>
           <div style={{ fontSize: 12.5, ...MUTED }}>3 exemples à remplacer sont préparés.</div>
         </button>
@@ -417,117 +412,87 @@ export default function Configurateur({ pro, banques }: { pro: ProConfigurateur;
     </>
   )
   if (ecran === 'lots') contenu = (
-    <>
-      <Titre t="Vos lots" s="Ce qui fait revenir vos clients." />
-      <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 10 }}>
-        {lots.map((l, k) => <button key={l.id} type="button" data-lot-onglet={k} style={puce(l.id === lot.id)} onClick={() => setLotI(k)}>{l.nom.trim() ? (l.nom.trim().length > 14 ? l.nom.trim().slice(0, 13) + '…' : l.nom.trim()) : `Lot ${k + 1}`}</button>)}
-        {lots.length < 5 && <button type="button" data-lot-ajout style={{ ...puce(false), color: BLEU }} onClick={() => { setLots(ls => ls.concat([lotVide()])); setLotI(lots.length) }}>+ Lot</button>}
-      </div>
-      <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 8 }}>
-        {EXEMPLES_LOTS.map(x => <button key={x.t} type="button" data-exemple={x.t} style={{ ...puce(false), padding: '6px 11px', fontSize: 12.5, background: '#F1F5FB' }} onClick={() => majLot({ nom: x.nom, conditions: lot.conditions || x.cond })}>{x.t}</button>)}
-      </div>
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 84px', gap: 8 }}>
-        <C2 l="Libellé"><input data-lot-nom style={IN} value={lot.nom} onChange={e => majLot({ nom: e.target.value })} placeholder="Bon d’achat de 5 €" /></C2>
-        <C2 l="Quantité"><input data-lot-qte style={IN} type="number" min={1} value={lot.quantite} onChange={e => majLot({ quantite: Math.max(1, Number(e.target.value) || 1) })} /></C2>
-      </div>
-      <C2 l="Conditions"><input data-lot-cond style={IN} value={lot.conditions} onChange={e => majLot({ conditions: e.target.value })} placeholder="Bon de 5 € valable dès 30 € d’achat" /></C2>
-      <span style={LAB}>Validité</span>
-      <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
-        {([['sans', 'Sans limite'], ['jours', 'En jours'], ['dates', 'Du … au …']] as [Validite, string][]).map(([k, t]) =>
-          <button key={k} type="button" data-validite={k} style={puce(lot.validite === k)} onClick={() => majLot({ validite: k })}>{t}</button>)}
-      </div>
-      {lot.validite === 'jours' && <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 8 }}><input data-lot-jours style={{ ...IN, width: 90 }} type="number" min={1} value={lot.jours} onChange={e => majLot({ jours: Number(e.target.value) || 0 })} /><b style={{ fontSize: 14 }}>jours après le gain</b></div>}
-      {lot.validite === 'dates' && <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginTop: 8 }}>
-        <C2 l="Du"><input data-lot-du style={IN} type="date" value={lot.du} onChange={e => majLot({ du: e.target.value })} /></C2>
-        <C2 l="Au"><input data-lot-au style={IN} type="date" value={lot.au} onChange={e => majLot({ au: e.target.value })} /></C2>
-      </div>}
-    </>
+    <LotsEcran lots={lots} setLots={setLots} lotI={lotI} setLotI={setLotI} mode={gainImmediat ? 'immediat' : 'tirage'} spin={jeu === 'spin'}
+      nbPerdu={nbPerdu} setNbPerdu={setNbPerdu} nbTicket={nbTicket} setNbTicket={setNbTicket} commerce={commerce} logoUrl={logoUrl} />
   )
-  if (ecran === 'supports') contenu = (
+  if (ecran === 'diffusion') contenu = (
     <>
-      <Titre t="Où diffusez-vous votre jeu ?" s="Un QR par support : vous mesurez l’impact de chacun." />
+      <Titre t="Où diffuser ?" s="Un QR par support : vous mesurez l’impact de chacun." />
       <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
         {SUPPORTS.map(s => {
           const on = supports.indexOf(s.k) >= 0
           return <button key={s.k} type="button" data-support={s.k} aria-pressed={on} style={{ ...puce(on), display: 'inline-flex', alignItems: 'center', gap: 6, padding: '5px 12px 5px 6px' }} onClick={() => setSupports(l => on ? l.filter(x => x !== s.k) : l.concat([s.k]))}><span style={{ background: '#fff', borderRadius: 8, display: 'inline-flex' }}><PictoSupport k={s.p} taille={24} /></span>{s.t}</button>
         })}
       </div>
-      <div style={{ display: 'flex', gap: 10, overflowX: 'auto', marginTop: 14, paddingBottom: 4, scrollbarWidth: 'none' }}>
+      <div style={{ display: 'flex', gap: 10, overflowX: 'auto', marginTop: 12, paddingBottom: 4, scrollbarWidth: 'none' }}>
         {supportsChoisis.map(s => (
-          <div key={s.k} data-qr={s.k} style={{ flex: '0 0 auto', width: 106, textAlign: 'center', border: `1.5px solid ${C.bordure}`, borderRadius: 14, padding: 8, background: '#fff' }}>
-            {qrs[s.k + module_ + slugs[s.k]] ? <img src={qrs[s.k + module_ + slugs[s.k]]} alt={`QR ${s.t}`} width={90} height={90} style={{ display: 'block', margin: '0 auto' }} /> : <div style={{ width: 90, height: 90, margin: '0 auto', background: C.subtil, borderRadius: 8 }} />}
+          <div key={s.k} data-qr={s.k} style={{ flex: '0 0 auto', width: 132, textAlign: 'center', border: `1.5px solid ${C.bordure}`, borderRadius: 14, padding: 8, background: '#fff' }}>
+            {qrs[s.k + module_ + slugs[s.k]] ? <img src={qrs[s.k + module_ + slugs[s.k]]} alt={`QR ${s.t}`} width={116} height={116} style={{ display: 'block', margin: '0 auto' }} /> : <div style={{ width: 116, height: 116, margin: '0 auto', background: C.subtil, borderRadius: 8 }} />}
             <div style={{ fontSize: 12.5, fontWeight: 800, marginTop: 4 }}>{s.t}</div>
           </div>
         ))}
       </div>
-      <div data-qr-inclus style={{ fontSize: 12.5, fontWeight: 700, marginTop: 8, ...MUTED }}>{QR_INCLUS} QR inclus{supportsChoisis.length > QR_INCLUS ? ` · ${supportsChoisis.length - QR_INCLUS} QR supplémentaire${supportsChoisis.length - QR_INCLUS > 1 ? 's' : ''} (option, prix à définir)` : ''}</div>
-    </>
-  )
-  if (ecran === 'kit') contenu = (
-    <>
-      <Titre t="Votre kit" />
-      <div style={{ display: 'grid', gap: 12 }}>
-        <button type="button" data-kit="digital" style={{ ...carte(kit === 'digital'), padding: 18 }} onClick={() => choisirPuisSuivant(() => setKit('digital'))}>
-          <div style={{ fontSize: 17, fontWeight: 900 }}>Kit digital (inclus)</div>
-          <div style={{ fontSize: 13, ...MUTED, marginTop: 3 }}>Affiches et QR à imprimer vous-même.</div>
+      <div data-qr-inclus style={{ fontSize: 12.5, fontWeight: 700, marginTop: 6, ...MUTED }}>{QR_INCLUS} QR inclus{supportsChoisis.length > QR_INCLUS ? ` · ${supportsChoisis.length - QR_INCLUS} QR supplémentaire${supportsChoisis.length - QR_INCLUS > 1 ? 's' : ''} (option, prix à définir)` : ''}</div>
+      <div style={{ display: 'grid', gap: 8, marginTop: 10 }}>
+        <button type="button" data-kit="digital" aria-pressed={kit === 'digital'} style={{ ...carte(kit === 'digital'), minHeight: 44, padding: '9px 12px' }} onClick={() => setKit('digital')}>
+          <b style={{ fontSize: 14.5 }}>Kit digital (inclus)</b><div style={{ fontSize: 12.5, ...MUTED }}>Affiches et QR à imprimer vous-même.</div>
         </button>
-        <button type="button" data-kit="physique" style={{ ...carte(kit === 'physique'), padding: 18 }} onClick={() => setKit('physique')}>
-          <div style={{ fontSize: 17, fontWeight: 900 }}>Demander l’impression du kit physique</div>
-          <div style={{ fontSize: 13, ...MUTED, marginTop: 3 }}>Support de caisse, 3 affiches, 3 macarons · <b style={{ color: BLEU }}>{PRIX_KIT_PHYSIQUE} € HT</b> par boutique</div>
+        <button type="button" data-kit="physique" aria-pressed={kit === 'physique'} style={{ ...carte(kit === 'physique'), minHeight: 44, padding: '9px 12px' }} onClick={() => setKit('physique')}>
+          <b style={{ fontSize: 14.5 }}>Kit imprimé en option</b><div style={{ fontSize: 12.5, ...MUTED }}>Support de caisse, 3 affiches, 3 macarons · <b style={{ color: BLEU }}>{PRIX_KIT_PHYSIQUE} € HT</b> par boutique</div>
         </button>
         {kit === 'physique' && (
-          <div data-nb-boutiques style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10, padding: '4px 4px 0' }}>
-            <b style={{ fontSize: 15 }}>Nombre de boutiques</b>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-              <button type="button" aria-label="Moins" style={{ ...BTN2, padding: '8px 14px' }} onClick={() => setNbBoutiques(n => Math.max(1, n - 1))}>−</button>
-              <b data-nb style={{ fontSize: 18, minWidth: 22, textAlign: 'center' }}>{nbBoutiques}</b>
-              <button type="button" aria-label="Plus" style={{ ...BTN2, padding: '8px 14px' }} onClick={() => setNbBoutiques(n => Math.min(50, n + 1))}>+</button>
-            </div>
+          <div data-nb-boutiques style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10 }}>
+            <b style={{ fontSize: 14.5 }}>Nombre de boutiques</b>
+            <Pas v={nbBoutiques} set={setNbBoutiques} min={1} max={50} pas={1} label="Boutiques" />
           </div>
         )}
       </div>
     </>
   )
-  if (ecran === 'recap') {
+  if (ecran === 'validation') {
     const jeuT = JEUX.find(j => j.k === jeu)?.t || '—'
     const blocs: { cle: string; t: string; v: string }[] = [
-      { cle: 'jeu', t: 'Jeu', v: jeuT },
-      ...(estQuiz ? [{ cle: 'gain', t: 'Gain', v: gainQuiz === 'immediat' ? 'Gain immédiat' : 'Tirage au sort' }] : []),
-      ...(estQuiz ? [{ cle: voie === 'flowin' ? 'flowin' : 'quiz', t: 'Quiz', v: voie === 'flowin' ? `Rédigé par Flowin · ${theme.trim() || '—'}` : 'Je rédige mes questions' }] : []),
-      { cle: 'lots', t: 'Lots', v: lotsOk.map(l => `${l.nom.trim()} × ${l.quantite}${l.conditions.trim() ? ` (${l.conditions.trim()})` : ''} · ${l.validite === 'sans' ? 'sans limite' : l.validite === 'jours' ? `${l.jours} j` : `du ${l.du.split('-').reverse().join('/')} au ${l.au.split('-').reverse().join('/')}`}`).join(' ; ') || '—' },
-      { cle: 'supports', t: 'Supports', v: supportsChoisis.map(s => s.t).join(', ') || '—' },
-      { cle: 'kit', t: 'Kit', v: kit === 'physique' ? `Kit physique imprimé · ${nbBoutiques} boutique${nbBoutiques > 1 ? 's' : ''}` : 'Kit digital' },
+      { cle: 'jeu', t: 'Jeu', v: `${jeuT}${estQuiz ? ` · ${gainQuiz === 'immediat' ? 'gain immédiat' : 'tirage au sort'}` : ''}${voie === 'flowin' ? ` · questions par Flowin (${theme.trim() || '—'})` : ''}` },
+      { cle: 'lots', t: 'Lots', v: lotsOk.map(l => `${l.nom.trim()} × ${l.quantite}`).join(', ') || '—' },
+      { cle: 'diffusion', t: 'Diffusion', v: `${supportsChoisis.length} QR · ${kit === 'physique' ? `kit imprimé, ${nbBoutiques} boutique${nbBoutiques > 1 ? 's' : ''}` : 'kit digital'}` },
     ]
+    const champ = (cle: string, l: string, v: string, set: (x: string) => void, extra: Record<string, string> = {}) => <C2 key={cle} l={l}><input data-coord={cle} style={IN} value={v} onChange={e => set(e.target.value)} {...extra} /></C2>
     contenu = (
       <>
-        <Titre t="Récapitulatif" />
-        <div style={{ display: 'grid', gap: 7 }}>
+        <Titre t="Tout est prêt" />
+        <div style={{ display: 'grid', gap: 6 }}>
           {blocs.map(b => (
-            <div key={b.t} data-recap={b.cle} style={{ display: 'flex', alignItems: 'center', gap: 10, border: `1.5px solid ${C.bordure}`, borderRadius: 14, padding: '9px 12px', background: '#fff' }}>
+            <div key={b.t} data-recap={b.cle} style={{ display: 'flex', alignItems: 'center', gap: 10, border: `1.5px solid ${C.bordure}`, borderRadius: 14, padding: '6px 4px 6px 12px', background: '#fff' }}>
               <div style={{ minWidth: 0, flex: 1 }}>
                 <div style={{ fontSize: 12, fontWeight: 800, ...MUTED }}>{b.t}</div>
                 <div style={{ fontSize: 13.5, fontWeight: 700, overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}>{b.v}</div>
               </div>
-              <button type="button" data-modifier={b.cle} onClick={() => modifier(b.cle)} style={{ border: 'none', background: 'none', color: BLEU, fontWeight: 800, fontSize: 13, cursor: 'pointer', fontFamily: 'inherit' }}>Modifier</button>
+              <button type="button" data-modifier={b.cle} onClick={() => modifier(b.cle)} style={{ minHeight: 44, minWidth: 44, border: 'none', background: 'none', color: BLEU, fontWeight: 800, fontSize: 13, cursor: 'pointer', fontFamily: 'inherit' }}>Modifier</button>
             </div>
           ))}
+          {!coordKo && <div data-recap="coord" style={{ border: `1.5px solid ${C.bordure}`, borderRadius: 14, padding: '9px 12px', background: '#fff' }}><div style={{ fontSize: 12, fontWeight: 800, ...MUTED }}>Coordonnées</div><div style={{ fontSize: 13.5, fontWeight: 700 }}>Reprises de votre profil</div></div>}
         </div>
+        {coordKo && (
+          <div data-coord-manquantes style={{ marginTop: 10 }}>
+            <div style={{ fontSize: 13, fontWeight: 800, color: '#B45309', marginBottom: 4 }}>Il manque :</div>
+            {manque.nom && <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>{champ('prenom', 'Prénom', prenom, setPrenom, { autoComplete: 'given-name' })}{champ('nom', 'Nom', nomFam, setNomFam, { autoComplete: 'family-name' })}</div>}
+            {manque.tel && champ('tel', 'Téléphone', tel, setTel, { inputMode: 'tel', autoComplete: 'tel' })}
+            {manque.email && champ('email', 'Email', email, setEmail, { inputMode: 'email', autoComplete: 'email' })}
+            {manque.commerce && champ('commerce', 'Commerce', commerce, setCommerce, { autoComplete: 'organization' })}
+            {manque.siret && champ('siret', 'SIRET', siret, setSiret, { inputMode: 'numeric', placeholder: '14 chiffres' })}
+            {manque.adresse && <>{champ('adresse', 'Adresse', adresse, setAdresse, { autoComplete: 'street-address' })}<div style={{ display: 'grid', gridTemplateColumns: '110px 1fr', gap: 8 }}>{champ('cp', 'Code postal', cp, setCp, { inputMode: 'numeric' })}{champ('ville', 'Ville', ville, setVille, { autoComplete: 'address-level2' })}</div></>}
+          </div>
+        )}
+        <div style={{ border: `1.5px solid ${C.bordure}`, borderRadius: 16, background: '#fff', padding: '2px 14px', marginTop: 10 }}>
+          <LignePrix t="Animation, 1re année" barre={`${PRIX_ANIMATION.annuelle} € HT/an`} v={`${PRIX_ANIMATION.lancement} € HT`} />
+          {quizFlowin && <LignePrix t="Quiz rédigé par Flowin" barre={eur(PRIX_ANIMATION.quizFlowin)} v={`${eur(PRIX_ANIMATION.quizFlowinLancement)} HT`} />}
+          {kit === 'physique' && <LignePrix t={`Kit imprimé${nbBoutiques > 1 ? ` × ${nbBoutiques}` : ''}`} v={`${PRIX_KIT_PHYSIQUE * nbBoutiques} € HT`} />}
+          <div style={{ display: 'flex', justifyContent: 'space-between', padding: '9px 0', fontWeight: 900, fontSize: 16 }}><span>Total</span><span data-total>{eur(totalHt)} HT</span></div>
+        </div>
+        {erreur && <div style={{ fontSize: 12.5, color: '#B91C1C', fontWeight: 700, marginTop: 8 }}>{erreur}</div>}
       </>
     )
   }
-  if (ecran === 'prix') contenu = (
-    <>
-      <Titre t="Flowin vous remercie." s="Premier client : offre de bienvenue -50 %." />
-      <div style={{ border: `1.5px solid ${C.bordure}`, borderRadius: 16, background: '#fff', padding: '4px 14px' }}>
-        <LignePrix t="Animation, 1re année" barre={`${PRIX_ANIMATION.annuelle} € HT/an`} v={`${PRIX_ANIMATION.lancement} € HT`} />
-        {quizFlowin && <LignePrix t="Quiz rédigé par Flowin" barre={eur(PRIX_ANIMATION.quizFlowin)} v={`${eur(PRIX_ANIMATION.quizFlowinLancement)} HT`} />}
-        {kit === 'physique' && <LignePrix t={`Kit physique imprimé${nbBoutiques > 1 ? ` × ${nbBoutiques}` : ''}`} v={`${PRIX_KIT_PHYSIQUE * nbBoutiques} € HT`} />}
-        <div style={{ display: 'flex', justifyContent: 'space-between', padding: '11px 0', fontWeight: 900, fontSize: 16 }}><span>Total</span><span data-total>{eur(totalHt)} HT</span></div>
-      </div>
-      <div style={{ fontSize: 13, ...MUTED, marginTop: 10, textAlign: 'center' }}>Votre facture vous est envoyée par email.{quizFlowin ? ' Quiz : retour sous 72 h.' : ''}</div>
-      {erreur && <div style={{ fontSize: 12.5, color: '#B91C1C', fontWeight: 700, marginTop: 8 }}>{erreur}</div>}
-    </>
-  )
 
   const msg = tente ? bloque[ecran] : null
   return (
@@ -545,7 +510,7 @@ export default function Configurateur({ pro, banques }: { pro: ProConfigurateur;
       </div>
       <div {...glisser} data-ecran={ecran}>
         {contenu}
-        {retourRecap && ecran !== 'recap' && ecran !== 'quiz' && <button type="button" data-retour-recap style={{ ...BTN2, width: '100%', marginTop: 10 }} onClick={() => { if (bloque[ecran]) { setTente(true); return } setRetourRecap(false); allerA('recap') }}>Retour au récapitulatif</button>}
+        {retourRecap && ecran !== 'validation' && ecran !== 'quiz' && <button type="button" data-retour-recap style={{ ...BTN2, width: '100%', marginTop: 10 }} onClick={() => { if (bloque[ecran]) { setTente(true); return } setRetourRecap(false); allerA('validation') }}>Retour au récapitulatif</button>}
         {msg && <div style={{ fontSize: 12.5, color: '#B45309', fontWeight: 700, marginTop: 8, textAlign: 'right' }}>{msg}</div>}
         <NavCarrousel sansPoints n={ecrans.length} i={cur} setI={setEcran} suivantBloque={bloque[ecran]} onTenter={() => setTente(true)}
           dernier={<button type="button" data-valider style={{ ...BTN, opacity: envoi ? 0.6 : 1 }} disabled={!!envoi} onClick={valider}>{envoi ? 'Validation…' : 'Valider mon bon de commande'}</button>} />
@@ -554,6 +519,16 @@ export default function Configurateur({ pro, banques }: { pro: ProConfigurateur;
   )
 }
 
+function Pas({ v, set, min, max, pas, label }: { v: number; set: (n: number) => void; min: number; max: number; pas: number; label: string }) {
+  const b: CSSProperties = { width: 44, height: 44, borderRadius: 99, border: `1.5px solid ${BLEU}`, background: '#fff', color: BLEU, fontSize: 22, fontWeight: 800, cursor: 'pointer', fontFamily: 'inherit', lineHeight: 1 }
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+      <button type="button" aria-label={`${label} : moins`} style={b} onClick={() => set(Math.max(min, v - pas))}>−</button>
+      <b data-nb style={{ fontSize: 18, minWidth: 28, textAlign: 'center' }}>{v}</b>
+      <button type="button" aria-label={`${label} : plus`} style={b} onClick={() => set(Math.min(max, v + pas))}>+</button>
+    </div>
+  )
+}
 function Cadre({ children }: { children: ReactNode }) {
   return <div data-configurateur style={{ maxWidth: 560, margin: '0 auto' }}>{children}</div>
 }
