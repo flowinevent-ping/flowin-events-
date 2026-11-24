@@ -12,11 +12,12 @@ import { CARD, MUTED, H1, SUB, BTN, BTN2 } from '@/lib/proui'
 import { lireDroitsPro, peutOuvrirNouvelle } from '@/lib/droitsPro'
 import { RapportProAvecContacts } from '@/components/pro/CrmProCharge'
 import { BASE_CANONIQUE } from '@/lib/qrPermalien'
+import AccueilCommerce from '@/components/pro/AccueilCommerce'
 
 export const metadata: Metadata = { title: 'Mes animations — Flowin Pro' }
 export const dynamic = 'force-dynamic'
 
-interface Props { searchParams: { pro?: string; ev?: string; type?: string; bienvenue?: string; quiz?: string } }
+interface Props { searchParams: { pro?: string; ev?: string; type?: string; bienvenue?: string; quiz?: string; liste?: string } }
 
 const TYPES: { id: '' | 'event' | 'super'; label: string }[] = [
   { id: '', label: 'Toutes' },
@@ -52,6 +53,7 @@ export default async function ProAccueilPage({ searchParams }: Props) {
   const lien = (cle: string, onglet?: string) => `/pro/operation${q}${et}op=${encodeURIComponent(cle)}${onglet ? `&onglet=${onglet}` : ''}`
   const type = (searchParams.type === 'event' || searchParams.type === 'super' ? searchParams.type : null) as FiltreType
   const groupes = rangerParPeriode(ops.operations, type)
+  const vueListe = searchParams.liste === '1' || !!type
 
   return (
     <ProShell proName={proName} proId={proId} active="operations">
@@ -84,6 +86,12 @@ export default async function ProAccueilPage({ searchParams }: Props) {
           </div>
         </div>
       )}
+      {/* Lot 6 C (24/11/2026) : l'accueil est le carrousel du commerce. L'ancienne liste complète reste à /pro?liste=1
+          (et avec un filtre de type) : rien n'est retiré, seulement rangé derrière « Toutes mes animations ». */}
+      {!vueListe && (
+        <AccueilCommerce proId={proId} proNom={proName} operations={ops.operations} peutCreer={peutCreer} peutRejoindre={peutRejoindre} />
+      )}
+      {vueListe && <>
       <AlerteLotsRetires partenaireId={ops.partenaire?.id ?? null} />
       <CompteurMensuel proId={proId} />
       {idsGlobal.length > 0 && (
@@ -148,6 +156,7 @@ export default async function ProAccueilPage({ searchParams }: Props) {
         ]} />
       )} />
       </div>
+      </>}
     </ProShell>
   )
 }
