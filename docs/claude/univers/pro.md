@@ -23,3 +23,4 @@ Voir `paiement.md` (source unique des prix). Aucun montant n'est écrit ici.
 
 ## À faire et notes
 Un Super Admin ne peut pas choisir un pro pour créer une animation ou une banque en son nom. Import du fichier client incomplet. Scanner caméra non vérifié sur appareils réels. Demandes de rappel dans la fiche pro : PR #94. Détail : `kit/A-FAIRE.md`.
+Contrat de données (conservé, isolé, tracé) : `kit/CONTRATS-DONNEES.md`, section Pro.
