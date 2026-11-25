@@ -34,7 +34,7 @@ h2{font-size:13px;letter-spacing:.06em;text-transform:uppercase;color:var(--mute
 .dots{display:flex;justify-content:center;gap:6px;margin-top:6px}
 .dots i{width:7px;height:7px;border-radius:50%;background:var(--line)}
 .dots i.on{background:var(--blue)}
-.jeux{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+.jeux{display:grid;grid-template-columns:1fr;gap:10px}
 .jeu{display:flex;align-items:center;justify-content:center;min-height:52px;padding:8px 10px;border-radius:12px;background:#fff;border:1px solid var(--line);color:var(--ink);text-decoration:none;font-weight:700;font-size:14.5px;text-align:center}
 .jeu.main{border-color:var(--blue);color:var(--blue)}
 .note{margin-top:10px;font-size:13px;color:var(--mute)}
@@ -67,8 +67,7 @@ h2{font-size:13px;letter-spacing:.06em;text-transform:uppercase;color:var(--mute
   <div class="jeux">
     <a class="jeu main" href="/jouer?m=quiz">Quiz + bonus</a>
     <a class="jeu main" href="/jouer?m=tombola">Tombola</a>
-    <a class="jeu" href="/jouer?m=spin">Roue</a>
-    <a class="jeu" href="/jouer?m=quizsolo">Quiz solo</a>
+    <a class="jeu main" href="/jouer?m=spin">Roue</a>
   </div>
   <p class="note">Démonstration : rien n'est enregistré.</p>
 
