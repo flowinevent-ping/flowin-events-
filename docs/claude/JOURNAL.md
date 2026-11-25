@@ -99,3 +99,5 @@ Ce journal n'est pas une preuve de production : l'état vérifié est dans `ETAT
 - 25/11/2026 · Pixel mis de côté ; demande d'un schéma d'organisation (dossier Flowin Event) : audit architecture lancé.
 - 25/11/2026 · Audit architecture (docs/flowin-event/, verdict bon avec écarts) fusionné ; accès anon retiré sur 4 fonctions Super Event. Décisions en attente : 6 actions de ECARTS.md.
 - 25/11/2026 · Correction du modèle (Super Event créé par Flowin seulement) ; EN-CLAIR.md écrit ; rien en production avant validation de Romain.
+- 25/11 | Pro : règles du 25/11 (jeux, offres, grille de prix provisoire), note de transmission ; hub mis en ligne (/hub.html, propriétaire Super Admin) | branche claude/pro-regles-25-11
+- 25/11 | Pro (code) : trois jeux, objectifs, curseur de durée de l'animation (Configurateur) ; tsc et build lus | branche claude/pro-regles-25-11

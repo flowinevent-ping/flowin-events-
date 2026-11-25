@@ -22,5 +22,4 @@ Voir `paiement.md` (source unique des prix). Aucun montant n'est écrit ici.
 | Plaquette, vidéo, texte | `contenu.md` |
 
 ## À faire et notes
-Un Super Admin ne peut pas choisir un pro pour créer une animation ou une banque en son nom. Import du fichier client incomplet. Scanner caméra non vérifié sur appareils réels. Demandes de rappel dans la fiche pro : PR #94. Détail : `kit/A-FAIRE.md`.
-Contrat de données (conservé, isolé, tracé) : `kit/CONTRATS-DONNEES.md`, section Pro.
+Fait le 25/11 : trois jeux (quiz solo retiré de la création), objectifs affichés, curseur de durée. Grille de prix provisoire dans `REGLES.md` (pas encore dans `reglement.ts`). À faire : case parrainage de la roue (pro et joueur), lots restants et utilisés par lot, attribution des tickets à vérifier en base (accord de Romain), choix du pro côté Super Admin, import du fichier client, scanner caméra non vérifié. Hub : voir Super Admin. Détail : `kit/A-FAIRE.md`.
