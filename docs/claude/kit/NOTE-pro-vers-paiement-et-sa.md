@@ -15,3 +15,11 @@ Schémas : page « Super Event et offres » (artifact de la session Pro).
 
 ## Pour l'entrée Jeux et tirages
 Banques de questions : une par pro, non partagée ; les banques communes deviennent des modèles copiés. À valider avec Romain.
+
+## Mise à jour du code des prix (préparée le 25/11, à faire en une seule livraison)
+Pourquoi en une fois : le trigger SQL recalcule les prix à la facturation ; changer l'application seule fabriquerait des factures différentes du bon de commande.
+1. `lib/reglement.ts` : `PRIX_ANIMATION` (lancement 445 vers 450 ; supprimer `mensuelle` ; quiz one-shot 150 ; tombola ou roue one-shot 90 ; option questions Flowin 150 ; remise 1re animation 50 %) ; `OFFRES_ANIMATION` sans « Mensuelle » ; `prixOptionQuiz` ; QR en plus 7 (one-shot) et 3,50 (abonné).
+2. Consommateurs : `Configurateur.tsx` (écran Validation : choix « une fois » ou « abonnement » avant le récapitulatif), `animationMagasin.ts` (`mensuelleHt`), `app/dashboard/commercial/page.tsx`, `ParcoursCreation.tsx`.
+3. Copies : `public/bon-commande-pdf.js` (PRIX), `bon-commande-animation.html` (boutons d'offre, prix de l'option), `cgv-animation-magasin.html` (art. 4 et 6 : texte juridique à faire relire par Romain).
+4. Base de production : `sql/2026-11-10-lot-a.sql` à remplacer par un nouveau script (constantes c_lancement, c_mensuel, c_quiz). Jamais appliqué sans l'accord de Romain.
+5. Écran de choix de formule : maquette « Maquettes Pro à valider », écran 1, à faire valider avant de coder.
