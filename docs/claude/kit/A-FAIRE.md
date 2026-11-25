@@ -14,6 +14,11 @@ Lu au début de chaque session, filtré sur ton entrée. Une ligne par point. Pr
 | Pro | Banque de questions personnelle, modèles de départ copiés | proposition à valider |
 | Paiement | Aligner le code sur la grille validée le 25/11 (`reglement.ts`, bon de commande, CGV, trigger SQL) ; facture animation ; Wero | voir `kit/NOTE-pro-vers-paiement-et-sa.md` |
 | Super Admin | Rubriques Demandes de création et Demandes de participation | voir la note de transmission |
+| Pro | Maquettes à valider (formule, lot, suivi des lots, Super Event, création au nom d'un pro) | publiées le 25/11, réponse de Romain attendue |
+| Pro | Bouton unique « Je contacte Flowin » (WhatsApp, téléphone, e-mail, rappel) sur plaquette et création ; capture « laissez-nous votre e-mail » rangée dans le CRM en « Contacté, pas abouti » (consentement exigé, aucun envoi sans go) | décidé le 25/11, à construire |
+| Paiement | Facture simple en 3 lignes (Animation, Outils d'animation commerciale, Mesure de trafic), hébergée dans le profil du pro en lecture seule (ni effaçable ni modifiable), Jeffrey CRM y puise ; un seul émetteur du numéro légal à trancher | décidé le 25/11 |
+| Paiement | Relance avant la date anniversaire (modèle fixe avec logo, sans IA, à valider par Romain une fois) ; renouvellement à 990 € | décidé le 25/11 |
+| Pro | Compte de test prérempli depuis le hub (données marquées TEST) ; étape paiement : message « paiement en cours de branchement, contactez Flowin » tant que `PAIEMENT_ACTIF=false` | décidé le 25/11, à construire |
 | Pro | Import fichier client incomplet (attestation, adresse) | `ETAT.md` |
 | Pro | Scanner caméra iPhone et Android | non vérifié |
 | Super Admin | CRM vides : fusionner et vérifier la PR #99 | PR #99 en attente |
