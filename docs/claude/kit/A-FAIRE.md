@@ -7,8 +7,9 @@ Lu au début de chaque session, filtré sur ton entrée. Une ligne par point. Pr
 | Participant | Appli installable `joueur-app.html` ouvre une démo : la faire ouvrir l'espace client | à faire |
 | Participant | Points crédités et débités, historique | n'existe pas ; décision produit |
 | Pro | Choix du pro pour créer une animation ou une banque au nom d'un pro (côté SA) | à construire |
-| Pro | Trois jeux seulement (retirer le quiz solo) ; objectifs des jeux ; case parrainage ; roue à répartition libre ; curseur de date de fin | décidé le 25/11, à coder |
-| Pro | Lots restants et utilisés ; vérifier l'attribution des tickets gagnants (`gains` vide) | à construire / à vérifier |
+| Pro | Case roue « parraine un ami, +1 ticket » : choix côté pro à ajouter ET affichage côté joueur (`SpinClient.tsx`, `engine.ts`) pour éviter un message « perdu » trompeur | décidé le 25/11 ; partie joueur à faire par Jeux et tirages |
+| Pro | Trois jeux, objectifs des jeux, curseur de durée (dates début et fin) | FAIT le 25/11 (tsc et build lus, rendu navigateur non vérifié) |
+| Pro | Lots restants et utilisés par lot dans l'espace pro (l'accueil affiche déjà « X restants sur Y » pour un lot) ; attribution des tickets gagnants : la table `gains` n'est écrite par aucun code, donc vide sans bug apparent ; lecture réelle en base à faire avec l'accord de Romain | à construire / à vérifier |
 | Pro | Banque de questions personnelle, modèles de départ copiés | proposition à valider |
 | Paiement | Facture animation, Wero, prix option Flowin (sens à confirmer), QR supplémentaire | voir `kit/NOTE-pro-vers-paiement-et-sa.md` |
 | Super Admin | Rubriques Demandes de création et Demandes de participation | voir la note de transmission |
