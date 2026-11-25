@@ -41,13 +41,14 @@ export interface ProConfigurateur {
   id: string; nom: string | null; adresse: string | null; code_postal: string | null; ville: string | null
   email: string | null; tel: string | null; contact: string | null; partenaire_id: string | null; siret?: string | null
 }
-type Jeu = 'quizsolo' | 'quizbonus' | 'spin' | 'tombola'
+/** Date du jour + n jours, au format AAAA-MM-JJ (heure locale). */
+const isoJour = (n: number) => { const d = new Date(); d.setDate(d.getDate() + n); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}` }
+type Jeu = 'quizbonus' | 'spin' | 'tombola'
 
 const JEUX: { k: Jeu; module: string; t: string; s: string; illu: ReactNode }[] = [
-  { k: 'quizsolo', module: 'quizsolo', t: 'Quiz', s: '3 bonnes réponses = 1 ticket', illu: <IlluQuiz /> },
-  { k: 'quizbonus', module: GABARIT_MODULE, t: 'Quiz + bonus', s: 'Le quiz, plus vos questions pour sonder', illu: <IlluQuiz bonus /> },
-  { k: 'spin', module: 'spin', t: 'Roue', s: 'On tourne, on gagne tout de suite', illu: <IlluRoue /> },
-  { k: 'tombola', module: 'tombola', t: 'Tombola', s: 'On s’inscrit, grand tirage à la fin', illu: <IlluTombola /> },
+  { k: 'quizbonus', module: GABARIT_MODULE, t: 'Quiz + bonus', s: 'Animez, dynamisez et sondez votre clientèle', illu: <IlluQuiz bonus /> },
+  { k: 'spin', module: 'spin', t: 'Roue', s: 'Faites-les gagner tout de suite, faites-les revenir', illu: <IlluRoue /> },
+  { k: 'tombola', module: 'tombola', t: 'Tombola', s: 'Animez et créez de l’engouement autour de votre offre', illu: <IlluTombola /> },
 ]
 /** Supports de diffusion : ceux des QR tracés (lib/qrTraces SUPPORTS_QR), un QR par support coché. */
 const SUPPORTS: { k: string; t: string; support: string; type: TypeQr; p: string }[] = [
@@ -120,7 +121,7 @@ export default function Configurateur({ pro, banques }: { pro: ProConfigurateur;
   const [delai, setDelai] = useState('Sous 1 semaine')
   const [motFlowin, setMotFlowin] = useState('')
   const [commerceQuiz, setCommerceQuiz] = useState(p.nom || '')
-  const estQuiz = jeu === 'quizsolo' || jeu === 'quizbonus'
+  const estQuiz = jeu === 'quizbonus'
   /* Audit promesse L3 (19/11/2026) : « c'est toi qui choisis le gain, immédiat ou par tirage au sort ».
      La roue gagne tout de suite, la tombola tire au sort ; pour le quiz, le pro choisit. */
   const [gainQuiz, setGainQuiz] = useState<'' | 'immediat' | 'tirage'>('immediat')
@@ -163,6 +164,8 @@ export default function Configurateur({ pro, banques }: { pro: ProConfigurateur;
 
   /* 7. Kit */
   const [kit, setKit] = useState<'digital' | 'physique'>('digital')
+  /* Durée de l'animation (curseur, Romain 25/11) : début aujourd'hui, fin = début + durée. */
+  const [dureeJours, setDureeJours] = useState(30)
   const [nbBoutiques, setNbBoutiques] = useState(1)
 
   /* Écrans */
@@ -255,7 +258,7 @@ export default function Configurateur({ pro, banques }: { pro: ProConfigurateur;
       logoUrl = (data as { image_url: string | null } | null)?.image_url ?? null
     }
     const r = await creerAnimation({
-      id: evId, proId: p.id, module: module_, nom: `Jeu ${commerce.trim()}`, dateD: null, dateF: null,
+      id: evId, proId: p.id, module: module_, nom: `Jeu ${commerce.trim()}`, dateD: isoJour(0), dateF: isoJour(dureeJours),
       banqueId: estQuiz ? bq : null,
       cfgJeu: {
         ...(spin ? { spinSegments: casesRoue(lotsOk, nbPerdu, nbTicket).map(c => ({ label: c.label, color: c.color, ...(c.perdant ? { perdant: true } : {}), ...(c.mode ? { mode: c.mode } : {}), ...(c.textes && c.textes.length ? { textes: c.textes } : {}) })) } : cfgDepuisTirage({ mode: 'manuel', date: '', publier: false, notifierPerdants: true })),
@@ -418,6 +421,12 @@ export default function Configurateur({ pro, banques }: { pro: ProConfigurateur;
   if (ecran === 'diffusion') contenu = (
     <>
       <Titre t="Où diffuser ?" s="Un QR par support : vous mesurez l’impact de chacun." />
+      <div style={{ marginBottom: 12 }}>
+        <span style={LAB}>Durée de l’animation : {dureeJours} jours</span>
+        <input type="range" data-duree min={7} max={180} step={1} value={dureeJours} aria-label="Durée de l’animation en jours" style={{ width: '100%', minHeight: 44 }} onChange={e => setDureeJours(Number(e.target.value))} />
+        <div style={{ fontSize: 13, ...MUTED }}>Du {new Date().toLocaleDateString('fr-FR')} au {new Date(Date.now() + dureeJours * 86400000).toLocaleDateString('fr-FR')}</div>
+      </div>
+
       <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
         {SUPPORTS.map(s => {
           const on = supports.indexOf(s.k) >= 0

@@ -98,7 +98,6 @@ export interface ProCatalogue { id: string; nom: string | null; contact: string 
    libelle du gabarit (le bonus est optionnel). */
 const JEUX: { m: string; t: string; s: string; banque: boolean }[] = [
   { m: GABARIT_MODULE, t: GABARIT_NOM, s: 'Questions à choix multiple, bonus de rattrapage optionnel', banque: true },
-  { m: 'quizsolo', t: 'Quiz solo', s: '3 questions, 3/3 = 1 ticket, sans questions bonus', banque: true },
   { m: 'spin', t: 'Roue de la fortune', s: 'Tirage instantané, segments = lots', banque: false },
   { m: 'tombola', t: 'Tombola', s: 'Inscription + grand tirage', banque: false },
   { m: 'vote', t: 'Vote', s: 'Vote produits / artistes', banque: false },
