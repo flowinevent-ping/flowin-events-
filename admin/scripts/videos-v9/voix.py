@@ -2,7 +2,7 @@
 """Voix off v9 (25/11/2026). edge-tts fr-FR-VivienneMultilingualNeural, rate -3 %, pitch +0 Hz, rendue phrase par phrase.
 Usage : SSL_CERT_FILE=/root/.ccr/ca-bundle.crt python3 voix.py <film> <dossier_sortie>
 Sortie : <dossier>/<film>/bNN.wav, voix.wav (mixage), timing.json {keys, d, c, total}."""
-import asyncio, json, os, subprocess, sys, wave, edge_tts
+import asyncio, json, os, re, subprocess, sys, wave, edge_tts
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from intonation import expanser
 RATE="-3%"; PITCH="+4Hz"; K_INTO=1.5; VOICE="fr-FR-VivienneMultilingualNeural"
@@ -32,7 +32,8 @@ for bi,(k,phrases) in enumerate(S['blocs']):
     parts=[];cues=[];t=0.0
     for pi,ph in enumerate(phrases):
         cues.append(round(t,3))
-        subs=ph.split('~~'); sp=[]
+        subs=[x for s0 in ph.split('~~') for x in re.split(r'(Flow in[,.:;?!]?)',s0) if x.strip()]; sp=[]  # « Flow in » rendu a part : lecture anglaise
+
         for si,s in enumerate(subs):
             w=seg(s,'%s_p%d_%d'%(k,pi,si)); sp.append(w)
             if si<len(subs)-1: sp.append(silence(GLUE,'g%s%d%d'%(k,pi,si)))
