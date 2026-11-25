@@ -47,17 +47,17 @@ Ajout : seulement une règle écrite ou confirmée par Romain. Modification : su
 - Pas de campagne d'acquisition : on travaille sur l'existant et le flux capté, en local | 10/11 | DEC
 
 ## Prix et offres
-- Tester Flowin : 445 € HT la 1re année, présenté en premier ; ensuite 990 € HT/an ou 110 € HT/mois (3 mois minimum) | 10/11 | DEC | `lib/reglement.ts`, `lib/documentsAnimation.ts`
-- (À REMPLACER, Romain 25/11 : « 72,50 € est une erreur ») Quiz rédigé par Flowin : 145 € (72,50 € la 1re année) | 10/11 | DEC | `lib/reglement.ts`
+- (REMPLACÉ le 25/11, voir GRILLE DE PRIX) Tester Flowin : 445 € HT la 1re année, présenté en premier ; ensuite 990 € HT/an ou 110 € HT/mois (3 mois minimum) | 10/11 | DEC | `lib/reglement.ts`, `lib/documentsAnimation.ts`
+- (REMPLACÉ le 25/11, voir GRILLE DE PRIX) Quiz rédigé par Flowin : 145 € (72,50 € la 1re année) | 10/11 | DEC | `lib/reglement.ts`
 - Ne pas montrer ce qui sera payé l'année suivante à la commande | 10/11 | DEC
-- 2 QR inclus (1 physique, 1 digital) ; QR de suivi supplémentaire : 7 € HT en one-shot, 3,50 € HT en abonnement annuel (25/11 ; remplace 10 € provisoire ; lecture à confirmer) | 17/11 | DEC | `lib/qrTraces.ts` (`QR_INCLUS`)
+- 2 QR inclus (1 physique, 1 digital) ; QR de suivi supplémentaire : 7 € HT en one-shot, 3,50 € HT en abonnement annuel (25/11, validé par Romain ; remplace 10 € provisoire) | 17/11 | DEC | `lib/qrTraces.ts` (`QR_INCLUS`)
 - Super Event organisateur : pas de prix public, sur étude | 08/11 | DEC
 - Paiement : virement SEPA (QR + IBAN copiable) ; `PAIEMENT_ACTIF=false` ; le jeu est visible avant paiement, paiement à la publication | 08/11, 10/11 | DEC | `lib/reglement.ts`
 - Stratégie commerciale : viser 4 à 8 animations par pro et par an ; le même jeu sert toute l'année, mais seulement avec l'abonnement annuel | 25/11 | conversation Pro
 - One-shot (sans abonnement) : une diffusion, statistiques et nombre de flashs par QR seulement ; pas de CRM récupérable après coup | 25/11 | conversation Pro
 - Abonnement annuel : CRM conservé (personnes qui acceptent), import de ses clients dans l'animation, diffusion du jeu à tout son CRM, rapport complet par QR (flashs, sexe, tranche d'âge) | 25/11 | conversation Pro
 - Paiement : virement codé mais coupé (`PAIEMENT_ACTIF=false`) ; préparer Wero (sans frais) ; facture à construire pour l'animation (première animation, premier abonnement) sur le modèle Nuits du Sud | 25/11 | conversation Pro | à faire par Paiement
-- GRILLE DE PRIX PROVISOIRE (25/11, Romain : « peu d'études de marché, les prix évolueront ») ; code non modifié, à coder par Paiement après validation : animation seule one-shot quiz ou quiz + bonus 150 € HT ; one-shot tombola ou roue 90 € HT ; 1re animation one-shot à -50 % ; option questions rédigées par Flowin 150 € HT (30 à 40 questions) ; abonnement annuel 1re année 450 € HT puis 990 € HT | 25/11 | conversation Pro | `lib/reglement.ts` (445 € en code, écart à confirmer)
+- GRILLE DE PRIX VALIDÉE PAR ROMAIN le 25/11 (tous prix HT ; peu d'études de marché, les prix pourront évoluer) : abonnement annuel 450 € la 1re année puis 990 € payés d'avance (plus de tarif mensuel) ; one-shot tombola ou roue 90 € ; one-shot quiz ou quiz + bonus 150 € ; 1re animation à -50 % ; l'option « questions rédigées par Flowin » ne s'ajoute pas en plus du quiz one-shot (lecture : 150 € = première animation avec quiz, soit la moitié de 300 € ; à confirmer par Romain) ; code `reglement.ts`, bon de commande, CGV et trigger SQL pas encore alignés (à faire par Paiement, SQL avec accord de Romain) | 25/11 | conversation Pro | `lib/reglement.ts`
 - One-shot inclut : période de jeu, traçabilité des passages, diffusion des lots, logo et couleurs du commerce, envoi des e-mails, stock et déstockage, interface pro (tirage, retrait), visuel des joueurs, 2 QR | 25/11 | conversation Pro
 - Abonnement annuel inclut : 1 animation par mois, 3 QR de suivi, rapport par QR, CRM (tableur, import de son fichier client, diffusion du jeu par notification à son CRM), 2 créations de quiz, 1 affichage Super Event sur la carte partenaire dans l'année | 25/11 | conversation Pro
 - Communication : Animation et Super Event sont deux produits séparés ; ne pas les mélanger ; possibilité de ne pas promouvoir le Super Event avec l'Animation pour l'instant | 25/11 | conversation Pro
