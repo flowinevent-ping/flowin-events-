@@ -1,5 +1,7 @@
 # Architecture Flowin Event : index (25/11/2026)
 
+> CORRECTION 25/11/2026 (Romain) : le Super Event est créé par Flowin Event uniquement ; les pros le rejoignent, ils ne l'organisent pas. Voir EN-CLAIR.md. Les mentions « organisateur pro » ci-dessous sont à revoir.
+
 Auteur : agent critique-architecture-code. Lecture seule : aucun code ni SQL d'écriture modifié. Mesures : dépôt (commit 9bbc60d8) et base `ywcqtupgoxfzkddqkztk` (SELECT uniquement, 25/11/2026). Tout ce qui n'est pas prouvé est marqué « non vérifié ».
 
 ## Verdict : BON AVEC ÉCARTS
