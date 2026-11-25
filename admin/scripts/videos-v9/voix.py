@@ -3,7 +3,9 @@
 Usage : SSL_CERT_FILE=/root/.ccr/ca-bundle.crt python3 voix.py <film> <dossier_sortie>
 Sortie : <dossier>/<film>/bNN.wav, voix.wav (mixage), timing.json {keys, d, c, total}."""
 import asyncio, json, os, subprocess, sys, wave, edge_tts
-RATE="-3%"; PITCH="+0Hz"; VOICE="fr-FR-VivienneMultilingualNeural"
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from intonation import expanser
+RATE="-3%"; PITCH="+4Hz"; K_INTO=1.5; VOICE="fr-FR-VivienneMultilingualNeural"
 PAUSE_PHRASE=0.40; PAUSE_SIGN=0.42; GLUE=0.04; LEAD=0.20; TAIL=0.45; FIN=1.6
 film=sys.argv[1]; out=os.path.join(sys.argv[2],film); os.makedirs(out,exist_ok=True)
 S=json.load(open(os.path.join(os.path.dirname(__file__),'scripts.json')))[film]
@@ -18,6 +20,7 @@ def seg(txt,name):
     asyncio.run(tts(txt,mp3))
     # silences de bord coupes
     sh('ffmpeg','-y','-i',mp3,'-ar','48000','-ac','1','-af','silenceremove=start_periods=1:start_threshold=-45dB:start_silence=0.03,areverse,silenceremove=start_periods=1:start_threshold=-45dB:start_silence=0.03,areverse',wav)
+    exp=wav[:-4]+'_i.wav'; expanser(wav,exp,K_INTO); os.replace(exp,wav)  # intonation amplifiee (x1,5)
     return wav
 def silence(sec,name):
     p=os.path.join(out,name+'.wav'); sh('ffmpeg','-y','-f','lavfi','-i','anullsrc=r=48000:cl=mono','-t',str(sec),p); return p
