@@ -23,3 +23,4 @@ Aucun prix côté participant. Pour tout montant : `paiement.md`.
 
 ## À faire et notes
 Espace client complet (compte, mot de passe, événements en cours, carte, historique, invitations) : descriptif `docs/SPEC-ESPACE-CLIENT-JOUEUR.md` (PR #96, non fusionnée). Points crédités / débités : n'existent pas. Appli installable `joueur-app.html` : pointe vers une démo, à corriger. Détail : `kit/A-FAIRE.md`.
+Contrat de données (conservé, isolé, tracé) : `kit/CONTRATS-DONNEES.md`, section Participant.
