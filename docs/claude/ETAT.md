@@ -52,3 +52,4 @@ Source principale : `docs/E2E-verification-2026-11-20.md` (E2E). Comptes de test
 | Page /se/[se] lot 4 + règle sur place + une seule carte | EN LIGNE sur main (52c941ee, bd2d0e02), tsc/build OK, démo 390 px ; production NON vérifiée (403 Vercel), iPhone NON testé | 24/11 | JOURNAL |
 | 5 exports anon fermés | FAIT (migration securite_fermer_exports_anon) | 24/11 | preuve SQL |
 | pros_anon_select | EN ATTENTE du clic de Romain dans Supabase | 24/11 | - |
+| Structure de travail profils + rubriques (ESSENTIEL, univers, kit) | INSTALLÉE le 25/11 ; test à blanc fait sur 3 cas (ROUTAGE) ; sessions créées : voir kit/SESSIONS.md ; non vérifié : lecture réelle par une nouvelle session | 25/11 | `docs/ESSENTIEL.md` | première session ouverte avec la nouvelle consigne |
