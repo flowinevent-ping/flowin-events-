@@ -23,7 +23,7 @@ CORRECTION : un pro n'est jamais « organisateur » d'un Super Event. L'organisa
 ## Ce que Romain veut (cible)
 
 - Le Super Admin crée une animation avec LE MÊME parcours que le pro.
-- Scénario téléphone : Flowin appelle un commerçant, lui crée son compte et lance son animation, en direct, sans changer d'écran.
+- Scénario téléphone (onboarding fait par Flowin) : après un démarchage, un commerçant n'a pas de compte et n'a pas le temps de le créer. Flowin crée depuis le Super Admin son compte et son animation avec le même parcours que le pro, puis TRANSMET l'accès au commerçant (il n'a plus qu'à se connecter et à ajuster).
 - Au début du parcours, une question « Pour qui ? » : un pro qui existe déjà, un nouveau pro à créer, ou un pro qui existe mais n'a pas encore d'animation.
 - Le Super Event est créé par Flowin Event seulement (jeu, tirage au sort, lots, distribution). Les pros demandent à le rejoindre, comme pour NDS 2026.
 
