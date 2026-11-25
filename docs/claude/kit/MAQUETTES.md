@@ -16,3 +16,4 @@ Chemin · version · statut (statuts repris de `docs/claude/ETAT.md`). Ne rien s
 | Scripts et scénarios vidéo | `docs/SCRIPT-*.md`, `docs/SCENARIOS-videos-*.md` | v7, v8 | référence |
 | Hub installable | `admin/public/hub.html` | 24/11 | PR #98 |
 | Ergonomie « en quelques clics » | `docs/claude/VISION-ERGONOMIE.md` | 23/11 | document, rien appliqué |
+| Vidéos v9 : 4 films à personnages avec voix (Animation participants / commerçants, Super Event participants / organisateurs) | `admin/public/videos/v9/`, scènes `videos/scenes/films-v9.html`, sources `admin/scripts/videos-v9/`, script `docs/SCRIPT-v9-2026-11-25.md` | v9 | livrées 25/11, écoute de Romain à confirmer |

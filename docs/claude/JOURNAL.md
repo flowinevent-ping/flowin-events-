@@ -101,3 +101,4 @@ Ce journal n'est pas une preuve de production : l'état vérifié est dans `ETAT
 - 25/11/2026 · Correction du modèle (Super Event créé par Flowin seulement) ; EN-CLAIR.md écrit ; rien en production avant validation de Romain.
 - 25/11 | Pro : règles du 25/11 (jeux, offres, grille de prix provisoire), note de transmission ; hub mis en ligne (/hub.html, propriétaire Super Admin) | branche claude/pro-regles-25-11
 - 25/11 | Pro (code) : trois jeux, objectifs, curseur de durée de l'animation (Configurateur) ; tsc et build lus | branche claude/pro-regles-25-11
+- 25/11/2026 · Contenu : 4 vidéos v9 (scènes à personnages des films v4 + voix Vivienne -3 %) dans admin/public/videos/v9/, sources admin/scripts/videos-v9/, dictée de Romain ajoutée à l'argumentaire ; rien déployé en catalogue, pas de 16:9 ni de version courte.
