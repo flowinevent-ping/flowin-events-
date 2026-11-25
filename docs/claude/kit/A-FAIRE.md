@@ -5,6 +5,7 @@ Lu au début de chaque session, filtré sur ton entrée. Une ligne par point. Pr
 |---|---|---|
 | Participant | Espace client complet (compte, mot de passe, événements, carte, historique, invitations) | descriptif `docs/SPEC-ESPACE-CLIENT-JOUEUR.md` (PR #96) ; décisions de Romain attendues |
 | Participant | Appli installable `joueur-app.html` ouvre une démo : la faire ouvrir l'espace client | à faire |
+| Participant | Formulaire « Où t'envoyer ton gain ? » : conseil = tranche d'âge (une touche, facultative) plutôt que date de naissance ; tout champ déjà connu doit être prérempli (colonne `age_tranche` et mémoire joueur existent). À confirmer par Romain | conseil du 25/11 |
 | Participant | Points crédités et débités, historique | n'existe pas ; décision produit |
 | Pro | Choix du pro pour créer une animation ou une banque au nom d'un pro (côté SA) | à construire |
 | Pro | Case roue « parraine un ami, +1 ticket » : choix côté pro à ajouter ET affichage côté joueur (`SpinClient.tsx`, `engine.ts`) pour éviter un message « perdu » trompeur | décidé le 25/11 ; partie joueur à faire par Jeux et tirages |
