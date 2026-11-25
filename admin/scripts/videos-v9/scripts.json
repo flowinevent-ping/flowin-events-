@@ -1,0 +1,47 @@
+{
+ "a-part": {"titre":"Animation · participants","blocs":[
+  ["b01",["Bienvenue sur Flowin.","Chez tes commerçants, retrouve des promotions, et des jeux."]],
+  ["b02",["À chaque fois que tu vas quelque part, c'est une occasion de jouer."]],
+  ["b03",["Une occasion de gagner des lots."]],
+  ["b04",["Et une occasion de mieux connaître ton commerce de proximité."]],
+  ["b05",["C'est simple : tu flashes le QR code, et tu joues.","Quiz, tombola, ou roue de la fortune."]],
+  ["b06",["Ton gain est immédiat, ou par tirage au sort."]],
+  ["b07",["Tu peux même offrir ton lot à un ami."]],
+  ["b08",["Et tu retrouves tous les commerces sur la carte."]],
+  ["b09",["Flowin : à toi de jouer !","Flashe le QR code."]]
+ ]},
+ "a-com": {"titre":"Animation · commerçants","blocs":[
+  ["b01",["Bienvenue sur Flowin, l'animation de votre commerce."]],
+  ["b02",["Une occasion de mieux connaître votre clientèle."]],
+  ["b03",["Chaque client qui joue entre dans votre fichier client, qui grandit."]],
+  ["b04",["Vous captez aussi le flux des passants."]],
+  ["b05",["Vous êtes visible sur la carte des commerces."]],
+  ["b06",["Les lots offerts font revenir vos clients, et leurs amis."]],
+  ["b07",["Ils jouent, ils reviennent, ils font parler de vous."]],
+  ["b08",["Vous publiez en quelques clics.","C'est cent pour cent, automatisé."]],
+  ["b09",["Scannez le QR code, et lancez votre animation.","Flowin, l'animation~~plug and play."]]
+ ]},
+ "se-part": {"titre":"Super Event · participants","blocs":[
+  ["b01",["Tu connais Flowin ?","Tu le retrouves déjà dans ton commerce."]],
+  ["b02",["Retrouve-le à ton festival !"]],
+  ["b03",["Viens remporter des lots, toujours chez ton commerçant,","et d'autres lots à gagner pendant le festival."]],
+  ["b04",["Le principe est toujours le même : tu flashes le QR code, tu joues."]],
+  ["b05",["Tu remportes des lots, en tombola, ou en gain immédiat."]],
+  ["b06",["Quiz : teste tes connaissances, et découvre les stations jeux."]],
+  ["b07",["Plus tu joues aux stations jeux, plus tu cumules de tickets."]],
+  ["b08",["Partage avec tes potes !"]],
+  ["b09",["Voilà, ça, c'est Flowin.","À toi de jouer !"]]
+ ]},
+ "se-org": {"titre":"Super Event · organisateurs","blocs":[
+  ["b01",["Vous organisez un événement ?","Rayonnez encore plus, au niveau local : avant, pendant, et après."]],
+  ["b02",["Avant : votre événement est diffusé.","Faites jouer vos participants, ou futurs participants, et faites-leur gagner des places, ou des goodies."]],
+  ["b03",["Pendant : faites-les jouer, et mesurez le trafic."]],
+  ["b04",["D'où viennent-ils ? Comment vous ont-ils connu ? Où ont-ils joué ?"]],
+  ["b05",["Connaissez mieux vos participants, et gardez le contact avec eux."]],
+  ["b06",["Les questions bonus sensibilisent, et vous rapportent des chiffres utiles : R.S.E., éthique, mobilité."]],
+  ["b07",["Comment ça marche ?","Un parcours, des questions, et des stations jeux, pendant votre événement."]],
+  ["b08",["Votre événement est diffusé avant, pendant et après, dans le réseau des commerces participants."]],
+  ["b09",["Ils vous mettent en avant.","Vous les mettez à l'honneur."]],
+  ["b10",["Flowin Super Event.","Flowin, l'animation~~plug and play."]]
+ ]}
+}

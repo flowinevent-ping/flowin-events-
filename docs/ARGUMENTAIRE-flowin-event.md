@@ -164,3 +164,19 @@ Avant toute livraison, chaque texte est relu contre ce fichier (et la liste « i
 - **Promesse : « Faites jouer, faites grandir votre fichier, faites-les revenir. »**
 - **Signature : « Flowin, l'animation plug and play. »**
 - Voix off des vidéos : voix « Vivienne », jeune femme, ton enjoué (seule voix testée qui prononce « Flowin » correctement).
+
+## Dictée de Romain du 25/11/2026 (vidéos v9 : le commentaire explique les bénéfices, il ne lit pas un texte)
+
+### Flowin Animation : participant
+- « Retrouve chez tes commerçants des promotions, des jeux. À chaque fois que tu vas quelque part, une occasion de jouer, une occasion de gagner, une occasion d'apprendre à mieux connaître ton commerce de proximité. »
+
+### Flowin Animation : commerçant
+- Une occasion de mieux connaître sa clientèle, de recenser, de faire grandir son fichier client, de capter le flux des passants, une manière d'être visible sur la carte, de faire revenir ses clients avec les lots offerts, de faire parler de lui.
+
+### Flowin Super Event : participant
+- « Tu connais Flowin, tu le retrouves déjà dans ton commerce. Retrouve-le à ton festival : viens remporter des lots, toujours chez ton commerçant, et d'autres lots à gagner pendant le festival. »
+- Le principe est toujours le même : tu flashes le QR code, tu joues, tu remportes les lots, en tombola ou en gain immédiat. Flash, joue, quiz, découvre les stations jeux. Plus tu joues aux stations jeux, plus tu cumules (Romain dit « points » ; la vidéo dit « tickets », seul cumul qui existe aujourd'hui : à confirmer, voir `kit/A-FAIRE.md`). « À toi de jouer. Teste tes connaissances. Partage avec tes potes. Voilà, ça, c'est Flowin. »
+
+### Flowin Super Event : organisateur
+- « Vous organisez un événement : rayonnez encore plus d'un point de vue local, avant, pendant et après votre événement. » Avant : votre événement est diffusé ; faites jouer vos participants ou futurs participants, faites-leur gagner des places, des goodies. Pendant : faites-les jouer, mesurez le trafic (d'où ils viennent, comment ils vous ont connu). Connaissez mieux vos participants, gardez le contact. Sensibilisez, relevez des chiffres utiles : RSE, éthique, mobilité.
+- Comment ça marche : un parcours pendant votre événement, des questions, des stations, une diffusion de votre événement avant, pendant et après dans le réseau des commerces participants. « Ils vous mettent en avant, vous les mettez à l'honneur. » Logos et tampons dans l'animation.
