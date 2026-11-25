@@ -24,3 +24,4 @@ Lire aussi : `prospection.md` pour tout envoi.
 
 ## À faire et notes
 Le « 70 » de la vidéo organisateur est peu lisible. Animation tirée du contenu de la plaquette : à décider. Boutons violets des pages d'installation admin, pro, joueur : à passer en bleu. Détail : `kit/A-FAIRE.md`.
+État des lieux 25/11 : `docs/PARCOURS-video-vers-animation-2026-11-25.md` (vidéos, texte en 4 temps, parcours, kit). Attendu de Romain : quelle vidéo est « le bonhomme avec le son », kit imprimé 72 h ou à imprimer soi-même, validation de la structure de texte.
