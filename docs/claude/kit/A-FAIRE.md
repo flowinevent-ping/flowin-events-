@@ -12,7 +12,7 @@ Lu au début de chaque session, filtré sur ton entrée. Une ligne par point. Pr
 | Pro | Trois jeux, objectifs des jeux, curseur de durée (dates début et fin) | FAIT le 25/11 (tsc et build lus, rendu navigateur non vérifié) |
 | Pro | Lots restants et utilisés par lot dans l'espace pro (l'accueil affiche déjà « X restants sur Y » pour un lot) ; attribution des tickets gagnants : la table `gains` n'est écrite par aucun code, donc vide sans bug apparent ; lecture réelle en base à faire avec l'accord de Romain | à construire / à vérifier |
 | Pro | Banque de questions personnelle, modèles de départ copiés | proposition à valider |
-| Paiement | Facture animation, Wero, prix option Flowin (sens à confirmer), QR supplémentaire | voir `kit/NOTE-pro-vers-paiement-et-sa.md` |
+| Paiement | Aligner le code sur la grille validée le 25/11 (`reglement.ts`, bon de commande, CGV, trigger SQL) ; facture animation ; Wero | voir `kit/NOTE-pro-vers-paiement-et-sa.md` |
 | Super Admin | Rubriques Demandes de création et Demandes de participation | voir la note de transmission |
 | Pro | Import fichier client incomplet (attestation, adresse) | `ETAT.md` |
 | Pro | Scanner caméra iPhone et Android | non vérifié |

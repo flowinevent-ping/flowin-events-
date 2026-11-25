@@ -6,7 +6,7 @@ Schémas : page « Super Event et offres » (artifact de la session Pro).
 1. Offres : one-shot (une diffusion, flashs par QR) ou abonnement annuel (CRM, import clients, diffusion au CRM, rapport sexe et âge). Détail dans `REGLES.md`.
 2. Facture à construire pour l'animation (1re animation, 1er abonnement), sur le modèle de la facture des Nuits du Sud : reprendre jeu, lots, dates, QR supplémentaires, option Flowin, RIB.
 3. Virement : coder complet mais laisser `PAIEMENT_ACTIF=false`. Préparer Wero (sans frais) comme 2e moyen.
-4. Grille de prix provisoire de Romain du 25/11 dans `REGLES.md` : à coder après validation. Points à confirmer : 445 € en code contre 450 € dit ; 7 € ou 3,50 € le QR en plus selon la formule ; tombola et roue à 90 € ; politique de prix à présenter en rubrique claire.
+4. Grille de prix VALIDÉE le 25/11 dans `REGLES.md` : à coder. Copies à aligner : `lib/reglement.ts`, `public/bon-commande-pdf.js`, `bon-commande-animation.html`, `cgv-animation-magasin.html` (art. 4 et 6) et le trigger SQL `sql/2026-11-10-lot-a.sql` (SQL de production : accord de Romain d'abord). Seul point ouvert : lecture de l'option questions (150 € = première animation avec quiz).
 
 ## Pour l'entrée Super Admin
 1. Rubrique « Demandes de création » (organisateur : identité, coordonnées, type d'événement, description, rappel).
