@@ -7,6 +7,11 @@ Lu au début de chaque session, filtré sur ton entrée. Une ligne par point. Pr
 | Participant | Appli installable `joueur-app.html` ouvre une démo : la faire ouvrir l'espace client | à faire |
 | Participant | Points crédités et débités, historique | n'existe pas ; décision produit |
 | Pro | Choix du pro pour créer une animation ou une banque au nom d'un pro (côté SA) | à construire |
+| Pro | Trois jeux seulement (retirer le quiz solo) ; objectifs des jeux ; case parrainage ; roue à répartition libre ; curseur de date de fin | décidé le 25/11, à coder |
+| Pro | Lots restants et utilisés ; vérifier l'attribution des tickets gagnants (`gains` vide) | à construire / à vérifier |
+| Pro | Banque de questions personnelle, modèles de départ copiés | proposition à valider |
+| Paiement | Facture animation, Wero, prix option Flowin (sens à confirmer), QR supplémentaire | voir `kit/NOTE-pro-vers-paiement-et-sa.md` |
+| Super Admin | Rubriques Demandes de création et Demandes de participation | voir la note de transmission |
 | Pro | Import fichier client incomplet (attestation, adresse) | `ETAT.md` |
 | Pro | Scanner caméra iPhone et Android | non vérifié |
 | Super Admin | CRM vides : fusionner et vérifier la PR #99 | PR #99 en attente |

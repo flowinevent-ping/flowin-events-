@@ -48,11 +48,17 @@ Ajout : seulement une règle écrite ou confirmée par Romain. Modification : su
 
 ## Prix et offres
 - Tester Flowin : 445 € HT la 1re année, présenté en premier ; ensuite 990 € HT/an ou 110 € HT/mois (3 mois minimum) | 10/11 | DEC | `lib/reglement.ts`, `lib/documentsAnimation.ts`
-- Quiz rédigé par Flowin : 145 € (72,50 € la 1re année) | 10/11 | DEC | `lib/reglement.ts`
+- (À REMPLACER, Romain 25/11 : « 72,50 € est une erreur ») Quiz rédigé par Flowin : 145 € (72,50 € la 1re année) | 10/11 | DEC | `lib/reglement.ts`
 - Ne pas montrer ce qui sera payé l'année suivante à la commande | 10/11 | DEC
-- 2 QR inclus puis 10 € HT par QR de suivi (PROVISOIRE, à confirmer) | 17/11 | DEC | `lib/qrTraces.ts` (`QR_INCLUS`)
+- 2 QR inclus puis 3,50 € HT par QR de suivi supplémentaire (25/11 ; remplace 10 € provisoire) | 17/11 | DEC | `lib/qrTraces.ts` (`QR_INCLUS`)
 - Super Event organisateur : pas de prix public, sur étude | 08/11 | DEC
 - Paiement : virement SEPA (QR + IBAN copiable) ; `PAIEMENT_ACTIF=false` ; le jeu est visible avant paiement, paiement à la publication | 08/11, 10/11 | DEC | `lib/reglement.ts`
+- Option Flowin (30 questions + 5 bonus, retour sous 72 h) : prix à 90 €, 55 € pour la première animation, offre de départ ; sens exact (option seule ou animation « rapport + CRM » complète) à confirmer par Romain | 25/11 | conversation Pro | `lib/reglement.ts` (pas encore modifié)
+- Stratégie commerciale : viser 4 à 8 animations par pro et par an ; le même jeu sert toute l'année, mais seulement avec l'abonnement annuel | 25/11 | conversation Pro
+- One-shot (sans abonnement) : une diffusion, statistiques et nombre de flashs par QR seulement ; pas de CRM récupérable après coup | 25/11 | conversation Pro
+- Abonnement annuel : CRM conservé (personnes qui acceptent), import de ses clients dans l'animation, diffusion du jeu à tout son CRM, rapport complet par QR (flashs, sexe, tranche d'âge) | 25/11 | conversation Pro
+- Premier abonnement annuel : moitié du prix annuel (offre de lancement déjà en code) | 25/11 | conversation Pro | `lib/reglement.ts`
+- Paiement : virement codé mais coupé (`PAIEMENT_ACTIF=false`) ; préparer Wero (sans frais) ; facture à construire pour l'animation (première animation, premier abonnement) sur le modèle Nuits du Sud | 25/11 | conversation Pro | à faire par Paiement
 - Piste 99 € HT/an et 2e année 99 €/mois : non tranchées, ne pas annoncer | 10/11 | `docs/PRIX-animation-99-analyse-2026-11-10.md`
 
 ## Jeux, tickets, tirages
@@ -66,6 +72,14 @@ Ajout : seulement une règle écrite ou confirmée par Romain. Modification : su
 - Super Event en deux phases (avant : lots organisateur ; pendant : lots des commerces) ; exception Nuits du Sud : pas de phases | 19/11 | DEC | `lib/superEventPhases.ts` (`SE_SANS_PHASES`)
 - Nuits du Sud 2026 : pas de péremption ni de refus en caisse des tickets | 10/11 | DEC | SQL `date_limite_tirage` (null pour se-nds-2026)
 - Ticket gagnant : stocké dans le profil joueur et l'espace pro, déstocké du stock ; scanner caméra sur /pro/scanner (jsQR) | 10/11, 19/11 | DEC
+- Trois jeux seulement : Quiz + bonus, Roue de la fortune, Tombola (le quiz solo disparaît de l'offre) | 25/11 | conversation Pro | `components/creation/Configurateur.tsx` (pas encore modifié)
+- Roue : cases gain immédiat, perdu, ticket pour le tirage, parrainer un ami (= +1 ticket) ; répartition entièrement libre : le pro choisit ses cases et ses gains | 25/11 | conversation Pro
+- Lots : même fenêtre d'édition pour tous les jeux (intitulé, quantité, valeur, conditions d'utilisation rédigées librement) ; le pro voit lots restants et lots utilisés | 25/11 | conversation Pro | `components/creation/LotFormulaire.tsx`
+- Banques de questions : chacune est personnelle à son pro, jamais partagée entre pros (pas de banque commune où l'on pioche) ; les questions écrites pour un pro restent à lui | 25/11 | conversation Pro
+- Date de fin de l'animation réglable (curseur) | 25/11 | conversation Pro
+- Un ticket gagnant doit être attribué au joueur et apparaître comme distribué chez le pro | 25/11 | conversation Pro | à vérifier (table `gains` vide)
+- Demande de création de Super Event : l'organisateur crée son compte, décrit son événement (type : musique, commercial, etc.) ; elle arrive chez Super Admin comme demande de création ; la demande d'un pro pour une station arrive comme demande de participation | 25/11 | conversation Pro
+- Offre organisateur : station-jeu avec statistiques (passages, stations des partenaires), diffusion et tirage des lots, questions liées à l'événement, une personne sur place le jour J, mise en place auprès des exposants | 25/11 | conversation Pro
 - Une animation du commerce et sa station Super Event peuvent tourner en parallèle (gains et suivi séparés) | 17/11 | DEC
 
 ## Code et livraison (CLAUDE.md)
