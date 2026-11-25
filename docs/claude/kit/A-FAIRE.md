@@ -27,7 +27,8 @@ Lu au début de chaque session, filtré sur ton entrée. Une ligne par point. Pr
 | Paiement | SQL 08 (export CRM) non appliqué ; prix non modifiables | décisions de Romain |
 | Paiement | Facturation automatique et Jeffrey CRM | feu vert attendu |
 | Prospection | Page « Annonces des commerces » vide ; historique d'envois NDS 2026 | définir avec Romain |
-| Données et sécurité | Factures et bons de commande lisibles sans connexion | décision attendue |
+| Données et sécurité | Factures, bons de commande et `comm_config` lisibles sans connexion | décision attendue (`CONTRATS-DONNEES.md`) |
+| Données et sécurité | Retrait des gains : 190 lignes avec date, 37 avec statut retiré ; gains et se_gains vides | à vérifier |
 | Données et sécurité | `pros_anon_select` : confirmation de Romain | en attente |
 | Données et sécurité | Nettoyage des données TEST | bloqué |
 | Automatisation | Décisions en attente (voir `AUTOMATISATION.md`) | rien construit |

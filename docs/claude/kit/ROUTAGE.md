@@ -12,7 +12,7 @@ Sessions nommées « Flowin Event · <Entrée> ». Un point = une seule session.
 | Plaquette, vidéo, texte, visuel | Contenu | `univers/contenu.md` |
 | Prix, bon de commande, facture, CGV | Paiement | `univers/paiement.md` |
 | Envoi, e-mail, annonce, réseaux | Prospection | `univers/prospection.md` |
-| Droits d'accès, RLS, consentement, mineurs | Données et sécurité | `univers/donnees-securite.md` |
+| Droits d'accès, RLS, consentement, mineurs, contrats de données | Données et sécurité | `univers/donnees-securite.md`, `kit/CONTRATS-DONNEES.md` |
 | Moteur automatique, file d'approbation | Automatisation | `kit/AUTOMATISATION.md` |
 | Je ne sais pas, plusieurs sujets en vrac | Entrée | `univers/entree.md` |
 
