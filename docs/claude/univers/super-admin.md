@@ -22,5 +22,5 @@ Offres et prix affichés dans « Offres et prix » : lecture seule de `paiement.
 | Outils commerciaux, annonces | `prospection.md` |
 
 ## À faire et notes
-CRM vides (cause trouvée) : PR #99. Hub installable : PR #98. SQL 08 (export CRM) non appliqué. Page de visualisation des factures et bons à construire. Détail : `kit/A-FAIRE.md`.
+CRM vides (cause trouvée) : PR #99. Hub installable : en ligne (/hub.html), il appartient à cette rubrique. SQL 08 (export CRM) non appliqué. Page de visualisation des factures et bons à construire. Détail : `kit/A-FAIRE.md`.
 Contrat de données (conservé, isolé, tracé) : `kit/CONTRATS-DONNEES.md`, section Super Admin.
