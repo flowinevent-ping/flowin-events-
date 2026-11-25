@@ -2,7 +2,10 @@ import numpy as np, parselmouth
 from parselmouth.praat import call
 def expanser(src,dst,k=1.4):
     """Amplifie les variations de hauteur (demi-tons autour de la mediane de la phrase) d'un facteur k ; duree et timbre inchanges (PSOLA)."""
-    s=parselmouth.Sound(src); m=call(s,"To Manipulation",0.01,75,500)
+    s=parselmouth.Sound(src)
+    if s.duration<0.15:
+        s.save(dst,"WAV"); return
+    m=call(s,"To Manipulation",0.01,75,500)
     pt=call(m,"Extract pitch tier"); n=call(pt,"Get number of points")
     if n<5: s.save(dst,'WAV'); return
     ts=[call(pt,"Get time from index",i) for i in range(1,n+1)]; fs=np.array([call(pt,"Get value at index",i) for i in range(1,n+1)])

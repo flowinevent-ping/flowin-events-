@@ -32,7 +32,7 @@ for bi,(k,phrases) in enumerate(S['blocs']):
     parts=[];cues=[];t=0.0
     for pi,ph in enumerate(phrases):
         cues.append(round(t,3))
-        subs=[x for s0 in ph.split('~~') for x in re.split(r'(Flow in[,.:;?!]?)',s0) if x.strip()]; sp=[]  # « Flow in » rendu a part : lecture anglaise
+        subs=[x for s0 in ph.split('~~') for x in re.split(r'(Flow in\s*[,.:;?!]?)',s0) if re.search(r'\w',x)]; sp=[]  # « Flow in » rendu a part : lecture anglaise
 
         for si,s in enumerate(subs):
             w=seg(s,'%s_p%d_%d'%(k,pi,si)); sp.append(w)
