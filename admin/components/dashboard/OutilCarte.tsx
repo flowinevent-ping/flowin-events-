@@ -111,6 +111,14 @@ export function OutilCarte({ o, onApercu, onSelect, actif, coche, onCoche }: { o
         )}
       </div>
 
+      {o.animation?.poster && !brouillon && (
+        <button type="button" onClick={e => { e.stopPropagation(); onApercu(o, url) }} data-poster aria-label={`Voir la vidéo : ${o.titre}`}
+          style={{ padding: 0, border: `1px solid ${C.bordure}`, borderRadius: 10, overflow: 'hidden', background: C.fond, cursor: 'pointer', width: '100%', maxHeight: 170 }}>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src={o.animation.poster} alt="" style={{ display: 'block', width: '100%', maxHeight: 170, objectFit: 'cover', objectPosition: 'top' }} />
+        </button>
+      )}
+
       <div onClick={stop} onKeyDown={stop} style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
         <button type="button" onClick={onCopier} disabled={brouillon} data-copier
           style={{ ...petit, background: C.violet, borderColor: C.violet, color: '#fff', ...(brouillon ? bloque : {}) }}>
