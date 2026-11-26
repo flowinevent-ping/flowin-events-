@@ -43,15 +43,24 @@ SPECIAL['origine']=""" scene(3,function(){var s=['Affiche','Réseaux sociaux','C
 SPECIAL['parcours']=""" scene(3,function(){var st=['Un parcours','Des questions','Des stations jeux'],h='';for(var i=0;i<3;i++)h+=A(40,340+i*150,'<div class="card" style="width:460px;display:flex;align-items:center;gap:16px;padding:18px"><div style="width:48px;height:48px;border-radius:99px;background:#FF8A14;color:#0E1B30;font-weight:900;font-size:26px;display:grid;place-items:center">'+(i+1)+'</div><b style="font-size:26px">'+st[i]+'</b>'+(i===2?'<div style="margin-left:auto">'+qrMini(54)+'</div>':'')+'</div>','opacity:0" data-in="'+(1.0+i*.9));
    return cap('Comment ça marche ? <em>Un parcours, des stations jeux.</em>')+h;},function(t,el){});"""
 PLAN={
+ 'a-part':('v10apart',[
+  ('b01',(1,1),'f2-7','Chez tes commerçants : <em>promotions et jeux.</em>',''),
+  ('b02',(0,.62),'f2-1','Une occasion <em>de jouer.</em>',''),('b02',(.62,1),'f2-4','Une occasion <em>de gagner.</em>',''),
+  ('b03',(1,1),'f2-2','Mieux connaître <em>ton commerce de proximité.</em>',''),
+  ('b04',(0,.5),'f1-6','Scan, <em>joue.</em>',''),('b04',(.5,1),'f2-5','Entre amis <em>ou en famille.</em>',''),
+  ('b05',(0,0),'f1-7','Teste tes connaissances <em>sur le quiz.</em>',''),('b05',(1,1),'f1-8','Remporte <em>les lots.</em>',''),
+  ('b06',(1,1),'f2-3',None,None),
+  ('b07',(1,1),'f1-12','Découvre la carte. <em>Rends-toi dans les commerces participants.</em>',''),
+  ('b08',(1,1),'f2-8','FIN2:Suis <b>le flow.</b>|Découvre ce que tu gagnes.',None)]),
  'a-com':('v10acom',[
   ('b01',(0,0),'f1-1','Un commerce, <em>un fichier client ?</em>',''),('b01',(1,1),'f1-5','Faites-le <em>grandir.</em>',''),
   ('b02',(1,1),'f1-4','Captez <em>le flux.</em>',''),
-  ('b03',(0,0),'f1-13','Vous choisissez <em>le jeu.</em>',''),('b03',(1,1),'f1-6','Quiz, tombola, <em>roue de la fortune.</em>',''),
+  ('b03',(0,.6),'f1-13','Vous choisissez <em>le jeu.</em>',''),('b03',(.6,1),'f1-6','Quiz, tombola, <em>roue de la fortune.</em>',''),
   ('b04',(1,1),'f1-7','Animez-les. <em>Mieux les connaître.</em>',''),
-  ('b05',(1,1),'f1-14','Simple à installer. <em>Renforce votre marque.</em>',''),
+  ('b05',(1,1),'f1-14','Simple à installer. <em>Renforce votre image de marque.</em>',''),
   ('b06',(0,.5),'f1-8','Mettez des lots <em>en jeu.</em>',''),('b06',(.5,1),'retour',None,None),
   ('b07',(1,1),'f1-9','Ils parlent de vous. <em>Ils offrent leurs lots.</em>',''),
-  ('b08',(0,0),'flash','Visible sur la carte. <em>Offres flash.</em>',''),('b08',(1,1),'f1-4','Ils viennent <em>chez vous.</em>',''),
+  ('b08',('s',0),'f1-12','Sur la carte, <em>avec les autres commerces.</em>',''),('b08',('s',1),'flash','Offres flash : <em>les clients participent.</em>',''),('b08',('s',2),'f1-4','Ils viennent chez vous, <em>en parlent autour d\'eux.</em>',''),
   ('b09',(1,1),'f1-11','Automatisée. <em>Plus de visibilité.</em>',''),
   ('b10',(1,1),'f1-15','FIN:Flowin, l\'animation jeu plug and play.',None)]),
  'se-part':('v10separt',[
@@ -78,7 +87,7 @@ PLAN={
 # normalise les entrees a 5 elements
 def norm(e):
     e=list(e)+[None]*(5-len(e)); return e
-code=[];SE_NAMES=[];CIBS={'v10acom':'Pour les commerçants','v10separt':'Pour les participants','v10seorg':'Pour les organisateurs'}
+code=[];SE_NAMES=[];CIBS={'v10apart':'Pour les participants','v10acom':'Pour les commerçants','v10separt':'Pour les participants','v10seorg':'Pour les organisateurs'}
 for fid,(fname,entries) in PLAN.items():
     T=json.load(open(os.path.join(HERE,'timing10',fid+'.json')))
     B0={};acc=0.0
@@ -92,7 +101,11 @@ for fid,(fname,entries) in PLAN.items():
         b0=B0[k];D=T['d'][k];c=T['c'][k];nS=len(c)
         # une entree est une phrase (0 / 1 pour 2 phrases) ou une fraction
         multi=len([x for x in blocs[k]])>1
-        if rng in((0,0),(1,1)) and nS==1 and rng==(1,1) and not multi: a,b=b0,b0+D
+        if isinstance(rng[0],str):  # ('s', i) ou ('s', i, j) : phrases i a j du bloc
+            i=rng[1]; j=rng[-1]
+            a=b0 if i==0 else b0+LEAD+c[i]-0.15
+            b=(b0+D) if j==nS-1 else b0+LEAD+c[j+1]-0.15
+        elif rng in((0,0),(1,1)) and nS==1 and rng==(1,1) and not multi: a,b=b0,b0+D
         elif rng not in ((0,0),(1,1)): a,b=b0+rng[0]*D,b0+rng[1]*D
         else:
             i=0 if rng==(0,0) else 1

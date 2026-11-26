@@ -18,8 +18,7 @@
    [
     "b03",
     [
-     "Vos clients jouent, participent à un jeu que vous sélectionnez.",
-     "Quiz, tombola, roue de la fortune."
+     "Vos clients jouent, participent à un jeu que vous sélectionnez : quiz, tombola, roue de la fortune."
     ]
    ],
    [
@@ -32,7 +31,7 @@
    [
     "b05",
     [
-     "Une animation simple à installer, qui renforce votre marque."
+     "Une animation simple à installer, qui renforce votre image de marque."
     ]
    ],
    [
@@ -50,8 +49,9 @@
    [
     "b08",
     [
-     "Vous apparaissez sur la carte, diffusez des offres flash.",
-     "Les clients viennent chez vous et vous découvrent."
+     "Vous apparaissez sur la carte avec les autres commerces.",
+     "Une occasion de diffuser des offres flash auxquelles les clients peuvent participer.",
+     "Les clients viennent chez vous, saisissent les offres, en parlent autour d'eux."
     ]
    ],
    [
@@ -82,7 +82,7 @@
    [
     "b02",
     [
-     "Retrouve-le dans ton festival, avec des lots, des cadeaux à gagner liés au festival."
+     "Retrouve-le dans ton festival, avec des lots à gagner, des cadeaux liés au festival."
     ]
    ],
    [
@@ -108,7 +108,7 @@
    [
     "b06",
     [
-     "Remporte les lots.",
+     "Remporte les lots du festival.",
      "Gagne tes tickets, soit pour le grand tirage, soit des gains immédiats."
     ]
    ],
@@ -192,6 +192,60 @@
     [
      "Flow in Super Event.",
      "Flow in, l'animation jeu~~plug and play."
+    ]
+   ]
+  ]
+ },
+ "a-part": {
+  "titre": "Animation · participants (v10)",
+  "blocs": [
+   [
+    "b01",
+    [
+     "Retrouve chez tes commerçants des promotions, des jeux."
+    ]
+   ],
+   [
+    "b02",
+    [
+     "À chaque fois que tu vas quelque part, une occasion de jouer, une occasion de gagner,"
+    ]
+   ],
+   [
+    "b03",
+    [
+     "une occasion de mieux connaître ton commerce de proximité."
+    ]
+   ],
+   [
+    "b04",
+    [
+     "Scan, joue, entre amis ou en famille."
+    ]
+   ],
+   [
+    "b05",
+    [
+     "Teste tes connaissances sur le quiz.",
+     "Remporte les lots du commerce."
+    ]
+   ],
+   [
+    "b06",
+    [
+     "Gagne tes tickets, soit pour le tirage au sort, soit des gains immédiats."
+    ]
+   ],
+   [
+    "b07",
+    [
+     "Flow in, découvre la carte, rends-toi dans les commerces participants."
+    ]
+   ],
+   [
+    "b08",
+    [
+     "Flow in, suis le flow, découvre ce que tu gagnes."
     ]
    ]
   ]

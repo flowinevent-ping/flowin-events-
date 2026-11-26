@@ -33,6 +33,9 @@ Ajout : seulement une règle écrite ou confirmée par Romain. Modification : su
 - Voix off : « Flow in » (deux mots, prononciation anglaise) et « plug and play » validés ; gain cumulé dit « tickets » (pas « points ») | 26/11 | ARG | `admin/scripts/videos-v9/voix.py`
 - Signature participants des vidéos : « Flow in, suis le flow, découvre ce que tu gagnes. » | 26/11 | ARG | scénario `docs/SCENARIOS-videos-v10-2026-11-26.md` (à valider)
 
+- Vidéos : « Flow in » dit deux fois au plus par vidéo ; dans chaque vidéo participants « scanne le QR code et joue » et « gain immédiat, ou tirage au sort » ; « renforce votre image de marque » (pas « votre marque ») | 26/11 | ARG | `admin/scripts/videos-v9/scripts10.json`
+- Signature des vidéos pro : « Flow in, l'animation jeu plug and play » | 26/11 | ARG | `scripts10.json`
+
 ## Données et consentement
 - Jamais de donnée inventée (téléphone, e-mail, SIRET, TVA, coordonnées, handles) : placeholder `[… à compléter]` | 07/11 | CLA 5, DEC | tous supports
 - Genre : Homme / Femme / vide uniquement, jamais « Autre » | 07/11 | CLA 6 | `lib/masters/engine.ts`, `components/parcours/ParcoursChampsStandard.tsx`, RPC `joueur_inscrire` (Autre devient vide)
