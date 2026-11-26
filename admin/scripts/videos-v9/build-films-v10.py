@@ -42,7 +42,25 @@ SPECIAL['origine']=""" scene(3,function(){var s=['Affiche','Réseaux sociaux','C
    return cap('D\\'où viennent-ils ? <em>Comment vous ont-ils connu ?</em>')+h;},function(t,el){var w=[70,45,58,30];for(var i=0;i<4;i++)$(el,'#o'+i).style.width=(w[i]*eo(win(t,.6+i*.25,2.4)))+'%';});"""
 SPECIAL['parcours']=""" scene(3,function(){var st=['Un parcours','Des questions','Des stations jeux'],h='';for(var i=0;i<3;i++)h+=A(40,340+i*150,'<div class="card" style="width:460px;display:flex;align-items:center;gap:16px;padding:18px"><div style="width:48px;height:48px;border-radius:99px;background:#FF8A14;color:#0E1B30;font-weight:900;font-size:26px;display:grid;place-items:center">'+(i+1)+'</div><b style="font-size:26px">'+st[i]+'</b>'+(i===2?'<div style="margin-left:auto">'+qrMini(54)+'</div>':'')+'</div>','opacity:0" data-in="'+(1.0+i*.9));
    return cap('Comment ça marche ? <em>Un parcours, des stations jeux.</em>')+h;},function(t,el){});"""
+SPECIAL['k2']=""" scene(3,function(){return cap('Nous avons <em>la solution.</em>')+sol()+A(30,350,boutique(480),'filter:grayscale(1)" id="bq')+C('alex','alex','deuxbras','joie',170,190,610);},
+  function(t,el){var p=eo(win(t,.1,.7));$(el,'#bq').style.filter='grayscale('+(1-p)+')';bob($(el,'#alex'),t);});"""
+SPECIAL['k3']=""" scene(3,function(){return cap('Une animation <em>aux couleurs de votre commerce.</em>')+sol()+A(30,350,boutique(480),'" id="bq')+C('alex','alex','bras','joie',160,190,610);},
+  function(t,el){var h=[0,150,260,0],i=Math.min(3,Math.floor(t/.75)),b=$(el,'#bq');b.style.filter='hue-rotate('+h[i]+'deg)';bob($(el,'#alex'),t);});"""
+SPECIAL['k4']=""" scene(3,function(){var c=[['Quiz','personnalisé','#3B5CC4'],['Tombola','','#FF8A14'],['Roue','de la fortune','#0B7A4F']],h='';for(var i=0;i<3;i++)h+=A(40,330+i*165,'<div class="card" style="width:460px;padding:0;overflow:hidden;display:flex;align-items:center"><div style="background:'+c[i][2]+';color:#fff;font-weight:900;font-size:38px;padding:30px 24px;width:250px">'+c[i][0]+'</div><div style="padding:0 20px;font-weight:900;font-size:24px">'+c[i][1]+'</div></div>','opacity:0" data-in="'+(.2+i*.6));return cap('Quiz, tombola, <em>roue de la fortune.</em>')+h;},function(t,el){});"""
+SPECIAL['k8b']=""" scene(3,function(){return cap('Visibilité <em>sur le trafic.</em>')+A(40,330,'<div class="card" style="width:460px;padding:22px"><div style="display:flex;justify-content:space-between"><b style="font-size:22px">Passages</b><span class="ex">exemple</span></div><div class="bar" style="margin-top:16px"><i class="bb" id="t1" style="width:0"></i></div><div class="bar" style="margin-top:14px"><i class="bb" id="t2" style="width:0"></i></div><div class="bar" style="margin-top:14px"><i class="bb" id="t3" style="width:0"></i></div></div>')+C('alex','alex','telephone','sourire',170,30,620);},function(t,el){var w=[40,72,58];for(var i=0;i<3;i++)$(el,'#t'+(i+1)).style.width=(w[i]*eo(win(t,.2+i*.2,1.6)))+'%';bob($(el,'#alex'),t);});"""
+SPECIAL['k8c']=""" scene(3,function(){var s=['Vitrine','Ticket de caisse','Affiche'],h='';for(var i=0;i<3;i++)h+=A(40+i*158,360,'<div class="card" style="width:142px;text-align:center;padding:14px 6px"><div style="display:flex;justify-content:center">'+qrMini(70)+'</div><b style="font-size:17px;display:block;margin-top:8px">'+s[i]+'</b></div>','opacity:0" data-in="'+(.2+i*.4));return cap('Tracking link <em>pour vos campagnes.</em>')+h+A(40,590,'<div class="card" style="width:460px;padding:18px;font-weight:800;font-size:22px">Un QR par support. Chaque campagne mesurée.</div>','opacity:0" data-in="1.6');},function(t,el){});"""
 PLAN={
+ 'a-acc':('v10aacc',[
+  ('b01',(1,1),'f1-1','Valoriser votre commerce <em>par un concept innovant ?</em>',''),
+  ('b02',(1,1),'k2',None,None),
+  ('b03',(1,1),'k3',None,None),
+  ('b04',(1,1),'k4',None,None),
+  ('b05',('s',0),'f1-4','Vous captez <em>les passants.</em>',''),('b05',('s',1),'f1-7','Vous <em>sondez.</em>',''),
+  ('b06',(1,1),'f1-10','Animez. <em>Faites grandir votre fichier client.</em>',''),
+  ('b07',('s',0),'f1-12','Sur la carte. <em>Plus de visibilité.</em>',''),('b07',('s',1),'flash','Offres flash <em>en direct.</em>',''),
+  ('b08',('s',0),'f1-8','Gestion <em>automatique des lots.</em>',''),('b08',('s',1),'k8b',None,None),('b08',('s',2),'k8c',None,None),
+  ('b09',(1,1),'f1-14','Aussi simple que <em>coller une affiche.</em>',''),
+  ('b10',(1,1),'f1-15','FIN2:Flowin, <b>l\'animation jeux des commerces.</b>|Contactez-nous : 04 93 59 91 37',None)]),
  'a-part':('v10apart',[
   ('b01',(1,1),'f2-7','Chez tes commerçants : <em>promotions et jeux.</em>',''),
   ('b02',(0,.62),'f2-1','Une occasion <em>de jouer.</em>',''),('b02',(.62,1),'f2-4','Une occasion <em>de gagner.</em>',''),
@@ -87,7 +105,7 @@ PLAN={
 # normalise les entrees a 5 elements
 def norm(e):
     e=list(e)+[None]*(5-len(e)); return e
-code=[];SE_NAMES=[];CIBS={'v10apart':'Pour les participants','v10acom':'Pour les commerçants','v10separt':'Pour les participants','v10seorg':'Pour les organisateurs'}
+code=[];SE_NAMES=[];CIBS={'v10aacc':'Pour les commerçants','v10apart':'Pour les participants','v10acom':'Pour les commerçants','v10separt':'Pour les participants','v10seorg':'Pour les organisateurs'}
 for fid,(fname,entries) in PLAN.items():
     T=json.load(open(os.path.join(HERE,'timing10',fid+'.json')))
     B0={};acc=0.0
