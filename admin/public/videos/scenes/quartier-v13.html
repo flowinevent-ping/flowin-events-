@@ -45,7 +45,7 @@ function mapCard(t){var g='';for(var r=0;r<4;r++)for(var c=0;c<4;c++)g+='<div st
 var S=[
  // 1 Et si votre commerce devenait le jeu prefere du quartier ?
  function(t){var h=A(30,90,'<div class="k1">Et si votre commerce devenait…</div>','transform-origin:0 50%;'+slam(win(t,.15,.45),-4));
-  h+=A(214,340,shop('',RED,112),'transform:scale(1.4);transform-origin:50% 100%;'+'opacity:'+win(t,.3,.5));
+  SH.forEach(function(q,i){var p=win(t,.3+i*.12,.6+i*.12);h+=A([20,400,20,400][i],[300,300,800,800][i],'<div style="transform:scale(.8);transform-origin:0 0">'+shop('',q[1])+'</div>','opacity:'+cl(p*4)+';transform:translateY('+(-60*(1-eo(p)))+'px)');});
   var p=win(t,1.35,1.65);h+=burst(270,520,260,t,YEL,22)+big('Le jeu',t,1.35,560,120,RED,-8)+big('du quartier',t,1.55,680,96,BLUE,6);
   return h;},
  // 2 Nouveau : les commerces s'unissent
