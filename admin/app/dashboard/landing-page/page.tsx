@@ -194,7 +194,13 @@ export default function Page() {
     (filtre === 'tous' || filtre === 'gerees') ? list.filter(l => !t || (l.nom ?? l.id).toLowerCase().includes(t)) : []
   , [list, filtre, t])
   const outilsFiltres = useMemo(() =>
-    OUTILS.filter(o => filtre !== 'gerees' && (filtre === 'archives' ? !!o.archive : filtre === 'animations' ? o.type === 'animation' : !o.archive && (filtre === 'tous' || o.public.indexOf(filtre) >= 0))
+    /* Rangement : le plus récent d'abord (le fichier des outils s'écrit dans l'ordre de création),
+       les outils validés avant les brouillons et les vidéos à venir. */
+    OUTILS.map((o, i) => ({ o, i })).sort((a, b) => {
+      const ra = a.o.statut === 'validé' && !a.o.aVenir ? 0 : 1
+      const rb = b.o.statut === 'validé' && !b.o.aVenir ? 0 : 1
+      return ra !== rb ? ra - rb : b.i - a.i
+    }).map(x => x.o).filter(o => filtre !== 'gerees' && (filtre === 'archives' ? !!o.archive : filtre === 'animations' ? o.type === 'animation' : !o.archive && (filtre === 'tous' || o.public.indexOf(filtre) >= 0))
       && (!t || (o.titre + ' ' + o.description).toLowerCase().includes(t)))
   , [OUTILS, filtre, t])
 
