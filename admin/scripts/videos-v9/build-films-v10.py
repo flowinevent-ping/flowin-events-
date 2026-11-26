@@ -53,6 +53,15 @@ SPECIAL['k3b']=""" scene(3,function(){return cap('Flowin <em>Animation.</em>')+s
   function(t,el){var p=eo(win(t,.05,.6));$(el,'#bq').style.filter='grayscale('+(1-p)+')';bob($(el,'#alex'),t);});"""
 SPECIAL['k4b']=""" scene(3,function(){var c=[['Quiz','#3B5CC4'],['Tombola','#FF8A14'],['Roulette','#0B7A4F']],h='';for(var i=0;i<3;i++)h+=A(40,330+i*165,'<div class="card" style="width:460px;padding:0;overflow:hidden"><div style="background:'+c[i][1]+';color:#fff;font-weight:900;font-size:42px;padding:30px 24px">'+c[i][0]+'</div></div>','opacity:0" data-in="'+(.1+i*.4));return cap('Quiz, tombola, <em>roulette.</em>')+h;},function(t,el){});"""
 PLAN={
+ 'a-ben':('v10aben',[
+  ('b01',(1,1),'f1-1','Peu de passage <em>dans votre commerce ?</em>',''),
+  ('b02',(1,1),'f1-4','Les passants jouent, <em>et entrent chez vous.</em>',''),
+  ('b03',('s',0),'f1-8','Vos clients <em>ne reviennent pas ?</em>',''),('b03',('s',1),'f1-9','Les lots <em>les font revenir.</em>',''),
+  ('b04',('s',0),'f1-5','Pas de <em>fichier client ?</em>',''),('b04',('s',1),'f1-10','Votre fichier <em>grandit tout seul.</em>',''),
+  ('b05',('s',0),'f1-12','Pas assez <em>visible ?</em>',''),('b05',('s',1),'flash','Sur la carte. <em>Offres flash.</em>',''),
+  ('b06',('s',0),'f1-11','Pas <em>le temps ?</em>',''),('b06',('s',1),'k4b',None,None),
+  ('b07',(1,1),'f1-14','Aussi simple que <em>coller une affiche.</em>',''),
+  ('b08',(1,1),'f1-15','FIN2:Flowin, <b>l\'animation jeu plug and play.</b>|Contactez-nous : 04 93 59 91 37',None)]),
  'a-pb':('v10apb',[
   ('b01',(1,1),'f1-1','Augmenter <em>le trafic ?</em>',''),
   ('b02',(1,1),'f1-12','Plus de <em>visibilité ?</em>',''),
@@ -117,7 +126,7 @@ PLAN={
 # normalise les entrees a 5 elements
 def norm(e):
     e=list(e)+[None]*(5-len(e)); return e
-code=[];SE_NAMES=[];CIBS={'v10apb':'Pour les commerçants','v10aacc':'Pour les commerçants','v10apart':'Pour les participants','v10acom':'Pour les commerçants','v10separt':'Pour les participants','v10seorg':'Pour les organisateurs'}
+code=[];SE_NAMES=[];CIBS={'v10aben':'Pour les commerçants','v10apb':'Pour les commerçants','v10aacc':'Pour les commerçants','v10apart':'Pour les participants','v10acom':'Pour les commerçants','v10separt':'Pour les participants','v10seorg':'Pour les organisateurs'}
 for fid,(fname,entries) in PLAN.items():
     T=json.load(open(os.path.join(HERE,'timing10',fid+'.json')))
     B0={};acc=0.0
