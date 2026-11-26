@@ -57,10 +57,10 @@ PLAN={
   ('b02',(1,1),'f1-4','Captez <em>le flux.</em>',''),
   ('b03',(0,.6),'f1-13','Vous choisissez <em>le jeu.</em>',''),('b03',(.6,1),'f1-6','Quiz, tombola, <em>roue de la fortune.</em>',''),
   ('b04',(1,1),'f1-7','Animez-les. <em>Mieux les connaître.</em>',''),
-  ('b05',(1,1),'f1-14','Simple à installer. <em>Renforce votre marque.</em>',''),
+  ('b05',(1,1),'f1-14','Simple à installer. <em>Renforce votre image de marque.</em>',''),
   ('b06',(0,.5),'f1-8','Mettez des lots <em>en jeu.</em>',''),('b06',(.5,1),'retour',None,None),
   ('b07',(1,1),'f1-9','Ils parlent de vous. <em>Ils offrent leurs lots.</em>',''),
-  ('b08',(0,0),'flash','Visible sur la carte. <em>Offres flash.</em>',''),('b08',(1,1),'f1-4','Ils viennent <em>chez vous.</em>',''),
+  ('b08',('s',0),'f1-12','Sur la carte, <em>avec les autres commerces.</em>',''),('b08',('s',1),'flash','Offres flash : <em>les clients participent.</em>',''),('b08',('s',2),'f1-4','Ils viennent chez vous, <em>en parlent autour d\'eux.</em>',''),
   ('b09',(1,1),'f1-11','Automatisée. <em>Plus de visibilité.</em>',''),
   ('b10',(1,1),'f1-15','FIN:Flowin, l\'animation jeu plug and play.',None)]),
  'se-part':('v10separt',[
@@ -101,7 +101,11 @@ for fid,(fname,entries) in PLAN.items():
         b0=B0[k];D=T['d'][k];c=T['c'][k];nS=len(c)
         # une entree est une phrase (0 / 1 pour 2 phrases) ou une fraction
         multi=len([x for x in blocs[k]])>1
-        if rng in((0,0),(1,1)) and nS==1 and rng==(1,1) and not multi: a,b=b0,b0+D
+        if isinstance(rng[0],str):  # ('s', i) ou ('s', i, j) : phrases i a j du bloc
+            i=rng[1]; j=rng[-1]
+            a=b0 if i==0 else b0+LEAD+c[i]-0.15
+            b=(b0+D) if j==nS-1 else b0+LEAD+c[j+1]-0.15
+        elif rng in((0,0),(1,1)) and nS==1 and rng==(1,1) and not multi: a,b=b0,b0+D
         elif rng not in ((0,0),(1,1)): a,b=b0+rng[0]*D,b0+rng[1]*D
         else:
             i=0 if rng==(0,0) else 1
