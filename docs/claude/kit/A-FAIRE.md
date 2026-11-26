@@ -30,7 +30,7 @@ Lu au début de chaque session, filtré sur ton entrée. Une ligne par point. Pr
 | Design | Boutons violets des pages `admin-app`, `pro-app`, `joueur-app` | à décider |
 | Jeux et tirages | 16 banques communes à valider par Romain | en attente de Romain |
 | Jeux et tirages | Gains : 0 ligne en base ; chercher pourquoi | audit à faire |
-| Contenu | Écouter les 4 vidéos v10 et dire plan par plan ce qui ne va pas ; coupes 25 s ; 16:9 si voulu ; phrase « aimée » de la vidéo participants à redonner ; « 70 » peu lisible | `docs/EVALUATION-videos-v10-2026-11-26.md` |
+| Contenu | Bloc 2 vidéos : réponses de Romain (canal, se filmer, échantillon de voix), puis scénario à valider avant toute production | `univers/contenu.md` |
 | Paiement | SQL 08 (export CRM) non appliqué ; prix non modifiables | décisions de Romain |
 | Paiement | Facturation automatique et Jeffrey CRM | feu vert attendu |
 | Prospection | Page « Annonces des commerces » vide ; historique d'envois NDS 2026 | définir avec Romain |
