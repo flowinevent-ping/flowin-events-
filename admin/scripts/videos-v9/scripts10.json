@@ -1,0 +1,199 @@
+{
+ "a-com": {
+  "titre": "Animation · commerces (v10)",
+  "blocs": [
+   [
+    "b01",
+    [
+     "Vous avez un commerce, un fichier client ?",
+     "Faites-le grandir."
+    ]
+   ],
+   [
+    "b02",
+    [
+     "Flow in, l'animation qui vous permet de capter le flux et de faire grandir votre fichier client."
+    ]
+   ],
+   [
+    "b03",
+    [
+     "Vos clients jouent, participent à un jeu que vous sélectionnez.",
+     "Quiz, tombola, roue de la fortune."
+    ]
+   ],
+   [
+    "b04",
+    [
+     "Animez-les.",
+     "Une occasion de mieux les connaître."
+    ]
+   ],
+   [
+    "b05",
+    [
+     "Une animation simple à installer, qui renforce votre marque."
+    ]
+   ],
+   [
+    "b06",
+    [
+     "Gardez le contact, mettez des lots en jeu, faites-les revenir."
+    ]
+   ],
+   [
+    "b07",
+    [
+     "Ils parlent de vous, remportent des lots, peuvent les offrir à leurs amis."
+    ]
+   ],
+   [
+    "b08",
+    [
+     "Vous apparaissez sur la carte, diffusez des offres flash.",
+     "Les clients viennent chez vous et vous découvrent."
+    ]
+   ],
+   [
+    "b09",
+    [
+     "Une animation simple, automatisée, qui vous donne de la visibilité et augmente le trafic."
+    ]
+   ],
+   [
+    "b10",
+    [
+     "Flow in.",
+     "L'animation jeu~~plug and play."
+    ]
+   ]
+  ]
+ },
+ "se-part": {
+  "titre": "Super Event · participants (v10)",
+  "blocs": [
+   [
+    "b01",
+    [
+     "Tu connais Flow in ?",
+     "Tu l'as déjà chez ton commerçant."
+    ]
+   ],
+   [
+    "b02",
+    [
+     "Retrouve-le dans ton festival, avec des lots, des cadeaux à gagner liés au festival."
+    ]
+   ],
+   [
+    "b03",
+    [
+     "Retrouve les stations-jeux de la ville, dans les commerces et à l'intérieur du festival.",
+     "Des cadeaux à gagner, des places."
+    ]
+   ],
+   [
+    "b04",
+    [
+     "Scan, joue, entre amis ou en famille."
+    ]
+   ],
+   [
+    "b05",
+    [
+     "Teste tes connaissances sur le quiz.",
+     "Challenge tes potes."
+    ]
+   ],
+   [
+    "b06",
+    [
+     "Remporte les lots.",
+     "Gagne tes tickets, soit pour le grand tirage, soit des gains immédiats."
+    ]
+   ],
+   [
+    "b07",
+    [
+     "Flow in, découvre la carte, rends-toi dans les commerces participants."
+    ]
+   ],
+   [
+    "b08",
+    [
+     "Flow in, suis le flow, découvre ce que tu gagnes."
+    ]
+   ]
+  ]
+ },
+ "se-org": {
+  "titre": "Super Event · organisateurs (v10)",
+  "blocs": [
+   [
+    "b01",
+    [
+     "Vous organisez un événement ?",
+     "Rayonnez encore plus, au niveau local : avant, pendant, et après."
+    ]
+   ],
+   [
+    "b02",
+    [
+     "Avant : votre événement est diffusé.",
+     "Faites jouer vos participants, ou futurs participants, et faites-leur gagner des places, ou des goodies."
+    ]
+   ],
+   [
+    "b03",
+    [
+     "Pendant : faites-les jouer, et mesurez le trafic."
+    ]
+   ],
+   [
+    "b04",
+    [
+     "D'où viennent-ils ? Comment vous ont-ils connu ? Où ont-ils joué ?"
+    ]
+   ],
+   [
+    "b05",
+    [
+     "Connaissez mieux vos participants, et gardez le contact avec eux."
+    ]
+   ],
+   [
+    "b06",
+    [
+     "Les questions bonus sensibilisent, et vous rapportent des chiffres utiles : R.S.E., éthique, mobilité."
+    ]
+   ],
+   [
+    "b07",
+    [
+     "Comment ça marche ?",
+     "Un parcours, des questions, et des stations jeux, pendant votre événement."
+    ]
+   ],
+   [
+    "b08",
+    [
+     "Votre événement est diffusé avant, pendant et après, dans le réseau des commerces participants."
+    ]
+   ],
+   [
+    "b09",
+    [
+     "Ils vous mettent en avant.",
+     "Vous les mettez à l'honneur."
+    ]
+   ],
+   [
+    "b10",
+    [
+     "Flow in Super Event.",
+     "Flow in, l'animation jeu~~plug and play."
+    ]
+   ]
+  ]
+ }
+}

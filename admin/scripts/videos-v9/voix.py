@@ -8,7 +8,7 @@ from intonation import expanser
 RATE="-3%"; PITCH="+4Hz"; K_INTO=1.5; VOICE="fr-FR-VivienneMultilingualNeural"
 PAUSE_PHRASE=0.40; PAUSE_SIGN=0.42; GLUE=0.04; LEAD=0.20; TAIL=0.45; FIN=1.6
 film=sys.argv[1]; out=os.path.join(sys.argv[2],film); os.makedirs(out,exist_ok=True)
-S=json.load(open(os.path.join(os.path.dirname(__file__),'scripts.json')))[film]
+S=json.load(open(os.path.join(os.path.dirname(__file__),os.environ.get('SCRIPTS','scripts.json'))))[film]
 def sh(*a): subprocess.run(a,check=True,stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL)
 def dur(p):
     w=wave.open(p); d=w.getnframes()/w.getframerate(); w.close(); return d
