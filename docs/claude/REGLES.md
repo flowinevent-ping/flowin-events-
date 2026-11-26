@@ -34,7 +34,9 @@ Ajout : seulement une règle écrite ou confirmée par Romain. Modification : su
 - Signature participants des vidéos : « Flow in, suis le flow, découvre ce que tu gagnes. » | 26/11 | ARG | scénario `docs/SCENARIOS-videos-v10-2026-11-26.md` (à valider)
 
 - Vidéos : « Flow in » dit deux fois au plus par vidéo ; dans chaque vidéo participants « scanne le QR code et joue » et « gain immédiat, ou tirage au sort » ; « renforce votre image de marque » (pas « votre marque ») | 26/11 | ARG | `admin/scripts/videos-v9/scripts10.json`
-- Signature des vidéos pro : « Flow in, l'animation jeu plug and play » | 26/11 | ARG | `scripts10.json`
+- Signature des vidéos pro : « Flow in, l'animation jeu plug and play » | 26/11 | ARG | `scripts10.json` (remplacée le 26/11 soir, voir ligne suivante)
+- Signature pro : « Flowin, l'animation du commerce de proximité » ; dire « multicommerce » (jamais « intercommerce », jamais « la première ») ; l'argument premier n'est pas le gratuit | 26/11 | ARG | maquette https://claude.ai/artifact/9x8rbGhByDBAHqPdGXTpmZ
+- Vidéos : même charte que v4 à v10 (fond blanc vers bleu clair, Inter 900, mot clé en bleu, personnages) et même voix (Vivienne -3 %) ; « Flowin » dit une fois | 26/11 | ARG | idem
 
 ## Données et consentement
 - Jamais de donnée inventée (téléphone, e-mail, SIRET, TVA, coordonnées, handles) : placeholder `[… à compléter]` | 07/11 | CLA 5, DEC | tous supports

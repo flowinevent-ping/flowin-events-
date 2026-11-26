@@ -34,3 +34,11 @@ Lire aussi : `prospection.md` pour tout envoi.
 - **Bloc 2 commence par :** relire ce fichier et le document de correction (lecture `sinceRev` 30), obtenir les réponses aux questions ci-dessus, écrire un scénario à valider, ne produire qu'après validation. Outillage prêt : `admin/scripts/videos-v9/` (voix `voix.py` avec `SCRIPTS`, `RATE` ; scènes `build-films-v10.py` ; rendu `CHROMIUM=/opt/pw-browsers/chromium node rendu-v9.mjs` ; `montage-v9.sh`).
 - Règles vidéo (voir `REGLES.md`) : « Flow in » deux fois au plus ; scanne le QR code et joue ; gain immédiat ou tirage au sort ; « image de marque » ; tickets ; signature pro « l'animation jeu plug and play » ; signature participants « Flow in, suis le flow, découvre ce que tu gagnes ».
 - Autres : « 70 » peu lisible (vidéo organisateur) ; boutons violets des pages d'installation à passer en bleu. Détail : `kit/A-FAIRE.md`.
+
+**État au 26/11/2026, fin du bloc 2**
+- Branche `contenu/video-probleme-2026-11-26`, PR #114 en brouillon (non fusionnée, rien publié). tsc et build OK le 26/11 après-midi. Contient : `a-pb2.mp4` (test 20 s), `a-flash.mp4` (vidéo courte gros titres 13,6 s, hors charte, à ne pas publier), `flash-v11.html`, `scripts12.json`, dictées dans l'argumentaire.
+- Maquette à valider : https://claude.ai/artifact/9x8rbGhByDBAHqPdGXTpmZ (audit, charte unifiée, aperçu animé de la vidéo « multicommerce » en 8 plans, offres en 3 propositions). Page d'offre plus ancienne : https://claude.ai/artifact/DTabKZ9Qi9oA1BLvz4LW2S.
+- Décisions de Romain : signature « Flowin, l'animation du commerce de proximité » ; « multicommerce » ; pas « la première » ; preuve 56 % ; première animation offerte puis offre complète et options. Le gratuit n'est pas l'argument premier.
+- **Bloc 3 commence par :** relire la maquette (section 3) ; obtenir le go de Romain sur la vidéo multicommerce, la phrase « Votre première animation est offerte », le nom et le prix de l'offre complète ; puis produire la vidéo avec les scènes à personnages (`build-films-v10.py`, voix `voix.py` RATE -3 %), pas avec `flash-v11.html`.
+- Outillage : `voix.py` demande `pip install edge-tts praat-parselmouth numpy` ; `rendu-v9.mjs` accepte `SCENE=<fichier>` ; `build-films-v10.py` ignore les films sans voix.
+- Le parcours de souscription (offre gratuite) relève d'une autre entrée (produit), après validation de l'offre.

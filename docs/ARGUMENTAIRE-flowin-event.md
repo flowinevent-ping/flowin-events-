@@ -209,3 +209,9 @@ Avant toute livraison, chaque texte est relu contre ce fichier (et la liste « i
 - « L'argument premier, c'est pas que c'est gratuit. »
 - Premier jet : « Est-ce que vous connaissez Flowin, la première animation innovante, l'innovation de jeux intercommerce. Captez le flux passant, animez votre fichier client, participez à un jeu d'animation intercommerce. Carte digitale pour vos clients. Publiez votre animation en quelques clics. Quiz. Spin roulette. Tombola. Animez, boostez, fidélisez. Faites revenir vos clients. Rejoignez. L'animation Flowin intercommerce. »
 - Version « très simple, très claire, très évidente » : « Rejoignez la première animation intercommerce et réunis le commerce de proximité. Animation de votre fichier client en quelques clics, simple et automatique. Capter le flux passant, diffuser vos offres promotionnelles et flash. Flowin, l'animation du commerce de proximité. »
+
+## Décisions de Romain du 26/11/2026, fin du bloc 2
+- Signature pro retenue : « Flowin, l'animation du commerce de proximité. »
+- On dit « multicommerce », pas « intercommerce ». On retire « la première ».
+- Preuve à mettre en avant : « 56 % des participants souhaitent garder le contact. » (chiffre exact ; Romain a dit « 56 % de nos joueurs souhaitent rester en contact »).
+- Offre : « On peut leur offrir leur première animation. » Puis trois propositions : première animation offerte, offre complète, options.
