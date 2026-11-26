@@ -82,6 +82,11 @@ export const OUTILS: Outil[] = [
     animation: { format: 'vertical', mp4: '/videos/v4/f5-participant-super-event.mp4', courte: '/videos/v4/f5-15s.mp4', poster: '/videos/v4/f5-participant-super-event.jpg', pret: true },
     message: 'Bonjour, une courte vidéo pour jouer au Super Event :' },
   /* V10 (26/11/2026) : scenarios valides par Romain (docs/SCENARIOS-videos-v10-2026-11-26.md). Brouillon jusqu'a validation. Remplacent les v9 commerces, participants Super Event, organisateurs. */
+  { statut: 'brouillon', id: 'video-v10-accroche-commercants', titre: 'Vidéo v10 · Flowin Animation (commerçants, version accroche, essai)', public: ['commerce'], type: 'video', suivi: false, canalDefaut: 'video-commerce',
+    description: 'Version courte et rythmée pour créer l\'envie : concept innovant, jeux, passants, fichier client, carte, offres flash, suivi des campagnes ; se termine par « Contactez-nous » (env. 38 s). Voix off, 9:16.',
+    chemin: '/videos/v10/a-acc.mp4',
+    animation: { format: 'vertical', mp4: '/videos/v10/a-acc.mp4', poster: '/videos/v10/a-acc.jpg', pret: true },
+    message: 'Bonjour, découvrez Flowin Animation en vidéo :' },
   { statut: 'brouillon', id: 'video-v10-animation-commercants', titre: 'Vidéo v10 · Flowin Animation (commerçants)', public: ['commerce'], type: 'video', suivi: false, canalDefaut: 'video-commerce',
     description: 'Un fichier client à faire grandir : capter le flux, un jeu que vous sélectionnez, des lots qui font revenir, visible sur la carte (env. 46 s). Voix off, 9:16.',
     chemin: '/videos/v10/a-com.mp4',
