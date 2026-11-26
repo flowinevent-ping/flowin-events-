@@ -30,6 +30,9 @@ Ajout : seulement une règle écrite ou confirmée par Romain. Modification : su
 - Ne jamais faire jouer ni « tester le jeu » aux commerçants dans les plaquettes ou la démo | 08/11, 09/11 | DEC
 - Pas de logo à l'inscription ni au bon de commande (il se met dans « Mon profil ») | 10/11 | DEC | `components/pro/PremiereFois.tsx`
 
+- Voix off : « Flow in » (deux mots, prononciation anglaise) et « plug and play » validés ; gain cumulé dit « tickets » (pas « points ») | 26/11 | ARG | `admin/scripts/videos-v9/voix.py`
+- Signature participants des vidéos : « Flow in, suis le flow, découvre ce que tu gagnes. » | 26/11 | ARG | scénario `docs/SCENARIOS-videos-v10-2026-11-26.md` (à valider)
+
 ## Données et consentement
 - Jamais de donnée inventée (téléphone, e-mail, SIRET, TVA, coordonnées, handles) : placeholder `[… à compléter]` | 07/11 | CLA 5, DEC | tous supports
 - Genre : Homme / Femme / vide uniquement, jamais « Autre » | 07/11 | CLA 6 | `lib/masters/engine.ts`, `components/parcours/ParcoursChampsStandard.tsx`, RPC `joueur_inscrire` (Autre devient vide)

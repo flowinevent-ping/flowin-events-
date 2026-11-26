@@ -180,3 +180,14 @@ Avant toute livraison, chaque texte est relu contre ce fichier (et la liste « i
 ### Flowin Super Event : organisateur
 - « Vous organisez un événement : rayonnez encore plus d'un point de vue local, avant, pendant et après votre événement. » Avant : votre événement est diffusé ; faites jouer vos participants ou futurs participants, faites-leur gagner des places, des goodies. Pendant : faites-les jouer, mesurez le trafic (d'où ils viennent, comment ils vous ont connu). Connaissez mieux vos participants, gardez le contact. Sensibilisez, relevez des chiffres utiles : RSE, éthique, mobilité.
 - Comment ça marche : un parcours pendant votre événement, des questions, des stations, une diffusion de votre événement avant, pendant et après dans le réseau des commerces participants. « Ils vous mettent en avant, vous les mettez à l'honneur. » Logos et tampons dans l'animation.
+
+## Dictée de Romain du 26/11/2026 (textes des prochaines vidéos ; scénarios à valider avant production)
+
+### Flowin Animation : commerces
+- « Vous avez un commerce, un fichier client, faites-le grandir. Flowin, l'animation qui vous permet de capter le flux et de faire grandir votre fichier client. Vos clients jouent, participent à un jeu que vous sélectionnez : quiz, tombola, roue de la fortune. Animez-les. Une occasion de mieux les connaître. Une animation simple à installer qui renforce votre marque, fait grandir votre fichier client. Gardez le contact, mettez des lots en jeu, faites-les revenir. Ils parlent de vous, remportent des lots, peuvent les offrir à leurs amis. Boostez votre popularité locale avec un jeu d'animation commerce. Vous apparaissez sur la carte, diffusez des offres flash. Les clients viennent chez vous et vous découvrent. Une animation simple, automatisée, qui vous donne de la visibilité, augmente le trafic, renforce votre marque. »
+- Signature pro : « Flowin, l'animation digitale plug and play » ou « animation jeu plug and play » (à trancher).
+
+### Flowin Super Event : participants
+- « Tu connais Flowin, tu l'as déjà chez ton commerçant. Retrouve-le dans ton festival avec des lots, des cadeaux à gagner liés au festival. Retrouve les stations-jeux de la ville, dans les commerces et à l'intérieur du festival. Des cadeaux à gagner, des places. Teste tes connaissances sur le quiz. Challenge tes potes. Remporte les lots. Gagne tes tickets, soit pour le grand tirage, soit des gains immédiats. Flow in, découvre la carte, rends-toi dans les commerces participants. Scan, joue, entre amis ou en famille. »
+- Signature participants : « Flow in, suis le flow, découvre ce que tu gagnes. »
+- Prononciation « Flow in » et « plug and play » dans les voix : validée par Romain le 26/11.

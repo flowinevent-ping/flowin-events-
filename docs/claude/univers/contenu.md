@@ -26,3 +26,4 @@ Lire aussi : `prospection.md` pour tout envoi.
 Le « 70 » de la vidéo organisateur est peu lisible. Animation tirée du contenu de la plaquette : à décider. Boutons violets des pages d'installation admin, pro, joueur : à passer en bleu. Détail : `kit/A-FAIRE.md`.
 Vidéos v9 (25/11) : films à personnages + voix, `docs/SCRIPT-v9-2026-11-25.md`. Romain a précisé : la bonne direction est la mise en scène avec les bonhommes (v4), pas le tutoriel d'écrans (v8).
 Vidéos v10 (26/11) : produites d'après les scénarios validés, `docs/SCRIPT-v10-2026-11-26.md`.
+Le 26/11 : critique v9 et scénarios v10 dans `docs/SCENARIOS-videos-v10-2026-11-26.md`, en attente de validation de Romain (rien produit).
