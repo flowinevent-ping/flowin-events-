@@ -4,7 +4,7 @@ const { chromium } = require('playwright')
 import path from 'path'; import fs from 'fs'; import { fileURLToPath } from 'url'
 const here = path.dirname(fileURLToPath(import.meta.url))
 const [film, out, a, b, pas] = process.argv.slice(2)
-const url = 'file://' + path.join(here, '..', '..', 'public', 'videos', 'scenes', 'films-v10.html') + '#' + film
+const url = 'file://' + path.join(here, '..', '..', 'public', 'videos', 'scenes', (process.env.SCENE || 'films-v10.html')) + '#' + film
 fs.mkdirSync(out, { recursive: true })
 const br = await chromium.launch(process.env.CHROMIUM ? { executablePath: process.env.CHROMIUM, args: ['--no-sandbox'] } : {}); const pg = await br.newPage({ viewport: { width: 540, height: 960 }, deviceScaleFactor: 2 })
 const errs = []; pg.on('pageerror', e => errs.push(String(e))); pg.on('console', m => { if (m.type() === 'error') errs.push(m.text()) })

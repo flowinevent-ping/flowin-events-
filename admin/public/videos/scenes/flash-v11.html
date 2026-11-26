@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="fr"><head><meta charset="utf-8">
+<title>Flowin, gros titres flash (v11)</title>
+<!-- Video A courte (26/11/2026, dictee de Romain) : gros titres en majuscules qui arrivent en flash.
+     Rendu image par image : window.render(t), window.DUREE. Durees = timing10/a-flash.json -->
+<style>
+html,body{margin:0;width:540px;height:960px;overflow:hidden;background:#1B3A5C;font-family:"Arial Black","Archivo Black",Arial,sans-serif}
+#st{position:absolute;inset:0;overflow:hidden}
+.bg{position:absolute;inset:0}
+.t{position:absolute;left:36px;right:36px;top:50%;transform-origin:50% 50%;text-transform:uppercase;font-weight:900;line-height:.95;letter-spacing:-.01em}
+.t .l{display:block;white-space:nowrap;width:max-content}
+.fl{position:absolute;inset:0;background:#fff;pointer-events:none}
+.top{position:absolute;left:36px;top:44px;font:900 22px Arial,sans-serif;letter-spacing:.02em}
+
+.sub{position:absolute;left:36px;right:36px;bottom:110px;font:700 26px Arial,sans-serif;text-transform:none}
+.shape{position:absolute;border-radius:50%}
+</style></head><body><div id="st"></div>
+<script>
+var D={b01:2.11,b02:3.542,b03:1.655,b04:1.607,b05:1.531,b06:3.181};
+var K=['b01','b02','b03','b04','b05','b06'];
+var NAVY='#1B3A5C',BLUE='#3B5CC4',OR='#FF8A14',W='#FFFFFF';
+var P={
+ b01:{bg:NAVY,fg:W,acc:OR,l:['Flowin','une animation'],size:[118,58]},
+ b02:{bg:BLUE,fg:W,acc:'#FFC21A',l:["L'animation digitale",'des commerces','de proximité'],size:[56,56,56]},
+ b03:{bg:OR,fg:NAVY,acc:W,l:['Captez','plus de','clients'],size:[104,104,104]},
+ b04:{bg:NAVY,fg:W,acc:OR,l:['Rendez-vous','visible'],size:[84,110]},
+ b05:{bg:BLUE,fg:W,acc:'#FFC21A',l:['Faites','partie','du jeu'],size:[108,108,108]},
+ b06:{bg:NAVY,fg:W,acc:OR,l:['Flowin','Animation'],size:[120,84],fin:true}
+};
+var T0={},acc=0;for(var i=0;i<K.length;i++){T0[K[i]]=acc;acc+=D[K[i]];}
+window.DUREE=acc;
+function eo(x){x=Math.max(0,Math.min(1,x));return 1-Math.pow(1-x,3)}
+function back(x){x=Math.max(0,Math.min(1,x));var c=1.7;return 1+(c+1)*Math.pow(x-1,3)+c*Math.pow(x-1,2)}
+var st=document.getElementById('st');
+window.render=function(t){
+  var k=K[K.length-1];for(var i=0;i<K.length;i++){if(t<T0[K[i]]+D[K[i]]){k=K[i];break;}}
+  var p=P[k],lt=t-T0[k],h='';
+  h+='<div class="bg" style="background:'+p.bg+'"></div>';
+  // formes de fond : cercles qui derivent
+  for(var j=0;j<3;j++){var r=[260,180,120][j],x=[380,-60,300][j]+Math.sin(lt*1.3+j)*18,y=[80,620,760][j]+Math.cos(lt*1.1+j)*14;
+    h+='<div class="shape" style="width:'+r+'px;height:'+r+'px;left:'+x+'px;top:'+y+'px;background:'+p.acc+';opacity:.12"></div>';}
+  h+='<div class="top" style="color:'+p.fg+'">Flow<b style="color:'+p.acc+'">in</b></div>';
+  // titre : chaque ligne arrive en flash, decalee de 0,12 s
+  var lines='',tot=0;for(var j=0;j<p.l.length;j++)tot+=p.size[j];
+  var sc=1+0.04*eo(lt/D[k]); // lente poussee
+  for(var j=0;j<p.l.length;j++){
+    var a=lt-0.05-j*0.12, s=a<0?2.2:(2.2-1.2*back(a/0.22)), o=a<0?0:Math.min(1,a/0.08);
+    var col=(j===p.l.length-1&&!p.fin)?p.acc:p.fg; if(p.fin&&j===0)col=p.fg; if(p.fin&&j===1)col=p.acc;
+    lines+='<span class="l" style="font-size:'+p.size[j]+'px;color:'+col+';opacity:'+o+';transform:scale('+s+');transform-origin:0 50%">'+p.l[j]+'</span>';
+  }
+  h+='<div class="t" style="transform:translateY(-50%) scale('+sc+')">'+lines+'</div>';
+  if(p.fin){var o2=eo((lt-0.6)/0.4);
+    h+='<div class="sub" style="color:'+W+';opacity:'+o2+'">Flowin, l\'animation jeu plug and play.<br><span style="color:'+OR+'">04 93 59 91 37</span></div>';}
+  // eclair blanc a l'entree du plan
+  var f=Math.max(0,1-lt/0.16); if(f>0)h+='<div class="fl" style="opacity:'+(0.85*f)+'"></div>';
+  st.innerHTML=h;
+  var ls=st.querySelectorAll('.l');for(var q=0;q<ls.length;q++){var w=ls[q].offsetWidth;if(w>468){ls[q].style.fontSize=(parseFloat(ls[q].style.fontSize)*468/w)+'px';}}
+};
+window.render(0);
+</script></body></html>

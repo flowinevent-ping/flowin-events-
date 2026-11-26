@@ -52,5 +52,46 @@
     ]
    ]
   ]
+ },
+ "a-flash": {
+  "titre": "Animation · commerces, vidéo A courte gros titres (dictée Romain 26/11)",
+  "blocs": [
+   [
+    "b01",
+    [
+     "Flow in, une animation."
+    ]
+   ],
+   [
+    "b02",
+    [
+     "Flow in, l'animation digitale des commerces de proximité."
+    ]
+   ],
+   [
+    "b03",
+    [
+     "Captez plus de clients."
+    ]
+   ],
+   [
+    "b04",
+    [
+     "Rendez-vous visible."
+    ]
+   ],
+   [
+    "b05",
+    [
+     "Faites partie du jeu."
+    ]
+   ],
+   [
+    "b06",
+    [
+     "Flow in, animation."
+    ]
+   ]
+  ]
  }
 }
