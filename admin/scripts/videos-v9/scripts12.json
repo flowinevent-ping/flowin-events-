@@ -205,5 +205,71 @@
     ]
    ]
   ]
+ },
+ "a-quartier": {
+  "titre": "Animation · commerces, « Le jeu du quartier » (26/11 soir)",
+  "blocs": [
+   [
+    "b01",
+    [
+     "Et si votre commerce devenait le jeu préféré du quartier ?"
+    ]
+   ],
+   [
+    "b02",
+    [
+     "Nouveau : les commerces du quartier s'unissent dans un seul jeu."
+    ]
+   ],
+   [
+    "b03",
+    [
+     "Vos clients scannent,",
+     "jouent,",
+     "gagnent,"
+    ]
+   ],
+   [
+    "b04",
+    [
+     "et passent d'une boutique à l'autre."
+    ]
+   ],
+   [
+    "b05",
+    [
+     "Quiz,",
+     "tombola,",
+     "spin roulette :",
+     "vous choisissez, tout tourne tout seul."
+    ]
+   ],
+   [
+    "b06",
+    [
+     "Chaque joueur, un contact de plus.",
+     "56 % des participants souhaitent garder le contact."
+    ]
+   ],
+   [
+    "b07",
+    [
+     "Vos offres flash, en direct sur la carte."
+    ]
+   ],
+   [
+    "b08",
+    [
+     "Votre première animation est offerte.",
+     "Rejoignez le jeu."
+    ]
+   ],
+   [
+    "b09",
+    [
+     "Flow in, l'animation du commerce de proximité."
+    ]
+   ]
+  ]
  }
 }

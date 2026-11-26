@@ -215,3 +215,8 @@ Avant toute livraison, chaque texte est relu contre ce fichier (et la liste « i
 - On dit « multicommerce », pas « intercommerce ». On retire « la première ».
 - Preuve à mettre en avant : « 56 % des participants souhaitent garder le contact. » (chiffre exact ; Romain a dit « 56 % de nos joueurs souhaitent rester en contact »).
 - Offre : « On peut leur offrir leur première animation. » Puis trois propositions : première animation offerte, offre complète, options.
+
+## Script marketing « Le jeu du quartier » (proposé par Claude, validé par Romain le 26/11/2026 soir)
+« Et si votre commerce devenait le jeu préféré du quartier ? Nouveau : les commerces du quartier s'unissent dans un seul jeu. Vos clients scannent, jouent, gagnent… et passent d'une boutique à l'autre. Quiz, tombola, spin roulette : vous choisissez, tout tourne tout seul. Chaque joueur, un contact de plus. 56 % des participants souhaitent garder le contact. Vos offres flash, en direct sur la carte. Votre première animation est offerte. Rejoignez le jeu. Flow in, l'animation du commerce de proximité. »
+- Gros titres : LE JEU DU QUARTIER · NOUVEAU · SCANNEZ. JOUEZ. GAGNEZ. · DE BOUTIQUE EN BOUTIQUE · 100 % AUTOMATIQUE · 56 % · OFFRES FLASH · REJOIGNEZ LE JEU. Voix +4 %.
+- Non retenu faute de règle confirmée : « Une seule place par métier et par quartier ».

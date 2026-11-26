@@ -1,0 +1,104 @@
+<!doctype html><html lang="fr"><head><meta charset="utf-8"><meta name="robots" content="noindex">
+<title>Le jeu du quartier (v13)</title>
+<!-- Video commerces « Le jeu du quartier » (26/11/2026 soir, script valide par Romain). Style Super Event.
+     Rendu : window.render(t), window.DUREE. Durees et reperes de voix : timing10/a-quartier.json (plans cales sur un battement de 0,5 s). -->
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bangers&family=Inter:wght@600;800;900&display=swap">
+<style>
+html,body{margin:0;width:540px;height:960px;overflow:hidden;background:#F6F8FD}
+#stage{position:fixed;left:0;top:0;width:540px;height:960px;overflow:hidden;font-family:"Inter",system-ui,sans-serif;color:#1B2F5C}
+.a{position:absolute}
+.bgd{left:0;top:0;width:540px;height:960px;background-color:#F6F8FD;background-image:radial-gradient(#C9D3E6 2px,transparent 2px);background-size:22px 22px}
+.k1{font-family:"Bangers",Impact,sans-serif;font-size:40px;letter-spacing:.02em;line-height:1;white-space:nowrap}
+.k2{font-family:"Bangers",Impact,sans-serif;font-size:96px;letter-spacing:.02em;line-height:.9;color:#E2231A;-webkit-text-stroke:3px #1B2F5C;text-shadow:6px 6px 0 #FFD23F;white-space:nowrap}
+.stk{background:#fff;border:4px solid #1B2F5C;border-radius:20px;box-shadow:7px 7px 0 #1B2F5C}
+.tag{font-family:"Bangers",Impact,sans-serif;font-size:34px;letter-spacing:.03em;padding:6px 20px;border:4px solid #1B2F5C;border-radius:14px;box-shadow:5px 5px 0 #1B2F5C;white-space:nowrap}
+.ex{font-size:12px;font-weight:900;letter-spacing:.1em;text-transform:uppercase;color:#8A96AB}
+</style></head><body><div id="stage"></div>
+<script>
+(function(){
+var D=[3.0,3.5,3.5,2.5,5.5,6.0,3.0,3.5,4.0];
+var C=[[0.15],[0.15],[0.15,1.428,2.411],[0.15],[0.15,1.042,2.033,3.253],[0.15,2.556],[0.15],[0.15,2.338],[0.15]];
+var T0=[],acc=0;for(var i=0;i<D.length;i++){T0.push(acc);acc+=D[i];}window.DUREE=acc;
+var NAVY='#1B2F5C',RED='#E2231A',YEL='#FFD23F',BLUE='#3B5CC4',OR='#FF8A14',GRN='#0B7A4F',MINT='#3FD48A';
+function cl(x){return x<0?0:x>1?1:x}function eo(x){x=cl(x);return 1-Math.pow(1-x,3)}
+function bk(x){x=cl(x);var c=2.2;return 1+(c+1)*Math.pow(x-1,3)+c*Math.pow(x-1,2)}function win(t,a,b){return cl((t-a)/(b-a))}
+function A(x,y,h,st){return '<div class="a" style="left:'+x+'px;top:'+y+'px;'+(st||'')+'">'+h+'</div>'}
+function slam(p,rot){return 'opacity:'+cl(p*5)+';transform:scale('+(2.4-1.4*bk(p))+') rotate('+((rot||0)*(1-eo(p)))+'deg);'}
+function shake(t,t0){var p=1-win(t,t0,t0+.25);return p>0?'translate('+(Math.sin(t*90)*8*p)+'px,'+(Math.cos(t*70)*6*p)+'px)':'none'}
+function burst(cx,cy,r,t,col,n){n=n||16;var s='<svg class="a" style="left:'+(cx-r)+'px;top:'+(cy-r)+'px;transform:rotate('+(t*25)+'deg)" width="'+(2*r)+'" height="'+(2*r)+'" viewBox="'+(-r)+' '+(-r)+' '+(2*r)+' '+(2*r)+'">';for(var i=0;i<n;i+=2){var a=i*2*Math.PI/n,b=(i+1)*2*Math.PI/n;s+='<path d="M0 0L'+(r*Math.cos(a))+' '+(r*Math.sin(a))+'L'+(r*Math.cos(b))+' '+(r*Math.sin(b))+'Z" fill="'+col+'"/>';}return s+'</svg>';}
+function star(sz,rot){return '<svg width="'+sz+'" height="'+sz+'" viewBox="-12 -12 24 24" style="transform:rotate('+rot+'deg)"><circle r="11" fill="'+YEL+'" stroke="'+NAVY+'" stroke-width="2"/><path d="M0-7 2-2 7-2 3 1 4.5 6.5 0 3.3-4.5 6.5-3 1-7-2-2-2Z" fill="'+RED+'"/></svg>';}
+function shop(lbl,col,w){w=w||112;var st='';for(var i=0;i<5;i++)st+='<div style="flex:1;background:'+(i%2?'#fff':col)+';border-right:'+(i<4?'3px solid '+NAVY:'0')+'"></div>';
+ return '<div style="width:'+w+'px"><div style="height:30px;display:flex;border:4px solid '+NAVY+';border-radius:10px 10px 0 0;overflow:hidden">'+st+'</div><div style="height:78px;background:#fff;border:4px solid '+NAVY+';border-top:0;display:flex;gap:8px;padding:10px 8px;box-shadow:5px 5px 0 '+NAVY+'"><div style="flex:1.3;border:3px solid '+NAVY+';border-radius:6px;background:#E3E9F8"></div><div style="flex:1;border:3px solid '+NAVY+';border-radius:6px 6px 0 0;background:'+YEL+'"></div></div>'+(lbl?'<div style="font-weight:900;font-size:19px;text-align:center;margin-top:10px">'+lbl+'</div>':'')+'</div>';}
+function big(txt,t,t0,y,size,col,rot){return A(0,y,'<div class="k2" style="width:540px;text-align:center;font-size:'+size+'px;color:'+(col||RED)+'">'+txt+'</div>','transform-origin:50% 50%;'+slam(win(t,t0,t0+.3),rot||-6));}
+function fit(){var ks=document.querySelectorAll('.k2,.k1');for(var q=0;q<ks.length;q++){var w=ks[q].scrollWidth,lim=ks[q].style.width?520:480;if(w>lim)ks[q].style.fontSize=(parseFloat(getComputedStyle(ks[q]).fontSize)*(lim-10)/w)+'px';}}
+var SH=[['Café',RED,40,430],['Boutique',BLUE,388,430],['Fleuriste',GRN,40,710],['Boulangerie',OR,388,710]],HUB=[270,610];
+function network(t,b){var h='<svg class="a" style="left:0;top:0" width="540" height="960">';
+ SH.forEach(function(s,i){var x=s[2]+56,y=s[3]+60,p=eo(win(t,b+.6+i*.1,b+1.1+i*.1));h+='<line x1="'+HUB[0]+'" y1="'+HUB[1]+'" x2="'+x+'" y2="'+y+'" stroke="'+NAVY+'" stroke-width="5" stroke-linecap="round" stroke-dasharray="2 14" stroke-dashoffset="'+(-t*40)+'" opacity="'+p+'"/>';});h+='</svg>';
+ SH.forEach(function(s,i){var p=win(t,b+i*.12,b+.45+i*.12);h+=A(s[2],s[3],shop(s[0],s[1]),'transform-origin:50% 100%;opacity:'+cl(p*4)+';transform:translateY('+(-90*(1-eo(p)))+'px) scale('+(.6+.4*bk(p))+')');var q=win(t,b+.8+i*.1,b+1.1+i*.1);h+=A(s[2]+84,s[3]-18,star(46,t*90),'transform:scale('+bk(q)+')');});
+ var hp=win(t,b+.5,b+.9);return h+burst(HUB[0],HUB[1],120,t,YEL,18)+A(HUB[0]-80,HUB[1]-48,'<div class="stk" style="width:160px;height:96px;display:grid;place-items:center;background:'+NAVY+'"><div style="font-weight:900;font-size:34px;color:#fff">Flow<span style="color:#8FA6F0">in</span></div></div>','transform:scale('+bk(hp)+')');}
+function phone(inner){return '<div class="stk" style="width:300px;height:430px;padding:22px 20px;border-radius:30px">'+inner+'</div>';}
+var G=[function(t){var ok=t>.5;return '<div style="font-weight:900;font-size:22px;line-height:1.15;margin-bottom:14px">Depuis quand le commerce est-il ouvert ?</div>'+['Moins de 5 ans','5 à 10 ans','Plus de 10 ans'].map(function(o,i){var g=ok&&i===2;return '<div style="border:4px solid '+NAVY+';background:'+(g?MINT:'#fff')+';border-radius:14px;padding:11px;font-weight:900;font-size:18px;margin-bottom:10px">'+o+'</div>';}).join('')+'<div class="ex">exemple</div>';},
+ function(t){var n=Math.floor(t*45)%90+10;return '<div style="font-weight:900;font-size:22px;margin-bottom:16px">Votre ticket</div><div style="border:5px dashed '+RED+';border-radius:18px;padding:30px 0;text-align:center;font-family:Bangers,Impact;font-size:90px;color:'+RED+';line-height:1">N° '+(t>.6?42:n)+'</div><div style="text-align:center;font-weight:900;font-size:19px;margin-top:14px">Tirage au sort</div><div class="ex" style="text-align:center;margin-top:6px">exemple</div>';},
+ function(t){var a=1080*eo(t/1.2),seg='',c=[BLUE,OR,YEL,GRN,BLUE,OR,YEL,GRN];for(var i=0;i<8;i++){var a0=i*Math.PI/4,a1=(i+1)*Math.PI/4;seg+='<path d="M120 120L'+(120+116*Math.cos(a0))+' '+(120+116*Math.sin(a0))+'A116 116 0 0 1 '+(120+116*Math.cos(a1))+' '+(120+116*Math.sin(a1))+'Z" fill="'+c[i]+'" stroke="'+NAVY+'" stroke-width="3"/>';}
+  return '<div style="font-weight:900;font-size:22px;margin-bottom:14px">Tournez la roue</div><div style="position:relative;width:240px;margin:0 auto"><svg width="240" height="240" viewBox="0 0 240 240" style="transform:rotate('+a+'deg)"><circle cx="120" cy="120" r="118" fill="'+NAVY+'"/>'+seg+'<circle cx="120" cy="120" r="22" fill="#fff" stroke="'+NAVY+'" stroke-width="4"/></svg><div style="position:absolute;left:106px;top:-14px;border-left:14px solid transparent;border-right:14px solid transparent;border-top:30px solid '+RED+'"></div></div>';}];
+function mapCard(t){var g='';for(var r=0;r<4;r++)for(var c=0;c<4;c++)g+='<div style="position:absolute;left:'+(16+c*116)+'px;top:'+(16+r*134)+'px;width:96px;height:110px;border-radius:12px;background:#fff;border:3px solid #C9D3E6"></div>';return A(30,330,'<div class="stk" style="width:480px;height:560px;background:#EAF0FA;overflow:hidden;position:relative">'+g+'</div>');}
+var S=[
+ // 1 Et si votre commerce devenait le jeu prefere du quartier ?
+ function(t){var h=A(30,90,'<div class="k1">Et si votre commerce devenait…</div>','transform-origin:0 50%;'+slam(win(t,.15,.45),-4));
+  h+=A(214,340,shop('',RED,112),'transform:scale(1.4);transform-origin:50% 100%;'+'opacity:'+win(t,.3,.5));
+  var p=win(t,1.35,1.65);h+=burst(270,520,260,t,YEL,22)+big('Le jeu',t,1.35,560,120,RED,-8)+big('du quartier',t,1.55,680,96,BLUE,6);
+  return h;},
+ // 2 Nouveau : les commerces s'unissent
+ function(t){return A(30,70,'<div class="tag" style="background:'+YEL+';font-size:64px;padding:4px 26px">Nouveau !</div>','transform-origin:0 50%;'+slam(win(t,.15,.4),-10))+A(30,190,'<div class="k1" style="font-size:44px">Les commerces s\'unissent</div>','transform-origin:0 50%;'+slam(win(t,1.1,1.4),-4))+A(30,240,'<div class="k2" style="font-size:72px">Un seul jeu</div>','transform-origin:0 50%;'+slam(win(t,2.2,2.5),-6))+network(t,.8);},
+ // 3 Scannez, jouez, gagnez
+ function(t){var W=['Scannez','Jouez','Gagnez'],COL=[BLUE,OR,RED],h='',i=0;for(var j=0;j<3;j++)if(t>=C[2][j])i=j;var lt=t-C[2][i];
+  h+=burst(270,480,340,t,[YEL,'#BFD0F5',YEL][i],20);
+  for(var j=0;j<=i;j++){var y=230+j*190;h+=A(0,y,'<div class="k2" style="width:540px;text-align:center;font-size:128px;color:'+COL[j]+'">'+W[j]+(j<2?',':' !')+'</div>','transform-origin:50% 50%;'+slam(win(t,C[2][j],C[2][j]+.28),j%2?6:-6));}
+  return '<div class="a" style="left:0;top:0;width:540px;height:960px;transform:'+shake(t,C[2][i]+.1)+'">'+h+'</div>';},
+ // 4 et passent d'une boutique a l'autre
+ function(t){var h=mapCard(t),P=[[100,440],[400,470],[130,770],[410,800]];
+  var svg='<svg class="a" style="left:0;top:0" width="540" height="960"><path d="M100 440 L400 470 L130 770 L410 800" fill="none" stroke="'+RED+'" stroke-width="7" stroke-linecap="round" stroke-dasharray="4 16" stroke-dashoffset="'+(-t*60)+'"/></svg>';h+=svg;
+  P.forEach(function(p,i){h+=A(p[0]-34,p[1]-40,'<div style="transform:scale(.6);transform-origin:0 0">'+shop('',[RED,BLUE,GRN,OR][i],112)+'</div>','opacity:'+win(t,i*.15,.3+i*.15));});
+  var k=cl((t-.3)/1.9)*3,s=Math.min(2,Math.floor(k)),f=eo(k-s),x=P[s][0]+(P[s+1][0]-P[s][0])*f,y=P[s][1]+(P[s+1][1]-P[s][1])*f;
+  h+=A(x-22,y-40-Math.abs(Math.sin(t*12))*12,'<div style="display:flex;flex-direction:column;align-items:center;gap:2px"><div style="width:26px;height:26px;border-radius:50%;background:#fff;border:3px solid '+NAVY+'"></div><div style="width:36px;height:50px;border-radius:18px 18px 8px 8px;background:'+YEL+';border:3px solid '+NAVY+'"></div></div>');
+  return h+A(30,80,'<div class="k1">De boutique</div>','transform-origin:0 50%;'+slam(win(t,.15,.4),-4))+A(30,124,'<div class="k2" style="font-size:84px">en boutique</div>','transform-origin:0 50%;'+slam(win(t,.35,.65),-6));},
+ // 5 Quiz, tombola, spin roulette : tout tourne tout seul
+ function(t){var N=['Quiz','Tombola','Spin roulette'],CC=[BLUE,RED,GRN],h='',i=-1;for(var j=0;j<3;j++)if(t>=C[4][j])i=j;
+  if(t<C[4][3]){i=Math.max(0,i);var lt=t-C[4][i];h+=burst(270,560,330,t,[ '#BFD0F5',YEL,'#BDEFD6'][i],20)+A(0,80,'<div class="k2" style="width:540px;text-align:center;color:'+CC[i]+'">'+N[i]+'</div>','transform-origin:50% 50%;'+slam(win(lt,0,.25),-6))+A(120,300,phone(G[i](lt)),'transform-origin:50% 50%;'+slam(win(lt,0,.28),i%2?7:-7));
+   h+=A(186,880,[0,1,2].map(function(j){return '<span style="display:inline-block;width:'+(j===i?60:22)+'px;height:22px;border-radius:11px;margin:0 6px;border:3px solid '+NAVY+';background:'+(j<=i?YEL:'#fff')+'"></span>';}).join(''));return h;}
+  var lt=t-C[4][3];h+=burst(270,480,340,t,YEL,22);
+  [0,1,2].forEach(function(j){h+=A(40+j*160,640,'<div style="transform:scale(.45) rotate('+((j-1)*8)+'deg);transform-origin:0 0">'+phone(G[j](2))+'</div>','opacity:'+win(lt,.1+j*.08,.3+j*.08));});
+  h+=big('100 %',lt,.05,250,170,RED,-8)+big('automatique',lt,.25,420,86,BLUE,6);
+  var on=lt>.9;return h+A(200,560,'<span style="width:140px;height:72px;border-radius:36px;border:5px solid '+NAVY+';background:'+(on?GRN:'#C9D3E6')+';position:relative;display:inline-block;box-shadow:5px 5px 0 '+NAVY+'"><span style="position:absolute;top:6px;left:'+(on?72:6)+'px;width:50px;height:50px;border-radius:50%;background:#fff;border:4px solid '+NAVY+'"></span></span>');},
+ // 6 Chaque joueur, un contact de plus. 56 %
+ function(t){var h='';if(t<C[5][1]){h+=A(30,80,'<div class="k1">Chaque joueur</div>','transform-origin:0 50%;'+slam(win(t,.15,.4),-4))+A(30,124,'<div class="k2" style="font-size:80px">+1 contact</div>','transform-origin:0 50%;'+slam(win(t,1.0,1.3),-6));
+   for(var i=0;i<6;i++){var p=win(t,.5+i*.25,.8+i*.25);h+=A(50+(i%2)*230,330+Math.floor(i/2)*150,'<div class="stk" style="width:200px;padding:14px;display:flex;gap:12px;align-items:center"><div style="width:42px;height:42px;border-radius:50%;border:3px solid '+NAVY+';background:'+[YEL,RED,GRN,BLUE,OR,MINT][i]+'"></div><div style="font-family:Bangers,Impact;font-size:34px;color:'+GRN+'">+1</div></div>','opacity:'+cl(p*3)+';transform:scale('+bk(p)+') rotate('+((i%2?4:-4))+'deg)');}
+   return h+A(50,800,'<div class="ex">exemple</div>');}
+  var lt=t-C[5][1],p=eo(win(lt,.1,1.4)),v=Math.round(56*p);
+  h+=burst(270,450,320,t,YEL,22)+A(20,280,'<div style="width:500px;text-align:center;font-family:Bangers,Impact;font-size:250px;line-height:1;color:'+RED+';-webkit-text-stroke:5px '+NAVY+';text-shadow:10px 10px 0 '+NAVY+'">'+v+'%</div>','transform:scale('+(.6+.4*bk(win(lt,0,.35)))+')');
+  return h+A(30,610,'<div class="stk" style="width:480px;padding:22px;text-align:center;font-weight:900;font-size:30px;line-height:1.2">des participants souhaitent<br><span style="color:'+RED+'">garder le contact</span></div>','transform-origin:50% 0;'+slam(win(lt,1.0,1.35),4));},
+ // 7 Vos offres flash, en direct sur la carte
+ function(t){var h=mapCard(t);[[90,430],[400,410],[130,770],[420,790],[300,860]].forEach(function(p,i){var q=win(t,.1+i*.08,.35+i*.08);h+=A(p[0]-22,p[1]-22,star(44,0),'transform:scale('+bk(q)+')');});
+  var pul=1+.08*Math.sin(t*10);h+=burst(270,620,140,t,YEL,14)+A(222,560,'<svg width="96" height="120" viewBox="0 0 32 40"><path d="M16 1a15 15 0 0 0-15 15c0 11 15 23 15 23s15-12 15-23A15 15 0 0 0 16 1z" fill="'+RED+'" stroke="'+NAVY+'" stroke-width="2.5"/><circle cx="16" cy="16" r="6" fill="#fff" stroke="'+NAVY+'" stroke-width="2"/></svg>','transform-origin:50% 100%;transform:scale('+(bk(win(t,.2,.5))*pul)+')');
+  h+=A(230,450,'<div class="tag" style="background:'+YEL+';font-size:46px">En direct !</div>','transform-origin:0 100%;'+slam(win(t,1.3,1.6),-12));
+  return h+A(30,80,'<div class="k1">Vos offres</div>','transform-origin:0 50%;'+slam(win(t,.15,.4),-4))+A(30,124,'<div class="k2">Flash</div>','transform-origin:0 60%;'+slam(win(t,.45,.75),-8));},
+ // 8 Votre premiere animation est offerte. Rejoignez le jeu.
+ function(t){var h=burst(270,600,330,t,YEL,20),o=win(t,.9,1.2);
+  h+=A(30,80,'<div class="k1">Votre première animation</div>','transform-origin:0 50%;'+slam(win(t,.15,.4),-4))+A(30,124,'<div class="k2">Offerte !</div>','transform-origin:0 60%;'+slam(win(t,1.2,1.5),-8));
+  h+=A(170,560,'<div style="width:200px;height:160px;background:'+RED+';border:5px solid '+NAVY+';border-radius:14px;box-shadow:8px 8px 0 '+NAVY+'"></div><div style="position:absolute;left:84px;top:5px;width:32px;height:150px;background:'+YEL+';border-left:4px solid '+NAVY+';border-right:4px solid '+NAVY+'"></div>');
+  h+=A(150,500,'<div style="width:240px;height:64px;background:'+RED+';border:5px solid '+NAVY+';border-radius:12px"></div>','transform:translateY('+(-180*eo(o))+'px) rotate('+(-30*eo(o))+'deg);transform-origin:0 100%');
+  for(var i=0;i<28;i++){var a=i*12.7,r=300*eo(win(t,1.0,2.0)),x=270+Math.cos(a)*r,y=580-Math.abs(Math.sin(a))*r+260*Math.pow(win(t,1.6,3.5),2);h+=A(x,y,'<div style="width:16px;height:26px;border-radius:3px;border:2px solid '+NAVY+';background:'+[BLUE,RED,YEL,GRN][i%4]+';transform:rotate('+(a*40+t*500)+'deg)"></div>','opacity:'+(o>0?1-win(t,2.8,3.5):0));}
+  return h+A(70,800,'<div class="tag" style="background:'+MINT+';font-size:58px;padding:8px 30px">Rejoignez le jeu</div>','transform-origin:50% 50%;'+slam(win(t,C[7][1],C[7][1]+.3),6));},
+ // 9 Signature
+ function(t){var h='<div class="a" style="left:0;top:0;width:540px;height:960px;background:'+NAVY+';background-image:radial-gradient(#2C467E 2px,transparent 2px);background-size:22px 22px"></div>'+burst(270,330,300,t,'#2C467E',18);
+  h+=A(30,200,'<div style="font-weight:900;font-size:100px;color:#fff;letter-spacing:-.03em">Flow<span style="color:#8FA6F0">in</span></div>','transform-origin:0 50%;'+slam(win(t,.15,.45),-6));
+  h+=A(30,340,'<div style="font-family:Bangers,Impact;font-size:66px;line-height:.98;color:#fff;letter-spacing:.02em;width:480px">L\'animation du commerce <span style="color:'+YEL+'">de proximité</span></div>','transform-origin:0 50%;'+slam(win(t,.7,1.0),-4));
+  for(var i=0;i<4;i++)h+=A(42+i*120,580,star(64,t*60),'transform:scale('+bk(win(t,1.4+i*.1,1.7+i*.1))+')');
+  var r=win(t,2.0,2.3);return h+A(110,730,'<div class="tag" style="background:'+YEL+';font-size:46px;padding:14px 30px">Je publie mon jeu</div>','transform:scale('+((.9+.1*bk(r))*(1+.03*Math.sin(t*6)))+');opacity:'+cl(r*3));}
+];
+var st=document.getElementById('stage');
+window.render=function(t){t=Math.max(0,Math.min(window.DUREE-.001,t));var k=0;for(var i=0;i<D.length;i++)if(t>=T0[i])k=i;var lt=t-T0[k],f=1-win(lt,0,.1);
+ st.innerHTML=(k<8?'<div class="a bgd"></div>':'')+S[k](lt)+(f>0?'<div class="a" style="left:0;top:0;width:540px;height:960px;background:#fff;opacity:'+(.7*f)+'"></div>':'');fit();};
+window.render(0);
+})();
+</script></body></html>
