@@ -597,6 +597,33 @@ if(FILM==='l5se'){
  sc(7,'F c30 c15',function(){return fin('Un événement ? <b>Gagne tes places, découvre les lots dans ta ville.</b>','','Je joue',QR_L5SE,'flowin-events.vercel.app/carte-commerces');},finAnim);
 }
 
+if(FILM==='v10aacc'){
+ scene(3,function(){return cap('Valoriser votre commerce <em>par un concept innovant ?</em>','')+sol()+A(30,350,boutique(480),'opacity:.25')+
+   '<div class="a" style="left:40px;top:690px;width:460px;height:18px;background:#2B4A72;border-radius:16px 16px 0 0"></div>'+C('alex','alex','debout','doute',200,170,330,{regard:6})+'<div class="a" style="left:40px;top:700px;width:460px;height:160px;background:#1B3A5C"></div>'+A(70,640,'<div style="width:70px;height:56px;background:#FFC21A;border-radius:10px"></div>');},
+  function(t,el){bob($(el,'#alex'),t);repose($(el,'#alex'),'alex','debout',t>1.6?'triste':'doute',{w:200,regard:t<1.4?7:-2,tete:t>1.4?Math.sin((t-1.4)*4)*6:0});});
+ scene(3,function(){return cap('Nous avons <em>la solution.</em>')+sol()+A(30,350,boutique(480),'filter:grayscale(1)" id="bq')+C('alex','alex','deuxbras','joie',170,190,610);},
+  function(t,el){var p=eo(win(t,.1,.7));$(el,'#bq').style.filter='grayscale('+(1-p)+')';bob($(el,'#alex'),t);});
+ scene(3,function(){return cap('Une animation <em>aux couleurs de votre commerce.</em>')+sol()+A(30,350,boutique(480),'" id="bq')+C('alex','alex','bras','joie',160,190,610);},
+  function(t,el){var h=[0,150,260,0],i=Math.min(3,Math.floor(t/.75)),b=$(el,'#bq');b.style.filter='hue-rotate('+h[i]+'deg)';bob($(el,'#alex'),t);});
+ scene(3,function(){var c=[['Quiz','personnalisé','#3B5CC4'],['Tombola','','#FF8A14'],['Roue','de la fortune','#0B7A4F']],h='';for(var i=0;i<3;i++)h+=A(40,330+i*165,'<div class="card" style="width:460px;padding:0;overflow:hidden;display:flex;align-items:center"><div style="background:'+c[i][2]+';color:#fff;font-weight:900;font-size:38px;padding:30px 24px;width:250px">'+c[i][0]+'</div><div style="padding:0 20px;font-weight:900;font-size:24px">'+c[i][1]+'</div></div>','opacity:0" data-in="'+(.2+i*.6));return cap('Quiz, tombola, <em>roue de la fortune.</em>')+h;},function(t,el){});
+ scene(3,function(){return cap('Vous captez <em>les passants.</em>','')+sol()+A(30,350,boutique(480))+A(78,500,affiche(false,120),'transform:rotate(-3deg)')+C('lea','lea','debout','sourire',170,560,540)+C('max','max','debout','sourire',150,700,580);},
+  function(t,el){var l=$(el,'#lea');walk(l,t,560,320,0,1.3);walk($(el,'#max'),t,700,420,.2,1.6);repose(l,'lea',t>1.4?'telephone':'debout',t>1.6?'joie':'sourire',{w:170,regard:-6});},true);
+ scene(3,function(){return cap('Vous <em>sondez.</em>','')+
+   phone('Boutique','<div class="kick">Question bonus</div><div class="q">Vous habitez à moins de 1 km ?</div><div class="opt" id="o1">Oui</div><div class="opt">Non</div>','B',30,290)+A(220,580,chart('Habitent à moins de 1 km','',0,'Oui','Non'),'z-index:12;opacity:0" id="ch')+doigt();},
+  function(t,el){tap($(el,'.fg'),t,200,575,.1,.55,.8);$(el,'#o1').className='opt'+(t>.55?' on':'');at($(el,'#ch'),-20*(1-eo(win(t,1,1.5))),0,1,win(t,1,1.3));chartAnim(el,t,1.3,64,36);});
+ scene(3,function(){return cap('Animez. <em>Faites grandir votre fichier client.</em>','')+fileHTML()+C('alex','alex','deuxbras','joie',150,30,620);},function(t,el){fichierAnim(el,t,.2,2.2,5);bob($(el,'#alex'),t);});
+ scene(3,function(){return cap('Sur la carte. <em>Plus de visibilité.</em>','')+A(40,300,carte([[90,140],[240,105],[380,190],[90,300],[300,280,'Boutique d\'Alex'],[180,420],[400,440],[60,470]],{}));},
+  function(t,el){for(var i=0;i<8;i++)allume(el,i,win(t,.3+i*.12,.6+i*.12),i===4?'#FF8A14':null);},true);
+ scene(3,function(){return cap('Offres flash <em>en direct.</em>','')+A(40,300,carte([[90,140],[240,105],[380,190],[90,300],[300,280,'Boutique d\'Alex'],[180,420],[400,440],[60,470]],{}))+A(250,470,'<div class="card" style="padding:10px 18px;border:3px solid #FF8A14;font-weight:900;font-size:24px">Offre flash</div>','opacity:0" data-in="1.1');},
+  function(t,el){for(var i=0;i<8;i++)allume(el,i,win(t,.3+i*.12,.6+i*.12),i===4?'#FF8A14':null);},true);
+ scene(3,function(){return cap('Gestion <em>automatique des lots.</em>','')+A(130,300,imprimante(ticket('GAGNÉ','Produit offert pour un achat','À présenter en boutique')))+C('lea','lea','debout','joie',150,20,620);},
+  function(t,el){printAnim(el,t,.2,1.4);bob($(el,'#lea'),t);},true);
+ scene(3,function(){return cap('Visibilité <em>sur le trafic.</em>')+A(40,330,'<div class="card" style="width:460px;padding:22px"><div style="display:flex;justify-content:space-between"><b style="font-size:22px">Passages</b><span class="ex">exemple</span></div><div class="bar" style="margin-top:16px"><i class="bb" id="t1" style="width:0"></i></div><div class="bar" style="margin-top:14px"><i class="bb" id="t2" style="width:0"></i></div><div class="bar" style="margin-top:14px"><i class="bb" id="t3" style="width:0"></i></div></div>')+C('alex','alex','telephone','sourire',170,30,620);},function(t,el){var w=[40,72,58];for(var i=0;i<3;i++)$(el,'#t'+(i+1)).style.width=(w[i]*eo(win(t,.2+i*.2,1.6)))+'%';bob($(el,'#alex'),t);});
+ scene(3,function(){var s=['Vitrine','Ticket de caisse','Affiche'],h='';for(var i=0;i<3;i++)h+=A(40+i*158,360,'<div class="card" style="width:142px;text-align:center;padding:14px 6px"><div style="display:flex;justify-content:center">'+qrMini(70)+'</div><b style="font-size:17px;display:block;margin-top:8px">'+s[i]+'</b></div>','opacity:0" data-in="'+(.2+i*.4));return cap('Tracking link <em>pour vos campagnes.</em>')+h+A(40,590,'<div class="card" style="width:460px;padding:18px;font-weight:800;font-size:22px">Un QR par support. Chaque campagne mesurée.</div>','opacity:0" data-in="1.6');},function(t,el){});
+ scene(3,function(){return cap('Aussi simple que <em>coller une affiche.</em>','')+sol()+A(30,350,boutique(480))+A(78,500,affiche(false,120),'opacity:0;z-index:3" id="aff')+C('alex','alex','debout','sourire',190,300,500);},
+  function(t,el){var a=$(el,'#aff'),p=eo(win(t,.2,.9));at(a,lerp(200,0,p),lerp(140,0,p),lerp(.6,1,p),win(t,.2,.4),lerp(-25,-3,p));repose($(el,'#alex'),'alex',t<.9?'affiche':'coucou',t<.9?'sourire':'joie',{w:190});bob($(el,'#alex'),t);},true);
+ scene(4,function(){return fin('Flowin, <b>l\'animation jeux des commerces.</b>','Contactez-nous : 04 93 59 91 37','Je publie mon jeu',QR_F1,'flowin-events.vercel.app/pro/premiere-fois');},finAnim,true);
+ window.V9T=[[0.0, 3.376], [3.376, 5.09], [5.09, 7.748], [7.748, 11.855], [11.855, 13.291], [13.291, 14.548], [14.548, 18.381], [18.381, 21.667], [21.667, 24.944], [24.944, 26.697], [26.697, 28.669], [28.669, 30.856], [30.856, 33.247], [33.247, 38.414]];}
 if(FILM==='v10apart'){
  scene(3.2,function(){return cap('Chez tes commerçants : <em>promotions et jeux.</em>','')+A(40,320,carte([[90,140],[240,105],[380,190],[90,300],[300,280],[180,420],[400,440],[60,470]],{}));},
   function(t,el){for(var i=0;i<8;i++)allume(el,i,win(t,.3+i*.15,.6+i*.15));},true);
@@ -617,7 +644,7 @@ if(FILM==='v10apart'){
  scene(3,function(){return cap('Découvre la carte. <em>Rends-toi dans les commerces participants.</em>','')+A(40,300,carte([[90,140],[240,105],[380,190],[90,300],[300,280,'Boutique d\'Alex'],[180,420],[400,440],[60,470]],{}));},
   function(t,el){for(var i=0;i<8;i++)allume(el,i,win(t,.3+i*.12,.6+i*.12),i===4?'#FF8A14':null);},true);
  scene(3.6,function(){return fin('Suis <b>le flow.</b>','Découvre ce que tu gagnes.','Je trouve les commerces',QR_F2,'flowin-events.vercel.app/carte-commerces');},finAnim,true);
- window.V9T=[[0.0, 3.148], [3.148, 6.015], [6.015, 7.772], [7.772, 10.999], [10.999, 12.521], [12.521, 14.044], [14.044, 16.123], [16.123, 18.166], [18.166, 22.334], [22.334, 26.606], [26.606, 31.353]];}
+ window.V9T=[[0.0, 3.162], [3.162, 6.01], [6.01, 7.755], [7.755, 10.986], [10.986, 12.51], [12.51, 14.034], [14.034, 16.154], [16.154, 18.196], [18.196, 22.374], [22.374, 26.627], [26.627, 31.373]];}
 if(FILM==='v10acom'){
  scene(3,function(){return cap('Un commerce, <em>un fichier client ?</em>','')+sol()+A(30,350,boutique(480),'opacity:.25')+
    '<div class="a" style="left:40px;top:690px;width:460px;height:18px;background:#2B4A72;border-radius:16px 16px 0 0"></div>'+C('alex','alex','debout','doute',200,170,330,{regard:6})+'<div class="a" style="left:40px;top:700px;width:460px;height:160px;background:#1B3A5C"></div>'+A(70,640,'<div style="width:70px;height:56px;background:#FFC21A;border-radius:10px"></div>');},
@@ -632,21 +659,23 @@ if(FILM==='v10acom'){
  scene(3,function(){return cap('Animez-les. <em>Mieux les connaître.</em>','')+
    phone('Boutique','<div class="kick">Question bonus</div><div class="q">Vous habitez à moins de 1 km ?</div><div class="opt" id="o1">Oui</div><div class="opt">Non</div>','B',30,290)+A(220,580,chart('Habitent à moins de 1 km','',0,'Oui','Non'),'z-index:12;opacity:0" id="ch')+doigt();},
   function(t,el){tap($(el,'.fg'),t,200,575,.1,.55,.8);$(el,'#o1').className='opt'+(t>.55?' on':'');at($(el,'#ch'),-20*(1-eo(win(t,1,1.5))),0,1,win(t,1,1.3));chartAnim(el,t,1.3,64,36);});
- scene(3,function(){return cap('Simple à installer. <em>Renforce votre marque.</em>','')+sol()+A(30,350,boutique(480))+A(78,500,affiche(false,120),'opacity:0;z-index:3" id="aff')+C('alex','alex','debout','sourire',190,300,500);},
+ scene(3,function(){return cap('Simple à installer. <em>Renforce votre image de marque.</em>','')+sol()+A(30,350,boutique(480))+A(78,500,affiche(false,120),'opacity:0;z-index:3" id="aff')+C('alex','alex','debout','sourire',190,300,500);},
   function(t,el){var a=$(el,'#aff'),p=eo(win(t,.2,.9));at(a,lerp(200,0,p),lerp(140,0,p),lerp(.6,1,p),win(t,.2,.4),lerp(-25,-3,p));repose($(el,'#alex'),'alex',t<.9?'affiche':'coucou',t<.9?'sourire':'joie',{w:190});bob($(el,'#alex'),t);},true);
  scene(3,function(){return cap('Mettez des lots <em>en jeu.</em>','')+A(130,300,imprimante(ticket('GAGNÉ','Produit offert pour un achat','À présenter en boutique')))+C('lea','lea','debout','joie',150,20,620);},
   function(t,el){printAnim(el,t,.2,1.4);bob($(el,'#lea'),t);},true);
  scene(3,function(){return cap('Et elle <em>revient.</em>','','Le lendemain')+sol()+A(30,350,boutique(480))+C('lea','lea','debout','sourire',170,560,540);},
   function(t,el){var l=$(el,'#lea');walk(l,t,560,300,.2,1.8);repose(l,'lea',t>1.9?'joie':'debout',t>1.9?'joie':'sourire',{w:170,regard:-6});});
  scene(3.2,function(){return cap('Ils parlent de vous. <em>Ils offrent leurs lots.</em>','')+offreHTML(false,'Produit offert pour un achat');},function(t,el){offre(el,t,$(el,'#lea'),$(el,'#max'),$(el,'#box'));bob($(el,'#max'),t,1);},true);
- scene(3,function(){return cap('Visible sur la carte. <em>Offres flash.</em>','')+A(40,300,carte([[90,140],[240,105],[380,190],[90,300],[300,280,'Boutique d\'Alex'],[180,420],[400,440],[60,470]],{}))+A(250,470,'<div class="card" style="padding:10px 18px;border:3px solid #FF8A14;font-weight:900;font-size:24px">Offre flash</div>','opacity:0" data-in="1.1');},
+ scene(3,function(){return cap('Sur la carte, <em>avec les autres commerces.</em>','')+A(40,300,carte([[90,140],[240,105],[380,190],[90,300],[300,280,'Boutique d\'Alex'],[180,420],[400,440],[60,470]],{}));},
   function(t,el){for(var i=0;i<8;i++)allume(el,i,win(t,.3+i*.12,.6+i*.12),i===4?'#FF8A14':null);},true);
- scene(3,function(){return cap('Ils viennent <em>chez vous.</em>','')+sol()+A(30,350,boutique(480))+A(78,500,affiche(false,120),'transform:rotate(-3deg)')+C('lea','lea','debout','sourire',170,560,540)+C('max','max','debout','sourire',150,700,580);},
+ scene(3,function(){return cap('Offres flash : <em>les clients participent.</em>','')+A(40,300,carte([[90,140],[240,105],[380,190],[90,300],[300,280,'Boutique d\'Alex'],[180,420],[400,440],[60,470]],{}))+A(250,470,'<div class="card" style="padding:10px 18px;border:3px solid #FF8A14;font-weight:900;font-size:24px">Offre flash</div>','opacity:0" data-in="1.1');},
+  function(t,el){for(var i=0;i<8;i++)allume(el,i,win(t,.3+i*.12,.6+i*.12),i===4?'#FF8A14':null);},true);
+ scene(3,function(){return cap('Ils viennent chez vous, <em>en parlent autour d\'eux.</em>','')+sol()+A(30,350,boutique(480))+A(78,500,affiche(false,120),'transform:rotate(-3deg)')+C('lea','lea','debout','sourire',170,560,540)+C('max','max','debout','sourire',150,700,580);},
   function(t,el){var l=$(el,'#lea');walk(l,t,560,320,0,1.3);walk($(el,'#max'),t,700,420,.2,1.6);repose(l,'lea',t>1.4?'telephone':'debout',t>1.6?'joie':'sourire',{w:170,regard:-6});},true);
  scene(3,function(){var c=[['Mars','Roulette','#3B5CC4'],['Été','Tombola','#FF8A14'],['Noël','Quiz','#0B7A4F']],h='';for(var i=0;i<3;i++)h+=A(40+i*158,350+i*40,'<div class="card" style="width:142px;padding:0;overflow:hidden;text-align:center"><div style="background:'+c[i][2]+';color:#fff;font-weight:900;font-size:20px;padding:12px">'+c[i][0]+'</div><div style="padding:18px 6px 20px;font-weight:900;font-size:19px">'+c[i][1]+'</div></div>','opacity:0" data-in="'+(.2+i*.35));
    return cap('Automatisée. <em>Plus de visibilité.</em>','')+h+C('alex','alex','bras','joie',150,190,620);},function(t,el){bob($(el,'#alex'),t);});
  scene(4,function(){return fin('Installez <b>Flowin.</b>','Flowin, l\'animation jeu plug and play.','Je publie mon jeu',QR_F1,'flowin-events.vercel.app/pro/premiere-fois');},finAnim,true);
- window.V9T=[[0.0, 2.545], [2.545, 4.061], [4.061, 9.12], [9.12, 12.713], [12.713, 15.108], [15.108, 18.23], [18.23, 22.1], [22.1, 24.048], [24.048, 25.996], [25.996, 29.934], [29.934, 33.299], [33.299, 35.578], [35.578, 41.092], [41.092, 45.76]];}
+ window.V9T=[[0.0, 2.565], [2.565, 4.083], [4.083, 9.069], [9.069, 12.711], [12.711, 15.139], [15.139, 18.245], [18.245, 22.375], [22.375, 24.303], [24.303, 26.231], [26.231, 30.203], [30.203, 33.1], [33.1, 36.875], [36.875, 40.598], [40.598, 46.162], [46.162, 50.828]];}
 if(FILM==='v10separt'){
  scene(3,function(){return cap('Tu connais <em>Flowin ?</em>','')+sol(true)+A(30,350,boutique(480,{se:true}))+A(78,500,affiche(true,120),'z-index:2" id="aff')+C('lea','lea','debout','o',180,560,520);},
   function(t,el){var l=$(el,'#lea');walk(l,t,560,330,0,1.3);repose(l,'lea','debout',t>1.4?'joie':'o',{w:180,regard:-7});at($(el,'#aff'),0,0,1+.08*Math.max(0,Math.sin(t*9))*win(t,.8,1),1,-3);},true);
@@ -674,7 +703,7 @@ if(FILM==='v10separt'){
   function(t,el){var tr=$(el,'#trace'),L=tr.getTotalLength(),p=eo(win(t,.2,3)),pt=tr.getPointAtLength(L*p);tr.setAttribute('stroke-dasharray',L);tr.setAttribute('stroke-dashoffset',L*(1-p));$(el,'#moi').setAttribute('transform','translate('+pt.x+' '+pt.y+')');
    allume(el,1,win(t,.2,.5));allume(el,2,p>.55?win(p,.55,.65):0);allume(el,4,p>.97?1:0);},true);
  scene(3.6,function(){return fin('Suis <b>le flow.</b>','Découvre ce que tu gagnes.','Je joue',QR_F5,'flowin-events.vercel.app/se/se-master-superevent');},finAnim,true);
- window.V9T=[[0.0, 1.657], [1.657, 3.614], [3.614, 8.497], [8.497, 12.736], [12.736, 15.237], [15.237, 16.759], [16.759, 18.282], [18.282, 20.36], [20.36, 22.354], [22.354, 24.301], [24.301, 28.38], [28.38, 32.652], [32.652, 35.5], [35.5, 37.399]];}
+ window.V9T=[[0.0, 1.633], [1.633, 3.597], [3.597, 8.425], [8.425, 12.595], [12.595, 15.088], [15.088, 16.631], [16.631, 18.173], [18.173, 20.289], [20.289, 22.277], [22.277, 24.211], [24.211, 28.311], [28.311, 32.615], [32.615, 35.477], [35.477, 37.385]];}
 if(FILM==='v10seorg'){
  scene(3,function(){return cap('Rayonnez en local : <em>avant, pendant, après.</em>','')+A(30,330,sceneSE())+A(0,640,'<div style="width:540px;height:320px;background:#0A1426"></div>')+C('sam','sam','affiche','sourire',190,320,420)+A(30,800,foule(9,480));},
   function(t,el){fouleAnim(el,t);bob($(el,'#sam'),t);},true);
@@ -701,7 +730,7 @@ if(FILM==='v10seorg'){
  scene(3,function(){var h='',p=[[40,330],[200,330],[360,330],[40,470],[200,470],[360,470]];for(var i=0;i<6;i++)h+=A(p[i][0],p[i][1],'<div class="card" style="width:140px;padding:18px 6px;text-align:center;border:3px solid #FF8A14"><div style="font-weight:900;font-size:20px;color:#1B3A5C">Logo</div><div class="ex">commerce partenaire</div></div>','opacity:0" data-in="'+(.3+i*.28));
    return cap('Ils vous mettent en avant. <em>Vous les mettez à l\'honneur.</em>')+h+C('sam','sam','deuxbras','joie',170,190,640);},function(t,el){bob($(el,'#sam'),t);});
  scene(4,function(){return fin('<span style="font-size:36px;display:block">Démultipliez votre communication</span><b>en local.</b>','Flowin, l\'animation jeu plug and play.','Je découvre le Super Event',QR_F3,'<span style="font-size:16px">flowin-events.vercel.app/validation/<br>plaquette-super-event-v3.html</span>');},finAnim,true);
- window.V9T=[[0.0, 7.02], [7.02, 9.53], [9.53, 15.152], [15.152, 18.754], [18.754, 22.855], [22.855, 26.524], [26.524, 33.335], [33.335, 39.222], [39.222, 44.355], [44.355, 47.26], [47.26, 53.613]];}
+ window.V9T=[[0.0, 7.023], [7.023, 9.523], [9.523, 15.052], [15.052, 18.645], [18.645, 22.808], [22.808, 26.464], [26.464, 33.355], [33.355, 39.283], [39.283, 44.477], [44.477, 47.378], [47.378, 53.792]];}
 if(window.V9T){for(var i9=0;i9<S.length;i9++){S[i9].a=V9T[i9][0];S[i9].b=V9T[i9][1];S[i9].d=S[i9].b-S[i9].a;}}
 
 /* ================= MOTEUR ================= */
@@ -714,7 +743,7 @@ if(V6){var T=[],acc=0,tot=0,kc=1,fx=0,mo;for(var i=0;i<S.length;i++){S[i].inn=S[
  for(i=0;i<S.length;i++)if(S[i].inn){S[i].d0=S[i].d;var nd=S[i].fx||S[i].d*kc;S[i].v=S[i].d0/nd;S[i].d=nd;S[i].a=acc;acc+=S[i].d;S[i].b=acc;T.push(S[i]);}S=T;}
 if(V6||window.V9T){}else if(COURT){var T=[],acc=0,tot=0;for(var i=0;i<S.length;i++)if(S[i].court)tot+=S[i].d;var kc=15/tot;for(i=0;i<S.length;i++)if(S[i].court){S[i].v=1/kc;S[i].d=S[i].d*kc;S[i].a=acc;acc+=S[i].d;S[i].b=acc;T.push(S[i]);}S=T;}
 else{var acc=0;for(var i=0;i<S.length;i++){S[i].v=1;S[i].d0=S[i].d;S[i].d=S[i].d*LENT;S[i].a=acc;acc+=S[i].d;S[i].b=acc;}}
-var CIB={v10apart:'Pour les participants',v10acom:'Pour les commerçants',v10separt:'Pour les participants',v10seorg:'Pour les organisateurs',l3v6:'Pour les commerçants',l4v6:'Pour les organisateurs',l5se:'Pour les participants',l3:'Pour les commerçants',l4:'Pour les organisateurs et les commerces',l5:'Pour les participants',f1:'Pour les commerçants',f4:'Pour les commerçants',f2:'Pour les participants',f5:'Pour les participants',f3:'Pour les organisateurs d\'événements'}[FILM]||'';
+var CIB={v10aacc:'Pour les commerçants',v10apart:'Pour les participants',v10acom:'Pour les commerçants',v10separt:'Pour les participants',v10seorg:'Pour les organisateurs',l3v6:'Pour les commerçants',l4v6:'Pour les organisateurs',l5se:'Pour les participants',l3:'Pour les commerçants',l4:'Pour les organisateurs et les commerces',l5:'Pour les participants',f1:'Pour les commerçants',f4:'Pour les commerçants',f2:'Pour les participants',f5:'Pour les participants',f3:'Pour les organisateurs d\'événements'}[FILM]||'';
 var logo=e('<div class="a" style="left:0;top:0;width:'+(WIDE?960:540)+'px;height:0">'+(SE?'<div class="a" style="left:24px;top:16px;background:#fff;border-radius:10px;padding:6px 10px"><img src="../../flowin-super-event-logo.svg" style="height:22px;display:block"></div>':'<div class="a logo">Flow<b>in</b> Animation</div>')+'<div class="a cib">'+CIB+'</div></div>');
 /* V5 : format horizontal 960x540 : la legende reste a gauche, le reste du plan (coordonnees 540x960) passe a droite, reduit */
 function paysage(el){var v=document.createElement('div');v.className='pv';var k=[].slice.call(el.children);for(var i=0;i<k.length;i++)if(!k[i].classList.contains('cap'))v.appendChild(k[i]);el.appendChild(v);}

@@ -5,7 +5,7 @@ Sortie : <dossier>/<film>/bNN.wav, voix.wav (mixage), timing.json {keys, d, c, t
 import asyncio, json, os, re, subprocess, sys, wave, edge_tts
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from intonation import expanser
-RATE="-3%"; PITCH="+2Hz"; K_INTO=1.25; VOICE="fr-FR-VivienneMultilingualNeural"
+RATE=os.environ.get("RATE","-3%"); PITCH="+2Hz"; K_INTO=1.25; VOICE="fr-FR-VivienneMultilingualNeural"
 PAUSE_PHRASE=0.40; PAUSE_SIGN=0.42; GLUE=0.04; LEAD=0.20; TAIL=0.45; FIN=1.6
 film=sys.argv[1]; out=os.path.join(sys.argv[2],film); os.makedirs(out,exist_ok=True)
 S=json.load(open(os.path.join(os.path.dirname(__file__),os.environ.get('SCRIPTS','scripts.json'))))[film]
