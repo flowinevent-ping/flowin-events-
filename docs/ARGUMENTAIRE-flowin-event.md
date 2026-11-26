@@ -204,3 +204,8 @@ Avant toute livraison, chaque texte est relu contre ce fichier (et la liste « i
 ## Offre commerce proposée par Romain le 26/11/2026 (à valider, rien n'est appliqué)
 - « Flowin, tu l'installes et c'est gratuit. » Gratuit : mettre l'animation (une seule), diffuser, mettre ses lots, apparaître sur la carte. Données joueurs au départ : sexe et tranche d'âge seulement.
 - Payant : plusieurs actions dans l'année avec plusieurs lots à distribuer ; s'associer à des événements ; impression du QR code avec le logo pour le macaron (« ça vaut 50 € par exemple ») ; QR code Tracking link (« ils payent en plus ») ; accès au détail de l'acquisition (CRM, les personnes venues) ; importer sa base de données dans Flowin et diffuser depuis Flowin ; lancer des campagnes quand ils veulent ; tarifs préférentiels pour les Super Events.
+
+## Dictée de Romain du 26/11/2026, bloc 2, fin (positionnement : l'animation intercommerce)
+- « L'argument premier, c'est pas que c'est gratuit. »
+- Premier jet : « Est-ce que vous connaissez Flowin, la première animation innovante, l'innovation de jeux intercommerce. Captez le flux passant, animez votre fichier client, participez à un jeu d'animation intercommerce. Carte digitale pour vos clients. Publiez votre animation en quelques clics. Quiz. Spin roulette. Tombola. Animez, boostez, fidélisez. Faites revenir vos clients. Rejoignez. L'animation Flowin intercommerce. »
+- Version « très simple, très claire, très évidente » : « Rejoignez la première animation intercommerce et réunis le commerce de proximité. Animation de votre fichier client en quelques clics, simple et automatique. Capter le flux passant, diffuser vos offres promotionnelles et flash. Flowin, l'animation du commerce de proximité. »
