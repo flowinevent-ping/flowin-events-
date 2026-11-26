@@ -4,6 +4,7 @@ import { DashboardProvider } from '@/contexts/DashboardContext'
 import Sidebar from '@/components/dashboard/Sidebar'
 import Drawer from '@/components/dashboard/Drawer'
 import GardeSA from '@/components/dashboard/GardeSA'
+import ChargeurDonneesSA from '@/components/dashboard/ChargeurDonneesSA'
 import TablesMobiles from '@/components/dashboard/TablesMobiles'
 import type { FlowinJoueur, FlowinEvent, FlowinPartenaire, FlowinPro, FlowinLot } from '@/lib/types'
 
@@ -36,6 +37,7 @@ export default function DashboardShell({
       <link rel="stylesheet" href="/flowin-theme.css" />
       <GardeSA>
         <div className="sa-shell">
+          <ChargeurDonneesSA />
           <Sidebar />
           <div className="sa-main">
             {children}
