@@ -1,0 +1,142 @@
+<title>Vidéo multicommerce</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@500;700;800;900&display=swap">
+<style>
+/* Page : la vidéo au centre (scène 540 x 960 mise à l'échelle), lecture avec la voix et le rythme, liste des plans à côté. Charte des vidéos v4 à v10. */
+:root{--bg:#F4F7FC;--surface:#FFFFFF;--ink:#1B3A5C;--muted:#5A6B85;--line:#DCE3EC;--bleu:#3B5CC4;--or:#FF8A14;--nuit:#0E1B30;--font:"Inter",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0B1424;--surface:#13213A;--ink:#EEF2F8;--muted:#A7B3C8;--line:#26385A;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#0B1424;--surface:#13213A;--ink:#EEF2F8;--muted:#A7B3C8;--line:#26385A;color-scheme:dark}
+body{background:var(--bg);color:var(--ink);font-family:var(--font);font-size:15px;line-height:1.5}
+.wrap{max-width:980px;margin:0 auto;padding-block:24px 48px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:grid;gap:20px}
+h1{margin:0;font-weight:900;letter-spacing:-.02em;font-size:clamp(24px,4vw,34px)}h1 em{font-style:normal;color:var(--bleu)}
+.lead{margin:4px 0 0;color:var(--muted);max-width:66ch}
+.grid{display:grid;grid-template-columns:minmax(0,340px) minmax(0,1fr);gap:28px;align-items:start}
+@media (max-width:760px){.grid{grid-template-columns:1fr}}
+.frame{width:100%;max-width:340px;justify-self:center;aspect-ratio:9/16;border-radius:24px;overflow:hidden;background:#0E1B30;box-shadow:0 20px 40px rgba(14,27,48,.28);position:relative}
+#stage{position:absolute;left:0;top:0;width:540px;height:960px;transform-origin:0 0;overflow:hidden;font-family:var(--font);color:#1B3A5C;background:linear-gradient(180deg,#FFFFFF 0%,#EDF1FA 100%)}
+.ctl{display:flex;gap:10px;align-items:center;margin-top:12px;max-width:340px;justify-self:center;width:100%}
+.ctl button{font:inherit;font-weight:800;border:0;background:var(--bleu);color:#fff;border-radius:99px;padding:10px 18px;cursor:pointer;white-space:nowrap}
+.ctl input{flex:1;accent-color:var(--bleu);min-width:0}
+.ctl span{font-variant-numeric:tabular-nums;font-size:13px;color:var(--muted);min-width:40px;text-align:right}
+.plans{list-style:none;margin:0;padding:0;display:grid;gap:6px;min-width:0}
+.plans li{display:grid;grid-template-columns:28px 1fr;gap:10px;padding:8px 10px;border-radius:12px;border:1px solid transparent;cursor:pointer}
+.plans li.on{background:var(--surface);border-color:var(--line)}
+.plans .k{width:28px;height:28px;border-radius:50%;display:grid;place-items:center;font-size:12px;font-weight:900;background:var(--bleu);color:#fff}
+.plans b{display:block}.plans small{display:block;color:var(--muted);font-size:13px}
+.note{font-size:13px;color:var(--muted);max-width:70ch;margin:0}
+button:focus-visible,input:focus-visible{outline:3px solid var(--bleu);outline-offset:2px}
+/* scène */
+#stage .a{position:absolute}
+#stage .lg{left:30px;top:24px;font-weight:900;font-size:22px}#stage .lg b{color:#3B5CC4}
+#stage .tt{left:30px;right:30px;top:78px;font-weight:900;font-size:50px;line-height:1.02;letter-spacing:-.035em}
+#stage .tt span{display:block;transform-origin:0 60%}
+#stage .tt em{font-style:normal;color:#3B5CC4}
+#stage .card{background:#fff;border-radius:18px;box-shadow:0 14px 30px -18px rgba(10,25,50,.55)}
+#stage .fx{left:0;top:0;width:540px;height:960px;background:#fff;pointer-events:none}
+#stage .ex{font-size:13px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#8A96AB}
+</style>
+
+<div class="wrap">
+  <header>
+    <h1>Vidéo <em>multicommerce</em></h1>
+    <p class="lead">Aperçu à écouter : la vraie voix, sur un rythme de fond provisoire. Chaque plan est animé. Cette même page servira à fabriquer la vidéo une fois validée.</p>
+  </header>
+  <div class="grid">
+    <div style="display:grid">
+      <div class="frame" id="frame"><div id="stage" aria-live="off"></div></div>
+      <div class="ctl"><button type="button" id="play">Lecture</button><input type="range" id="seek" min="0" max="1000" value="0" aria-label="Position dans la vidéo"><span id="time">0,0 s</span></div>
+      <audio id="aud" src="mix.mp3" preload="auto"></audio>
+    </div>
+    <div style="display:grid;gap:12px;min-width:0">
+      <ol class="plans" id="plans"></ol>
+      <p class="note">Le rythme de fond est un battement de synthèse, pour juger la dynamique : la vraie musique reste à choisir. Les chiffres du fichier client sont des exemples. Les jeux montrés sont ceux de l'application : quiz, question bonus, tombola, spin roulette.</p>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+var D=[4.204,3.63,1.727,3.948,4.058,3.609,2.631,4.47];
+var V=["« Rejoignez l'animation multicommerce qui réunit le commerce de proximité. »","« Vous apparaissez sur la carte, diffusez des offres flash. »","« Captez le flux passant. »","« Quiz, questions bonus, tombola, spin roulette. »","« Animez votre fichier client en quelques clics, simple et automatique. »","« 56 % des participants souhaitent garder le contact. »","« Votre première animation est offerte. »","« Flow in, l'animation du commerce de proximité. »"];
+var N=["Le réseau des commerces","Sur la carte, offres flash","Le flux passant","Les jeux","Le fichier client, automatique","La preuve : 56 %","Première animation offerte","Signature"];
+var T0=[],acc=0;for(var i=0;i<D.length;i++){T0.push(acc);acc+=D[i];}
+var DUREE=acc;window.DUREE=DUREE;
+function cl(x){return x<0?0:x>1?1:x}
+function eo(x){x=cl(x);return 1-Math.pow(1-x,3)}
+function bk(x){x=cl(x);var c=1.9;return 1+(c+1)*Math.pow(x-1,3)+c*Math.pow(x-1,2)}
+function win(t,a,b){return cl((t-a)/(b-a))}
+function A(x,y,html,st){return '<div class="a" style="left:'+x+'px;top:'+y+'px;'+(st||'')+'">'+html+'</div>'}
+function title(l1,l2,t){var h='<div class="a tt">';[l1,l2].forEach(function(l,j){if(!l)return;var p=win(t,.05+j*.12,.42+j*.12),s=1.8-.8*bk(p);h+='<span style="opacity:'+cl(p*4)+';transform:scale('+s+')">'+l+'</span>';});return h+'</div>';}
+function flash(t){var f=1-win(t,0,.18);return f>0?'<div class="a fx" style="opacity:'+(.85*f)+'"></div>':''}
+var PINS=[[110,470],[400,430],[170,700],[420,690],[280,860],[70,600],[460,560]],C=[270,600];
+function map(t,me,flashOn){
+  var h='<div class="a card" style="left:30px;top:330px;width:480px;height:600px;background:#EEF2F8;overflow:hidden">';
+  for(var r=0;r<5;r++)for(var c=0;c<4;c++)h+='<div style="position:absolute;left:'+(18+c*118)+'px;top:'+(18+r*118)+'px;width:96px;height:96px;border-radius:14px;background:#fff;opacity:.75"></div>';
+  h+='</div>';
+  // liens du reseau
+  var svg='<svg class="a" style="left:0;top:0" width="540" height="960" viewBox="0 0 540 960">';
+  PINS.forEach(function(p,i){var pr=win(t,.9+i*.12,1.5+i*.12),len=Math.hypot(p[0]-C[0],p[1]-C[1]);svg+='<line x1="'+C[0]+'" y1="'+C[1]+'" x2="'+p[0]+'" y2="'+p[1]+'" stroke="#3B5CC4" stroke-width="4" stroke-linecap="round" stroke-dasharray="'+len+'" stroke-dashoffset="'+(len*(1-eo(pr)))+'" opacity=".55"/>';});
+  svg+='</svg>';h+=svg;
+  PINS.forEach(function(p,i){var pr=win(t,.15+i*.1,.5+i*.1),s=bk(pr);h+=A(p[0]-16,p[1]-40,'<svg width="32" height="40" viewBox="0 0 32 40"><path d="M16 0a16 16 0 0 0-16 16c0 12 16 24 16 24s16-12 16-24A16 16 0 0 0 16 0z" fill="#3B5CC4"/><circle cx="16" cy="16" r="6" fill="#fff"/></svg>','transform:scale('+s+');transform-origin:50% 100%;opacity:'+cl(pr*3));});
+  var ps=me?1+.08*Math.sin(t*8):bk(win(t,.6,1));
+  var ring=(t*1.2)%1;
+  h+=A(C[0]-60,C[1]-60,'<div style="width:120px;height:120px;border-radius:50%;border:4px solid #FF8A14;opacity:'+(1-ring)+';transform:scale('+(0.4+ring)+')"></div>');
+  h+=A(C[0]-24,C[1]-60,'<svg width="48" height="60" viewBox="0 0 32 40"><path d="M16 0a16 16 0 0 0-16 16c0 12 16 24 16 24s16-12 16-24A16 16 0 0 0 16 0z" fill="#FF8A14"/><circle cx="16" cy="16" r="6" fill="#fff"/></svg>','transform:scale('+ps+');transform-origin:50% 100%');
+  if(flashOn){var fp=win(t,.6,1.0);h+=A(C[0]-10,C[1]-128,'<div class="card" style="padding:12px 18px;border:3px solid #FF8A14;font-weight:900;font-size:26px;white-space:nowrap">Offre flash</div>','transform:scale('+(bk(fp)*(1+.04*Math.sin(t*10)))+');transform-origin:0 100%;opacity:'+cl(fp*3));}
+  return h;
+}
+function phone(x,y,inner,st){return A(x,y,'<div style="width:300px;height:560px;border-radius:40px;background:#0E1B30;padding:12px"><div style="width:100%;height:100%;border-radius:30px;background:#fff;overflow:hidden;position:relative;padding:26px 20px">'+inner+'</div></div>',st)}
+var GAMES=[
+ function(t){var ok=t>.45;return '<div class="ex">Quiz</div><div style="font-weight:900;font-size:22px;margin:12px 0 16px;line-height:1.15">Depuis quand le commerce est-il ouvert ?</div>'+['Moins de 5 ans','5 à 10 ans','Plus de 10 ans'].map(function(o,i){var g=ok&&i===2;return '<div style="border:3px solid '+(g?'#0B7A4F':'#DCE3EC')+';background:'+(g?'#E3F4EC':'#fff')+';border-radius:14px;padding:12px;font-weight:800;margin-bottom:10px">'+o+'</div>';}).join('')+'<div class="ex" style="margin-top:6px">exemple</div>';},
+ function(t){var w=[64,24,12];return '<div class="ex">Question bonus</div><div style="font-weight:900;font-size:22px;margin:12px 0 16px;line-height:1.15">Comment nous avez-vous connus ?</div>'+['En passant','Un ami','Les réseaux sociaux'].map(function(o,i){return '<div style="font-weight:800;margin-top:12px">'+o+'</div><div style="height:14px;border-radius:7px;background:#EEF2F8;margin-top:6px;overflow:hidden"><div style="height:100%;width:'+(w[i]*eo(win(t,.1+i*.1,.8)))+'%;background:#3B5CC4"></div></div>';}).join('')+'<div class="ex" style="margin-top:16px">exemple</div>';},
+ function(t){var n=Math.floor(t*40)%90+10,stop=t>.6;return '<div class="ex">Tombola</div><div style="font-weight:900;font-size:22px;margin:12px 0 20px">Votre ticket</div><div style="border:3px dashed #FF8A14;border-radius:18px;padding:30px 0;text-align:center;font-weight:900;font-size:64px;color:#FF8A14;font-variant-numeric:tabular-nums">N° '+(stop?42:n)+'</div><div style="text-align:center;font-weight:800;margin-top:16px">Tirage au sort</div><div class="ex" style="text-align:center;margin-top:8px">exemple</div>';},
+ function(t){var a=900*eo(t/1.0),seg='',cols=['#3B5CC4','#FF8A14','#FFC21A','#0B7A4F','#3B5CC4','#FF8A14','#FFC21A','#0B7A4F'];for(var i=0;i<8;i++){var a0=i*45*Math.PI/180,a1=(i+1)*45*Math.PI/180;seg+='<path d="M110 110 L'+(110+110*Math.cos(a0))+' '+(110+110*Math.sin(a0))+' A110 110 0 0 1 '+(110+110*Math.cos(a1))+' '+(110+110*Math.sin(a1))+'Z" fill="'+cols[i]+'"/>';}
+   return '<div class="ex">Spin roulette</div><div style="font-weight:900;font-size:22px;margin:12px 0 16px">Tournez la roue</div><div style="position:relative;width:220px;margin:0 auto"><svg width="220" height="220" viewBox="0 0 220 220" style="transform:rotate('+a+'deg)">'+seg+'<circle cx="110" cy="110" r="22" fill="#fff"/></svg><div style="position:absolute;left:98px;top:-10px;width:0;height:0;border-left:12px solid transparent;border-right:12px solid transparent;border-top:24px solid #0E1B30"></div></div>';}
+];
+var GN=['Quiz','Question bonus','Tombola','Spin roulette'];
+var S=[
+ function(t){return title("Rejoignez l'animation","<em>multicommerce</em>",t)+map(t,false,false);},
+ function(t){return title("Visible <em>sur la carte</em>","Offres <em>flash</em>",t)+map(t+3,true,true);},
+ function(t){var h=title("Captez","<em>le flux passant</em>",t)+A(30,330,'<img src="sb8.jpg" alt="" style="width:480px;height:560px;object-fit:cover;object-position:50% 72%;border-radius:18px">','');
+   for(var i=0;i<6;i++){var p=((t*1.4+i/6)%1);h+=A(20+p*300,760+Math.sin(i)*30,'<div style="width:22px;height:22px;border-radius:50%;background:#FF8A14;opacity:'+(1-p)+'"></div>');}
+   var c=Math.min(9,Math.floor(t*6));return h+A(360,360,'<div class="card" style="padding:12px 16px;font-weight:900;font-size:30px;color:#0B7A4F">+'+c+'</div>','transform:scale('+bk(win(t,.1,.4))+')')+A(360,420,'<div class="ex">exemple</div>');},
+ function(t){var d=D[3]/4,i=Math.min(3,Math.floor(t/d)),lt=t-i*d,sl=1-eo(win(lt,0,.25));
+   var h=title(GN[i],i===0?"<em>et question bonus</em>":"",lt).replace('top:78px','top:78px')+phone(120+sl*420,330,GAMES[i](lt));
+   if(i>0&&lt<.25)h+=phone(120-eo(win(lt,0,.25))*420,330,GAMES[i-1](d));
+   h+=A(170,912,[0,1,2,3].map(function(j){return '<span style="display:inline-block;width:'+(j===i?40:12)+'px;height:12px;border-radius:6px;margin:0 5px;background:'+(j===i?'#3B5CC4':'#C9D3E6')+'"></span>';}).join(''));return h;},
+ function(t){var n=Math.round(128*eo(win(t,.6,3.4)));var h=title("Animez votre","<em>fichier client</em>",t)+A(30,330,'<div class="card" style="width:480px;padding:22px"><div style="display:flex;justify-content:space-between;align-items:center"><b style="font-size:24px">Fichier client</b><span class="ex">exemple</span></div><div style="font-weight:900;font-size:72px;color:#3B5CC4;font-variant-numeric:tabular-nums;line-height:1.1;margin-top:8px">'+n+'</div><div style="font-weight:700;color:#5A6B85">contacts</div></div>');
+   for(var i=0;i<4;i++){var p=win(t,.4+i*.35,.8+i*.35);h+=A(30,560+i*76,'<div class="card" style="width:480px;padding:14px 18px;display:flex;gap:14px;align-items:center"><div style="width:40px;height:40px;border-radius:50%;background:'+['#3B5CC4','#FF8A14','#0B7A4F','#FFC21A'][i]+'"></div><div style="flex:1;height:12px;border-radius:6px;background:#EEF2F8"></div></div>','opacity:'+p+';transform:translateX('+(60*(1-eo(p)))+'px)');}
+   var on=t>2.2;return h+A(300,880,'<div style="display:flex;gap:10px;align-items:center;font-weight:900;font-size:22px">Automatique <span style="width:64px;height:36px;border-radius:18px;background:'+(on?'#0B7A4F':'#C9D3E6')+';position:relative;display:inline-block"><span style="position:absolute;top:4px;left:'+(on?32:4)+'px;width:28px;height:28px;border-radius:50%;background:#fff"></span></span></div>');},
+ function(t){var p=eo(win(t,.3,2.2)),v=Math.round(56*p),R=150,L=2*Math.PI*R;
+   return title("Ils veulent","<em>garder le contact</em>",t)+A(70,340,'<svg width="400" height="400" viewBox="0 0 400 400"><circle cx="200" cy="200" r="'+R+'" fill="none" stroke="#E3E9F8" stroke-width="34"/><circle cx="200" cy="200" r="'+R+'" fill="none" stroke="#FF8A14" stroke-width="34" stroke-linecap="round" stroke-dasharray="'+L+'" stroke-dashoffset="'+(L*(1-.56*p))+'" transform="rotate(-90 200 200)"/></svg>')+A(70,470,'<div style="width:400px;text-align:center;font-weight:900;font-size:110px;letter-spacing:-.04em;font-variant-numeric:tabular-nums">'+v+' %</div>')+A(30,790,'<div style="width:480px;text-align:center;font-weight:800;font-size:26px;color:#5A6B85">des participants souhaitent<br>garder le contact</div>','opacity:'+win(t,1.6,2.2));},
+ function(t){var o=win(t,.5,.9),h=title("Votre première animation","<em>est offerte</em>",t);
+   h+=A(170,560,'<div style="width:200px;height:150px;background:#FF8A14;border-radius:14px"></div><div style="position:absolute;left:88px;top:0;width:24px;height:150px;background:#FFC21A"></div>');
+   h+=A(155,510,'<div style="width:230px;height:56px;background:#C2410C;border-radius:12px"></div>','transform:translateY('+(-160*eo(o))+'px) rotate('+(-25*eo(o))+'deg);transform-origin:0 100%');
+   for(var i=0;i<22;i++){var a=i*16.4,r=260*eo(win(t,.6,1.6)),x=270+Math.cos(a)*r,y=560-Math.abs(Math.sin(a))*r*1.1+200*win(t,1.2,2.6)*win(t,1.2,2.6);h+=A(x,y,'<div style="width:14px;height:22px;border-radius:3px;background:'+['#3B5CC4','#FF8A14','#FFC21A','#0B7A4F'][i%4]+';transform:rotate('+(a*40+t*400)+'deg)"></div>','opacity:'+(o>0?1-win(t,1.8,2.6):0));}
+   return h+A(170,740,'<div style="width:200px;text-align:center;font-weight:900;font-size:64px;letter-spacing:-.03em">0 €</div>','opacity:'+win(t,.8,1.1));},
+ function(t){var h='<div class="a" style="left:0;top:0;width:540px;height:960px;background:linear-gradient(180deg,#0E1B30 0%,#172B4D 100%)"></div>';
+   PINS.forEach(function(p,i){h+=A(p[0]-6,p[1]-6,'<div style="width:12px;height:12px;border-radius:50%;background:#3B5CC4;opacity:.5"></div>');});
+   var p=win(t,.1,.6);h+=A(30,300,'<div style="font-weight:900;font-size:64px;color:#fff;letter-spacing:-.03em">Flow<span style="color:#8FA6F0">in</span></div>','opacity:'+p+';transform:scale('+(1.6-.6*bk(p))+');transform-origin:0 50%');
+   var q=win(t,.5,1.0);h+=A(30,400,'<div style="font-weight:900;font-size:46px;line-height:1.05;color:#fff;letter-spacing:-.03em">L\'animation du commerce <span style="color:#FF8A14">de proximité</span></div>','width:480px;opacity:'+q+';transform:translateY('+(30*(1-eo(q)))+'px)');
+   var r=win(t,1.4,1.8);return h+A(140,760,'<div style="background:#3B5CC4;color:#fff;font-weight:900;font-size:28px;padding:18px 34px;border-radius:99px;white-space:nowrap">Je publie mon jeu</div>','opacity:'+r+';transform:scale('+((.9+.1*bk(r))*(1+.03*Math.sin(t*6)))+')');}
+];
+var st=document.getElementById('stage');
+function render(t){t=Math.max(0,Math.min(DUREE-0.001,t));var k=0;for(var i=0;i<D.length;i++){if(t>=T0[i])k=i;}var lt=t-T0[k];
+  var h=(k<7?'<div class="a lg">Flow<b>in</b></div>':'')+S[k](lt)+flash(lt);st.innerHTML=h;return k;}
+window.render=render;
+// lecteur
+var frame=document.getElementById('frame'),aud=document.getElementById('aud'),seek=document.getElementById('seek'),tm=document.getElementById('time'),pl=document.getElementById('play'),list=document.getElementById('plans'),lis=[],cur=-1,t0=null,clock=0,playing=false;
+N.forEach(function(n,i){var li=document.createElement('li');li.innerHTML='<span class="k">'+(i+1)+'</span><span><b>'+n+'</b><small>'+V[i]+'</small></span>';li.onclick=function(){go(T0[i]+.01)};list.appendChild(li);lis.push(li);});
+function fit(){var s=frame.clientWidth/540;st.style.transform='scale('+s+')';}
+window.addEventListener('resize',fit);fit();
+function show(t){var k=render(t);if(k!==cur){lis.forEach(function(l,j){l.classList.toggle('on',j===k)});cur=k;}seek.value=Math.round(1000*t/DUREE);tm.textContent=t.toFixed(1).replace('.',',')+' s';}
+function now(){return (aud.currentTime&&!aud.paused)?aud.currentTime:clock;}
+function loop(ts){if(!playing)return;if(aud.paused){if(t0===null)t0=ts-clock*1000;clock=(ts-t0)/1000;}else clock=aud.currentTime;if(clock>=DUREE){stop();clock=0;show(0);return;}show(clock);requestAnimationFrame(loop);}
+function stop(){playing=false;try{aud.pause()}catch(e){}pl.textContent='Lecture';}
+function go(t){clock=t;t0=null;try{aud.currentTime=t}catch(e){}show(t);}
+pl.onclick=function(){if(playing){stop();return;}playing=true;pl.textContent='Pause';t0=null;try{aud.currentTime=clock;var p=aud.play();if(p&&p.catch)p.catch(function(){});}catch(e){}requestAnimationFrame(loop);};
+seek.oninput=function(){go(DUREE*seek.value/1000);};
+var reduce=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+show(reduce?T0[0]+2:2.2);clock=0;
+})();
+</script>

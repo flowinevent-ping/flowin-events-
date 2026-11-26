@@ -93,5 +93,58 @@
     ]
    ]
   ]
+ },
+ "a-multi": {
+  "titre": "Animation · commerces, vidéo multicommerce (proposition 26/11 soir)",
+  "blocs": [
+   [
+    "b01",
+    [
+     "Rejoignez l'animation multicommerce qui réunit le commerce de proximité."
+    ]
+   ],
+   [
+    "b02",
+    [
+     "Vous apparaissez sur la carte, diffusez des offres flash."
+    ]
+   ],
+   [
+    "b03",
+    [
+     "Captez le flux passant."
+    ]
+   ],
+   [
+    "b04",
+    [
+     "Quiz, questions bonus, tombola, spin roulette."
+    ]
+   ],
+   [
+    "b05",
+    [
+     "Animez votre fichier client en quelques clics, simple et automatique."
+    ]
+   ],
+   [
+    "b06",
+    [
+     "56 % des participants souhaitent garder le contact."
+    ]
+   ],
+   [
+    "b07",
+    [
+     "Votre première animation est offerte."
+    ]
+   ],
+   [
+    "b08",
+    [
+     "Flow in, l'animation du commerce de proximité."
+    ]
+   ]
+  ]
  }
 }
