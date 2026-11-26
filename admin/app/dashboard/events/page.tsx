@@ -153,7 +153,7 @@ export default function Page() {
         {list.length === 0 && <EmptyState title="Aucun résultat" />}
 
         {list.length > 0 && (
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 16 }}>
+          <div className="sa-cols3" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 16 }}>
             {([['en_cours', 'En cours'], ['a_venir', 'À venir'], ['passe', 'Terminé']] as const).map(([cle, titreCol]) => (
               <div key={cle}>
                 <div style={{ fontSize: 12, fontWeight: 800, color: 'var(--sa-muted)', marginBottom: 10, textTransform: 'uppercase', letterSpacing: '.04em' }}>

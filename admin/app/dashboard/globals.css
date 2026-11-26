@@ -63,6 +63,17 @@
   /* Audit 17/11 (expert 5) : zones de toucher >= 44 px sur telephone (boutons, listes, champs, menu). */
   .sa-main button,.sa-main select,.sa-main input:not([type=checkbox]):not([type=radio]):not([type=range]):not([type=color]),.sa-sb button,.sa-sb a{min-height:44px}
   .sa-main input[type=checkbox],.sa-main input[type=radio]{width:20px;height:20px}
+  /* Telephone : plus rien ne depasse de l'ecran (retour Romain 26/11 : page Animations coupee a gauche et a droite). */
+  .sa-shell,.sa-main,.sa-content,.sa-page{max-width:100%;min-width:0}
+  .sa-main{overflow-x:hidden}
+  .sa-page-header{flex-direction:column;align-items:stretch;gap:12px;padding:16px}
+  .sa-page-actions{flex-wrap:wrap}
+  .sa-page-actions>*{flex:1 1 auto;justify-content:center}
+  /* Colonnes d'un tableau kanban : un carrousel, une colonne par ecran, aimante. */
+  .sa-cols3{display:flex!important;overflow-x:auto;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;gap:12px!important}
+  .sa-cols3>*{flex:0 0 calc(100% - 24px);min-width:0;scroll-snap-align:start}
+  /* Grilles de 4 chiffres : 2 par ligne. */
+  .sa-main [style*="repeat(4"]{grid-template-columns:repeat(2,1fr)!important}
 }
 /* ── Topbar ── */
 .sa-topbar{height:52px;background:var(--sa-card);border-bottom:1px solid var(--sa-border);padding:0 24px;display:flex;align-items:center;gap:16px;flex-shrink:0}
