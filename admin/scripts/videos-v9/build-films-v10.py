@@ -49,7 +49,19 @@ SPECIAL['k3']=""" scene(3,function(){return cap('Une animation <em>aux couleurs 
 SPECIAL['k4']=""" scene(3,function(){var c=[['Quiz','personnalisé','#3B5CC4'],['Tombola','','#FF8A14'],['Roue','de la fortune','#0B7A4F']],h='';for(var i=0;i<3;i++)h+=A(40,330+i*165,'<div class="card" style="width:460px;padding:0;overflow:hidden;display:flex;align-items:center"><div style="background:'+c[i][2]+';color:#fff;font-weight:900;font-size:38px;padding:30px 24px;width:250px">'+c[i][0]+'</div><div style="padding:0 20px;font-weight:900;font-size:24px">'+c[i][1]+'</div></div>','opacity:0" data-in="'+(.2+i*.6));return cap('Quiz, tombola, <em>roue de la fortune.</em>')+h;},function(t,el){});"""
 SPECIAL['k8b']=""" scene(3,function(){return cap('Visibilité <em>sur le trafic.</em>')+A(40,330,'<div class="card" style="width:460px;padding:22px"><div style="display:flex;justify-content:space-between"><b style="font-size:22px">Passages</b><span class="ex">exemple</span></div><div class="bar" style="margin-top:16px"><i class="bb" id="t1" style="width:0"></i></div><div class="bar" style="margin-top:14px"><i class="bb" id="t2" style="width:0"></i></div><div class="bar" style="margin-top:14px"><i class="bb" id="t3" style="width:0"></i></div></div>')+C('alex','alex','telephone','sourire',170,30,620);},function(t,el){var w=[40,72,58];for(var i=0;i<3;i++)$(el,'#t'+(i+1)).style.width=(w[i]*eo(win(t,.2+i*.2,1.6)))+'%';bob($(el,'#alex'),t);});"""
 SPECIAL['k8c']=""" scene(3,function(){var s=['Vitrine','Ticket de caisse','Affiche'],h='';for(var i=0;i<3;i++)h+=A(40+i*158,360,'<div class="card" style="width:142px;text-align:center;padding:14px 6px"><div style="display:flex;justify-content:center">'+qrMini(70)+'</div><b style="font-size:17px;display:block;margin-top:8px">'+s[i]+'</b></div>','opacity:0" data-in="'+(.2+i*.4));return cap('Tracking link <em>pour vos campagnes.</em>')+h+A(40,590,'<div class="card" style="width:460px;padding:18px;font-weight:800;font-size:22px">Un QR par support. Chaque campagne mesurée.</div>','opacity:0" data-in="1.6');},function(t,el){});"""
+SPECIAL['k3b']=""" scene(3,function(){return cap('Flowin <em>Animation.</em>')+sol()+A(30,350,boutique(480),'filter:grayscale(1)" id="bq')+C('alex','alex','deuxbras','joie',170,190,610);},
+  function(t,el){var p=eo(win(t,.05,.6));$(el,'#bq').style.filter='grayscale('+(1-p)+')';bob($(el,'#alex'),t);});"""
+SPECIAL['k4b']=""" scene(3,function(){var c=[['Quiz','#3B5CC4'],['Tombola','#FF8A14'],['Roulette','#0B7A4F']],h='';for(var i=0;i<3;i++)h+=A(40,330+i*165,'<div class="card" style="width:460px;padding:0;overflow:hidden"><div style="background:'+c[i][1]+';color:#fff;font-weight:900;font-size:42px;padding:30px 24px">'+c[i][0]+'</div></div>','opacity:0" data-in="'+(.1+i*.4));return cap('Quiz, tombola, <em>roulette.</em>')+h;},function(t,el){});"""
 PLAN={
+ 'a-pb':('v10apb',[
+  ('b01',(1,1),'f1-1','Augmenter <em>le trafic ?</em>',''),
+  ('b02',(1,1),'f1-12','Plus de <em>visibilité ?</em>',''),
+  ('b03',(1,1),'k3b',None,None),
+  ('b04',(1,1),'k4b',None,None),
+  ('b05',(1,1),'flash','Des offres <em>flash.</em>',''),
+  ('b06',(1,1),'f2-3','Tirage au sort <em>ou gain immédiat.</em>',''),
+  ('b07',(0,.5),'f1-4','Attirez <em>de nouveaux clients.</em>',''),('b07',(.5,1),'f1-10','Animez <em>votre fichier.</em>',''),
+  ('b08',(1,1),'f1-15','FIN2:Flowin, <b>l\'animation jeux des commerces.</b>|Contactez-nous : 04 93 59 91 37',None)]),
  'a-acc':('v10aacc',[
   ('b01',(1,1),'f1-1','Valoriser votre commerce <em>par un concept innovant ?</em>',''),
   ('b02',(1,1),'k2',None,None),
@@ -105,7 +117,7 @@ PLAN={
 # normalise les entrees a 5 elements
 def norm(e):
     e=list(e)+[None]*(5-len(e)); return e
-code=[];SE_NAMES=[];CIBS={'v10aacc':'Pour les commerçants','v10apart':'Pour les participants','v10acom':'Pour les commerçants','v10separt':'Pour les participants','v10seorg':'Pour les organisateurs'}
+code=[];SE_NAMES=[];CIBS={'v10apb':'Pour les commerçants','v10aacc':'Pour les commerçants','v10apart':'Pour les participants','v10acom':'Pour les commerçants','v10separt':'Pour les participants','v10seorg':'Pour les organisateurs'}
 for fid,(fname,entries) in PLAN.items():
     T=json.load(open(os.path.join(HERE,'timing10',fid+'.json')))
     B0={};acc=0.0

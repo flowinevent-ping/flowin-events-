@@ -69,5 +69,58 @@
     ]
    ]
   ]
+ },
+ "a-pb": {
+  "titre": "Animation · commerces, version problème (26/11)",
+  "blocs": [
+   [
+    "b01",
+    [
+     "Vous voulez augmenter le trafic ?"
+    ]
+   ],
+   [
+    "b02",
+    [
+     "Donner de la visibilité à votre commerce ?"
+    ]
+   ],
+   [
+    "b03",
+    [
+     "Flow in Animation."
+    ]
+   ],
+   [
+    "b04",
+    [
+     "Un quiz, une tombola, une roulette."
+    ]
+   ],
+   [
+    "b05",
+    [
+     "Des offres flash."
+    ]
+   ],
+   [
+    "b06",
+    [
+     "Tirage au sort, ou gain immédiat."
+    ]
+   ],
+   [
+    "b07",
+    [
+     "Attirez de nouveaux clients, animez votre fichier."
+    ]
+   ],
+   [
+    "b08",
+    [
+     "Contactez-nous."
+    ]
+   ]
+  ]
  }
 }
