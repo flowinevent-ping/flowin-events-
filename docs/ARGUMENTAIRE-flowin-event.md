@@ -225,3 +225,6 @@ Avant toute livraison, chaque texte est relu contre ce fichier (et la liste « i
 - « Il y a des erreurs d'intonation et de type espagnol. »
 - « On dit pas […] et si ton commerce devenait l'animation du quartier. » Mettre en avant Flowin : « Flowin, l'animation de quartier », « l'animation des commerces », « Flowin, l'animation qui réunit les commerces ».
 - « Vous voulez valoriser votre commerce ? Vous souhaitez mettre en avant votre commerce ? On a une solution innovante. Flowin, un jeu qu'on retrouve en boutique, dans toutes les boutiques. Jeu d'animation de quartier. »
+
+## Dictée de Romain du 27/11/2026, suite (texte de référence pour la vidéo commerces)
+« Mettre en avant Flowin, l'animation jeu qui met en avant votre commerce. Animer votre clientèle, augmenter la fréquentation, donner de la visibilité à votre commerce, mesurer le passage, développer votre chiffre d'affaires. Flowin, l'animation : une carte, un QR code, les personnes scannent et jouent chez vous. Garde le contact. Une carte, des offres flash. Des lots à gagner. On travaille en proximité. C'est important, 56 % de nos joueurs souhaitent rester en contact avec les commerces. Flowin, c'est facile. Vous vous inscrivez, lancez votre animation, faites grandir votre fichier client, automatisez le jeu. Donnez plus de visibilité dans votre quartier. »
