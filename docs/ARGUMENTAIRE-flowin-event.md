@@ -220,3 +220,8 @@ Avant toute livraison, chaque texte est relu contre ce fichier (et la liste « i
 « Et si votre commerce devenait le jeu préféré du quartier ? Nouveau : les commerces du quartier s'unissent dans un seul jeu. Vos clients scannent, jouent, gagnent… et passent d'une boutique à l'autre. Quiz, tombola, spin roulette : vous choisissez, tout tourne tout seul. Chaque joueur, un contact de plus. 56 % des participants souhaitent garder le contact. Vos offres flash, en direct sur la carte. Votre première animation est offerte. Rejoignez le jeu. Flow in, l'animation du commerce de proximité. »
 - Gros titres : LE JEU DU QUARTIER · NOUVEAU · SCANNEZ. JOUEZ. GAGNEZ. · DE BOUTIQUE EN BOUTIQUE · 100 % AUTOMATIQUE · 56 % · OFFRES FLASH · REJOIGNEZ LE JEU. Voix +4 %.
 - Non retenu faute de règle confirmée : « Une seule place par métier et par quartier ».
+
+## Dictée de Romain du 27/11/2026 (retour sur « Le jeu du quartier »)
+- « Il y a des erreurs d'intonation et de type espagnol. »
+- « On dit pas […] et si ton commerce devenait l'animation du quartier. » Mettre en avant Flowin : « Flowin, l'animation de quartier », « l'animation des commerces », « Flowin, l'animation qui réunit les commerces ».
+- « Vous voulez valoriser votre commerce ? Vous souhaitez mettre en avant votre commerce ? On a une solution innovante. Flowin, un jeu qu'on retrouve en boutique, dans toutes les boutiques. Jeu d'animation de quartier. »
