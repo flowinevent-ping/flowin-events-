@@ -69,5 +69,116 @@
     ]
    ]
   ]
+ },
+ "a-pb": {
+  "titre": "Animation · commerces, version problème (26/11)",
+  "blocs": [
+   [
+    "b01",
+    [
+     "Vous voulez augmenter le trafic ?"
+    ]
+   ],
+   [
+    "b02",
+    [
+     "Donner de la visibilité à votre commerce ?"
+    ]
+   ],
+   [
+    "b03",
+    [
+     "Flow in Animation."
+    ]
+   ],
+   [
+    "b04",
+    [
+     "Un quiz, une tombola, une roulette."
+    ]
+   ],
+   [
+    "b05",
+    [
+     "Des offres flash."
+    ]
+   ],
+   [
+    "b06",
+    [
+     "Tirage au sort, ou gain immédiat."
+    ]
+   ],
+   [
+    "b07",
+    [
+     "Attirez de nouveaux clients, animez votre fichier."
+    ]
+   ],
+   [
+    "b08",
+    [
+     "Contactez-nous."
+    ]
+   ]
+  ]
+ },
+ "a-ben": {
+  "titre": "Animation · commerces, version bénéfices (26/11)",
+  "blocs": [
+   [
+    "b01",
+    [
+     "Peu de passage dans votre commerce ?"
+    ]
+   ],
+   [
+    "b02",
+    [
+     "Flow in fait jouer les passants : ils scannent votre vitrine, et entrent chez vous."
+    ]
+   ],
+   [
+    "b03",
+    [
+     "Vos clients ne reviennent pas ?",
+     "Les lots les font revenir, et ils les offrent à leurs amis."
+    ]
+   ],
+   [
+    "b04",
+    [
+     "Pas de fichier client ?",
+     "Chaque joueur laisse ses coordonnées : votre fichier grandit tout seul."
+    ]
+   ],
+   [
+    "b05",
+    [
+     "Pas assez visible ?",
+     "Apparaissez sur la carte, diffusez vos offres flash."
+    ]
+   ],
+   [
+    "b06",
+    [
+     "Pas le temps ?",
+     "Tout est automatique : quiz, tombola, roulette, gain immédiat ou tirage au sort."
+    ]
+   ],
+   [
+    "b07",
+    [
+     "Aussi simple que de coller une affiche."
+    ]
+   ],
+   [
+    "b08",
+    [
+     "Flow in, l'animation jeu~~plug and play.",
+     "Contactez-nous."
+    ]
+   ]
+  ]
  }
 }

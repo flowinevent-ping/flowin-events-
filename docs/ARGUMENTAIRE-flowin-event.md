@@ -191,3 +191,40 @@ Avant toute livraison, chaque texte est relu contre ce fichier (et la liste « i
 - « Tu connais Flowin, tu l'as déjà chez ton commerçant. Retrouve-le dans ton festival avec des lots, des cadeaux à gagner liés au festival. Retrouve les stations-jeux de la ville, dans les commerces et à l'intérieur du festival. Des cadeaux à gagner, des places. Teste tes connaissances sur le quiz. Challenge tes potes. Remporte les lots. Gagne tes tickets, soit pour le grand tirage, soit des gains immédiats. Flow in, découvre la carte, rends-toi dans les commerces participants. Scan, joue, entre amis ou en famille. »
 - Signature participants : « Flow in, suis le flow, découvre ce que tu gagnes. »
 - Prononciation « Flow in » et « plug and play » dans les voix : validée par Romain le 26/11.
+
+## Dictée de Romain du 26/11/2026, bloc 2 (vidéo commerces : gros titres en majuscules qui arrivent en flash)
+- Gros titres : « Plus de clients, plus de visibilité, plus de trafic. »
+- Version retenue par Romain (« Ah non, on va reprendre. Il faut qu'on ait une approche bénéfice du commerce. ») : « Vous souhaitez plus de visibilité, augmenter le passage dans votre commerce. Flow in, l'animation digitale, Flow in, l'animation jeu qui met votre commerce en avant. Une carte commerce participant, des lots à gagner pour vos clients. Aussi simple que de coller une affiche. Une animation en place en quelques minutes. Flow in, enfin une animation qui se gère, qui s'occupe de votre animation clientèle. »
+- Premier jet (non retenu tel quel) : « Vous avez un commerce, vous cherchez plus de clients, plus de visibilité, une solution innovante pour développer votre clientèle, acquérir de nouveaux clients. On a la solution Flow in Animation, l'animation commerce. Un QR code, un jeu, une animation qui s'autogère, quiz personnalisé aux couleurs de votre entreprise, tombola avec vos gains, tirage au sort des lots avec vos gains pour que les clients reviennent, une carte commerce jeu qui réunit l'ensemble des commerces de proximité. Flow in, la première animation digitale qui réunit les commerces. » ; « Flow in, l'animation commerce qui réunit les commerces de proximité. Aussi simple que de coller une affiche, vos clients ou les passants peuvent jouer au jeu. Vous récupérez les coordonnées, ils participent au jeu immédiat ou tirage au sort. Vous animez votre clientèle. Vous restez en contact avec eux. »
+
+## Dictée de Romain du 26/11/2026, bloc 2, suite (vidéo courte : expliquer ce que c'est)
+- « À chaque fois qu'on fait la vidéo, on doit dans cette interprétation expliquer ce que c'est. »
+- Texte : « Flowin, une animation. Flowin, l'animation digitale des commerces de proximité. Captez plus de clients, rendez-vous visible, faites partie du jeu, Flowin, animation. » Consigne : « un truc bref, court, impactant ».
+
+## Offre commerce proposée par Romain le 26/11/2026 (à valider, rien n'est appliqué)
+- « Flowin, tu l'installes et c'est gratuit. » Gratuit : mettre l'animation (une seule), diffuser, mettre ses lots, apparaître sur la carte. Données joueurs au départ : sexe et tranche d'âge seulement.
+- Payant : plusieurs actions dans l'année avec plusieurs lots à distribuer ; s'associer à des événements ; impression du QR code avec le logo pour le macaron (« ça vaut 50 € par exemple ») ; QR code Tracking link (« ils payent en plus ») ; accès au détail de l'acquisition (CRM, les personnes venues) ; importer sa base de données dans Flowin et diffuser depuis Flowin ; lancer des campagnes quand ils veulent ; tarifs préférentiels pour les Super Events.
+
+## Dictée de Romain du 26/11/2026, bloc 2, fin (positionnement : l'animation intercommerce)
+- « L'argument premier, c'est pas que c'est gratuit. »
+- Premier jet : « Est-ce que vous connaissez Flowin, la première animation innovante, l'innovation de jeux intercommerce. Captez le flux passant, animez votre fichier client, participez à un jeu d'animation intercommerce. Carte digitale pour vos clients. Publiez votre animation en quelques clics. Quiz. Spin roulette. Tombola. Animez, boostez, fidélisez. Faites revenir vos clients. Rejoignez. L'animation Flowin intercommerce. »
+- Version « très simple, très claire, très évidente » : « Rejoignez la première animation intercommerce et réunis le commerce de proximité. Animation de votre fichier client en quelques clics, simple et automatique. Capter le flux passant, diffuser vos offres promotionnelles et flash. Flowin, l'animation du commerce de proximité. »
+
+## Décisions de Romain du 26/11/2026, fin du bloc 2
+- Signature pro retenue : « Flowin, l'animation du commerce de proximité. »
+- On dit « multicommerce », pas « intercommerce ». On retire « la première ».
+- Preuve à mettre en avant : « 56 % des participants souhaitent garder le contact. » (chiffre exact ; Romain a dit « 56 % de nos joueurs souhaitent rester en contact »).
+- Offre : « On peut leur offrir leur première animation. » Puis trois propositions : première animation offerte, offre complète, options.
+
+## Script marketing « Le jeu du quartier » (proposé par Claude, validé par Romain le 26/11/2026 soir)
+« Et si votre commerce devenait le jeu préféré du quartier ? Nouveau : les commerces du quartier s'unissent dans un seul jeu. Vos clients scannent, jouent, gagnent… et passent d'une boutique à l'autre. Quiz, tombola, spin roulette : vous choisissez, tout tourne tout seul. Chaque joueur, un contact de plus. 56 % des participants souhaitent garder le contact. Vos offres flash, en direct sur la carte. Votre première animation est offerte. Rejoignez le jeu. Flow in, l'animation du commerce de proximité. »
+- Gros titres : LE JEU DU QUARTIER · NOUVEAU · SCANNEZ. JOUEZ. GAGNEZ. · DE BOUTIQUE EN BOUTIQUE · 100 % AUTOMATIQUE · 56 % · OFFRES FLASH · REJOIGNEZ LE JEU. Voix +4 %.
+- Non retenu faute de règle confirmée : « Une seule place par métier et par quartier ».
+
+## Dictée de Romain du 27/11/2026 (retour sur « Le jeu du quartier »)
+- « Il y a des erreurs d'intonation et de type espagnol. »
+- « On dit pas […] et si ton commerce devenait l'animation du quartier. » Mettre en avant Flowin : « Flowin, l'animation de quartier », « l'animation des commerces », « Flowin, l'animation qui réunit les commerces ».
+- « Vous voulez valoriser votre commerce ? Vous souhaitez mettre en avant votre commerce ? On a une solution innovante. Flowin, un jeu qu'on retrouve en boutique, dans toutes les boutiques. Jeu d'animation de quartier. »
+
+## Dictée de Romain du 27/11/2026, suite (texte de référence pour la vidéo commerces)
+« Mettre en avant Flowin, l'animation jeu qui met en avant votre commerce. Animer votre clientèle, augmenter la fréquentation, donner de la visibilité à votre commerce, mesurer le passage, développer votre chiffre d'affaires. Flowin, l'animation : une carte, un QR code, les personnes scannent et jouent chez vous. Garde le contact. Une carte, des offres flash. Des lots à gagner. On travaille en proximité. C'est important, 56 % de nos joueurs souhaitent rester en contact avec les commerces. Flowin, c'est facile. Vous vous inscrivez, lancez votre animation, faites grandir votre fichier client, automatisez le jeu. Donnez plus de visibilité dans votre quartier. »

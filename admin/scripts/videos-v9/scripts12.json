@@ -1,0 +1,275 @@
+{
+ "a-pb2": {
+  "titre": "Animation · commerces, test bloc 2 (dictée Romain 26/11)",
+  "blocs": [
+   [
+    "b01",
+    [
+     "Vous voulez augmenter le trafic ?"
+    ]
+   ],
+   [
+    "b02",
+    [
+     "Donner de la visibilité à votre commerce ?"
+    ]
+   ],
+   [
+    "b03",
+    [
+     "Flow in Animation."
+    ]
+   ],
+   [
+    "b04",
+    [
+     "Quiz, tombola, spin roulette."
+    ]
+   ],
+   [
+    "b05",
+    [
+     "Offre flash."
+    ]
+   ],
+   [
+    "b06",
+    [
+     "Tirage au sort, gain immédiat."
+    ]
+   ],
+   [
+    "b07",
+    [
+     "Attirez de nouveaux clients.",
+     "Animez votre fichier."
+    ]
+   ],
+   [
+    "b08",
+    [
+     "Contactez-nous."
+    ]
+   ]
+  ]
+ },
+ "a-flash": {
+  "titre": "Animation · commerces, vidéo A courte gros titres (dictée Romain 26/11)",
+  "blocs": [
+   [
+    "b01",
+    [
+     "Flow in, une animation."
+    ]
+   ],
+   [
+    "b02",
+    [
+     "Flow in, l'animation digitale des commerces de proximité."
+    ]
+   ],
+   [
+    "b03",
+    [
+     "Captez plus de clients."
+    ]
+   ],
+   [
+    "b04",
+    [
+     "Rendez-vous visible."
+    ]
+   ],
+   [
+    "b05",
+    [
+     "Faites partie du jeu."
+    ]
+   ],
+   [
+    "b06",
+    [
+     "Flow in, animation."
+    ]
+   ]
+  ]
+ },
+ "a-multi": {
+  "titre": "Animation · commerces, vidéo multicommerce (proposition 26/11 soir)",
+  "blocs": [
+   [
+    "b01",
+    [
+     "Rejoignez l'animation multicommerce qui réunit le commerce de proximité."
+    ]
+   ],
+   [
+    "b02",
+    [
+     "Vous apparaissez sur la carte, diffusez des offres flash."
+    ]
+   ],
+   [
+    "b03",
+    [
+     "Captez le flux passant."
+    ]
+   ],
+   [
+    "b04",
+    [
+     "Quiz, questions bonus, tombola, spin roulette."
+    ]
+   ],
+   [
+    "b05",
+    [
+     "Animez votre fichier client en quelques clics, simple et automatique."
+    ]
+   ],
+   [
+    "b06",
+    [
+     "56 % des participants souhaitent garder le contact."
+    ]
+   ],
+   [
+    "b07",
+    [
+     "Votre première animation est offerte."
+    ]
+   ],
+   [
+    "b08",
+    [
+     "Flow in, l'animation du commerce de proximité."
+    ]
+   ]
+  ]
+ },
+ "a-multi2": {
+  "titre": "Animation · commerces, vidéo multicommerce v2 (style Super Event, 26/11 soir)",
+  "blocs": [
+   [
+    "b01",
+    [
+     "Rejoignez l'animation multicommerce,",
+     "qui réunit le commerce de proximité."
+    ]
+   ],
+   [
+    "b02",
+    [
+     "Vous apparaissez sur la carte.",
+     "Diffusez des offres flash."
+    ]
+   ],
+   [
+    "b03",
+    [
+     "Captez le flux passant."
+    ]
+   ],
+   [
+    "b04",
+    [
+     "Quiz.",
+     "Questions bonus.",
+     "Tombola.",
+     "Spin roulette."
+    ]
+   ],
+   [
+    "b05",
+    [
+     "Animez votre fichier client en quelques clics.",
+     "Simple et automatique."
+    ]
+   ],
+   [
+    "b06",
+    [
+     "56 % des participants souhaitent garder le contact."
+    ]
+   ],
+   [
+    "b07",
+    [
+     "Votre première animation est offerte."
+    ]
+   ],
+   [
+    "b08",
+    [
+     "Flow in, l'animation du commerce de proximité."
+    ]
+   ]
+  ]
+ },
+ "a-quartier": {
+  "titre": "Animation · commerces, « Le jeu du quartier » (26/11 soir)",
+  "blocs": [
+   [
+    "b01",
+    [
+     "Et si votre commerce devenait le jeu préféré du quartier ?"
+    ]
+   ],
+   [
+    "b02",
+    [
+     "Nouveau : les commerces du quartier s'unissent dans un seul jeu."
+    ]
+   ],
+   [
+    "b03",
+    [
+     "Vos clients scannent,",
+     "jouent,",
+     "gagnent,"
+    ]
+   ],
+   [
+    "b04",
+    [
+     "et passent d'une boutique à l'autre."
+    ]
+   ],
+   [
+    "b05",
+    [
+     "Quiz,",
+     "tombola,",
+     "spin roulette :",
+     "vous choisissez, tout tourne tout seul."
+    ]
+   ],
+   [
+    "b06",
+    [
+     "Chaque joueur, un contact de plus.",
+     "56 % des participants souhaitent garder le contact."
+    ]
+   ],
+   [
+    "b07",
+    [
+     "Vos offres flash, en direct sur la carte."
+    ]
+   ],
+   [
+    "b08",
+    [
+     "Votre première animation est offerte.",
+     "Rejoignez le jeu."
+    ]
+   ],
+   [
+    "b09",
+    [
+     "Flow in, l'animation du commerce de proximité."
+    ]
+   ]
+  ]
+ }
+}
